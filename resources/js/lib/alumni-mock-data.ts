@@ -1,0 +1,117 @@
+export const alumniRecords = [
+    {
+        name: 'Sofia Reyes',
+        initials: 'SR',
+        studentNumber: '2021-00418',
+        program: 'BS Information Technology',
+        department: 'Computing',
+        year: '2025',
+        status: 'Employed',
+        employer: 'Northstar Digital',
+        color: 'bg-[#e9eee5] text-[#45634a]',
+    },
+    {
+        name: 'Miguel Santos',
+        initials: 'MS',
+        studentNumber: '2020-00276',
+        program: 'BS Business Administration',
+        department: 'Business',
+        year: '2024',
+        status: 'Employed',
+        employer: 'Harbor & Pine',
+        color: 'bg-[#f4e9dc] text-[#946740]',
+    },
+    {
+        name: 'Andrea Lim',
+        initials: 'AL',
+        studentNumber: '2022-00109',
+        program: 'BA Communication',
+        department: 'Arts & Communication',
+        year: '2026',
+        status: 'Further studies',
+        employer: '—',
+        color: 'bg-[#e9e9f1] text-[#5b6187]',
+    },
+    {
+        name: 'Gabriel Cruz',
+        initials: 'GC',
+        studentNumber: '2019-00350',
+        program: 'BS Hospitality Management',
+        department: 'Hospitality',
+        year: '2023',
+        status: 'Self-employed',
+        employer: 'Cruz Table Co.',
+        color: 'bg-[#f2e5e3] text-[#8b5a56]',
+    },
+    {
+        name: 'Nicole Dela Vega',
+        initials: 'ND',
+        studentNumber: '2021-00642',
+        program: 'BS Information Technology',
+        department: 'Computing',
+        year: '2025',
+        status: 'Seeking work',
+        employer: '—',
+        color: 'bg-[#e5edf1] text-[#4c7180]',
+    },
+];
+
+export const graduateOutcomes = [
+    { year: '2021', employment: 66, furtherStudies: 14 },
+    { year: '2022', employment: 72, furtherStudies: 12 },
+    { year: '2023', employment: 69, furtherStudies: 16 },
+    { year: '2024', employment: 78, furtherStudies: 11 },
+    { year: '2025', employment: 83, furtherStudies: 9 },
+    { year: '2026', employment: 75, furtherStudies: 13 },
+];
+
+export const upcomingActivities = [
+    {
+        title: 'Graduate outcomes survey closes',
+        detail: 'Tracer survey · 4 days left',
+        date: 'NOV 17',
+        tone: 'bg-[#f6ede1] text-[#916438]',
+    },
+    {
+        title: 'Alumni Homecoming 2026',
+        detail: 'Community event · Northfield Hall',
+        date: 'NOV 21',
+        tone: 'bg-[#e9eee5] text-[#45634a]',
+    },
+    {
+        title: 'Career connections night',
+        detail: 'Employer event · Online',
+        date: 'DEC 08',
+        tone: 'bg-[#e8eaf2] text-[#5a6081]',
+    },
+];
+
+export const jobOpenings = [
+    {
+        title: 'Product Designer',
+        company: 'Northstar Digital',
+        location: 'Makati · Hybrid',
+        type: 'Full-time',
+        posted: '2 days ago',
+        logo: 'N',
+        tone: 'bg-[#e7eee6] text-[#426147]',
+    },
+    {
+        title: 'Junior Data Analyst',
+        company: 'Harbor & Pine',
+        location: 'Quezon City · On-site',
+        type: 'Full-time',
+        posted: '4 days ago',
+        logo: 'H',
+        tone: 'bg-[#f5eade] text-[#92643b]',
+    },
+    {
+        title: 'Community Associate',
+        company: 'Common Ground Labs',
+        location: 'Remote · Philippines',
+        type: 'Contract',
+        posted: '1 week ago',
+        logo: 'C',
+        tone: 'bg-[#e9eaf2] text-[#5b6187]',
+    },
+];
