@@ -28,12 +28,14 @@ const EmptyState = () => {
 export default function ManagePasskeys(props: Props) {
     const passkeys = props.passkeys ?? [];
 
-    const handleDelete = (id: number, onError: () => void) => {
-        router.delete(destroy.url(id), {
-            preserveScroll: true,
-            onError,
+    const handleDelete = (id: number) =>
+        new Promise<boolean>((resolve) => {
+            router.delete(destroy.url(id), {
+                preserveScroll: true,
+                onSuccess: () => resolve(true),
+                onError: () => resolve(false),
+            });
         });
-    };
 
     const handleRegisterSuccess = () => {
         router.reload();

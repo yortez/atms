@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
+import ConfirmationDialog from '@/components/confirmation-dialog';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -19,10 +20,19 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
 
-    const handleLogout = () => {
-        cleanup();
-        router.flushAll();
-    };
+    const handleLogout = () =>
+        new Promise<boolean>((resolve) => {
+            cleanup();
+            router.flushAll();
+            router.post(
+                logout().url,
+                {},
+                {
+                    onSuccess: () => resolve(true),
+                    onError: () => resolve(false),
+                },
+            );
+        });
 
     return (
         <>
@@ -46,18 +56,25 @@ export function UserMenuContent({ user }: Props) {
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-                <Link
-                    className="block w-full cursor-pointer"
-                    href={logout()}
-                    as="button"
-                    onClick={handleLogout}
-                    data-test="logout-button"
-                >
-                    <LogOut className="mr-2" />
-                    Log out
-                </Link>
-            </DropdownMenuItem>
+            <ConfirmationDialog
+                title="Log out?"
+                description="Are you sure you want to log out of your account?"
+                confirmLabel="Log out"
+                pendingLabel="Logging out…"
+                variant="default"
+                onConfirm={handleLogout}
+            >
+                <DropdownMenuItem asChild>
+                    <button
+                        type="button"
+                        className="w-full cursor-pointer"
+                        data-test="logout-button"
+                    >
+                        <LogOut />
+                        Log out
+                    </button>
+                </DropdownMenuItem>
+            </ConfirmationDialog>
         </>
     );
 }

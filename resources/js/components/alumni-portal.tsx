@@ -26,6 +26,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { logout } from '@/routes';
 import { edit as profileSettings } from '@/routes/profile';
+import ConfirmationDialog from '@/components/confirmation-dialog';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -357,10 +358,19 @@ export default function AlumniPortal() {
         }
     }
 
-    function handleLogout() {
+    function handleLogout(): Promise<boolean> {
         setAccountMenuOpen(false);
         setMobileNavOpen(false);
-        router.post(logout().url);
+        return new Promise((resolve) => {
+            router.post(
+                logout().url,
+                {},
+                {
+                    onSuccess: () => resolve(true),
+                    onError: () => resolve(false),
+                },
+            );
+        });
     }
 
     const content = !availableRoles.length ? (
@@ -573,16 +583,24 @@ export default function AlumniPortal() {
                                 <Settings2 className="size-3.5" />
                                 Account settings
                             </Link>
-                            <button
-                                type="button"
-                                role="menuitem"
-                                onClick={handleLogout}
-                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-[#8b4e43] transition hover:bg-[#f8f2f0]"
-                                data-test="workspace-logout-button"
+                            <ConfirmationDialog
+                                title="Log out?"
+                                description="Are you sure you want to log out of your account?"
+                                confirmLabel="Log out"
+                                pendingLabel="Logging out…"
+                                variant="default"
+                                onConfirm={handleLogout}
                             >
-                                <LogOut className="size-3.5" />
-                                Log out
-                            </button>
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-[#8b4e43] transition hover:bg-[#f8f2f0]"
+                                    data-test="workspace-logout-button"
+                                >
+                                    <LogOut className="size-3.5" />
+                                    Log out
+                                </button>
+                            </ConfirmationDialog>
                         </div>
                     )}
                     <div className="flex items-center gap-2 rounded-xl bg-[#f7f8f5] p-2">

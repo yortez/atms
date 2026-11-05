@@ -9,6 +9,7 @@ import {
     UsersRound,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import ConfirmationDialog from '@/components/confirmation-dialog';
 import { useApiResource } from '@/hooks/use-api-resource';
 import {
     ApiError,
@@ -1642,7 +1643,9 @@ export function AssignedRoles({
         }
     }
 
-    async function updateUserSuspension(user: UserRoleAssignment) {
+    async function updateUserSuspension(
+        user: UserRoleAssignment,
+    ): Promise<boolean> {
         setManaging((current) => ({ ...current, [user.id]: true }));
 
         try {
@@ -1656,26 +1659,20 @@ export function AssignedRoles({
             toast.success(
                 user.is_suspended ? 'User reactivated.' : 'User suspended.',
             );
+            return true;
         } catch (requestError) {
             toast.error(
                 requestError instanceof ApiError
                     ? requestError.message
                     : 'The user status could not be updated.',
             );
+            return false;
         } finally {
             setManaging((current) => ({ ...current, [user.id]: false }));
         }
     }
 
-    async function deleteUser(user: UserRoleAssignment) {
-        if (
-            !window.confirm(
-                `Delete ${user.name}? This will remove their account access.`,
-            )
-        ) {
-            return;
-        }
-
+    async function deleteUser(user: UserRoleAssignment): Promise<boolean> {
         setManaging((current) => ({ ...current, [user.id]: true }));
 
         try {
@@ -1685,12 +1682,14 @@ export function AssignedRoles({
             );
             reload();
             toast.success('User deleted.');
+            return true;
         } catch (requestError) {
             toast.error(
                 requestError instanceof ApiError
                     ? requestError.message
                     : 'The user could not be deleted.',
             );
+            return false;
         } finally {
             setManaging((current) => ({ ...current, [user.id]: false }));
         }
@@ -1958,36 +1957,69 @@ export function AssignedRoles({
 
                                         {!isProtected && (
                                             <div className="mt-4 flex justify-end gap-2">
-                                                <button
-                                                    type="button"
-                                                    disabled={
-                                                        !canManage ||
-                                                        managing[user.id]
+                                                <ConfirmationDialog
+                                                    title={
+                                                        user.is_suspended
+                                                            ? 'Reactivate user?'
+                                                            : 'Suspend user?'
                                                     }
-                                                    onClick={() =>
-                                                        void updateUserSuspension(
+                                                    description={
+                                                        user.is_suspended
+                                                            ? `Reactivate ${user.name}'s account? They will be able to sign in and use the application again.`
+                                                            : `Suspend ${user.name}'s account? They will be signed out and unable to sign in or use the application until reactivated.`
+                                                    }
+                                                    confirmLabel={
+                                                        user.is_suspended
+                                                            ? 'Reactivate user'
+                                                            : 'Suspend user'
+                                                    }
+                                                    pendingLabel={
+                                                        user.is_suspended
+                                                            ? 'Reactivating…'
+                                                            : 'Suspending…'
+                                                    }
+                                                    variant={
+                                                        user.is_suspended
+                                                            ? 'default'
+                                                            : 'destructive'
+                                                    }
+                                                    onConfirm={() =>
+                                                        updateUserSuspension(
                                                             user,
                                                         )
                                                     }
-                                                    className="rounded-full border border-[#dfe5dd] bg-white px-3 py-2 text-[10px] font-semibold text-[#4d5a4f] disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
-                                                    {user.is_suspended
-                                                        ? 'Reactivate'
-                                                        : 'Suspend'}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    disabled={
-                                                        !canManage ||
-                                                        managing[user.id]
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            !canManage ||
+                                                            managing[user.id]
+                                                        }
+                                                        className="rounded-full border border-[#dfe5dd] bg-white px-3 py-2 text-[10px] font-semibold text-[#4d5a4f] disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {user.is_suspended
+                                                            ? 'Reactivate'
+                                                            : 'Suspend'}
+                                                    </button>
+                                                </ConfirmationDialog>
+                                                <ConfirmationDialog
+                                                    title="Delete user?"
+                                                    description={`Delete ${user.name}'s account? They will lose access, and their account will be archived.`}
+                                                    onConfirm={() =>
+                                                        deleteUser(user)
                                                     }
-                                                    onClick={() =>
-                                                        void deleteUser(user)
-                                                    }
-                                                    className="rounded-full border border-[#ecd8d2] bg-white px-3 py-2 text-[10px] font-semibold text-[#8b4e43] disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
-                                                    Delete
-                                                </button>
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            !canManage ||
+                                                            managing[user.id]
+                                                        }
+                                                        className="rounded-full border border-[#ecd8d2] bg-white px-3 py-2 text-[10px] font-semibold text-[#8b4e43] disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </ConfirmationDialog>
                                             </div>
                                         )}
                                     </div>
