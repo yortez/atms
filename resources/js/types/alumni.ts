@@ -1,0 +1,203 @@
+export type EducationRecord = {
+    id: number;
+    student_number: string;
+    graduation_year: number | null;
+    honors: string | null;
+    program: string | null;
+    degree: string | null;
+};
+
+export type EmploymentStatus = {
+    id: number;
+    code: string;
+    label: string;
+};
+
+export type EmploymentRecord = {
+    id: number;
+    employment_status_id: number;
+    employer_name: string | null;
+    job_title: string | null;
+    industry: string | null;
+    employment_type: string | null;
+    work_location: string | null;
+    started_on: string | null;
+    ended_on: string | null;
+    reported_at: string;
+    status: EmploymentStatus;
+};
+
+export type EmploymentSummary = {
+    id: number;
+    status: string | null;
+    employer_name: string | null;
+    job_title: string | null;
+    industry: string | null;
+    employment_type: string | null;
+    work_location: string | null;
+    started_on: string | null;
+    ended_on: string | null;
+    reported_at: string;
+};
+
+export type AlumniProfile = {
+    id: number;
+    name: string;
+    preferred_name: string | null;
+    first_name: string | null;
+    middle_name: string | null;
+    last_name: string | null;
+    suffix: string | null;
+    email: string;
+    date_of_birth: string;
+    profile_status: 'active' | 'archived';
+    education_records?: EducationRecord[];
+    employment_records?: EmploymentSummary[];
+};
+
+export type AcademicDepartment = {
+    id: number;
+    code: string;
+    name: string;
+    description: string | null;
+};
+
+export type AcademicProgram = {
+    id: number;
+    department_id: number;
+    code: string;
+    name: string;
+    description: string | null;
+    department?: AcademicDepartment;
+    program_degrees?: {
+        id: number;
+        degree: { id: number; title: string; degree_level: string };
+    }[];
+};
+
+export type UserNotification = {
+    id: string;
+    type: string;
+    data: Record<string, unknown>;
+    read_at: string | null;
+    created_at: string;
+};
+
+export type SurveyQuestion = {
+    id: number;
+    prompt: string;
+    type:
+        | 'text'
+        | 'textarea'
+        | 'number'
+        | 'boolean'
+        | 'select'
+        | 'multiselect'
+        | 'rating';
+    options: string[] | null;
+    is_required: boolean;
+    position: number;
+};
+
+export type Survey = {
+    id: number;
+    title: string;
+    description: string | null;
+    status: 'draft' | 'published' | 'closed';
+    published_at: string | null;
+    closes_at: string | null;
+    questions: SurveyQuestion[];
+    has_responded?: boolean;
+};
+
+export type Announcement = {
+    id: number;
+    title: string;
+    body: string;
+    audience_roles: string[] | null;
+    status: 'draft' | 'published';
+    published_at: string | null;
+    created_at: string;
+};
+
+export type Employer = {
+    id: number;
+    company_name: string;
+    website: string | null;
+    description: string | null;
+    industry: string | null;
+    registration_number: string | null;
+    contact_email: string;
+    contact_phone: string | null;
+    address: string | null;
+    verification_status: 'pending' | 'verified' | 'rejected' | 'suspended';
+};
+
+export type JobPosting = {
+    id: number;
+    employer_id: number;
+    title: string;
+    description: string;
+    location: string | null;
+    employment_type: string | null;
+    workplace_type: string | null;
+    salary_min: number | null;
+    salary_max: number | null;
+    status: 'draft' | 'published' | 'closed';
+    closes_at: string | null;
+    published_at: string | null;
+    applications_count?: number;
+    employer?: {
+        id: number;
+        company_name: string;
+        industry?: string | null;
+        website?: string | null;
+    };
+};
+
+export type JobApplication = {
+    id: number;
+    job_posting_id: number;
+    alumni_profile_id: number;
+    applicant_user_id: number;
+    cover_letter: string | null;
+    status: string;
+    reviewed_at: string | null;
+    created_at: string;
+    job_posting?: Pick<JobPosting, 'id' | 'title' | 'location' | 'status'> & {
+        employer?: Pick<Employer, 'id' | 'company_name'>;
+    };
+    alumni_profile?: Pick<AlumniProfile, 'id' | 'name' | 'email'>;
+};
+
+export type DashboardStatistics = {
+    role: string;
+    metrics: {
+        alumni_count: number;
+        users_count: number;
+        survey_count: number;
+        survey_response_count: number;
+        announcements_published_count: number;
+        employers: { total: number; verified: number; pending: number };
+        jobs: { total: number; published: number };
+        applications: {
+            total: number;
+            by_status: { status: string; count: number }[];
+        };
+    };
+    employment_outcomes: {
+        code: string;
+        label: string;
+        alumni_count: number;
+    }[];
+};
+
+export type ActivityLogEntry = {
+    id: number;
+    action: string;
+    subject_type: string | null;
+    subject_id: number | null;
+    metadata: Record<string, unknown> | null;
+    created_at: string;
+    actor?: { id: number; name: string } | null;
+};

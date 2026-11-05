@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\AlumniProfile;
+use App\Models\Employer;
+use App\Policies\AlumniProfilePolicy;
+use App\Policies\EmployerPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +29,36 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        Gate::policy(AlumniProfile::class, AlumniProfilePolicy::class);
+        Gate::policy(Employer::class, EmployerPolicy::class);
+        Gate::before(fn ($user, $ability) => $user->hasRole('system-administrator') ? true : null);
+        Gate::define('manageAcademicCatalog', fn ($user) => $user->hasRole(
+            'system-administrator',
+            'alumni-coordinator',
+        ));
+        Gate::define('manageRegistrationAssistance', fn ($user) => $user->hasRole(
+            'system-administrator',
+            'alumni-coordinator',
+        ));
+        Gate::define('manageSurveys', fn ($user) => $user->hasRole(
+            'system-administrator',
+            'alumni-coordinator',
+        ) || $user->hasPermission('surveys.manage'));
+        Gate::define('manageAnnouncements', fn ($user) => $user->hasRole(
+            'system-administrator',
+            'alumni-coordinator',
+        ) || $user->hasPermission('announcements.manage'));
+        Gate::define('manageJobs', fn ($user) => $user->hasRole(
+            'system-administrator',
+            'alumni-coordinator',
+        ) || $user->hasPermission('jobs.manage'));
+        Gate::define('viewDashboard', fn ($user) => $user->hasRole(
+            'system-administrator',
+            'alumni-coordinator',
+            'department-coordinator',
+            'alumni',
+            'employer',
+        ) || $user->hasPermission('reports.view'));
     }
 
     /**
