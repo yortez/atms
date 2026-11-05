@@ -1387,7 +1387,7 @@ export function UnreadNotificationIndicator() {
     ) : null;
 }
 
-export function Notifications() {
+export function Notifications({ onUpdated }: { onUpdated?: () => void } = {}) {
     const { data, loading, error, reload } =
         useApiResource<ApiEnvelope<NotificationPage>>('/api/notifications');
     const notifications = data?.data.data ?? [];
@@ -1401,6 +1401,7 @@ export function Notifications() {
                 { method: 'PATCH' },
             );
             reload();
+            onUpdated?.();
             toast.success('Notification marked as read.');
         } catch (error) {
             toast.error(

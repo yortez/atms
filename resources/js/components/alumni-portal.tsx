@@ -26,6 +26,20 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { logout } from '@/routes';
 import { edit as profileSettings } from '@/routes/profile';
+import { UserMenuContent } from '@/components/user-menu-content';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     ActivityLog,
     AcademicCatalog,
@@ -281,6 +295,8 @@ export default function AlumniPortal() {
     );
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
+    const [notificationRefreshKey, setNotificationRefreshKey] = useState(0);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [search, setSearch] = useState('');
     const profile = {
@@ -660,15 +676,44 @@ export default function AlumniPortal() {
                         <button
                             type="button"
                             aria-label="Notifications"
-                            onClick={() => setActivePage('Notifications')}
+                            onClick={() => setNotificationsOpen(true)}
                             className="relative grid size-9 place-items-center rounded-xl border border-[#e8eae4] bg-white text-[#687367] hover:bg-[#f8f9f6]"
+                            data-test="notifications-button"
                         >
                             <Bell className="size-4" />
-                            <UnreadNotificationIndicator />
+                            <UnreadNotificationIndicator
+                                key={notificationRefreshKey}
+                            />
                         </button>
-                        <span className="grid size-8 place-items-center rounded-full bg-[#e4ece2] text-[10px] font-bold text-[#49664c]">
-                            {profile.initials}
-                        </span>
+                        {user && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button
+                                        type="button"
+                                        aria-label="Open account menu"
+                                        className="grid size-9 place-items-center rounded-full ring-offset-2 transition hover:ring-2 hover:ring-[#dce6d9] focus-visible:ring-2 focus-visible:ring-[#7e9a7a] focus-visible:outline-none"
+                                        data-test="header-account-menu-button"
+                                    >
+                                        <Avatar className="size-8 overflow-hidden rounded-full bg-[#e4ece2] text-[10px] font-bold text-[#49664c]">
+                                            <AvatarImage
+                                                src={user.avatar ?? undefined}
+                                                alt={user.name}
+                                            />
+                                            <AvatarFallback className="rounded-full bg-[#e4ece2] text-[10px] font-bold text-[#49664c]">
+                                                {profile.initials}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    className="w-56"
+                                    align="end"
+                                    sideOffset={8}
+                                >
+                                    <UserMenuContent user={user} />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </div>
                 </header>
 
@@ -737,6 +782,28 @@ export default function AlumniPortal() {
                 <ArrowDownRight className="size-3.5 rotate-[-135deg]" /> Public
                 website
             </Link>
+
+            <Dialog
+                open={notificationsOpen}
+                onOpenChange={setNotificationsOpen}
+            >
+                <DialogContent
+                    className="max-h-[85vh] overflow-y-auto sm:max-w-2xl"
+                    data-test="notifications-dialog"
+                >
+                    <DialogHeader>
+                        <DialogTitle>Notifications</DialogTitle>
+                        <DialogDescription>
+                            Recent updates and account activity.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Notifications
+                        onUpdated={() =>
+                            setNotificationRefreshKey((key) => key + 1)
+                        }
+                    />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
