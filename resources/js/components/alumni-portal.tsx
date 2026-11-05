@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
     Activity,
     ArrowDownRight,
@@ -12,6 +12,7 @@ import {
     FileSpreadsheet,
     GraduationCap,
     LayoutDashboard,
+    LogOut,
     Menu,
     MessageSquareText,
     Plus,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { logout } from '@/routes';
 import {
     ActivityLog,
     AcademicCatalog,
@@ -277,6 +279,7 @@ export default function AlumniPortal() {
         () => navigation[availableRoles[0] ?? 'Alumni'][0].label,
     );
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
+    const [accountMenuOpen, setAccountMenuOpen] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [search, setSearch] = useState('');
     const profile = {
@@ -335,6 +338,12 @@ export default function AlumniPortal() {
         } else {
             setDialogOpen(true);
         }
+    }
+
+    function handleLogout() {
+        setAccountMenuOpen(false);
+        setMobileNavOpen(false);
+        router.post(logout().url);
     }
 
     const content = !availableRoles.length ? (
@@ -530,7 +539,25 @@ export default function AlumniPortal() {
                         <Settings2 className="size-4" /> Settings
                     </button>
                 </nav>
-                <div className="border-t border-[#eff0ec] p-2.5">
+                <div className="relative border-t border-[#eff0ec] p-2.5">
+                    {accountMenuOpen && user && (
+                        <div
+                            role="menu"
+                            aria-label="Account menu"
+                            className="absolute right-2 bottom-full z-30 mb-2 min-w-40 rounded-xl border border-[#e9ebe5] bg-white p-1.5 shadow-lg"
+                        >
+                            <button
+                                type="button"
+                                role="menuitem"
+                                onClick={handleLogout}
+                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-[#8b4e43] transition hover:bg-[#f8f2f0]"
+                                data-test="workspace-logout-button"
+                            >
+                                <LogOut className="size-3.5" />
+                                Log out
+                            </button>
+                        </div>
+                    )}
                     <div className="flex items-center gap-2 rounded-xl bg-[#f7f8f5] p-2">
                         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e4ece2] text-[10px] font-bold text-[#49664c]">
                             {profile.initials}
@@ -545,8 +572,12 @@ export default function AlumniPortal() {
                         </span>
                         <button
                             type="button"
-                            onClick={() => toastDemo('Account menu opened')}
+                            onClick={() =>
+                                setAccountMenuOpen((isOpen) => !isOpen)
+                            }
                             aria-label="Open account menu"
+                            aria-haspopup="menu"
+                            aria-expanded={accountMenuOpen}
                             className="grid size-7 place-items-center rounded-lg text-[#818980] hover:bg-white"
                         >
                             <ChevronDown className="size-3.5" />
