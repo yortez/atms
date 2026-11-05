@@ -32,5 +32,9 @@
   email verification. API access requires email verification; employer actions
   remain subject to membership and verification policies.
 
-Seed authorization roles and permissions with `php artisan db:seed`. Use
-`php artisan migrate` to install the `personal_access_tokens` table.
+Seed authorization roles and permissions with `php artisan db:seed`. This
+creates the default `system-administrator` account (`admin@atms.local` /
+`Password123!`) and assigns the system admin role. Use
+`php artisan app:create-system-admin --name="..." --email="..." --password="..."`
+to create or refresh the account manually. Use `php artisan migrate` to install
+the `personal_access_tokens` table.

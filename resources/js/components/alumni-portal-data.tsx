@@ -1521,6 +1521,13 @@ export function ActivityLog() {
     );
 }
 
+type UserRoleAssignment = {
+    id: number;
+    name: string;
+    email: string;
+    roles: string[];
+};
+
 export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
     const roleLabels: Record<string, string> = {
         'system-administrator': 'System administrator',
@@ -1529,6 +1536,57 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
         alumni: 'Alumni',
         employer: 'Employer',
     };
+    const isSystemAdmin = roleCodes.includes('system-administrator');
+    const { data, loading, error, reload } =
+        useApiResource<ApiEnvelope<UserRoleAssignment[]>>(
+            isSystemAdmin ? '/api/admin/users' : null,
+        );
+    const [selectedRoles, setSelectedRoles] = useState<Record<number, string[]>>(
+        {},
+    );
+    const [saving, setSaving] = useState<Record<number, boolean>>({});
+
+    useEffect(() => {
+        if (!data?.data) {
+            return;
+        }
+
+        const nextSelectedRoles = Object.fromEntries(
+            data.data.map((user) => [user.id, [...user.roles]]),
+        );
+        setSelectedRoles(nextSelectedRoles);
+    }, [data]);
+
+    async function updateUserRoles(userId: number, nextRoles: string[]) {
+        setSaving((current) => ({ ...current, [userId]: true }));
+
+        try {
+            await apiRequest<ApiEnvelope<UserRoleAssignment>>(
+                `/api/admin/users/${userId}/roles`,
+                {
+                    method: 'PATCH',
+                    body: { roles: nextRoles },
+                },
+            );
+            setSelectedRoles((current) => ({ ...current, [userId]: nextRoles }));
+            reload();
+            toast.success('User roles updated.');
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'User roles could not be updated.',
+            );
+            if (data?.data) {
+                const fallback = data.data.find((user) => user.id === userId)?.roles ?? [];
+                setSelectedRoles((current) => ({ ...current, [userId]: fallback }));
+            }
+        } finally {
+            setSaving((current) => ({ ...current, [userId]: false }));
+        }
+    }
+
+    const users = data?.data ?? [];
 
     return (
         <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
@@ -1551,6 +1609,88 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                     No roles are currently assigned.
                 </p>
             )}
+
+            {isSystemAdmin && (
+                <div className="mt-6 border-t border-[#eff0ec] pt-5">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                        <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
+                            User access management
+                        </h3>
+                        <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-medium text-[#45664a]">
+                            {users.length} users
+                        </span>
+                    </div>
+
+                    {loading ? (
+                        <LoadingState />
+                    ) : error ? (
+                        <ErrorState message={error} />
+                    ) : users.length ? (
+                        <div className="space-y-4">
+                            {users.map((user) => {
+                                const currentRoles = selectedRoles[user.id] ?? user.roles;
+                                const roleOptions = [
+                                    'system-administrator',
+                                    'alumni-coordinator',
+                                    'department-coordinator',
+                                    'alumni',
+                                    'employer',
+                                ];
+
+                                return (
+                                    <div
+                                        key={user.id}
+                                        className="rounded-2xl border border-[#e9ebe5] bg-[#f9faf7] p-4"
+                                    >
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <p className="text-sm font-semibold text-[#39463b]">
+                                                    {user.name}
+                                                </p>
+                                                <p className="mt-1 text-[11px] text-[#7a8278]">
+                                                    {user.email}
+                                                </p>
+                                            </div>
+                                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#6d7d6a]">
+                                                {currentRoles.length ? currentRoles.length : 0} roles
+                                            </span>
+                                        </div>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {roleOptions.map((code) => {
+                                                const checked = currentRoles.includes(code);
+                                                return (
+                                                    <label
+                                                        key={`${user.id}-${code}`}
+                                                        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#dfe5dd] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            className="h-3.5 w-3.5 accent-[#2f4f3e]"
+                                                            checked={checked}
+                                                            disabled={saving[user.id]}
+                                                            onChange={() => {
+                                                                const nextRoles = checked
+                                                                    ? currentRoles.filter((role) => role !== code)
+                                                                    : [...new Set([...currentRoles, code])];
+                                                                void updateUserRoles(user.id, nextRoles);
+                                                            }}
+                                                        />
+                                                        {roleLabels[code] ?? code}
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <EmptyState>No users are available to manage.</EmptyState>
+                    )}
+                </div>
+            )}
+
             <p className="mt-4 text-xs leading-5 text-[#7a8278]">
                 Role and permission changes are managed by an administrator.
             </p>

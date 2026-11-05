@@ -106,6 +106,10 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api'])->g
     Route::patch('/registration-assistance/{assistanceRequest}', [RegistrationAssistanceController::class, 'update'])
         ->name('api.registration-assistance.update');
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('api.activity-logs.index');
+    Route::get('/admin/users', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'index'])
+        ->name('api.admin.users.index');
+    Route::patch('/admin/users/{user}/roles', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateRoles'])
+        ->name('api.admin.users.roles.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
