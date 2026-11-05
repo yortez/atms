@@ -1527,9 +1527,16 @@ type UserRoleAssignment = {
     name: string;
     email: string;
     roles: string[];
+    is_suspended: boolean;
 };
 
-export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
+export function AssignedRoles({
+    roleCodes,
+    currentUserId,
+}: {
+    roleCodes: string[];
+    currentUserId: number;
+}) {
     const roleLabels: Record<string, string> = {
         'system-administrator': 'System administrator',
         'alumni-coordinator': 'Alumni coordinator',
@@ -1545,6 +1552,7 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
         Record<number, string[]>
     >({});
     const [saving, setSaving] = useState<Record<number, boolean>>({});
+    const [managing, setManaging] = useState<Record<number, boolean>>({});
     const [inviteOpen, setInviteOpen] = useState(false);
     const [inviting, setInviting] = useState(false);
     const [inviteForm, setInviteForm] = useState({
@@ -1553,7 +1561,6 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
         roles: [] as string[],
     });
     const roleOptions = [
-        'system-administrator',
         'alumni-coordinator',
         'department-coordinator',
         'alumni',
@@ -1631,6 +1638,60 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
             );
         } finally {
             setInviting(false);
+        }
+    }
+
+    async function updateUserSuspension(user: UserRoleAssignment) {
+        setManaging((current) => ({ ...current, [user.id]: true }));
+
+        try {
+            await apiRequest<
+                ApiEnvelope<{ id: number; is_suspended: boolean }>
+            >(`/api/admin/users/${user.id}/suspension`, {
+                method: 'PATCH',
+                body: { suspended: !user.is_suspended },
+            });
+            reload();
+            toast.success(
+                user.is_suspended ? 'User reactivated.' : 'User suspended.',
+            );
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'The user status could not be updated.',
+            );
+        } finally {
+            setManaging((current) => ({ ...current, [user.id]: false }));
+        }
+    }
+
+    async function deleteUser(user: UserRoleAssignment) {
+        if (
+            !window.confirm(
+                `Delete ${user.name}? This will remove their account access.`,
+            )
+        ) {
+            return;
+        }
+
+        setManaging((current) => ({ ...current, [user.id]: true }));
+
+        try {
+            await apiRequest<ApiEnvelope<never>>(
+                `/api/admin/users/${user.id}`,
+                { method: 'DELETE' },
+            );
+            reload();
+            toast.success('User deleted.');
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'The user could not be deleted.',
+            );
+        } finally {
+            setManaging((current) => ({ ...current, [user.id]: false }));
         }
     }
 
@@ -1788,6 +1849,11 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                             {users.map((user) => {
                                 const currentRoles =
                                     selectedRoles[user.id] ?? user.roles;
+                                const isProtected = user.roles.includes(
+                                    'system-administrator',
+                                );
+                                const canManage =
+                                    !isProtected && user.id !== currentUserId;
 
                                 return (
                                     <div
@@ -1811,52 +1877,118 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                                             </span>
                                         </div>
 
-                                        <div className="mt-4 flex flex-wrap gap-2">
-                                            {roleOptions.map((code) => {
-                                                const checked =
-                                                    currentRoles.includes(code);
-                                                return (
+                                        {user.is_suspended && (
+                                            <p className="mt-3 inline-flex rounded-full bg-[#f7e9e5] px-2.5 py-1 text-[10px] font-semibold text-[#8b4e43]">
+                                                Suspended
+                                            </p>
+                                        )}
+
+                                        {isProtected ? (
+                                            <div className="mt-4 flex flex-wrap gap-2">
+                                                {currentRoles.map((code) => (
                                                     <label
                                                         key={`${user.id}-${code}`}
-                                                        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#dfe5dd] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
+                                                        className="inline-flex items-center gap-2 rounded-full border border-[#dfe5dd] bg-[#f1f3ef] px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
                                                     >
-                                                        <input
-                                                            type="checkbox"
-                                                            className="h-3.5 w-3.5 accent-[#2f4f3e]"
-                                                            checked={checked}
-                                                            disabled={
-                                                                saving[user.id]
-                                                            }
-                                                            onChange={() => {
-                                                                const nextRoles =
-                                                                    checked
-                                                                        ? currentRoles.filter(
-                                                                              (
-                                                                                  role,
-                                                                              ) =>
-                                                                                  role !==
-                                                                                  code,
-                                                                          )
-                                                                        : [
-                                                                              ...new Set(
-                                                                                  [
-                                                                                      ...currentRoles,
-                                                                                      code,
-                                                                                  ],
-                                                                              ),
-                                                                          ];
-                                                                void updateUserRoles(
-                                                                    user.id,
-                                                                    nextRoles,
-                                                                );
-                                                            }}
-                                                        />
                                                         {roleLabels[code] ??
                                                             code}
                                                     </label>
-                                                );
-                                            })}
-                                        </div>
+                                                ))}
+                                                <span className="self-center text-[10px] text-[#7a8278]">
+                                                    Protected system
+                                                    administrator
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div className="mt-4 flex flex-wrap gap-2">
+                                                {roleOptions.map((code) => {
+                                                    const checked =
+                                                        currentRoles.includes(
+                                                            code,
+                                                        );
+                                                    return (
+                                                        <label
+                                                            key={`${user.id}-${code}`}
+                                                            className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#dfe5dd] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                className="h-3.5 w-3.5 accent-[#2f4f3e]"
+                                                                checked={
+                                                                    checked
+                                                                }
+                                                                disabled={
+                                                                    saving[
+                                                                        user.id
+                                                                    ] ||
+                                                                    !canManage
+                                                                }
+                                                                onChange={() => {
+                                                                    const nextRoles =
+                                                                        checked
+                                                                            ? currentRoles.filter(
+                                                                                  (
+                                                                                      role,
+                                                                                  ) =>
+                                                                                      role !==
+                                                                                      code,
+                                                                              )
+                                                                            : [
+                                                                                  ...new Set(
+                                                                                      [
+                                                                                          ...currentRoles,
+                                                                                          code,
+                                                                                      ],
+                                                                                  ),
+                                                                              ];
+                                                                    void updateUserRoles(
+                                                                        user.id,
+                                                                        nextRoles,
+                                                                    );
+                                                                }}
+                                                            />
+                                                            {roleLabels[code] ??
+                                                                code}
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
+                                        {!isProtected && (
+                                            <div className="mt-4 flex justify-end gap-2">
+                                                <button
+                                                    type="button"
+                                                    disabled={
+                                                        !canManage ||
+                                                        managing[user.id]
+                                                    }
+                                                    onClick={() =>
+                                                        void updateUserSuspension(
+                                                            user,
+                                                        )
+                                                    }
+                                                    className="rounded-full border border-[#dfe5dd] bg-white px-3 py-2 text-[10px] font-semibold text-[#4d5a4f] disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                    {user.is_suspended
+                                                        ? 'Reactivate'
+                                                        : 'Suspend'}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={
+                                                        !canManage ||
+                                                        managing[user.id]
+                                                    }
+                                                    onClick={() =>
+                                                        void deleteUser(user)
+                                                    }
+                                                    className="rounded-full border border-[#ecd8d2] bg-white px-3 py-2 text-[10px] font-semibold text-[#8b4e43] disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}

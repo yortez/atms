@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -23,6 +24,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $email
  * @property int|null $alumni_profile_id
  * @property Carbon|null $email_verified_at
+ * @property Carbon|null $suspended_at
  * @property string $password
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
@@ -36,7 +38,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, SoftDeletes, TwoFactorAuthenticatable;
 
     /**
      * @return BelongsTo<AlumniProfile, $this>
@@ -69,6 +71,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->roles()->whereIn('name', $roles)->exists();
     }
 
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
     public function hasPermission(string $permission): bool
     {
         return $this->roles()
@@ -86,6 +93,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'suspended_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
         ];
     }

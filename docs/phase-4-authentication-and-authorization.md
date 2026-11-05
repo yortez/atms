@@ -46,3 +46,9 @@ System administrators can invite users from **Users & roles** by entering a
 name, email address, and one or more roles. The new user receives a password
 setup link by email and must complete the normal email-verification flow before
 accessing protected areas.
+
+The system-administrator role is protected: it cannot be assigned or changed
+through user management, and system-administrator accounts cannot be suspended
+or deleted there. Administrators can suspend, reactivate, and delete other user
+accounts. Suspension blocks sign-in, API token issuance, and authenticated
+application access; deletion is soft so existing records remain intact.

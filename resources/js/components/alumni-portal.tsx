@@ -408,7 +408,7 @@ export default function AlumniPortal() {
     ) : activePage === 'Activity log' ? (
         <ActivityLog />
     ) : activePage === 'Users & roles' ? (
-        <AssignedRoles roleCodes={user.roles ?? []} />
+        <AssignedRoles roleCodes={user.roles ?? []} currentUserId={user.id} />
     ) : activePage === 'Recruitment analytics' ? (
         <LiveOverview role={role} onNavigate={(page) => setActivePage(page)} />
     ) : (

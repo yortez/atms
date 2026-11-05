@@ -20,7 +20,7 @@ class SystemAdminUserController extends Controller
      */
     public function index(): JsonResponse
     {
-        abort_unless(auth()->user()->hasRole('system-administrator'), 403);
+        $this->authorizeSystemAdministrator();
 
         $users = User::query()->with('roles:id,name')->orderBy('name')->get()->map(function (User $user): array {
             return [
@@ -28,6 +28,7 @@ class SystemAdminUserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->roles->pluck('name')->all(),
+                'is_suspended' => $user->isSuspended(),
             ];
         });
 
@@ -41,10 +42,9 @@ class SystemAdminUserController extends Controller
      */
     public function invite(Request $request): JsonResponse
     {
-        abort_unless($request->user()->hasRole('system-administrator'), 403);
+        $this->authorizeSystemAdministrator();
 
         $availableRoles = [
-            'system-administrator',
             'alumni-coordinator',
             'department-coordinator',
             'alumni',
@@ -101,6 +101,7 @@ class SystemAdminUserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->roles()->pluck('name')->all(),
+                'is_suspended' => false,
             ],
             'message' => 'Invitation sent.',
         ], 201);
@@ -111,10 +112,10 @@ class SystemAdminUserController extends Controller
      */
     public function updateRoles(User $user, Request $request): JsonResponse
     {
-        abort_unless(auth()->user()->hasRole('system-administrator'), 403);
+        $administrator = $this->authorizeSystemAdministrator();
+        $this->ensureUserCanBeManaged($user, $administrator);
 
         $availableRoles = [
-            'system-administrator',
             'alumni-coordinator',
             'department-coordinator',
             'alumni',
@@ -142,7 +143,62 @@ class SystemAdminUserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->fresh()->roles()->pluck('name')->all(),
+                'is_suspended' => $user->isSuspended(),
             ],
         ]);
+    }
+
+    public function updateSuspension(User $user, Request $request): JsonResponse
+    {
+        $administrator = $this->authorizeSystemAdministrator();
+        $this->ensureUserCanBeManaged($user, $administrator);
+
+        $validated = $request->validate([
+            'suspended' => ['required', 'boolean'],
+        ]);
+
+        $user->forceFill([
+            'suspended_at' => $validated['suspended'] ? ($user->suspended_at ?? now()) : null,
+        ])->save();
+
+        if ($validated['suspended']) {
+            $user->tokens()->delete();
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $user->id,
+                'is_suspended' => $user->isSuspended(),
+            ],
+            'message' => $user->isSuspended() ? 'User suspended.' : 'User reactivated.',
+        ]);
+    }
+
+    public function destroy(User $user): JsonResponse
+    {
+        $administrator = $this->authorizeSystemAdministrator();
+        $this->ensureUserCanBeManaged($user, $administrator);
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted.']);
+    }
+
+    private function authorizeSystemAdministrator(): User
+    {
+        $administrator = request()->user();
+        abort_unless($administrator?->hasRole('system-administrator'), 403);
+
+        return $administrator;
+    }
+
+    private function ensureUserCanBeManaged(User $user, User $administrator): void
+    {
+        abort_if(
+            $user->is($administrator) || $user->hasRole('system-administrator'),
+            403,
+            'System administrator accounts are protected.',
+        );
     }
 }

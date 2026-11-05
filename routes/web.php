@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\JobController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RegistrationAssistanceController;
 use App\Http\Controllers\Api\SurveyController;
+use App\Http\Middleware\EnsureUserIsNotSuspended;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -30,7 +31,7 @@ Route::post('/api/auth/token', [ApiTokenController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('api.auth.token.store');
 
-Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api'])->group(function () {
+Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', EnsureUserIsNotSuspended::class])->group(function () {
     Route::delete('/auth/token', [ApiTokenController::class, 'destroy'])->name('api.auth.token.destroy');
     Route::get('/me/alumni', [AlumniController::class, 'me'])->name('api.me.alumni');
     Route::get('/alumni', [AlumniController::class, 'index'])->name('api.alumni.index');
@@ -112,9 +113,13 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api'])->g
         ->name('api.admin.users.invite');
     Route::patch('/admin/users/{user}/roles', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateRoles'])
         ->name('api.admin.users.roles.update');
+    Route::patch('/admin/users/{user}/suspension', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateSuspension'])
+        ->name('api.admin.users.suspension.update');
+    Route::delete('/admin/users/{user}', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'destroy'])
+        ->name('api.admin.users.destroy');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', EnsureUserIsNotSuspended::class])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });
 

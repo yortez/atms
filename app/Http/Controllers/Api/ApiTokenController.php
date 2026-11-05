@@ -21,7 +21,7 @@ class ApiTokenController extends Controller
         ]);
         $user = User::query()->where('email', Str::lower(trim($data['email'])))->first();
 
-        if ($user === null || ! Hash::check($data['password'], $user->password)) {
+        if ($user === null || $user->isSuspended() || ! Hash::check($data['password'], $user->password)) {
             return response()->json(['message' => 'The provided credentials are invalid.'], 401);
         }
 
