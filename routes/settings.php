@@ -11,6 +11,9 @@ Route::middleware(['auth', EnsureUserIsNotSuspended::class])->group(function () 
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('settings/password', [SecurityController::class, 'update'])
+        ->middleware('throttle:6,1')
+        ->name('user-password.update');
 });
 
 Route::middleware(['auth', 'verified', EnsureUserIsNotSuspended::class])->group(function () {
@@ -19,10 +22,6 @@ Route::middleware(['auth', 'verified', EnsureUserIsNotSuspended::class])->group(
     Route::get('settings/security', [SecurityController::class, 'edit'])
         ->middleware(RequirePassword::class)
         ->name('security.edit');
-
-    Route::put('settings/password', [SecurityController::class, 'update'])
-        ->middleware('throttle:6,1')
-        ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
 });

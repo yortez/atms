@@ -25,6 +25,7 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { logout } from '@/routes';
+import { edit as profileSettings } from '@/routes/profile';
 import {
     ActivityLog,
     AcademicCatalog,
@@ -546,6 +547,16 @@ export default function AlumniPortal() {
                             aria-label="Account menu"
                             className="absolute right-2 bottom-full z-30 mb-2 min-w-40 rounded-xl border border-[#e9ebe5] bg-white p-1.5 shadow-lg"
                         >
+                            <Link
+                                href={profileSettings()}
+                                role="menuitem"
+                                onClick={() => setAccountMenuOpen(false)}
+                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-[#4d5a4f] transition hover:bg-[#f4f6f2]"
+                                data-test="workspace-account-settings"
+                            >
+                                <Settings2 className="size-3.5" />
+                                Account settings
+                            </Link>
                             <button
                                 type="button"
                                 role="menuitem"

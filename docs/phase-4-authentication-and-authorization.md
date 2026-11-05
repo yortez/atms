@@ -52,3 +52,8 @@ through user management, and system-administrator accounts cannot be suspended
 or deleted there. Administrators can suspend, reactivate, and delete other user
 accounts. Suspension blocks sign-in, API token issuance, and authenticated
 application access; deletion is soft so existing records remain intact.
+
+Users can open **Account settings** from the account menu to update their name
+and email, upload a JPG, PNG, or WebP profile photo (up to 5 MB), and change
+their password after confirming the current password. Email changes require
+email verification again.
