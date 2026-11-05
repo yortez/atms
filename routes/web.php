@@ -108,6 +108,8 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api'])->g
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('api.activity-logs.index');
     Route::get('/admin/users', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'index'])
         ->name('api.admin.users.index');
+    Route::post('/admin/users', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'invite'])
+        ->name('api.admin.users.invite');
     Route::patch('/admin/users/{user}/roles', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateRoles'])
         ->name('api.admin.users.roles.update');
 });

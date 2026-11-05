@@ -36,21 +36,25 @@ class RoleSeeder extends Seeder
             Permission::query()->firstOrCreate(['name' => $name], ['label' => $label]);
         }
 
-        Role::query()->where('name', 'alumni-coordinator')->firstOrFail()
-            ->permissions()->syncWithoutDetaching(
-                Permission::query()->whereIn('name', [
-                    'alumni.view',
-                    'alumni.create',
-                    'alumni.update',
-                    'reports.view',
-                    'surveys.manage',
-                    'announcements.manage',
-                    'jobs.manage',
-                ])->pluck('id'),
-            );
-        Role::query()->where('name', 'department-coordinator')->firstOrFail()
-            ->permissions()->syncWithoutDetaching(
-                Permission::query()->whereIn('name', ['alumni.view', 'reports.view'])->pluck('id'),
-            );
+        $rolePermissions = [
+            'system-administrator' => array_keys($permissionLabels),
+            'alumni-coordinator' => [
+                'alumni.view',
+                'alumni.create',
+                'alumni.update',
+                'reports.view',
+                'surveys.manage',
+                'announcements.manage',
+                'jobs.manage',
+            ],
+            'department-coordinator' => ['alumni.view', 'reports.view'],
+        ];
+
+        foreach ($rolePermissions as $roleName => $permissions) {
+            Role::query()->where('name', $roleName)->firstOrFail()
+                ->permissions()->syncWithoutDetaching(
+                    Permission::query()->whereIn('name', $permissions)->pluck('id'),
+                );
+        }
     }
 }

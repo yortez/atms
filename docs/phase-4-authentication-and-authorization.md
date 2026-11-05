@@ -20,6 +20,9 @@
 
 - Role assignments and permissions are stored in `roles`, `permissions`,
   `user_roles`, and `role_permissions`.
+- Seeding grants system administrators every defined permission,
+  alumni coordinators the alumni, reports, surveys, announcements, and jobs
+  permissions, and department coordinators alumni viewing and reports access.
 - Alumni self-service policies limit users to their linked profile. Staff
   permissions govern broader operations; department coordinators are limited
   to alumni in their assigned academic programs and need the explicit
@@ -38,3 +41,8 @@ creates the default `system-administrator` account (`admin@atms.local` /
 `php artisan app:create-system-admin --name="..." --email="..." --password="..."`
 to create or refresh the account manually. Use `php artisan migrate` to install
 the `personal_access_tokens` table.
+
+System administrators can invite users from **Users & roles** by entering a
+name, email address, and one or more roles. The new user receives a password
+setup link by email and must complete the normal email-verification flow before
+accessing protected areas.

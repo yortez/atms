@@ -5,6 +5,7 @@ import {
     Building2,
     ClipboardList,
     MessageSquareText,
+    UserPlus,
     UsersRound,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -1537,14 +1538,27 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
         employer: 'Employer',
     };
     const isSystemAdmin = roleCodes.includes('system-administrator');
-    const { data, loading, error, reload } =
-        useApiResource<ApiEnvelope<UserRoleAssignment[]>>(
-            isSystemAdmin ? '/api/admin/users' : null,
-        );
-    const [selectedRoles, setSelectedRoles] = useState<Record<number, string[]>>(
-        {},
-    );
+    const { data, loading, error, reload } = useApiResource<
+        ApiEnvelope<UserRoleAssignment[]>
+    >(isSystemAdmin ? '/api/admin/users' : null);
+    const [selectedRoles, setSelectedRoles] = useState<
+        Record<number, string[]>
+    >({});
     const [saving, setSaving] = useState<Record<number, boolean>>({});
+    const [inviteOpen, setInviteOpen] = useState(false);
+    const [inviting, setInviting] = useState(false);
+    const [inviteForm, setInviteForm] = useState({
+        name: '',
+        email: '',
+        roles: [] as string[],
+    });
+    const roleOptions = [
+        'system-administrator',
+        'alumni-coordinator',
+        'department-coordinator',
+        'alumni',
+        'employer',
+    ];
 
     useEffect(() => {
         if (!data?.data) {
@@ -1568,7 +1582,10 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                     body: { roles: nextRoles },
                 },
             );
-            setSelectedRoles((current) => ({ ...current, [userId]: nextRoles }));
+            setSelectedRoles((current) => ({
+                ...current,
+                [userId]: nextRoles,
+            }));
             reload();
             toast.success('User roles updated.');
         } catch (requestError) {
@@ -1578,11 +1595,42 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                     : 'User roles could not be updated.',
             );
             if (data?.data) {
-                const fallback = data.data.find((user) => user.id === userId)?.roles ?? [];
-                setSelectedRoles((current) => ({ ...current, [userId]: fallback }));
+                const fallback =
+                    data.data.find((user) => user.id === userId)?.roles ?? [];
+                setSelectedRoles((current) => ({
+                    ...current,
+                    [userId]: fallback,
+                }));
             }
         } finally {
             setSaving((current) => ({ ...current, [userId]: false }));
+        }
+    }
+
+    async function inviteUser(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setInviting(true);
+
+        try {
+            await apiRequest<ApiEnvelope<UserRoleAssignment>>(
+                '/api/admin/users',
+                {
+                    method: 'POST',
+                    body: inviteForm,
+                },
+            );
+            setInviteForm({ name: '', email: '', roles: [] });
+            setInviteOpen(false);
+            reload();
+            toast.success('Invitation sent.');
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'The invitation could not be sent.',
+            );
+        } finally {
+            setInviting(false);
         }
     }
 
@@ -1616,10 +1664,120 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                         <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
                             User access management
                         </h3>
-                        <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-medium text-[#45664a]">
-                            {users.length} users
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-medium text-[#45664a]">
+                                {users.length} users
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setInviteOpen((open) => !open)}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-[#2f4f3e] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#263f32]"
+                            >
+                                <UserPlus className="h-3.5 w-3.5" />
+                                Invite user
+                            </button>
+                        </div>
                     </div>
+
+                    {inviteOpen && (
+                        <form
+                            onSubmit={inviteUser}
+                            className="mb-5 space-y-3 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4"
+                        >
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <label className="space-y-1.5 text-xs font-medium text-[#4d5a4f]">
+                                    Name
+                                    <input
+                                        required
+                                        maxLength={255}
+                                        value={inviteForm.name}
+                                        onChange={(event) =>
+                                            setInviteForm((form) => ({
+                                                ...form,
+                                                name: event.target.value,
+                                            }))
+                                        }
+                                        className="w-full rounded-xl border border-[#dfe5dd] bg-white px-3 py-2 text-sm font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
+                                        autoComplete="name"
+                                    />
+                                </label>
+                                <label className="space-y-1.5 text-xs font-medium text-[#4d5a4f]">
+                                    Email
+                                    <input
+                                        required
+                                        type="email"
+                                        maxLength={255}
+                                        value={inviteForm.email}
+                                        onChange={(event) =>
+                                            setInviteForm((form) => ({
+                                                ...form,
+                                                email: event.target.value,
+                                            }))
+                                        }
+                                        className="w-full rounded-xl border border-[#dfe5dd] bg-white px-3 py-2 text-sm font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
+                                        autoComplete="email"
+                                    />
+                                </label>
+                            </div>
+                            <fieldset>
+                                <legend className="mb-2 text-xs font-medium text-[#4d5a4f]">
+                                    Assign roles
+                                </legend>
+                                <div className="flex flex-wrap gap-2">
+                                    {roleOptions.map((code) => (
+                                        <label
+                                            key={`invite-${code}`}
+                                            className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#dfe5dd] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                className="h-3.5 w-3.5 accent-[#2f4f3e]"
+                                                checked={inviteForm.roles.includes(
+                                                    code,
+                                                )}
+                                                onChange={() =>
+                                                    setInviteForm((form) => ({
+                                                        ...form,
+                                                        roles: form.roles.includes(
+                                                            code,
+                                                        )
+                                                            ? form.roles.filter(
+                                                                  (role) =>
+                                                                      role !==
+                                                                      code,
+                                                              )
+                                                            : [
+                                                                  ...form.roles,
+                                                                  code,
+                                                              ],
+                                                    }))
+                                                }
+                                            />
+                                            {roleLabels[code] ?? code}
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setInviteOpen(false)}
+                                    className="rounded-full border border-[#dfe5dd] bg-white px-3 py-2 text-[11px] font-semibold text-[#4d5a4f]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={
+                                        inviting || !inviteForm.roles.length
+                                    }
+                                    className="rounded-full bg-[#2f4f3e] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#263f32] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {inviting ? 'Sending…' : 'Send invitation'}
+                                </button>
+                            </div>
+                        </form>
+                    )}
 
                     {loading ? (
                         <LoadingState />
@@ -1628,14 +1786,8 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                     ) : users.length ? (
                         <div className="space-y-4">
                             {users.map((user) => {
-                                const currentRoles = selectedRoles[user.id] ?? user.roles;
-                                const roleOptions = [
-                                    'system-administrator',
-                                    'alumni-coordinator',
-                                    'department-coordinator',
-                                    'alumni',
-                                    'employer',
-                                ];
+                                const currentRoles =
+                                    selectedRoles[user.id] ?? user.roles;
 
                                 return (
                                     <div
@@ -1651,14 +1803,18 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                                                     {user.email}
                                                 </p>
                                             </div>
-                                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#6d7d6a]">
-                                                {currentRoles.length ? currentRoles.length : 0} roles
+                                            <span className="text-[10px] font-medium tracking-[0.14em] text-[#6d7d6a] uppercase">
+                                                {currentRoles.length
+                                                    ? currentRoles.length
+                                                    : 0}{' '}
+                                                roles
                                             </span>
                                         </div>
 
                                         <div className="mt-4 flex flex-wrap gap-2">
                                             {roleOptions.map((code) => {
-                                                const checked = currentRoles.includes(code);
+                                                const checked =
+                                                    currentRoles.includes(code);
                                                 return (
                                                     <label
                                                         key={`${user.id}-${code}`}
@@ -1668,15 +1824,35 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                                                             type="checkbox"
                                                             className="h-3.5 w-3.5 accent-[#2f4f3e]"
                                                             checked={checked}
-                                                            disabled={saving[user.id]}
+                                                            disabled={
+                                                                saving[user.id]
+                                                            }
                                                             onChange={() => {
-                                                                const nextRoles = checked
-                                                                    ? currentRoles.filter((role) => role !== code)
-                                                                    : [...new Set([...currentRoles, code])];
-                                                                void updateUserRoles(user.id, nextRoles);
+                                                                const nextRoles =
+                                                                    checked
+                                                                        ? currentRoles.filter(
+                                                                              (
+                                                                                  role,
+                                                                              ) =>
+                                                                                  role !==
+                                                                                  code,
+                                                                          )
+                                                                        : [
+                                                                              ...new Set(
+                                                                                  [
+                                                                                      ...currentRoles,
+                                                                                      code,
+                                                                                  ],
+                                                                              ),
+                                                                          ];
+                                                                void updateUserRoles(
+                                                                    user.id,
+                                                                    nextRoles,
+                                                                );
                                                             }}
                                                         />
-                                                        {roleLabels[code] ?? code}
+                                                        {roleLabels[code] ??
+                                                            code}
                                                     </label>
                                                 );
                                             })}
@@ -1686,7 +1862,9 @@ export function AssignedRoles({ roleCodes }: { roleCodes: string[] }) {
                             })}
                         </div>
                     ) : (
-                        <EmptyState>No users are available to manage.</EmptyState>
+                        <EmptyState>
+                            No users are available to manage.
+                        </EmptyState>
                     )}
                 </div>
             )}
