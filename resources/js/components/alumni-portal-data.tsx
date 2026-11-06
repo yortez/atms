@@ -1885,237 +1885,237 @@ type OutcomeRow = {
     related_count?: number;
 };
 
-    type InstitutionalReportDefinition = {
-        key: string;
-        number: number;
+type InstitutionalReportDefinition = {
+    key: string;
+    number: number;
+    title: string;
+    category: string;
+    description: string;
+};
+
+type InstitutionalReportCard = {
+    label: string;
+    value: string | number;
+    hint?: string;
+};
+
+type InstitutionalReportChartItem = {
+    label: string;
+    value: number;
+    percentage?: number;
+};
+
+type InstitutionalReportColumn = {
+    key: string;
+    label: string;
+    align?: 'left' | 'right' | 'center';
+};
+
+type InstitutionalReportPayload = {
+    report_type: string;
+    number: number;
+    title: string;
+    category: string;
+    description: string;
+    generated_at: string;
+    filters: {
+        department_id: number | null;
+        program_id: number | null;
+        graduation_year: number | null;
+        employment_status: string | null;
+        date_from: string | null;
+        date_to: string | null;
+    };
+    filter_options: {
+        departments: Array<{ id: number; code: string; name: string }>;
+        programs: Array<{ id: number; department_id: number; code: string; name: string }>;
+        graduation_years: number[];
+        employment_statuses: Array<{ id: number; code: string; label: string }>;
+    };
+    available_reports: InstitutionalReportDefinition[];
+    cards: InstitutionalReportCard[];
+    chart: {
         title: string;
-        category: string;
-        description: string;
+        type: 'bar' | 'horizontal-bar' | 'distribution';
+        unit?: string;
+        series: InstitutionalReportChartItem[];
     };
+    columns: InstitutionalReportColumn[];
+    rows: Array<Record<string, string | number | null>>;
+};
 
-    type InstitutionalReportCard = {
-        label: string;
-        value: string | number;
-        hint?: string;
-    };
+let currentReportExportParams = 'report_type=graduate_tracer_summary';
 
-    type InstitutionalReportChartItem = {
-        label: string;
-        value: number;
-        percentage?: number;
-    };
+export async function downloadInstitutionalReport(
+    format: 'excel' | 'pdf',
+    queryString: string = currentReportExportParams,
+) {
+    try {
+        const endpoint =
+            format === 'pdf'
+                ? `/api/reports/export/pdf?${queryString}`
+                : `/api/reports/export/excel?${queryString}`;
 
-    type InstitutionalReportColumn = {
-        key: string;
-        label: string;
-        align?: 'left' | 'right' | 'center';
-    };
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                Accept:
+                    format === 'pdf'
+                        ? 'application/pdf'
+                        : 'application/vnd.ms-excel',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
 
-    type InstitutionalReportPayload = {
-        report_type: string;
-        number: number;
-        title: string;
-        category: string;
-        description: string;
-        generated_at: string;
-        filters: {
-            department_id: number | null;
-            program_id: number | null;
-            graduation_year: number | null;
-            employment_status: string | null;
-            date_from: string | null;
-            date_to: string | null;
-        };
-        filter_options: {
-            departments: Array<{ id: number; code: string; name: string }>;
-            programs: Array<{ id: number; department_id: number; code: string; name: string }>;
-            graduation_years: number[];
-            employment_statuses: Array<{ id: number; code: string; label: string }>;
-        };
-        available_reports: InstitutionalReportDefinition[];
-        cards: InstitutionalReportCard[];
-        chart: {
-            title: string;
-            type: 'bar' | 'horizontal-bar' | 'distribution';
-            unit?: string;
-            series: InstitutionalReportChartItem[];
-        };
-        columns: InstitutionalReportColumn[];
-        rows: Array<Record<string, string | number | null>>;
-    };
+        if (!response.ok) {
+            throw new Error(`Export failed (${response.status})`);
+        }
 
-    let currentReportExportParams = 'report_type=graduate_tracer_summary';
+        const blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') ?? '';
+        const match = disposition.match(/filename="?([^"]+)"?/i);
+        const fallbackName =
+            format === 'pdf'
+                ? 'institutional-report.pdf'
+                : 'institutional-report.xls';
+        const filename = match?.[1] ?? fallbackName;
 
-    export async function downloadInstitutionalReport(
-        format: 'excel' | 'pdf',
-        queryString: string = currentReportExportParams,
-    ) {
-        try {
-            const endpoint =
-                format === 'pdf'
-                    ? `/api/reports/export/pdf?${queryString}`
-                    : `/api/reports/export/excel?${queryString}`;
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-            const response = await fetch(endpoint, {
-                method: 'GET',
-                credentials: 'same-origin',
-                headers: {
-                    Accept:
-                        format === 'pdf'
-                            ? 'application/pdf'
-                            : 'application/vnd.ms-excel',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Export failed (${response.status})`);
-            }
-
-            const blob = await response.blob();
-            const disposition = response.headers.get('Content-Disposition') ?? '';
-            const match = disposition.match(/filename="?([^"]+)"?/i);
-            const fallbackName =
-                format === 'pdf'
-                    ? 'institutional-report.pdf'
-                    : 'institutional-report.xls';
-            const filename = match?.[1] ?? fallbackName;
-
-            const url = URL.createObjectURL(blob);
-            const anchor = document.createElement('a');
-            anchor.href = url;
-            anchor.download = filename;
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-            toast.success(
-                format === 'pdf'
-                    ? 'PDF report downloaded.'
-                    : 'Excel report downloaded.',
-            );
-        } catch (error) {
-            toast.error(
+        toast.success(
+            format === 'pdf'
+                ? 'PDF report downloaded.'
+                : 'Excel report downloaded.',
+        );
+    } catch (error) {
+        toast.error(
             error instanceof Error
-                    ? error.message
+                ? error.message
                 : 'Report could not be exported.',
-            );
+        );
+    }
+}
+
+export async function exportEmploymentOutcomes() {
+    await downloadInstitutionalReport('excel', currentReportExportParams);
+}
+
+export function EmploymentReports() {
+    const [reportType, setReportType] = useState('graduate_tracer_summary');
+    const [departmentId, setDepartmentId] = useState('');
+    const [programId, setProgramId] = useState('');
+    const [graduationYear, setGraduationYear] = useState('');
+    const [employmentStatus, setEmploymentStatus] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
+    const [tableSearch, setTableSearch] = useState('');
+    const [chartMode, setChartMode] = useState<'bars' | 'distribution'>('bars');
+    const [exportingFormat, setExportingFormat] = useState<
+        'excel' | 'pdf' | null
+    >(null);
+
+    const params = new URLSearchParams();
+    params.set('report_type', reportType);
+    if (departmentId) params.set('department_id', departmentId);
+    if (programId) params.set('program_id', programId);
+    if (graduationYear) params.set('graduation_year', graduationYear);
+    if (employmentStatus) params.set('employment_status', employmentStatus);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo) params.set('date_to', dateTo);
+
+    const queryString = params.toString();
+    currentReportExportParams = queryString;
+
+    const { data, loading, error } = useApiResource<
+        ApiEnvelope<InstitutionalReportPayload>
+    >(`/api/reports?${queryString}`);
+
+    const report = data?.data;
+    const availableReports = report?.available_reports ?? [];
+    const departments = report?.filter_options.departments ?? [];
+    const allPrograms = report?.filter_options.programs ?? [];
+    const programs = departmentId
+        ? allPrograms.filter((p) => String(p.department_id) === departmentId)
+        : allPrograms;
+    const graduationYears = report?.filter_options.graduation_years ?? [];
+    const statuses = report?.filter_options.employment_statuses ?? [];
+
+    const hasActiveFilters = Boolean(
+        departmentId ||
+        programId ||
+        graduationYear ||
+        employmentStatus ||
+        dateFrom ||
+        dateTo,
+    );
+
+    function resetFilters() {
+        setDepartmentId('');
+        setProgramId('');
+        setGraduationYear('');
+        setEmploymentStatus('');
+        setDateFrom('');
+        setDateTo('');
+        setTableSearch('');
+    }
+
+    async function handleExport(format: 'excel' | 'pdf') {
+        setExportingFormat(format);
+        try {
+            await downloadInstitutionalReport(format, queryString);
+        } finally {
+            setExportingFormat(null);
         }
     }
 
-    export async function exportEmploymentOutcomes() {
-        await downloadInstitutionalReport('excel', currentReportExportParams);
+    if (loading && !report) {
+        return <LoadingState />;
     }
 
-    export function EmploymentReports() {
-    const [reportType, setReportType] = useState('graduate_tracer_summary');
-        const [departmentId, setDepartmentId] = useState('');
-        const [programId, setProgramId] = useState('');
-        const [graduationYear, setGraduationYear] = useState('');
-        const [employmentStatus, setEmploymentStatus] = useState('');
-        const [dateFrom, setDateFrom] = useState('');
-        const [dateTo, setDateTo] = useState('');
-        const [tableSearch, setTableSearch] = useState('');
-        const [chartMode, setChartMode] = useState<'bars' | 'distribution'>('bars');
-        const [exportingFormat, setExportingFormat] = useState<
-            'excel' | 'pdf' | null
-        >(null);
+    if (error && !report) {
+        return <ErrorState message={error} />;
+    }
 
-        const params = new URLSearchParams();
-        params.set('report_type', reportType);
-        if (departmentId) params.set('department_id', departmentId);
-        if (programId) params.set('program_id', programId);
-        if (graduationYear) params.set('graduation_year', graduationYear);
-        if (employmentStatus) params.set('employment_status', employmentStatus);
-        if (dateFrom) params.set('date_from', dateFrom);
-        if (dateTo) params.set('date_to', dateTo);
+    if (!report) {
+        return <EmptyState>No institutional report data available.</EmptyState>;
+    }
 
-        const queryString = params.toString();
-        currentReportExportParams = queryString;
+    const categories = Array.from(
+        new Set(availableReports.map((item) => item.category)),
+    );
 
-        const { data, loading, error } = useApiResource<
-            ApiEnvelope<InstitutionalReportPayload>
-        >(`/api/reports?${queryString}`);
+    const chartSeries = report.chart?.series ?? [];
+    const maxChartVal = Math.max(
+        1,
+        ...chartSeries.map((item) => Number(item.value) || 0),
+    );
+    const totalChartVal = chartSeries.reduce(
+        (sum, item) => sum + (Number(item.value) || 0),
+        0,
+    );
 
-        const report = data?.data;
-        const availableReports = report?.available_reports ?? [];
-        const departments = report?.filter_options.departments ?? [];
-        const allPrograms = report?.filter_options.programs ?? [];
-        const programs = departmentId
-            ? allPrograms.filter((p) => String(p.department_id) === departmentId)
-            : allPrograms;
-        const graduationYears = report?.filter_options.graduation_years ?? [];
-        const statuses = report?.filter_options.employment_statuses ?? [];
+    const filteredRows = tableSearch.trim()
+        ? report.rows.filter((row) =>
+            Object.values(row).some((cell) =>
+                String(cell ?? '')
+                    .toLowerCase()
+                    .includes(tableSearch.trim().toLowerCase()),
+            ),
+        )
+        : report.rows;
 
-        const hasActiveFilters = Boolean(
-            departmentId ||
-            programId ||
-            graduationYear ||
-            employmentStatus ||
-            dateFrom ||
-            dateTo,
-        );
-
-            function resetFilters() {
-                setDepartmentId('');
-                setProgramId('');
-                setGraduationYear('');
-                setEmploymentStatus('');
-                setDateFrom('');
-                setDateTo('');
-                setTableSearch('');
-            }
-
-            async function handleExport(format: 'excel' | 'pdf') {
-                setExportingFormat(format);
-                try {
-                    await downloadInstitutionalReport(format, queryString);
-                } finally {
-                    setExportingFormat(null);
-                }
-            }
-
-            if (loading && !report) {
-                return <LoadingState />;
-            }
-
-                if (error && !report) {
-                    return <ErrorState message={error} />;
-                }
-
-                if (!report) {
-                    return <EmptyState>No institutional report data available.</EmptyState>;
-                }
-
-                const categories = Array.from(
-                    new Set(availableReports.map((item) => item.category)),
-                );
-
-                const chartSeries = report.chart?.series ?? [];
-                const maxChartVal = Math.max(
-                    1,
-                    ...chartSeries.map((item) => Number(item.value) || 0),
-                );
-                const totalChartVal = chartSeries.reduce(
-                    (sum, item) => sum + (Number(item.value) || 0),
-                    0,
-                );
-
-                const filteredRows = tableSearch.trim()
-                    ? report.rows.filter((row) =>
-                        Object.values(row).some((cell) =>
-                            String(cell ?? '')
-                                .toLowerCase()
-                                .includes(tableSearch.trim().toLowerCase()),
-                        ),
-                    )
-                    : report.rows;
-
-                return (
-                        <div className="space-y-5">
-                            {/* Report Catalog Selector & Export Actions */}
-                            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+    return (
+        <div className="space-y-5">
+            {/* Report Catalog Selector & Export Actions */}
+            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
                 <div className="flex flex-col justify-between gap-4 border-b border-[#eff0ec] pb-4 lg:flex-row lg:items-center">
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -2356,21 +2356,21 @@ type OutcomeRow = {
                                     const widthPct =
                                         report.chart.unit === '%'
                                             ? Math.min(
-                                                  100,
-                                                  Math.max(
-                                                      0,
-                                                      Number(item.value) || 0,
-                                                  ),
-                                              )
+                                                100,
+                                                Math.max(
+                                                    0,
+                                                    Number(item.value) || 0,
+                                                ),
+                                            )
                                             : Math.min(
-                                                  100,
-                                                  Math.round(
-                                                      ((Number(item.value) ||
-                                                          0) /
-                                                          maxChartVal) *
-                                                          100,
-                                                  ),
-                                              );
+                                                100,
+                                                Math.round(
+                                                    ((Number(item.value) ||
+                                                        0) /
+                                                        maxChartVal) *
+                                                    100,
+                                                ),
+                                            );
 
                                     return (
                                         <div
@@ -2397,8 +2397,8 @@ type OutcomeRow = {
                                                     ? '%'
                                                     : report.chart.unit ===
                                                         'mos'
-                                                      ? ' mos'
-                                                      : ''}
+                                                        ? ' mos'
+                                                        : ''}
                                             </span>
                                         </div>
                                     );
@@ -2411,12 +2411,12 @@ type OutcomeRow = {
                                         item.percentage !== undefined
                                             ? item.percentage
                                             : totalChartVal > 0
-                                              ? Math.round(
+                                                ? Math.round(
                                                     ((Number(item.value) || 0) /
                                                         totalChartVal) *
-                                                        100,
+                                                    100,
                                                 )
-                                              : 0;
+                                                : 0;
                                     return (
                                         <div key={item.label}>
                                             <div className="mb-1 flex justify-between text-[11px]">
@@ -2460,11 +2460,10 @@ type OutcomeRow = {
                                     key={item.key}
                                     type="button"
                                     onClick={() => setReportType(item.key)}
-                                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${
-                                        active
+                                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${active
                                             ? 'bg-[#edf2eb] font-semibold text-[#2b5139]'
                                             : 'text-[#626c61] hover:bg-[#f6f7f4]'
-                                    }`}
+                                        }`}
                                 >
                                     <span className="truncate">
                                         {item.number}. {item.title}
@@ -2508,13 +2507,12 @@ type OutcomeRow = {
                                     {report.columns.map((col) => (
                                         <th
                                             key={col.key}
-                                            className={`px-4 py-3 ${
-                                                col.align === 'right'
+                                            className={`px-4 py-3 ${col.align === 'right'
                                                     ? 'text-right'
                                                     : col.align === 'center'
-                                                      ? 'text-center'
-                                                      : 'text-left'
-                                            }`}
+                                                        ? 'text-center'
+                                                        : 'text-left'
+                                                }`}
                                         >
                                             {col.label}
                                         </th>
@@ -2532,14 +2530,13 @@ type OutcomeRow = {
                                             return (
                                                 <td
                                                     key={col.key}
-                                                    className={`px-4 py-3 text-[#414e43] ${
-                                                        col.align === 'right'
+                                                    className={`px-4 py-3 text-[#414e43] ${col.align === 'right'
                                                             ? 'text-right font-medium'
                                                             : col.align ===
                                                                 'center'
-                                                              ? 'text-center'
-                                                              : 'text-left'
-                                                    }`}
+                                                                ? 'text-center'
+                                                                : 'text-left'
+                                                        }`}
                                                 >
                                                     {cellVal}
                                                 </td>
@@ -2625,7 +2622,7 @@ export function Notifications({ onUpdated }: { onUpdated?: () => void } = {}) {
                     typeof notification.data.title === 'string'
                         ? notification.data.title
                         : (notification.type.split('\\').pop() ??
-                          'Notification');
+                            'Notification');
                 const message =
                     typeof notification.data.message === 'string'
                         ? notification.data.message
@@ -3048,8 +3045,8 @@ export function AssignedRoles({
             roleFilter === 'all'
                 ? true
                 : roleFilter === 'suspended'
-                  ? u.is_suspended
-                  : u.roles.includes(roleFilter);
+                    ? u.is_suspended
+                    : u.roles.includes(roleFilter);
         return matchesSearch && matchesRole;
     });
 
@@ -3146,7 +3143,7 @@ export function AssignedRoles({
                                                     type="button"
                                                     disabled={
                                                         savingRolePermissions[
-                                                            roleItem.id
+                                                        roleItem.id
                                                         ]
                                                     }
                                                     onClick={() =>
@@ -3156,11 +3153,10 @@ export function AssignedRoles({
                                                         )
                                                     }
                                                     title={perm.label}
-                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
-                                                        active
+                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${active
                                                             ? 'bg-[#2b5139] text-white'
                                                             : 'border border-[#dce2d9] bg-[#fafbf9] text-[#5c685d] hover:bg-[#eff2ed]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {perm.label}
                                                 </button>
@@ -3223,11 +3219,10 @@ export function AssignedRoles({
                                     key={code}
                                     type="button"
                                     onClick={() => setRoleFilter(code)}
-                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
-                                        roleFilter === code
+                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${roleFilter === code
                                             ? 'bg-[#2b5139] text-white'
                                             : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                    }`}
+                                        }`}
                                 >
                                     {label}
                                 </button>
@@ -3315,14 +3310,14 @@ export function AssignedRoles({
                                                             code,
                                                         )
                                                             ? form.roles.filter(
-                                                                  (role) =>
-                                                                      role !==
-                                                                      code,
-                                                              )
+                                                                (role) =>
+                                                                    role !==
+                                                                    code,
+                                                            )
                                                             : [
-                                                                  ...form.roles,
-                                                                  code,
-                                                              ],
+                                                                ...form.roles,
+                                                                code,
+                                                            ],
                                                     }))
                                                 }
                                             />
@@ -3358,24 +3353,23 @@ export function AssignedRoles({
                                                                     assigned_program_ids:
                                                                         active
                                                                             ? form.assigned_program_ids.filter(
-                                                                                  (
-                                                                                      id,
-                                                                                  ) =>
-                                                                                      id !==
-                                                                                      prog.id,
-                                                                              )
+                                                                                (
+                                                                                    id,
+                                                                                ) =>
+                                                                                    id !==
+                                                                                    prog.id,
+                                                                            )
                                                                             : [
-                                                                                  ...form.assigned_program_ids,
-                                                                                  prog.id,
-                                                                              ],
+                                                                                ...form.assigned_program_ids,
+                                                                                prog.id,
+                                                                            ],
                                                                 }),
                                                             )
                                                         }
-                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                                                            active
+                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
                                                                 ? 'bg-[#2b5139] text-white'
                                                                 : 'border border-[#dce2d9] bg-[#f9faf7] text-[#4d5a4f]'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {prog.code} ·{' '}
                                                         {prog.name}
@@ -3404,8 +3398,8 @@ export function AssignedRoles({
                                     {inviting
                                         ? 'Saving…'
                                         : inviteForm.password.trim()
-                                          ? 'Create user account'
-                                          : 'Send invitation'}
+                                            ? 'Create user account'
+                                            : 'Send invitation'}
                                 </button>
                             </div>
                         </form>
@@ -3512,7 +3506,7 @@ export function AssignedRoles({
                                                                 }
                                                                 disabled={
                                                                     saving[
-                                                                        user.id
+                                                                    user.id
                                                                     ] ||
                                                                     !canManage
                                                                 }
@@ -3520,20 +3514,20 @@ export function AssignedRoles({
                                                                     const nextRoles =
                                                                         checked
                                                                             ? currentRoles.filter(
-                                                                                  (
-                                                                                      role,
-                                                                                  ) =>
-                                                                                      role !==
-                                                                                      code,
-                                                                              )
+                                                                                (
+                                                                                    role,
+                                                                                ) =>
+                                                                                    role !==
+                                                                                    code,
+                                                                            )
                                                                             : [
-                                                                                  ...new Set(
-                                                                                      [
-                                                                                          ...currentRoles,
-                                                                                          code,
-                                                                                      ],
-                                                                                  ),
-                                                                              ];
+                                                                                ...new Set(
+                                                                                    [
+                                                                                        ...currentRoles,
+                                                                                        code,
+                                                                                    ],
+                                                                                ),
+                                                                            ];
                                                                     void updateUserRoles(
                                                                         user.id,
                                                                         nextRoles,
@@ -3563,14 +3557,14 @@ export function AssignedRoles({
                                                         </span>
                                                         {currentProgramIds.length ===
                                                             0 && (
-                                                            <span className="rounded bg-[#fdf4e7] px-2 py-0.5 text-[10px] font-semibold text-[#9a6728]">
-                                                                No programs
-                                                                assigned —
-                                                                select programs
-                                                                to grant record
-                                                                access
-                                                            </span>
-                                                        )}
+                                                                <span className="rounded bg-[#fdf4e7] px-2 py-0.5 text-[10px] font-semibold text-[#9a6728]">
+                                                                    No programs
+                                                                    assigned —
+                                                                    select programs
+                                                                    to grant record
+                                                                    access
+                                                                </span>
+                                                            )}
                                                     </div>
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {programsCatalog.map(
@@ -3587,34 +3581,33 @@ export function AssignedRoles({
                                                                         type="button"
                                                                         disabled={
                                                                             savingPrograms[
-                                                                                user
-                                                                                    .id
+                                                                            user
+                                                                                .id
                                                                             ]
                                                                         }
                                                                         onClick={() => {
                                                                             const nextIds =
                                                                                 active
                                                                                     ? currentProgramIds.filter(
-                                                                                          (
-                                                                                              id,
-                                                                                          ) =>
-                                                                                              id !==
-                                                                                              prog.id,
-                                                                                      )
+                                                                                        (
+                                                                                            id,
+                                                                                        ) =>
+                                                                                            id !==
+                                                                                            prog.id,
+                                                                                    )
                                                                                     : [
-                                                                                          ...currentProgramIds,
-                                                                                          prog.id,
-                                                                                      ];
+                                                                                        ...currentProgramIds,
+                                                                                        prog.id,
+                                                                                    ];
                                                                             void updateUserAssignedPrograms(
                                                                                 user.id,
                                                                                 nextIds,
                                                                             );
                                                                         }}
-                                                                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
-                                                                            active
+                                                                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${active
                                                                                 ? 'bg-[#2b5139] text-white'
                                                                                 : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055] hover:bg-[#edf2eb]'
-                                                                        }`}
+                                                                            }`}
                                                                     >
                                                                         {
                                                                             prog.code
@@ -3726,17 +3719,158 @@ export function AcademicCatalog({
     onCloseCreate: () => void;
 }) {
     const { data, loading, error, reload } =
+    const programsRes =
         useApiResource<ApiEnvelope<AcademicProgram[]>>('/api/programs');
     const departments = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
         createOpen ? '/api/departments' : null,
+    const departmentsRes =
+        useApiResource<ApiEnvelope<AcademicDepartment[]>>('/api/departments');
+
+    const [viewMode, setViewMode] = useState<'modular' | 'grid'>('modular');
+    const [selectedDepartmentFilter, setSelectedDepartmentFilter] =
+        useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Department Form State (Create / Edit)
+    const [departmentFormOpen, setDepartmentFormOpen] = useState(false);
+    const [editingDepartmentId, setEditingDepartmentId] = useState<
+        number | null
+    >(null);
+    const [departmentForm, setDepartmentForm] = useState({
+        code: '',
+        name: '',
+        description: '',
+    });
+    const [savingDepartment, setSavingDepartment] = useState(false);
+
+    // Program Form State (Create / Edit)
+    const [programFormOpen, setProgramFormOpen] = useState(false);
+    const [editingProgramId, setEditingProgramId] = useState<number | null>(
+        null,
     );
+    const [createNewDeptInline, setCreateNewDeptInline] = useState(false);
+    const [inlineDeptForm, setInlineDeptForm] = useState({
+        code: '',
+        name: '',
+        description: '',
+    });
     const [form, setForm] = useState({
         department_id: '',
         code: '',
         name: '',
         description: '',
+        degree_title: '',
     });
     const [creating, setCreating] = useState(false);
+
+    // Inline Add Degree Offering State
+    const [addingDegreeProgramId, setAddingDegreeProgramId] = useState<
+        number | null
+    >(null);
+    const [degreeTitleInput, setDegreeTitleInput] = useState('');
+    const [savingDegree, setSavingDegree] = useState(false);
+
+    const isProgramModalActive = createOpen || programFormOpen;
+
+    function reloadAll() {
+        programsRes.reload();
+        departmentsRes.reload();
+    }
+
+    function openCreateDepartment() {
+        setEditingDepartmentId(null);
+        setDepartmentForm({ code: '', name: '', description: '' });
+        setDepartmentFormOpen(true);
+    }
+
+    function openEditDepartment(dept: AcademicDepartment) {
+        setEditingDepartmentId(dept.id);
+        setDepartmentForm({
+            code: dept.code,
+            name: dept.name,
+            description: dept.description ?? '',
+        });
+        setDepartmentFormOpen(true);
+    }
+
+    function openAddProgramForDepartment(deptId?: number) {
+        setEditingProgramId(null);
+        setCreateNewDeptInline(false);
+        setForm({
+            department_id: deptId ? String(deptId) : '',
+            code: '',
+            name: '',
+            description: '',
+            degree_title: '',
+        });
+        setProgramFormOpen(true);
+    }
+
+    function openEditProgram(prog: AcademicProgram) {
+        setEditingProgramId(prog.id);
+        setCreateNewDeptInline(false);
+        setForm({
+            department_id: String(prog.department_id),
+            code: prog.code,
+            name: prog.name,
+            description: prog.description ?? '',
+            degree_title: '',
+        });
+        setProgramFormOpen(true);
+    }
+
+    function closeProgramForm() {
+        setProgramFormOpen(false);
+        setEditingProgramId(null);
+        setCreateNewDeptInline(false);
+        onCloseCreate();
+    }
+
+    async function saveDepartment(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setSavingDepartment(true);
+        try {
+            if (editingDepartmentId !== null) {
+                await apiRequest<ApiEnvelope<AcademicDepartment>>(
+                    `/api/departments/${editingDepartmentId}`,
+                    {
+                        method: 'PATCH',
+                        body: {
+                            code: departmentForm.code,
+                            name: departmentForm.name,
+                            description: departmentForm.description || null,
+                        },
+                    },
+                );
+                toast.success('Department updated.');
+            } else {
+                await apiRequest<ApiEnvelope<AcademicDepartment>>(
+                    '/api/departments',
+                    {
+                        method: 'POST',
+                        body: {
+                            code: departmentForm.code,
+                            name: departmentForm.name,
+                            description: departmentForm.description || null,
+                        },
+                    },
+                );
+                toast.success('Department created.');
+            }
+            setDepartmentForm({ code: '', name: '', description: '' });
+            setEditingDepartmentId(null);
+            setDepartmentFormOpen(false);
+            reloadAll();
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Department could not be saved.',
+            );
+        } finally {
+            setSavingDepartment(false);
+        }
+    }
 
     async function createProgram(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -3745,45 +3879,378 @@ export function AcademicCatalog({
             await apiRequest<ApiEnvelope<AcademicProgram>>(
                 `/api/departments/${form.department_id}/programs`,
                 {
-                    method: 'POST',
+                    let targetDeptId = form.department_id;
+
+                    if(createNewDeptInline) {
+                        const newDeptRes = await apiRequest<
+                            ApiEnvelope<AcademicDepartment>
+                        >('/api/departments', {
+                            method: 'POST',
+                            body: {
+                                code: form.code,
+                                name: form.name,
+                                description: form.description || null,
+                                code: inlineDeptForm.code,
+                                name: inlineDeptForm.name,
+                                description: inlineDeptForm.description || null,
+                            },
+                        },
+                        );
+                    });
+            targetDeptId = String(newDeptRes.data.id);
+        }
+
+            if (editingProgramId !== null) {
+            await apiRequest<ApiEnvelope<AcademicProgram>>(
+                `/api/programs/${editingProgramId}`,
+                {
+                    method: 'PATCH',
                     body: {
+                        department_id: Number(targetDeptId),
                         code: form.code,
                         name: form.name,
                         description: form.description || null,
                     },
                 },
             );
-            setForm({
-                department_id: '',
-                code: '',
-                name: '',
-                description: '',
-            });
-            onCloseCreate();
-            reload();
+            toast.success('Academic program updated.');
+        } else {
+            await apiRequest<ApiEnvelope<AcademicProgram>>(
+                `/api/departments/${targetDeptId}/programs`,
+                {
+                    method: 'POST',
+                    body: {
+                        code: form.code,
+                        name: form.name,
+                        description: form.description || null,
+                        degree_title: form.degree_title || null,
+                    },
+                },
+            );
             toast.success('Academic program created.');
+        }
+
+        setForm({
+            department_id: '',
+            code: '',
+            name: '',
+            description: '',
+            degree_title: '',
+        });
+        onCloseCreate();
+        reload();
+        toast.success('Academic program created.');
+        setInlineDeptForm({ code: '', name: '', description: '' });
+        closeProgramForm();
+        reloadAll();
+    } catch (error) {
+        toast.error(
+            error instanceof ApiError
+                ? error.message
+                : 'Academic program could not be created.',
+                    : 'Academic program could not be saved.',
+        );
+    } finally {
+        setCreating(false);
+    }
+}
+
+if (loading) {
+    async function addDegreeOffering(programId: number) {
+        if (!degreeTitleInput.trim()) return;
+        setSavingDegree(true);
+        try {
+            await apiRequest(`/api/programs/${programId}/degrees`, {
+                method: 'POST',
+                body: {
+                    degree_title: degreeTitleInput.trim(),
+                },
+            });
+            setDegreeTitleInput('');
+            setAddingDegreeProgramId(null);
+            reloadAll();
+            toast.success('Degree offering added to program.');
         } catch (error) {
             toast.error(
                 error instanceof ApiError
                     ? error.message
-                    : 'Academic program could not be created.',
+                    : 'Degree offering could not be added.',
             );
         } finally {
-            setCreating(false);
+            setSavingDegree(false);
         }
     }
 
-    if (loading) {
+    if (programsRes.loading || departmentsRes.loading) {
         return <LoadingState />;
     }
 
     if (error) {
         return <ErrorState message={error} />;
-    }
+        if (programsRes.error) {
+            return <ErrorState message={programsRes.error} />;
+        }
 
-    return (
-        <div className="space-y-4">
-            {createOpen && (
+        const departmentsList = departmentsRes.data?.data ?? [];
+        const programsList = programsRes.data?.data ?? [];
+        const totalDegrees = programsList.reduce(
+            (sum, p) => sum + (p.program_degrees?.length ?? 0),
+            0,
+        );
+
+        const normalizedQuery = searchQuery.trim().toLowerCase();
+
+        const filteredDepartments = departmentsList.filter((dept) => {
+            if (
+                selectedDepartmentFilter !== 'all' &&
+                String(dept.id) !== selectedDepartmentFilter
+            ) {
+                return false;
+            }
+            if (!normalizedQuery) return true;
+            const deptMatches =
+                dept.code.toLowerCase().includes(normalizedQuery) ||
+                dept.name.toLowerCase().includes(normalizedQuery);
+            const progMatches = programsList
+                .filter((p) => p.department_id === dept.id)
+                .some(
+                    (p) =>
+                        p.code.toLowerCase().includes(normalizedQuery) ||
+                        p.name.toLowerCase().includes(normalizedQuery),
+                );
+            return deptMatches || progMatches;
+        });
+
+        const filteredPrograms = programsList.filter((prog) => {
+            if (
+                selectedDepartmentFilter !== 'all' &&
+                String(prog.department_id) !== selectedDepartmentFilter
+            ) {
+                return false;
+            }
+            if (!normalizedQuery) return true;
+            return (
+                prog.code.toLowerCase().includes(normalizedQuery) ||
+                prog.name.toLowerCase().includes(normalizedQuery) ||
+                (prog.department?.name.toLowerCase().includes(normalizedQuery) ??
+                    false)
+            );
+        });
+
+        return (
+            <div className="space-y-4">
+                {createOpen && (
+                    {/* Top Modular Action & Filter Toolbar */ }
+                    < div className="flex flex-col gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-[#edf2eb] px-3 py-1 text-xs font-semibold text-[#2b5139]">
+                            {departmentsList.length}{' '}
+                            {departmentsList.length === 1
+                                ? 'Department'
+                                : 'Departments'}
+                        </span>
+                        <span className="rounded-full bg-[#f3f5f1] px-3 py-1 text-xs font-semibold text-[#4d5a4f]">
+                            {programsList.length}{' '}
+                            {programsList.length === 1
+                                ? 'Academic Program'
+                                : 'Academic Programs'}
+                        </span>
+                        <span className="rounded-full bg-[#f7f8f5] px-3 py-1 text-xs font-medium text-[#6f786e]">
+                            {totalDegrees} Degree Offerings
+                        </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex items-center rounded-lg bg-[#f3f5f1] p-0.5">
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('modular')}
+                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'modular'
+                                        ? 'bg-white text-[#2b5139] shadow-2xs'
+                                        : 'text-[#626c61] hover:text-[#29382e]'
+                                    }`}
+                            >
+                                Modular by Department
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('grid')}
+                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'grid'
+                                        ? 'bg-white text-[#2b5139] shadow-2xs'
+                                        : 'text-[#626c61] hover:text-[#29382e]'
+                                    }`}
+                            >
+                                All Programs Grid
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={openCreateDepartment}
+                            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[#cfe0cc] bg-[#edf2eb] px-3.5 text-xs font-semibold text-[#2b5139] transition hover:bg-[#e1ebe0]"
+                        >
+                            + Create department
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => openAddProgramForDepartment()}
+                            className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[#2b5139] px-3.5 text-xs font-semibold text-white transition hover:bg-[#22422d]"
+                        >
+                            + Add program
+                        </button>
+                    </div>
+                </div>
+
+                {/* Search & Department Filter Pills */}
+                <div className="flex flex-col gap-2.5 border-t border-[#eff0ec] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                    <input
+                        type="search"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search departments, program codes, or titles…"
+                        className="h-9 w-full rounded-xl border border-[#dfe5dd] bg-[#fafbf9] px-3 text-xs text-[#29382e] outline-none focus:border-[#6d8b72] sm:max-w-xs"
+                    />
+                    <div className="flex flex-wrap gap-1.5">
+                        <button
+                            type="button"
+                            onClick={() => setSelectedDepartmentFilter('all')}
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${selectedDepartmentFilter === 'all'
+                                    ? 'bg-[#2b5139] text-white'
+                                    : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                }`}
+                        >
+                            All Departments ({departmentsList.length})
+                        </button>
+                        {departmentsList.map((dept) => {
+                            const count = programsList.filter(
+                                (p) => p.department_id === dept.id,
+                            ).length;
+                            const active =
+                                selectedDepartmentFilter === String(dept.id);
+                            return (
+                                <button
+                                    key={dept.id}
+                                    type="button"
+                                    onClick={() =>
+                                        setSelectedDepartmentFilter(
+                                            active ? 'all' : String(dept.id),
+                                        )
+                                    }
+                                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${active
+                                            ? 'bg-[#2b5139] text-white'
+                                            : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                        }`}
+                                >
+                                    {dept.code} ({count})
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* Create / Edit Department Form */ }
+        {
+            departmentFormOpen && (
+                <form
+                    onSubmit={saveDepartment}
+                    className="space-y-4 rounded-2xl border border-[#cfe0cc] bg-[#f8faf7] p-4 sm:p-5"
+                >
+                    <div className="flex items-center justify-between border-b border-[#e3eae0] pb-2.5">
+                        <div>
+                            <h3 className="text-sm font-semibold text-[#29382e]">
+                                {editingDepartmentId !== null
+                                    ? 'Edit Academic Department / College'
+                                    : 'Create New Academic Department / College'}
+                            </h3>
+                            <p className="text-xs text-[#6f786e]">
+                                Departments group related academic programs and
+                                cohort reports.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-3">
+                        <label className="text-xs font-medium text-[#4d5a4f]">
+                            Department code
+                            <input
+                                required
+                                maxLength={32}
+                                value={departmentForm.code}
+                                onChange={(e) =>
+                                    setDepartmentForm({
+                                        ...departmentForm,
+                                        code: e.target.value,
+                                    })
+                                }
+                                placeholder="e.g., CCS, CBA, COE"
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs uppercase"
+                            />
+                        </label>
+                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                            Department / College name
+                            <input
+                                required
+                                maxLength={160}
+                                value={departmentForm.name}
+                                onChange={(e) =>
+                                    setDepartmentForm({
+                                        ...departmentForm,
+                                        name: e.target.value,
+                                    })
+                                }
+                                placeholder="e.g., College of Computing Studies"
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
+                            />
+                        </label>
+                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-3">
+                            Description (optional)
+                            <input
+                                maxLength={500}
+                                value={departmentForm.description}
+                                onChange={(e) =>
+                                    setDepartmentForm({
+                                        ...departmentForm,
+                                        description: e.target.value,
+                                    })
+                                }
+                                placeholder="Brief overview of the college or academic department…"
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
+                            />
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setDepartmentFormOpen(false);
+                                setEditingDepartmentId(null);
+                            }}
+                            className="h-9 rounded-lg border border-[#dce2d9] bg-white px-3 text-xs font-medium text-[#687267]"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={savingDepartment}
+                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
+                        >
+                            {savingDepartment
+                                ? 'Saving…'
+                                : editingDepartmentId !== null
+                                    ? 'Save department'
+                                    : 'Create department'}
+                        </button>
+                    </div>
+                </form>
+            )
+        }
+
+        {/* Create / Edit Academic Program Form */ }
+        {
+            isProgramModalActive && (
                 <form
                     onSubmit={createProgram}
                     className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
@@ -3812,6 +4279,95 @@ export function AcademicCatalog({
                             ))}
                         </select>
                     </label>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff0ec] pb-2.5 sm:col-span-2">
+                        <div>
+                            <h3 className="text-sm font-semibold text-[#29382e]">
+                                {editingProgramId !== null
+                                    ? 'Edit Academic Program'
+                                    : 'Add Academic Program'}
+                            </h3>
+                            <p className="text-xs text-[#7a8278]">
+                                Link the program to an existing department or
+                                create a new department inline.
+                            </p>
+                        </div>
+                        {editingProgramId === null && (
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setCreateNewDeptInline((prev) => !prev)
+                                }
+                                className="rounded-lg border border-[#cfe0cc] bg-[#edf2eb] px-3 py-1.5 text-[11px] font-semibold text-[#2b5139] hover:bg-[#e1ebe0]"
+                            >
+                                {createNewDeptInline
+                                    ? '← Select existing department'
+                                    : '+ Create new department inline'}
+                            </button>
+                        )}
+                    </div>
+
+                    {createNewDeptInline ? (
+                        <div className="grid gap-3 rounded-xl border border-[#dce4d9] bg-[#f8faf7] p-3.5 sm:col-span-2 sm:grid-cols-2">
+                            <label className="text-xs font-medium text-[#2b5139]">
+                                New department code
+                                <input
+                                    required
+                                    maxLength={32}
+                                    value={inlineDeptForm.code}
+                                    onChange={(e) =>
+                                        setInlineDeptForm({
+                                            ...inlineDeptForm,
+                                            code: e.target.value,
+                                        })
+                                    }
+                                    placeholder="e.g., CON"
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs uppercase"
+                                />
+                            </label>
+                            <label className="text-xs font-medium text-[#2b5139]">
+                                New department name
+                                <input
+                                    required
+                                    maxLength={160}
+                                    value={inlineDeptForm.name}
+                                    onChange={(e) =>
+                                        setInlineDeptForm({
+                                            ...inlineDeptForm,
+                                            name: e.target.value,
+                                        })
+                                    }
+                                    placeholder="e.g., College of Nursing"
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
+                                />
+                            </label>
+                        </div>
+                    ) : (
+                        <label className="text-xs font-medium text-[#4d5a4f]">
+                            Department
+                            <select
+                                required
+                                value={form.department_id}
+                                onChange={(event) =>
+                                    setForm({
+                                        ...form,
+                                        department_id: event.target.value,
+                                    })
+                                }
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                            >
+                                <option value="">Select a department</option>
+                                {departmentsList.map((department) => (
+                                    <option
+                                        key={department.id}
+                                        value={department.id}
+                                    >
+                                        {department.code} · {department.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    )}
+
                     {(
                         [
                             ['code', 'Program code'],
@@ -3832,14 +4388,53 @@ export function AcademicCatalog({
                                         [name]: event.target.value,
                                     })
                                 }
+                                placeholder={
+                                    name === 'code'
+                                        ? 'e.g., BSCS, BSIT, BSN'
+                                        : 'e.g., BS in Computer Science'
+                                }
                                 className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
                             />
                         </label>
                     ))}
+
+                    {editingProgramId === null && (
+                        <label className="text-xs font-medium text-[#4d5a4f]">
+                            Initial degree title (optional)
+                            <input
+                                value={form.degree_title}
+                                onChange={(event) =>
+                                    setForm({
+                                        ...form,
+                                        degree_title: event.target.value,
+                                    })
+                                }
+                                placeholder="e.g., Bachelor of Science in Computer Science"
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                            />
+                        </label>
+                    )}
+
+                    <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                        Description (optional)
+                        <input
+                            value={form.description}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    description: event.target.value,
+                                })
+                            }
+                            placeholder="Optional program summary or specialization notes…"
+                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                        />
+                    </label>
+
                     <div className="flex items-center justify-end gap-2 sm:col-span-2">
                         <button
                             type="button"
                             onClick={onCloseCreate}
+                            onClick={closeProgramForm}
                             className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
                         >
                             Cancel
@@ -3850,689 +4445,790 @@ export function AcademicCatalog({
                             className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
                         >
                             {creating ? 'Saving…' : 'Add program'}
+                            {creating
+                                ? 'Saving…'
+                                : editingProgramId !== null
+                                    ? 'Save changes'
+                                    : 'Add program'}
                         </button>
                     </div>
                     {departments.error ? (
-                        <p role="alert" className="text-xs text-[#8b4e43]">
-                            {departments.error}
-                        </p>
-                    ) : null}
+                        {
+                            departmentsRes.error ? (
+                                <p role="alert" className="text-xs text-[#8b4e43]">
+                                    {departments.error}
+                                    {departmentsRes.error}
+                                </p>
+                            ) : null
+                        }
                 </form>
-            )}
-            {data?.data.length ? (
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {data.data.map((program) => (
-                        <article
-                            key={program.id}
-                            className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
-                        >
-                            <p className="text-[10px] font-semibold tracking-wide text-[#829080] uppercase">
-                                {program.code}
-                            </p>
-                            <h2 className="mt-2 text-sm font-semibold text-[#39463b]">
-                                {program.name}
-                            </h2>
-                            <p className="mt-1 text-xs text-[#7a8278]">
-                                {program.department?.name ??
-                                    'Department not assigned'}
-                            </p>
-                            {program.program_degrees?.length ? (
-                                <ul className="mt-4 space-y-1 border-t border-[#eff0ec] pt-3">
-                                    {program.program_degrees.map((offering) => (
-                                        <li
-                                            key={offering.id}
-                                            className="text-[11px] text-[#6f786e]"
-                                        >
-                                            {offering.degree.title}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : null}
-                        </article>
-                    ))}
+            )
+        }
+        {
+            data?.data.length ? (
+
+                {/* Modular by Department View */ }
+            {
+                viewMode === 'modular' ? (
+                    filteredDepartments.length ? (
+                        <div className="space-y-4">
+                            {filteredDepartments.map((dept) => {
+                                const deptPrograms = programsList.filter(
+                                    (p) =>
+                                        p.department_id === dept.id &&
+                                        (!normalizedQuery ||
+                                            dept.code
+                                                .toLowerCase()
+                                                .includes(normalizedQuery) ||
+                                            dept.name
+                                                .toLowerCase()
+                                                .includes(normalizedQuery) ||
+                                            p.code
+                                                .toLowerCase()
+                                                .includes(normalizedQuery) ||
+                                            p.name
+                                                .toLowerCase()
+                                                .includes(normalizedQuery)),
+                                );
+
+                                return (
+                                    <section
+                                        key={dept.id}
+                                        className="rounded-2xl border border-[#e4e9e1] bg-white p-5"
+                                    >
+                                        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#eff1ed] pb-3.5">
+                                            <div>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="rounded-lg bg-[#2b5139] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white uppercase">
+                                                        {dept.code}
+                                                    </span>
+                                                    <h2 className="text-sm font-semibold text-[#29382e]">
+                                                        {dept.name}
+                                                    </h2>
+                                                    <span className="rounded-full bg-[#f2f4f0] px-2.5 py-0.5 text-[10px] font-semibold text-[#5b675c]">
+                                                        {deptPrograms.length}{' '}
+                                                        {deptPrograms.length === 1
+                                                            ? 'program'
+                                                            : 'programs'}
+                                                    </span>
+                                                </div>
+                                                {dept.description && (
+                                                    <p className="mt-1 text-xs text-[#737c72]">
+                                                        {dept.description}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openEditDepartment(dept)
+                                                    }
+                                                    className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#536055] hover:bg-[#f6f7f4]"
+                                                >
+                                                    Edit department
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openAddProgramForDepartment(
+                                                            dept.id,
+                                                        )
+                                                    }
+                                                    className="rounded-lg bg-[#edf2eb] px-3 py-1.5 text-[11px] font-semibold text-[#2b5139] hover:bg-[#dfe7dc]"
+                                                >
+                                                    + Add program here
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {deptPrograms.length ? (
+                                            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                                {deptPrograms.map((program) => (
+                                                    <article
+                                                        key={program.id}
+                                                        className="flex flex-col justify-between rounded-xl border border-[#e9ebe5] bg-[#fafbf9] p-4"
+                                                    >
+                                                        <div>
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase">
+                                                                    {program.code}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        openEditProgram(
+                                                                            program,
+                                                                        )
+                                                                    }
+                                                                    className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                            </div>
+                                                            <h3 className="mt-2 text-sm font-semibold text-[#39463b]">
+                                                                {program.name}
+                                                            </h3>
+                                                            {program.description && (
+                                                                <p className="mt-1 text-xs text-[#7a8278]">
+                                                                    {
+                                                                        program.description
+                                                                    }
+                                                                </p>
+                                                            )}
+
+                                                            {program.program_degrees
+                                                                ?.length ? (
+                                                                <ul className="mt-3 space-y-1 border-t border-[#e8ece5] pt-2.5">
+                                                                    {program.program_degrees.map(
+                                                                        (
+                                                                            offering,
+                                                                        ) => (
+                                                                            <li
+                                                                                key={
+                                                                                    offering.id
+                                                                                }
+                                                                                className="text-[11px] text-[#5e685d]"
+                                                                            >
+                                                                                •{' '}
+                                                                                {
+                                                                                    offering
+                                                                                        .degree
+                                                                                        .title
+                                                                                }
+                                                                            </li>
+                                                                        ),
+                                                                    )}
+                                                                </ul>
+                                                            ) : (
+                                                                <p className="mt-3 border-t border-[#e8ece5] pt-2.5 text-[11px] text-[#969e95]">
+                                                                    No degree
+                                                                    offerings linked
+                                                                    yet.
+                                                                </p>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="mt-3 pt-2">
+                                                            {addingDegreeProgramId ===
+                                                                program.id ? (
+                                                                <div className="flex gap-1.5">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={
+                                                                            degreeTitleInput
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            setDegreeTitleInput(
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            )
+                                                                        }
+                                                                        placeholder="Degree title (e.g. BS in IT)"
+                                                                        className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2 text-[11px]"
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={
+                                                                            savingDegree
+                                                                        }
+                                                                        onClick={() =>
+                                                                            void addDegreeOffering(
+                                                                                program.id,
+                                                                            )
+                                                                        }
+                                                                        className="h-8 rounded-lg bg-[#2b5139] px-2.5 text-[10px] font-semibold text-white"
+                                                                    >
+                                                                        Save
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setAddingDegreeProgramId(
+                                                                                null,
+                                                                            );
+                                                                            setDegreeTitleInput(
+                                                                                '',
+                                                                            );
+                                                                        }}
+                                                                        className="h-8 rounded-lg border border-[#dce2d9] bg-white px-2 text-[10px] text-[#687267]"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setAddingDegreeProgramId(
+                                                                            program.id,
+                                                                        );
+                                                                        setDegreeTitleInput(
+                                                                            '',
+                                                                        );
+                                                                    }}
+                                                                    className="text-[11px] font-semibold text-[#2b5139] hover:underline"
+                                                                >
+                                                                    + Add degree
+                                                                    offering
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </article>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="mt-3 rounded-xl border border-dashed border-[#dce2d9] bg-[#fafbf9] p-4 text-center text-xs text-[#7a8278]">
+                                                No academic programs under{' '}
+                                                <span className="font-semibold text-[#39463b]">
+                                                    {dept.name}
+                                                </span>{' '}
+                                                yet.{' '}
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openAddProgramForDepartment(
+                                                            dept.id,
+                                                        )
+                                                    }
+                                                    className="font-semibold text-[#2b5139] hover:underline"
+                                                >
+                                                    Add the first program →
+                                                </button>
+                                            </div>
+                                        )}
+                                    </section>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <EmptyState>
+                            No academic departments match your filter. Click "+
+                            Create department" above to add one.
+                        </EmptyState>
+                    )
+                ) : filteredPrograms.length ? (
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        {data.data.map((program) => (
+                            {
+                                filteredPrograms.map((program) => (
+                                    <article
+                                        key={program.id}
+                                        className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
+                                    >
+                                        <p className="text-[10px] font-semibold tracking-wide text-[#829080] uppercase">
+                                            {program.code}
+                                        </p>
+                                        <div className="flex items-start justify-between gap-2">
+                                            <p className="text-[10px] font-semibold tracking-wide text-[#829080] uppercase">
+                                                {program.code}
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => openEditProgram(program)}
+                                                className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
+                                        <h2 className="mt-2 text-sm font-semibold text-[#39463b]">
+                                            {program.name}
+                                        </h2>
+                                        <p className="mt-1 text-xs text-[#7a8278]">
+                                            {program.department?.name ??
+                                                'Department not assigned'}
+                                        </p>
+                                        {program.program_degrees?.length ? (
+                                            <ul className="mt-4 space-y-1 border-t border-[#eff0ec] pt-3">
+                                                {program.program_degrees.map((offering) => (
+                                                    <li
+                                                        key={offering.id}
+                                                        className="text-[11px] text-[#6f786e]"
+                                                    >
+                                                        {offering.degree.title}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : null}
+                                    </article>
+                                ))
+                            }
                 </div>
-            ) : (
+                ) : (
                 <EmptyState>
                     No academic programs have been configured.
                 </EmptyState>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
-}
-
-type RawPagination<T> = {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    total: number;
-};
-
-const QUESTION_TYPE_LABELS: Record<string, string> = {
-    text: 'Short Text',
-    short_text: 'Short Text',
-    textarea: 'Long Text',
-    long_text: 'Long Text',
-    radio: 'Multiple Choice',
-    multiple_choice: 'Multiple Choice',
-    choice: 'Multiple Choice',
-    multiselect: 'Checkbox (Multi-Select)',
-    checkbox: 'Checkbox (Multi-Select)',
-    select: 'Dropdown',
-    dropdown: 'Dropdown',
-    rating: 'Rating Scale (1–5)',
-    date: 'Date',
-    number: 'Number',
-    boolean: 'Yes / No',
-    yes_no: 'Yes / No',
-};
-
-const BUILDER_QUESTION_TYPES = [
-    { value: 'text', label: 'Short Text' },
-    { value: 'textarea', label: 'Long Text' },
-    { value: 'radio', label: 'Multiple Choice (Single)' },
-    { value: 'multiselect', label: 'Checkbox (Multiple)' },
-    { value: 'select', label: 'Dropdown' },
-    { value: 'rating', label: 'Rating Scale (1–5)' },
-    { value: 'date', label: 'Date' },
-    { value: 'number', label: 'Number' },
-    { value: 'boolean', label: 'Yes / No' },
-] as const;
-
-function requiresQuestionOptions(type: string): boolean {
-    return [
-        'radio',
-        'multiple_choice',
-        'choice',
-        'multiselect',
-        'checkbox',
-        'select',
-        'dropdown',
-    ].includes(type);
-}
-
-function SurveyResponseForm({
-    survey,
-    onSubmitted,
-}: {
-    survey: Survey;
-    onSubmitted: () => void;
-}) {
-    const [answers, setAnswers] = useState<Record<number, unknown>>({});
-    const [saving, setSaving] = useState(false);
-
-    function updateAnswer(id: number, value: unknown) {
-        setAnswers((current) => ({ ...current, [id]: value }));
-    }
-
-    async function submit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setSaving(true);
-        try {
-            await apiRequest<ApiEnvelope<{ id: number }>>(
-                `/api/surveys/${survey.id}/responses`,
-                { method: 'POST', body: { answers } },
-            );
-            onSubmitted();
-            toast.success('Survey response submitted.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Survey response could not be submitted.',
-            );
-        } finally {
-            setSaving(false);
         }
-    }
 
-    return (
-        <form
-            onSubmit={submit}
-            className="mt-4 space-y-3.5 rounded-2xl bg-[#f3f6f2] p-4 sm:p-5"
-        >
-            {/* Google Forms Respondent Header Card */}
-            <div className="rounded-xl border border-[#dce4d9] border-t-8 border-t-[#2b5139] bg-white p-4 shadow-2xs">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[11px] font-semibold text-[#2b5139]">
-                        {survey.is_anonymous
-                            ? '🔒 Anonymous Form · Your name will not be shown in response summaries'
-                            : '📋 Institutional Tracer Form · 1 response per alumnus'}
-                    </span>
-                    <span className="text-[11px] font-medium text-[#b84a39]">
-                        * Indicates required question
-                    </span>
-                </div>
-            </div>
+        type RawPagination<T> = {
+            data: T[];
+            current_page: number;
+            last_page: number;
+            total: number;
+        };
 
-            {survey.questions.map((question, qIndex) => {
-                const value = answers[question.id];
-                const qType = question.type;
+        const QUESTION_TYPE_LABELS: Record<string, string> = {
+            text: 'Short Text',
+            short_text: 'Short Text',
+            textarea: 'Long Text',
+            long_text: 'Long Text',
+            radio: 'Multiple Choice',
+            multiple_choice: 'Multiple Choice',
+            choice: 'Multiple Choice',
+            multiselect: 'Checkbox (Multi-Select)',
+            checkbox: 'Checkbox (Multi-Select)',
+            select: 'Dropdown',
+            dropdown: 'Dropdown',
+            rating: 'Rating Scale (1–5)',
+            date: 'Date',
+            number: 'Number',
+            boolean: 'Yes / No',
+            yes_no: 'Yes / No',
+        };
 
-                return (
-                    <div
-                        key={question.id}
-                        className="rounded-xl border border-[#dfe5dc] bg-white p-4 shadow-2xs sm:p-5"
-                    >
-                        <div className="mb-3 flex items-start justify-between gap-2">
-                            <p className="text-xs font-semibold text-[#233127] sm:text-sm">
-                                {qIndex + 1}. {question.prompt}
-                                {question.is_required && (
-                                    <span className="ml-1 text-[#c93b2b]">
-                                        *
-                                    </span>
-                                )}
-                            </p>
-                            <span className="shrink-0 rounded bg-[#f4f6f2] px-2 py-0.5 text-[10px] font-medium text-[#6f786e]">
-                                {QUESTION_TYPE_LABELS[qType] ?? qType}
+        const BUILDER_QUESTION_TYPES = [
+            { value: 'text', label: 'Short Text' },
+            { value: 'textarea', label: 'Long Text' },
+            { value: 'radio', label: 'Multiple Choice (Single)' },
+            { value: 'multiselect', label: 'Checkbox (Multiple)' },
+            { value: 'select', label: 'Dropdown' },
+            { value: 'rating', label: 'Rating Scale (1–5)' },
+            { value: 'date', label: 'Date' },
+            { value: 'number', label: 'Number' },
+            { value: 'boolean', label: 'Yes / No' },
+        ] as const;
+
+        function requiresQuestionOptions(type: string): boolean {
+            return [
+                'radio',
+                'multiple_choice',
+                'choice',
+                'multiselect',
+                'checkbox',
+                'select',
+                'dropdown',
+            ].includes(type);
+        }
+
+        function SurveyResponseForm({
+            survey,
+            onSubmitted,
+        }: {
+            survey: Survey;
+            onSubmitted: () => void;
+        }) {
+            const [answers, setAnswers] = useState<Record<number, unknown>>({});
+            const [saving, setSaving] = useState(false);
+
+            function updateAnswer(id: number, value: unknown) {
+                setAnswers((current) => ({ ...current, [id]: value }));
+            }
+
+            async function submit(event: FormEvent<HTMLFormElement>) {
+                event.preventDefault();
+                setSaving(true);
+                try {
+                    await apiRequest<ApiEnvelope<{ id: number }>>(
+                        `/api/surveys/${survey.id}/responses`,
+                        { method: 'POST', body: { answers } },
+                    );
+                    onSubmitted();
+                    toast.success('Survey response submitted.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Survey response could not be submitted.',
+                    );
+                } finally {
+                    setSaving(false);
+                }
+            }
+
+            return (
+                <form
+                    onSubmit={submit}
+                    className="mt-4 space-y-3.5 rounded-2xl bg-[#f3f6f2] p-4 sm:p-5"
+                >
+                    {/* Google Forms Respondent Header Card */}
+                    <div className="rounded-xl border border-[#dce4d9] border-t-8 border-t-[#2b5139] bg-white p-4 shadow-2xs">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-[11px] font-semibold text-[#2b5139]">
+                                {survey.is_anonymous
+                                    ? '🔒 Anonymous Form · Your name will not be shown in response summaries'
+                                    : '📋 Institutional Tracer Form · 1 response per alumnus'}
+                            </span>
+                            <span className="text-[11px] font-medium text-[#b84a39]">
+                                * Indicates required question
                             </span>
                         </div>
+                    </div>
 
-                        {(qType === 'textarea' || qType === 'long_text') && (
-                            <textarea
-                                required={question.is_required}
-                                value={typeof value === 'string' ? value : ''}
-                                placeholder="Your answer"
-                                onChange={(event) =>
-                                    updateAnswer(
-                                        question.id,
-                                        event.target.value,
-                                    )
-                                }
-                                className="min-h-24 w-full border-b-2 border-[#dce2d9] bg-[#fafbf9] p-3 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139] focus:bg-white"
-                            />
-                        )}
+                    {survey.questions.map((question, qIndex) => {
+                        const value = answers[question.id];
+                        const qType = question.type;
 
-                        {(qType === 'radio' ||
-                            qType === 'multiple_choice' ||
-                            qType === 'choice') && (
-                            <div className="space-y-2">
-                                {(question.options ?? []).map((option) => (
-                                    <label
-                                        key={option}
-                                        className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${
-                                            value === option
-                                                ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                                : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
-                                        }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name={`question-${question.id}`}
-                                            required={question.is_required}
-                                            checked={value === option}
-                                            onChange={() =>
-                                                updateAnswer(
-                                                    question.id,
-                                                    option,
-                                                )
-                                            }
-                                            className="size-4 accent-[#2b5139]"
-                                        />
-                                        <span>{option}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-
-                        {(qType === 'multiselect' || qType === 'checkbox') && (
-                            <div className="space-y-2">
-                                {(question.options ?? []).map((option) => {
-                                    const selected = Array.isArray(value)
-                                        ? (value as string[])
-                                        : [];
-                                    const isChecked = selected.includes(option);
-                                    return (
-                                        <label
-                                            key={option}
-                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${
-                                                isChecked
-                                                    ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                                    : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
-                                            }`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={isChecked}
-                                                onChange={(event) =>
-                                                    updateAnswer(
-                                                        question.id,
-                                                        event.target.checked
-                                                            ? [
-                                                                  ...selected,
-                                                                  option,
-                                                              ]
-                                                            : selected.filter(
-                                                                  (item) =>
-                                                                      item !==
-                                                                      option,
-                                                              ),
-                                                    )
-                                                }
-                                                className="size-4 accent-[#2b5139]"
-                                            />
-                                            <span>{option}</span>
-                                        </label>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {(qType === 'select' || qType === 'dropdown') && (
-                            <select
-                                required={question.is_required}
-                                value={
-                                    value !== undefined && value !== null
-                                        ? String(value)
-                                        : ''
-                                }
-                                onChange={(event) =>
-                                    updateAnswer(
-                                        question.id,
-                                        event.target.value,
-                                    )
-                                }
-                                className="h-10 w-full max-w-sm rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
+                        return (
+                            <div
+                                key={question.id}
+                                className="rounded-xl border border-[#dfe5dc] bg-white p-4 shadow-2xs sm:p-5"
                             >
-                                <option value="">Choose</option>
-                                {(question.options ?? []).map((option) => (
-                                    <option key={option} value={option}>
-                                        {option}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-
-                        {qType === 'rating' && (
-                            <div className="py-2">
-                                <div className="flex items-center justify-between gap-2 sm:max-w-md">
-                                    <span className="text-[11px] text-[#7a8278]">
-                                        1 (Lowest)
+                                <div className="mb-3 flex items-start justify-between gap-2">
+                                    <p className="text-xs font-semibold text-[#233127] sm:text-sm">
+                                        {qIndex + 1}. {question.prompt}
+                                        {question.is_required && (
+                                            <span className="ml-1 text-[#c93b2b]">
+                                                *
+                                            </span>
+                                        )}
+                                    </p>
+                                    <span className="shrink-0 rounded bg-[#f4f6f2] px-2 py-0.5 text-[10px] font-medium text-[#6f786e]">
+                                        {QUESTION_TYPE_LABELS[qType] ?? qType}
                                     </span>
-                                    <div className="flex items-center gap-3 sm:gap-5">
-                                        {[1, 2, 3, 4, 5].map((score) => {
-                                            const active =
-                                                Number(value) === score;
-                                            return (
+                                </div>
+
+                                {(qType === 'textarea' || qType === 'long_text') && (
+                                    <textarea
+                                        required={question.is_required}
+                                        value={typeof value === 'string' ? value : ''}
+                                        placeholder="Your answer"
+                                        onChange={(event) =>
+                                            updateAnswer(
+                                                question.id,
+                                                event.target.value,
+                                            )
+                                        }
+                                        className="min-h-24 w-full border-b-2 border-[#dce2d9] bg-[#fafbf9] p-3 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139] focus:bg-white"
+                                    />
+                                )}
+
+                                {(qType === 'radio' ||
+                                    qType === 'multiple_choice' ||
+                                    qType === 'choice') && (
+                                        <div className="space-y-2">
+                                            {(question.options ?? []).map((option) => (
                                                 <label
-                                                    key={score}
-                                                    className="flex cursor-pointer flex-col items-center gap-1.5"
+                                                    key={option}
+                                                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${value === option
+                                                            ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                            : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
+                                                        }`}
                                                 >
-                                                    <span className="text-xs font-semibold text-[#4d5a4f]">
-                                                        {score}
-                                                    </span>
                                                     <input
                                                         type="radio"
                                                         name={`question-${question.id}`}
-                                                        required={
-                                                            question.is_required
-                                                        }
-                                                        checked={active}
+                                                        required={question.is_required}
+                                                        checked={value === option}
                                                         onChange={() =>
                                                             updateAnswer(
                                                                 question.id,
-                                                                score,
+                                                                option,
                                                             )
                                                         }
                                                         className="size-4 accent-[#2b5139]"
                                                     />
+                                                    <span>{option}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                {(qType === 'multiselect' || qType === 'checkbox') && (
+                                    <div className="space-y-2">
+                                        {(question.options ?? []).map((option) => {
+                                            const selected = Array.isArray(value)
+                                                ? (value as string[])
+                                                : [];
+                                            const isChecked = selected.includes(option);
+                                            return (
+                                                <label
+                                                    key={option}
+                                                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${isChecked
+                                                            ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                            : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
+                                                        }`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isChecked}
+                                                        onChange={(event) =>
+                                                            updateAnswer(
+                                                                question.id,
+                                                                event.target.checked
+                                                                    ? [
+                                                                        ...selected,
+                                                                        option,
+                                                                    ]
+                                                                    : selected.filter(
+                                                                        (item) =>
+                                                                            item !==
+                                                                            option,
+                                                                    ),
+                                                            )
+                                                        }
+                                                        className="size-4 accent-[#2b5139]"
+                                                    />
+                                                    <span>{option}</span>
                                                 </label>
                                             );
                                         })}
                                     </div>
-                                    <span className="text-[11px] text-[#7a8278]">
-                                        5 (Highest)
-                                    </span>
-                                </div>
-                            </div>
-                        )}
+                                )}
 
-                        {(qType === 'boolean' || qType === 'yes_no') && (
-                            <div className="flex gap-3">
-                                {[
-                                    { label: 'Yes', val: true },
-                                    { label: 'No', val: false },
-                                ].map((item) => (
-                                    <label
-                                        key={item.label}
-                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-4 py-2 text-xs transition ${
-                                            value === item.val
-                                                ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                                : 'border-[#e8ece5] bg-white text-[#3d4a3f]'
-                                        }`}
+                                {(qType === 'select' || qType === 'dropdown') && (
+                                    <select
+                                        required={question.is_required}
+                                        value={
+                                            value !== undefined && value !== null
+                                                ? String(value)
+                                                : ''
+                                        }
+                                        onChange={(event) =>
+                                            updateAnswer(
+                                                question.id,
+                                                event.target.value,
+                                            )
+                                        }
+                                        className="h-10 w-full max-w-sm rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
                                     >
+                                        <option value="">Choose</option>
+                                        {(question.options ?? []).map((option) => (
+                                            <option key={option} value={option}>
+                                                {option}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+
+                                {qType === 'rating' && (
+                                    <div className="py-2">
+                                        <div className="flex items-center justify-between gap-2 sm:max-w-md">
+                                            <span className="text-[11px] text-[#7a8278]">
+                                                1 (Lowest)
+                                            </span>
+                                            <div className="flex items-center gap-3 sm:gap-5">
+                                                {[1, 2, 3, 4, 5].map((score) => {
+                                                    const active =
+                                                        Number(value) === score;
+                                                    return (
+                                                        <label
+                                                            key={score}
+                                                            className="flex cursor-pointer flex-col items-center gap-1.5"
+                                                        >
+                                                            <span className="text-xs font-semibold text-[#4d5a4f]">
+                                                                {score}
+                                                            </span>
+                                                            <input
+                                                                type="radio"
+                                                                name={`question-${question.id}`}
+                                                                required={
+                                                                    question.is_required
+                                                                }
+                                                                checked={active}
+                                                                onChange={() =>
+                                                                    updateAnswer(
+                                                                        question.id,
+                                                                        score,
+                                                                    )
+                                                                }
+                                                                className="size-4 accent-[#2b5139]"
+                                                            />
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                            <span className="text-[11px] text-[#7a8278]">
+                                                5 (Highest)
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {(qType === 'boolean' || qType === 'yes_no') && (
+                                    <div className="flex gap-3">
+                                        {[
+                                            { label: 'Yes', val: true },
+                                            { label: 'No', val: false },
+                                        ].map((item) => (
+                                            <label
+                                                key={item.label}
+                                                className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-4 py-2 text-xs transition ${value === item.val
+                                                        ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                        : 'border-[#e8ece5] bg-white text-[#3d4a3f]'
+                                                    }`}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name={`question-${question.id}`}
+                                                    required={question.is_required}
+                                                    checked={value === item.val}
+                                                    onChange={() =>
+                                                        updateAnswer(
+                                                            question.id,
+                                                            item.val,
+                                                        )
+                                                    }
+                                                    className="size-4 accent-[#2b5139]"
+                                                />
+                                                <span>{item.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {qType === 'date' && (
+                                    <input
+                                        type="date"
+                                        required={question.is_required}
+                                        value={typeof value === 'string' ? value : ''}
+                                        onChange={(event) =>
+                                            updateAnswer(
+                                                question.id,
+                                                event.target.value,
+                                            )
+                                        }
+                                        className="h-10 w-full max-w-xs rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
+                                    />
+                                )}
+
+                                {(qType === 'text' ||
+                                    qType === 'short_text' ||
+                                    qType === 'number') && (
                                         <input
-                                            type="radio"
-                                            name={`question-${question.id}`}
+                                            type={qType === 'number' ? 'number' : 'text'}
                                             required={question.is_required}
-                                            checked={value === item.val}
-                                            onChange={() =>
+                                            placeholder="Your answer"
+                                            value={
+                                                typeof value === 'string' ||
+                                                    typeof value === 'number'
+                                                    ? value
+                                                    : ''
+                                            }
+                                            onChange={(event) =>
                                                 updateAnswer(
                                                     question.id,
-                                                    item.val,
+                                                    qType === 'number'
+                                                        ? event.target.value === ''
+                                                            ? ''
+                                                            : Number(event.target.value)
+                                                        : event.target.value,
                                                 )
                                             }
-                                            className="size-4 accent-[#2b5139]"
+                                            className="h-10 w-full max-w-md border-b-2 border-[#dce2d9] bg-transparent px-1 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139]"
                                         />
-                                        <span>{item.label}</span>
-                                    </label>
-                                ))}
+                                    )}
                             </div>
-                        )}
+                        );
+                    })}
 
-                        {qType === 'date' && (
-                            <input
-                                type="date"
-                                required={question.is_required}
-                                value={typeof value === 'string' ? value : ''}
-                                onChange={(event) =>
-                                    updateAnswer(
-                                        question.id,
-                                        event.target.value,
-                                    )
-                                }
-                                className="h-10 w-full max-w-xs rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
-                            />
-                        )}
-
-                        {(qType === 'text' ||
-                            qType === 'short_text' ||
-                            qType === 'number') && (
-                            <input
-                                type={qType === 'number' ? 'number' : 'text'}
-                                required={question.is_required}
-                                placeholder="Your answer"
-                                value={
-                                    typeof value === 'string' ||
-                                    typeof value === 'number'
-                                        ? value
-                                        : ''
-                                }
-                                onChange={(event) =>
-                                    updateAnswer(
-                                        question.id,
-                                        qType === 'number'
-                                            ? event.target.value === ''
-                                                ? ''
-                                                : Number(event.target.value)
-                                            : event.target.value,
-                                    )
-                                }
-                                className="h-10 w-full max-w-md border-b-2 border-[#dce2d9] bg-transparent px-1 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139]"
-                            />
-                        )}
+                    <div className="flex items-center justify-between pt-1">
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
+                        >
+                            {saving ? 'Submitting…' : 'Submit'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setAnswers({})}
+                            className="text-xs font-semibold text-[#2b5139] hover:underline"
+                        >
+                            Clear form
+                        </button>
                     </div>
-                );
-            })}
+                </form>
+            );
+        }
 
-            <div className="flex items-center justify-between pt-1">
-                <button
-                    type="submit"
-                    disabled={saving}
-                    className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
-                >
-                    {saving ? 'Submitting…' : 'Submit'}
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setAnswers({})}
-                    className="text-xs font-semibold text-[#2b5139] hover:underline"
-                >
-                    Clear form
-                </button>
-            </div>
-        </form>
-    );
-}
+        type QuestionDraft = {
+            prompt: string;
+            type: string;
+            options: string;
+            optionsList: string[];
+            is_required: boolean;
+        };
 
-type QuestionDraft = {
-    prompt: string;
-    type: string;
-    options: string;
-    optionsList: string[];
-    is_required: boolean;
-};
+        type SurveyAnalyticsPayload = {
+            survey_id: number;
+            title: string;
+            status: string;
+            is_anonymous: boolean;
+            total_responses: number;
+            questions: Array<{
+                id: number;
+                prompt: string;
+                type: string;
+                is_required: boolean;
+                answered_count: number;
+                response_rate: number;
+                distribution: Array<{
+                    label: string;
+                    count: number;
+                    percentage: number;
+                }>;
+                recent_answers: Array<{
+                    respondent: string;
+                    answer: string;
+                    submitted_at: string | null;
+                }>;
+            }>;
+        };
 
-type SurveyAnalyticsPayload = {
-    survey_id: number;
-    title: string;
-    status: string;
-    is_anonymous: boolean;
-    total_responses: number;
-    questions: Array<{
-        id: number;
-        prompt: string;
-        type: string;
-        is_required: boolean;
-        answered_count: number;
-        response_rate: number;
-        distribution: Array<{
-            label: string;
-            count: number;
-            percentage: number;
-        }>;
-        recent_answers: Array<{
-            respondent: string;
-            answer: string;
-            submitted_at: string | null;
-        }>;
-    }>;
-};
+        const COHORT_YEAR_OPTIONS = [
+            2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
+        ];
 
-const COHORT_YEAR_OPTIONS = [
-    2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
-];
+        export function SurveyCenter({
+            role,
+            createOpen,
+            onCloseCreate,
+        }: {
+            role: WorkspaceRole;
+            createOpen: boolean;
+            onCloseCreate: () => void;
+        }) {
+            const canManage = role === 'Administrator' || role === 'Alumni coordinator';
+            const canViewAnalytics =
+                canManage || role === 'Department coordinator';
+            const canRespond = role === 'Alumni';
+            const { data, loading, error, reload } =
+                useApiResource<ApiEnvelope<RawPagination<Survey>>>('/api/surveys');
+            const departmentsRes = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
+                canManage ? '/api/departments' : null,
+            );
+            const programsRes = useApiResource<ApiEnvelope<AcademicProgram[]>>(
+                canManage ? '/api/programs' : null,
+            );
 
-export function SurveyCenter({
-    role,
-    createOpen,
-    onCloseCreate,
-}: {
-    role: WorkspaceRole;
-    createOpen: boolean;
-    onCloseCreate: () => void;
-}) {
-    const canManage = role === 'Administrator' || role === 'Alumni coordinator';
-    const canViewAnalytics =
-        canManage || role === 'Department coordinator';
-    const canRespond = role === 'Alumni';
-    const { data, loading, error, reload } =
-        useApiResource<ApiEnvelope<RawPagination<Survey>>>('/api/surveys');
-    const departmentsRes = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
-        canManage ? '/api/departments' : null,
-    );
-    const programsRes = useApiResource<ApiEnvelope<AcademicProgram[]>>(
-        canManage ? '/api/programs' : null,
-    );
-
-    const [builderTab, setBuilderTab] = useState<
-        'questions' | 'settings' | 'preview'
-    >('questions');
-    const [activeQuestionIdx, setActiveQuestionIdx] = useState<number>(0);
-    const [editingSurveyId, setEditingSurveyId] = useState<number | null>(null);
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [startsAt, setStartsAt] = useState('');
-    const [closesAt, setClosesAt] = useState('');
-    const [isAnonymous, setIsAnonymous] = useState(false);
-    const [targetSpecificCohorts, setTargetSpecificCohorts] = useState(false);
-    const [targetDepartmentIds, setTargetDepartmentIds] = useState<number[]>(
-        [],
-    );
-    const [targetProgramIds, setTargetProgramIds] = useState<number[]>([]);
-    const [targetGraduationYears, setTargetGraduationYears] = useState<
-        number[]
-    >([]);
-    const [customYearInput, setCustomYearInput] = useState('');
-    const [questions, setQuestions] = useState<QuestionDraft[]>([
-        {
-            prompt: '',
-            type: 'radio',
-            options: 'Option 1, Option 2',
-            optionsList: ['Option 1', 'Option 2'],
-            is_required: true,
-        },
-    ]);
-
-    const [creating, setCreating] = useState(false);
-    const [publishing, setPublishing] = useState<number | null>(null);
-    const [closing, setClosing] = useState<number | null>(null);
-    const [activeAnalyticsId, setActiveAnalyticsId] = useState<number | null>(
-        null,
-    );
-    const [analyticsData, setAnalyticsData] =
-        useState<SurveyAnalyticsPayload | null>(null);
-    const [analyticsLoading, setAnalyticsLoading] = useState(false);
-
-    function resetBuilder() {
-        setBuilderTab('questions');
-        setActiveQuestionIdx(0);
-        setEditingSurveyId(null);
-        setTitle('');
-        setDescription('');
-        setStartsAt('');
-        setClosesAt('');
-        setIsAnonymous(false);
-        setTargetSpecificCohorts(false);
-        setTargetDepartmentIds([]);
-        setTargetProgramIds([]);
-        setTargetGraduationYears([]);
-        setCustomYearInput('');
-        setQuestions([
-            {
-                prompt: '',
-                type: 'radio',
-                options: 'Option 1, Option 2',
-                optionsList: ['Option 1', 'Option 2'],
-                is_required: true,
-            },
-        ]);
-    }
-
-    function openEditSurvey(survey: Survey) {
-        setBuilderTab('questions');
-        setActiveQuestionIdx(0);
-        setEditingSurveyId(survey.id);
-        setTitle(survey.title);
-        setDescription(survey.description ?? '');
-        setStartsAt(survey.starts_at ? survey.starts_at.slice(0, 10) : '');
-        setClosesAt(survey.closes_at ? survey.closes_at.slice(0, 10) : '');
-        setIsAnonymous(Boolean(survey.is_anonymous));
-        const hasTargeting = Boolean(
-            survey.target_department_ids?.length ||
-                survey.target_program_ids?.length ||
-                survey.target_graduation_years?.length,
-        );
-        setTargetSpecificCohorts(hasTargeting);
-        setTargetDepartmentIds(survey.target_department_ids ?? []);
-        setTargetProgramIds(survey.target_program_ids ?? []);
-        setTargetGraduationYears(survey.target_graduation_years ?? []);
-        setQuestions(
-            survey.questions.length
-                ? survey.questions.map((q) => {
-                      const list =
-                          q.options && q.options.length
-                              ? [...q.options]
-                              : ['Option 1'];
-                      return {
-                          prompt: q.prompt,
-                          type: q.type,
-                          options: list.join(', '),
-                          optionsList: list,
-                          is_required: q.is_required,
-                      };
-                  })
-                : [
-                      {
-                          prompt: '',
-                          type: 'radio',
-                          options: 'Option 1, Option 2',
-                          optionsList: ['Option 1', 'Option 2'],
-                          is_required: true,
-                      },
-                  ],
-        );
-    }
-
-    function updateQuestion(index: number, patch: Partial<QuestionDraft>) {
-        setQuestions((current) =>
-            current.map((item, idx) => {
-                if (idx !== index) return item;
-                const updated = { ...item, ...patch };
-                if (
-                    patch.type &&
-                    requiresQuestionOptions(patch.type) &&
-                    updated.optionsList.length === 0
-                ) {
-                    updated.optionsList = ['Option 1'];
-                    updated.options = 'Option 1';
-                }
-                return updated;
-            }),
-        );
-    }
-
-    function updateQuestionOptionItem(
-        questionIndex: number,
-        optionIndex: number,
-        value: string,
-    ) {
-        setQuestions((current) =>
-            current.map((item, idx) => {
-                if (idx !== questionIndex) return item;
-                const nextList = item.optionsList.map((opt, oIdx) =>
-                    oIdx === optionIndex ? value : opt,
-                );
-                return {
-                    ...item,
-                    optionsList: nextList,
-                    options: nextList.join(', '),
-                };
-            }),
-        );
-    }
-
-    function addQuestionOptionItem(questionIndex: number) {
-        setQuestions((current) =>
-            current.map((item, idx) => {
-                if (idx !== questionIndex) return item;
-                const nextList = [
-                    ...item.optionsList,
-                    `Option ${item.optionsList.length + 1}`,
-                ];
-                return {
-                    ...item,
-                    optionsList: nextList,
-                    options: nextList.join(', '),
-                };
-            }),
-        );
-    }
-
-    function removeQuestionOptionItem(
-        questionIndex: number,
-        optionIndex: number,
-    ) {
-        setQuestions((current) =>
-            current.map((item, idx) => {
-                if (idx !== questionIndex || item.optionsList.length <= 1) {
-                    return item;
-                }
-                const nextList = item.optionsList.filter(
-                    (_, oIdx) => oIdx !== optionIndex,
-                );
-                return {
-                    ...item,
-                    optionsList: nextList,
-                    options: nextList.join(', '),
-                };
-            }),
-        );
-    }
-
-    function addQuestion() {
-        setQuestions((current) => {
-            const next = [
-                ...current,
+            const [builderTab, setBuilderTab] = useState<
+                'questions' | 'settings' | 'preview'
+            >('questions');
+            const [activeQuestionIdx, setActiveQuestionIdx] = useState<number>(0);
+            const [editingSurveyId, setEditingSurveyId] = useState<number | null>(null);
+            const [title, setTitle] = useState('');
+            const [description, setDescription] = useState('');
+            const [startsAt, setStartsAt] = useState('');
+            const [closesAt, setClosesAt] = useState('');
+            const [isAnonymous, setIsAnonymous] = useState(false);
+            const [targetSpecificCohorts, setTargetSpecificCohorts] = useState(false);
+            const [targetDepartmentIds, setTargetDepartmentIds] = useState<number[]>(
+                [],
+            );
+            const [targetProgramIds, setTargetProgramIds] = useState<number[]>([]);
+            const [targetGraduationYears, setTargetGraduationYears] = useState<
+                number[]
+            >([]);
+            const [customYearInput, setCustomYearInput] = useState('');
+            const [questions, setQuestions] = useState<QuestionDraft[]>([
                 {
                     prompt: '',
                     type: 'radio',
@@ -4540,2655 +5236,2817 @@ export function SurveyCenter({
                     optionsList: ['Option 1', 'Option 2'],
                     is_required: true,
                 },
-            ];
-            setActiveQuestionIdx(next.length - 1);
-            return next;
-        });
-    }
+            ]);
 
-    function duplicateQuestion(index: number) {
-        setQuestions((current) => {
-            const copy = [...current];
-            const source = current[index];
-            const clone: QuestionDraft = {
-                ...source,
-                optionsList: [...source.optionsList],
-            };
-            copy.splice(index + 1, 0, clone);
-            setActiveQuestionIdx(index + 1);
-            return copy;
-        });
-    }
-
-    function removeQuestion(index: number) {
-        setQuestions((current) =>
-            current.length > 1
-                ? current.filter((_, idx) => idx !== index)
-                : current,
-        );
-    }
-
-    function moveQuestion(index: number, direction: -1 | 1) {
-        const nextIndex = index + direction;
-        if (nextIndex < 0 || nextIndex >= questions.length) {
-            return;
-        }
-        setQuestions((current) => {
-            const copy = [...current];
-            const [item] = copy.splice(index, 1);
-            copy.splice(nextIndex, 0, item);
-            setActiveQuestionIdx(nextIndex);
-            return copy;
-        });
-    }
-
-    function toggleId(list: number[], id: number): number[] {
-        return list.includes(id)
-            ? list.filter((item) => item !== id)
-            : [...list, id];
-    }
-
-    function addCustomBatchYear() {
-        const parsed = Number.parseInt(customYearInput.trim(), 10);
-        if (Number.isNaN(parsed) || parsed < 1950 || parsed > 2100) {
-            toast.error('Enter a valid graduation year between 1950 and 2100.');
-            return;
-        }
-        if (!targetGraduationYears.includes(parsed)) {
-            setTargetGraduationYears((curr) =>
-                [...curr, parsed].sort((a, b) => b - a),
+            const [creating, setCreating] = useState(false);
+            const [publishing, setPublishing] = useState<number | null>(null);
+            const [closing, setClosing] = useState<number | null>(null);
+            const [activeAnalyticsId, setActiveAnalyticsId] = useState<number | null>(
+                null,
             );
-        }
-        setCustomYearInput('');
-    }
+            const [analyticsData, setAnalyticsData] =
+                useState<SurveyAnalyticsPayload | null>(null);
+            const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
-    async function saveSurvey(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setCreating(true);
-
-        const formattedQuestions = questions.map((q, index) => {
-            const fromList = q.optionsList
-                .map((opt) => opt.trim())
-                .filter(Boolean);
-            const fromString = q.options
-                .split(',')
-                .map((opt) => opt.trim())
-                .filter(Boolean);
-            const parsedOptions = fromList.length ? fromList : fromString;
-
-            return {
-                prompt: q.prompt,
-                type: q.type,
-                options: requiresQuestionOptions(q.type) ? parsedOptions : null,
-                is_required: q.is_required,
-                position: index,
-            };
-        });
-
-        const payload = {
-            title,
-            description: description || null,
-            starts_at: startsAt || null,
-            closes_at: closesAt || null,
-            is_anonymous: isAnonymous,
-            target_department_ids: targetSpecificCohorts
-                ? targetDepartmentIds
-                : null,
-            target_program_ids: targetSpecificCohorts ? targetProgramIds : null,
-            target_graduation_years: targetSpecificCohorts
-                ? targetGraduationYears
-                : null,
-            questions: formattedQuestions,
-        };
-
-        try {
-            if (editingSurveyId !== null) {
-                await apiRequest<ApiEnvelope<Survey>>(
-                    `/api/surveys/${editingSurveyId}`,
+            function resetBuilder() {
+                setBuilderTab('questions');
+                setActiveQuestionIdx(0);
+                setEditingSurveyId(null);
+                setTitle('');
+                setDescription('');
+                setStartsAt('');
+                setClosesAt('');
+                setIsAnonymous(false);
+                setTargetSpecificCohorts(false);
+                setTargetDepartmentIds([]);
+                setTargetProgramIds([]);
+                setTargetGraduationYears([]);
+                setCustomYearInput('');
+                setQuestions([
                     {
-                        method: 'PATCH',
-                        body: payload,
+                        prompt: '',
+                        type: 'radio',
+                        options: 'Option 1, Option 2',
+                        optionsList: ['Option 1', 'Option 2'],
+                        is_required: true,
                     },
-                );
-                toast.success('Survey updated.');
-            } else {
-                await apiRequest<ApiEnvelope<Survey>>('/api/surveys', {
-                    method: 'POST',
-                    body: payload,
-                });
-                toast.success('Survey created as a draft.');
+                ]);
             }
-            resetBuilder();
-            onCloseCreate();
-            reload();
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Survey could not be saved.',
-            );
-        } finally {
-            setCreating(false);
-        }
-    }
 
-    async function publishSurvey(id: number) {
-        setPublishing(id);
-        try {
-            await apiRequest<ApiEnvelope<Survey>>(
-                `/api/surveys/${id}/publish`,
-                { method: 'POST' },
-            );
-            reload();
-            toast.success('Survey published.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Survey could not be published.',
-            );
-        } finally {
-            setPublishing(null);
-        }
-    }
+            function openEditSurvey(survey: Survey) {
+                setBuilderTab('questions');
+                setActiveQuestionIdx(0);
+                setEditingSurveyId(survey.id);
+                setTitle(survey.title);
+                setDescription(survey.description ?? '');
+                setStartsAt(survey.starts_at ? survey.starts_at.slice(0, 10) : '');
+                setClosesAt(survey.closes_at ? survey.closes_at.slice(0, 10) : '');
+                setIsAnonymous(Boolean(survey.is_anonymous));
+                const hasTargeting = Boolean(
+                    survey.target_department_ids?.length ||
+                    survey.target_program_ids?.length ||
+                    survey.target_graduation_years?.length,
+                );
+                setTargetSpecificCohorts(hasTargeting);
+                setTargetDepartmentIds(survey.target_department_ids ?? []);
+                setTargetProgramIds(survey.target_program_ids ?? []);
+                setTargetGraduationYears(survey.target_graduation_years ?? []);
+                setQuestions(
+                    survey.questions.length
+                        ? survey.questions.map((q) => {
+                            const list =
+                                q.options && q.options.length
+                                    ? [...q.options]
+                                    : ['Option 1'];
+                            return {
+                                prompt: q.prompt,
+                                type: q.type,
+                                options: list.join(', '),
+                                optionsList: list,
+                                is_required: q.is_required,
+                            };
+                        })
+                        : [
+                            {
+                                prompt: '',
+                                type: 'radio',
+                                options: 'Option 1, Option 2',
+                                optionsList: ['Option 1', 'Option 2'],
+                                is_required: true,
+                            },
+                        ],
+                );
+            }
 
-    async function closeSurvey(id: number) {
-        setClosing(id);
-        try {
-            await apiRequest<ApiEnvelope<Survey>>(`/api/surveys/${id}/close`, {
-                method: 'POST',
-            });
-            reload();
-            toast.success('Survey closed.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Survey could not be closed.',
-            );
-        } finally {
-            setClosing(null);
-        }
-    }
+            function updateQuestion(index: number, patch: Partial<QuestionDraft>) {
+                setQuestions((current) =>
+                    current.map((item, idx) => {
+                        if (idx !== index) return item;
+                        const updated = { ...item, ...patch };
+                        if (
+                            patch.type &&
+                            requiresQuestionOptions(patch.type) &&
+                            updated.optionsList.length === 0
+                        ) {
+                            updated.optionsList = ['Option 1'];
+                            updated.options = 'Option 1';
+                        }
+                        return updated;
+                    }),
+                );
+            }
 
-    async function toggleAnalytics(surveyId: number) {
-        if (activeAnalyticsId === surveyId) {
-            setActiveAnalyticsId(null);
-            setAnalyticsData(null);
-            return;
-        }
-        setActiveAnalyticsId(surveyId);
-        setAnalyticsLoading(true);
-        try {
-            const response = await apiRequest<
-                ApiEnvelope<SurveyAnalyticsPayload>
-            >(`/api/surveys/${surveyId}/analytics`);
-            setAnalyticsData(response.data);
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Survey analytics could not be loaded.',
-            );
-            setActiveAnalyticsId(null);
-        } finally {
-            setAnalyticsLoading(false);
-        }
-    }
+            function updateQuestionOptionItem(
+                questionIndex: number,
+                optionIndex: number,
+                value: string,
+            ) {
+                setQuestions((current) =>
+                    current.map((item, idx) => {
+                        if (idx !== questionIndex) return item;
+                        const nextList = item.optionsList.map((opt, oIdx) =>
+                            oIdx === optionIndex ? value : opt,
+                        );
+                        return {
+                            ...item,
+                            optionsList: nextList,
+                            options: nextList.join(', '),
+                        };
+                    }),
+                );
+            }
 
-    if (loading) {
-        return <LoadingState />;
-    }
+            function addQuestionOptionItem(questionIndex: number) {
+                setQuestions((current) =>
+                    current.map((item, idx) => {
+                        if (idx !== questionIndex) return item;
+                        const nextList = [
+                            ...item.optionsList,
+                            `Option ${item.optionsList.length + 1}`,
+                        ];
+                        return {
+                            ...item,
+                            optionsList: nextList,
+                            options: nextList.join(', '),
+                        };
+                    }),
+                );
+            }
 
-    if (error) {
-        return <ErrorState message={error} />;
-    }
+            function removeQuestionOptionItem(
+                questionIndex: number,
+                optionIndex: number,
+            ) {
+                setQuestions((current) =>
+                    current.map((item, idx) => {
+                        if (idx !== questionIndex || item.optionsList.length <= 1) {
+                            return item;
+                        }
+                        const nextList = item.optionsList.filter(
+                            (_, oIdx) => oIdx !== optionIndex,
+                        );
+                        return {
+                            ...item,
+                            optionsList: nextList,
+                            options: nextList.join(', '),
+                        };
+                    }),
+                );
+            }
 
-    const surveys = data?.data.data ?? [];
-    const departments = departmentsRes.data?.data ?? [];
-    const programs = programsRes.data?.data ?? [];
-    const builderVisible = canManage && (createOpen || editingSurveyId !== null);
+            function addQuestion() {
+                setQuestions((current) => {
+                    const next = [
+                        ...current,
+                        {
+                            prompt: '',
+                            type: 'radio',
+                            options: 'Option 1, Option 2',
+                            optionsList: ['Option 1', 'Option 2'],
+                            is_required: true,
+                        },
+                    ];
+                    setActiveQuestionIdx(next.length - 1);
+                    return next;
+                });
+            }
 
-    return (
-        <div className="space-y-4">
-            {builderVisible ? (
-                <form
-                    onSubmit={saveSurvey}
-                    className="mx-auto max-w-4xl space-y-4 rounded-2xl border border-[#dfe5dc] bg-[#f1f4ef] p-4 sm:p-6"
-                >
-                    {/* Survey Builder Top Navigation Bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e2e7df] bg-white px-4 py-2.5 shadow-2xs">
-                        <div className="flex items-center gap-2.5">
-                            <span className="grid size-8 place-items-center rounded-lg bg-[#2b5139] text-xs font-bold text-white">
-                                SB
-                            </span>
-                            <div>
-                                <p className="text-xs font-bold text-[#29382e]">
-                                    {title.trim() || 'Untitled Tracer Survey'}
-                                </p>
-                                <p className="text-[10px] text-[#7a8278]">
-                                    {editingSurveyId !== null
-                                        ? 'Editing Draft Survey'
-                                        : 'Visual Survey Builder & Dynamic Question Engine'}{' '}
-                                    · {questions.length}{' '}
-                                    {questions.length === 1
-                                        ? 'Question'
-                                        : 'Questions'}
-                                </p>
+            function duplicateQuestion(index: number) {
+                setQuestions((current) => {
+                    const copy = [...current];
+                    const source = current[index];
+                    const clone: QuestionDraft = {
+                        ...source,
+                        optionsList: [...source.optionsList],
+                    };
+                    copy.splice(index + 1, 0, clone);
+                    setActiveQuestionIdx(index + 1);
+                    return copy;
+                });
+            }
+
+            function removeQuestion(index: number) {
+                setQuestions((current) =>
+                    current.length > 1
+                        ? current.filter((_, idx) => idx !== index)
+                        : current,
+                );
+            }
+
+            function moveQuestion(index: number, direction: -1 | 1) {
+                const nextIndex = index + direction;
+                if (nextIndex < 0 || nextIndex >= questions.length) {
+                    return;
+                }
+                setQuestions((current) => {
+                    const copy = [...current];
+                    const [item] = copy.splice(index, 1);
+                    copy.splice(nextIndex, 0, item);
+                    setActiveQuestionIdx(nextIndex);
+                    return copy;
+                });
+            }
+
+            function toggleId(list: number[], id: number): number[] {
+                return list.includes(id)
+                    ? list.filter((item) => item !== id)
+                    : [...list, id];
+            }
+
+            function addCustomBatchYear() {
+                const parsed = Number.parseInt(customYearInput.trim(), 10);
+                if (Number.isNaN(parsed) || parsed < 1950 || parsed > 2100) {
+                    toast.error('Enter a valid graduation year between 1950 and 2100.');
+                    return;
+                }
+                if (!targetGraduationYears.includes(parsed)) {
+                    setTargetGraduationYears((curr) =>
+                        [...curr, parsed].sort((a, b) => b - a),
+                    );
+                }
+                setCustomYearInput('');
+            }
+
+            async function saveSurvey(event: FormEvent<HTMLFormElement>) {
+                event.preventDefault();
+                setCreating(true);
+
+                const formattedQuestions = questions.map((q, index) => {
+                    const fromList = q.optionsList
+                        .map((opt) => opt.trim())
+                        .filter(Boolean);
+                    const fromString = q.options
+                        .split(',')
+                        .map((opt) => opt.trim())
+                        .filter(Boolean);
+                    const parsedOptions = fromList.length ? fromList : fromString;
+
+                    return {
+                        prompt: q.prompt,
+                        type: q.type,
+                        options: requiresQuestionOptions(q.type) ? parsedOptions : null,
+                        is_required: q.is_required,
+                        position: index,
+                    };
+                });
+
+                const payload = {
+                    title,
+                    description: description || null,
+                    starts_at: startsAt || null,
+                    closes_at: closesAt || null,
+                    is_anonymous: isAnonymous,
+                    target_department_ids: targetSpecificCohorts
+                        ? targetDepartmentIds
+                        : null,
+                    target_program_ids: targetSpecificCohorts ? targetProgramIds : null,
+                    target_graduation_years: targetSpecificCohorts
+                        ? targetGraduationYears
+                        : null,
+                    questions: formattedQuestions,
+                };
+
+                try {
+                    if (editingSurveyId !== null) {
+                        await apiRequest<ApiEnvelope<Survey>>(
+                            `/api/surveys/${editingSurveyId}`,
+                            {
+                                method: 'PATCH',
+                                body: payload,
+                            },
+                        );
+                        toast.success('Survey updated.');
+                    } else {
+                        await apiRequest<ApiEnvelope<Survey>>('/api/surveys', {
+                            method: 'POST',
+                            body: payload,
+                        });
+                        toast.success('Survey created as a draft.');
+                    }
+                    resetBuilder();
+                    onCloseCreate();
+                    reload();
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Survey could not be saved.',
+                    );
+                } finally {
+                    setCreating(false);
+                }
+            }
+
+            async function publishSurvey(id: number) {
+                setPublishing(id);
+                try {
+                    await apiRequest<ApiEnvelope<Survey>>(
+                        `/api/surveys/${id}/publish`,
+                        { method: 'POST' },
+                    );
+                    reload();
+                    toast.success('Survey published.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Survey could not be published.',
+                    );
+                } finally {
+                    setPublishing(null);
+                }
+            }
+
+            async function closeSurvey(id: number) {
+                setClosing(id);
+                try {
+                    await apiRequest<ApiEnvelope<Survey>>(`/api/surveys/${id}/close`, {
+                        method: 'POST',
+                    });
+                    reload();
+                    toast.success('Survey closed.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Survey could not be closed.',
+                    );
+                } finally {
+                    setClosing(null);
+                }
+            }
+
+            async function toggleAnalytics(surveyId: number) {
+                if (activeAnalyticsId === surveyId) {
+                    setActiveAnalyticsId(null);
+                    setAnalyticsData(null);
+                    return;
+                }
+                setActiveAnalyticsId(surveyId);
+                setAnalyticsLoading(true);
+                try {
+                    const response = await apiRequest<
+                        ApiEnvelope<SurveyAnalyticsPayload>
+                    >(`/api/surveys/${surveyId}/analytics`);
+                    setAnalyticsData(response.data);
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Survey analytics could not be loaded.',
+                    );
+                    setActiveAnalyticsId(null);
+                } finally {
+                    setAnalyticsLoading(false);
+                }
+            }
+
+            if (loading) {
+                return <LoadingState />;
+            }
+
+            if (error) {
+                return <ErrorState message={error} />;
+            }
+
+            const surveys = data?.data.data ?? [];
+            const departments = departmentsRes.data?.data ?? [];
+            const programs = programsRes.data?.data ?? [];
+            const builderVisible = canManage && (createOpen || editingSurveyId !== null);
+
+            return (
+                <div className="space-y-4">
+                    {builderVisible ? (
+                        <form
+                            onSubmit={saveSurvey}
+                            className="mx-auto max-w-4xl space-y-4 rounded-2xl border border-[#dfe5dc] bg-[#f1f4ef] p-4 sm:p-6"
+                        >
+                            {/* Survey Builder Top Navigation Bar */}
+                            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e2e7df] bg-white px-4 py-2.5 shadow-2xs">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="grid size-8 place-items-center rounded-lg bg-[#2b5139] text-xs font-bold text-white">
+                                        SB
+                                    </span>
+                                    <div>
+                                        <p className="text-xs font-bold text-[#29382e]">
+                                            {title.trim() || 'Untitled Tracer Survey'}
+                                        </p>
+                                        <p className="text-[10px] text-[#7a8278]">
+                                            {editingSurveyId !== null
+                                                ? 'Editing Draft Survey'
+                                                : 'Visual Survey Builder & Dynamic Question Engine'}{' '}
+                                            · {questions.length}{' '}
+                                            {questions.length === 1
+                                                ? 'Question'
+                                                : 'Questions'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-1 rounded-lg bg-[#f3f5f1] p-1">
+                                    {(
+                                        [
+                                            ['questions', 'Questions'],
+                                            ['settings', 'Settings & Cohorts'],
+                                            ['preview', 'Preview Form'],
+                                        ] as const
+                                    ).map(([tabKey, tabLabel]) => (
+                                        <button
+                                            key={tabKey}
+                                            type="button"
+                                            onClick={() => setBuilderTab(tabKey)}
+                                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${builderTab === tabKey
+                                                    ? 'bg-white text-[#2b5139] shadow-2xs'
+                                                    : 'text-[#626c61] hover:text-[#29382e]'
+                                                }`}
+                                        >
+                                            {tabLabel}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            resetBuilder();
+                                            onCloseCreate();
+                                        }}
+                                        className="h-8 rounded-lg border border-[#e3e7df] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={creating}
+                                        className="h-8 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#21402c] disabled:opacity-60"
+                                    >
+                                        {creating
+                                            ? 'Saving…'
+                                            : editingSurveyId !== null
+                                                ? 'Save changes'
+                                                : 'Create survey'}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="flex items-center gap-1 rounded-lg bg-[#f3f5f1] p-1">
-                            {(
-                                [
-                                    ['questions', 'Questions'],
-                                    ['settings', 'Settings & Cohorts'],
-                                    ['preview', 'Preview Form'],
-                                ] as const
-                            ).map(([tabKey, tabLabel]) => (
-                                <button
-                                    key={tabKey}
-                                    type="button"
-                                    onClick={() => setBuilderTab(tabKey)}
-                                    className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-                                        builderTab === tabKey
-                                            ? 'bg-white text-[#2b5139] shadow-2xs'
-                                            : 'text-[#626c61] hover:text-[#29382e]'
+                            {/* Google Forms Header Card (Always mounted for form validation) */}
+                            <div className="rounded-xl border border-[#dce3d9] border-t-8 border-t-[#2b5139] bg-white p-5 shadow-2xs">
+                                <label className="block text-[11px] font-semibold tracking-wider text-[#667367] uppercase">
+                                    Survey title
+                                    <input
+                                        required
+                                        value={title}
+                                        onChange={(event) =>
+                                            setTitle(event.target.value)
+                                        }
+                                        placeholder="Untitled Tracer Survey"
+                                        className="mt-1 w-full border-b-2 border-[#e3e7df] bg-transparent pb-2 text-lg font-bold text-[#233127] transition outline-none focus:border-[#2b5139]"
+                                    />
+                                </label>
+                                <label className="mt-3 block text-[11px] font-medium text-[#667367]">
+                                    Form description
+                                    <textarea
+                                        value={description}
+                                        onChange={(event) =>
+                                            setDescription(event.target.value)
+                                        }
+                                        rows={2}
+                                        placeholder="Form description (explain the purpose of this survey to alumni respondents)…"
+                                        className="mt-1 w-full border-b border-[#e5e9e2] bg-transparent pb-1.5 text-xs text-[#4d5a4f] transition outline-none focus:border-[#2b5139]"
+                                    />
+                                </label>
+                            </div>
+
+                            {/* Settings & Cohort Targeting Card */}
+                            <div
+                                className={`space-y-4 rounded-xl border border-[#dce3d9] bg-white p-5 shadow-2xs ${builderTab === 'preview' ? 'hidden' : ''
                                     }`}
-                                >
-                                    {tabLabel}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    resetBuilder();
-                                    onCloseCreate();
-                                }}
-                                className="h-8 rounded-lg border border-[#e3e7df] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
                             >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={creating}
-                                className="h-8 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#21402c] disabled:opacity-60"
-                            >
-                                {creating
-                                    ? 'Saving…'
-                                    : editingSurveyId !== null
-                                      ? 'Save changes'
-                                      : 'Create survey'}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Google Forms Header Card (Always mounted for form validation) */}
-                    <div className="rounded-xl border border-[#dce3d9] border-t-8 border-t-[#2b5139] bg-white p-5 shadow-2xs">
-                        <label className="block text-[11px] font-semibold tracking-wider text-[#667367] uppercase">
-                            Survey title
-                            <input
-                                required
-                                value={title}
-                                onChange={(event) =>
-                                    setTitle(event.target.value)
-                                }
-                                placeholder="Untitled Tracer Survey"
-                                className="mt-1 w-full border-b-2 border-[#e3e7df] bg-transparent pb-2 text-lg font-bold text-[#233127] transition outline-none focus:border-[#2b5139]"
-                            />
-                        </label>
-                        <label className="mt-3 block text-[11px] font-medium text-[#667367]">
-                            Form description
-                            <textarea
-                                value={description}
-                                onChange={(event) =>
-                                    setDescription(event.target.value)
-                                }
-                                rows={2}
-                                placeholder="Form description (explain the purpose of this survey to alumni respondents)…"
-                                className="mt-1 w-full border-b border-[#e5e9e2] bg-transparent pb-1.5 text-xs text-[#4d5a4f] transition outline-none focus:border-[#2b5139]"
-                            />
-                        </label>
-                    </div>
-
-                    {/* Settings & Cohort Targeting Card */}
-                    <div
-                        className={`space-y-4 rounded-xl border border-[#dce3d9] bg-white p-5 shadow-2xs ${
-                            builderTab === 'preview' ? 'hidden' : ''
-                        }`}
-                    >
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff1ed] pb-3">
-                            <div>
-                                <h3 className="text-xs font-bold tracking-wider text-[#2b5139] uppercase">
-                                    Schedule, Privacy & Cohort Targeting
-                                </h3>
-                                <p className="text-[11px] text-[#758074]">
-                                    Configure opening/closing dates, anonymous
-                                    mode, and target graduation batches or
-                                    programs.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <label className="text-xs font-medium text-[#4d5a4f]">
-                                Opens on (optional)
-                                <input
-                                    type="date"
-                                    value={startsAt}
-                                    onChange={(event) =>
-                                        setStartsAt(event.target.value)
-                                    }
-                                    className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                                />
-                            </label>
-                            <label className="text-xs font-medium text-[#4d5a4f]">
-                                Closes on
-                                <input
-                                    type="date"
-                                    value={closesAt}
-                                    onChange={(event) =>
-                                        setClosesAt(event.target.value)
-                                    }
-                                    className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                                />
-                            </label>
-                            <div className="flex flex-col justify-end gap-2 sm:col-span-2">
-                                <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#3b4a3e]">
-                                    <input
-                                        type="checkbox"
-                                        checked={isAnonymous}
-                                        onChange={(e) =>
-                                            setIsAnonymous(e.target.checked)
-                                        }
-                                        className="size-4 accent-[#2b5139]"
-                                    />
-                                    <span>
-                                        Collect anonymous responses (mask
-                                        respondent names in summaries)
-                                    </span>
-                                </label>
-                                <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#2b5139]">
-                                    <input
-                                        type="checkbox"
-                                        checked={targetSpecificCohorts}
-                                        onChange={(e) =>
-                                            setTargetSpecificCohorts(
-                                                e.target.checked,
-                                            )
-                                        }
-                                        className="size-4 accent-[#2b5139]"
-                                    />
-                                    <span>
-                                        Target specific departments, programs,
-                                        or graduating batches
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-
-                        {targetSpecificCohorts && (
-                            <div className="grid gap-4 border-t border-[#e6eae3] pt-4 lg:grid-cols-3">
-                                {/* Target Departments */}
-                                <div>
-                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
-                                        Target Departments (
-                                        {targetDepartmentIds.length || 'All'})
-                                    </p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {departments.map((dept) => {
-                                            const active =
-                                                targetDepartmentIds.includes(
-                                                    dept.id,
-                                                );
-                                            return (
-                                                <button
-                                                    key={dept.id}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setTargetDepartmentIds(
-                                                            (curr) =>
-                                                                toggleId(
-                                                                    curr,
-                                                                    dept.id,
-                                                                ),
-                                                        )
-                                                    }
-                                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                                                        active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
-                                                    }`}
-                                                >
-                                                    {dept.code} · {dept.name}
-                                                </button>
-                                            );
-                                        })}
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff1ed] pb-3">
+                                    <div>
+                                        <h3 className="text-xs font-bold tracking-wider text-[#2b5139] uppercase">
+                                            Schedule, Privacy & Cohort Targeting
+                                        </h3>
+                                        <p className="text-[11px] text-[#758074]">
+                                            Configure opening/closing dates, anonymous
+                                            mode, and target graduation batches or
+                                            programs.
+                                        </p>
                                     </div>
                                 </div>
 
-                                {/* Target Academic Programs */}
-                                <div>
-                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
-                                        Target Academic Programs (
-                                        {targetProgramIds.length || 'All'})
-                                    </p>
-                                    <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
-                                        {programs.map((prog) => {
-                                            const active =
-                                                targetProgramIds.includes(
-                                                    prog.id,
-                                                );
-                                            return (
-                                                <button
-                                                    key={prog.id}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setTargetProgramIds(
-                                                            (curr) =>
-                                                                toggleId(
-                                                                    curr,
-                                                                    prog.id,
-                                                                ),
-                                                        )
-                                                    }
-                                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                                                        active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
-                                                    }`}
-                                                >
-                                                    {prog.code}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Target Graduation Years / Batches */}
-                                <div>
-                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
-                                        Target Graduation Batches (
-                                        {targetGraduationYears.length || 'All'})
-                                    </p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {Array.from(
-                                            new Set([
-                                                ...COHORT_YEAR_OPTIONS,
-                                                ...targetGraduationYears,
-                                            ]),
-                                        )
-                                            .sort((a, b) => b - a)
-                                            .map((yr) => {
-                                                const active =
-                                                    targetGraduationYears.includes(
-                                                        yr,
-                                                    );
-                                                return (
-                                                    <button
-                                                        key={yr}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setTargetGraduationYears(
-                                                                (curr) =>
-                                                                    toggleId(
-                                                                        curr,
-                                                                        yr,
-                                                                    ),
-                                                            )
-                                                        }
-                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                                                            active
-                                                                ? 'bg-[#2b5139] text-white'
-                                                                : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
-                                                        }`}
-                                                    >
-                                                        {yr}
-                                                    </button>
-                                                );
-                                            })}
-                                    </div>
-                                    <div className="mt-2 flex gap-1.5">
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                    <label className="text-xs font-medium text-[#4d5a4f]">
+                                        Opens on (optional)
                                         <input
-                                            type="number"
-                                            min={1950}
-                                            max={2100}
-                                            value={customYearInput}
-                                            onChange={(e) =>
-                                                setCustomYearInput(
-                                                    e.target.value,
-                                                )
+                                            type="date"
+                                            value={startsAt}
+                                            onChange={(event) =>
+                                                setStartsAt(event.target.value)
                                             }
-                                            placeholder="Add year (e.g. 2015)"
-                                            className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2.5 text-xs"
+                                            className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
                                         />
+                                    </label>
+                                    <label className="text-xs font-medium text-[#4d5a4f]">
+                                        Closes on
+                                        <input
+                                            type="date"
+                                            value={closesAt}
+                                            onChange={(event) =>
+                                                setClosesAt(event.target.value)
+                                            }
+                                            className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                        />
+                                    </label>
+                                    <div className="flex flex-col justify-end gap-2 sm:col-span-2">
+                                        <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#3b4a3e]">
+                                            <input
+                                                type="checkbox"
+                                                checked={isAnonymous}
+                                                onChange={(e) =>
+                                                    setIsAnonymous(e.target.checked)
+                                                }
+                                                className="size-4 accent-[#2b5139]"
+                                            />
+                                            <span>
+                                                Collect anonymous responses (mask
+                                                respondent names in summaries)
+                                            </span>
+                                        </label>
+                                        <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#2b5139]">
+                                            <input
+                                                type="checkbox"
+                                                checked={targetSpecificCohorts}
+                                                onChange={(e) =>
+                                                    setTargetSpecificCohorts(
+                                                        e.target.checked,
+                                                    )
+                                                }
+                                                className="size-4 accent-[#2b5139]"
+                                            />
+                                            <span>
+                                                Target specific departments, programs,
+                                                or graduating batches
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {targetSpecificCohorts && (
+                                    <div className="grid gap-4 border-t border-[#e6eae3] pt-4 lg:grid-cols-3">
+                                        {/* Target Departments */}
+                                        <div>
+                                            <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                                Target Departments (
+                                                {targetDepartmentIds.length || 'All'})
+                                            </p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {departments.map((dept) => {
+                                                    const active =
+                                                        targetDepartmentIds.includes(
+                                                            dept.id,
+                                                        );
+                                                    return (
+                                                        <button
+                                                            key={dept.id}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setTargetDepartmentIds(
+                                                                    (curr) =>
+                                                                        toggleId(
+                                                                            curr,
+                                                                            dept.id,
+                                                                        ),
+                                                                )
+                                                            }
+                                                            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
+                                                                    ? 'bg-[#2b5139] text-white'
+                                                                    : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
+                                                                }`}
+                                                        >
+                                                            {dept.code} · {dept.name}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Target Academic Programs */}
+                                        <div>
+                                            <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                                Target Academic Programs (
+                                                {targetProgramIds.length || 'All'})
+                                            </p>
+                                            <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
+                                                {programs.map((prog) => {
+                                                    const active =
+                                                        targetProgramIds.includes(
+                                                            prog.id,
+                                                        );
+                                                    return (
+                                                        <button
+                                                            key={prog.id}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setTargetProgramIds(
+                                                                    (curr) =>
+                                                                        toggleId(
+                                                                            curr,
+                                                                            prog.id,
+                                                                        ),
+                                                                )
+                                                            }
+                                                            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
+                                                                    ? 'bg-[#2b5139] text-white'
+                                                                    : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
+                                                                }`}
+                                                        >
+                                                            {prog.code}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Target Graduation Years / Batches */}
+                                        <div>
+                                            <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                                Target Graduation Batches (
+                                                {targetGraduationYears.length || 'All'})
+                                            </p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {Array.from(
+                                                    new Set([
+                                                        ...COHORT_YEAR_OPTIONS,
+                                                        ...targetGraduationYears,
+                                                    ]),
+                                                )
+                                                    .sort((a, b) => b - a)
+                                                    .map((yr) => {
+                                                        const active =
+                                                            targetGraduationYears.includes(
+                                                                yr,
+                                                            );
+                                                        return (
+                                                            <button
+                                                                key={yr}
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setTargetGraduationYears(
+                                                                        (curr) =>
+                                                                            toggleId(
+                                                                                curr,
+                                                                                yr,
+                                                                            ),
+                                                                    )
+                                                                }
+                                                                className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
+                                                                        ? 'bg-[#2b5139] text-white'
+                                                                        : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
+                                                                    }`}
+                                                            >
+                                                                {yr}
+                                                            </button>
+                                                        );
+                                                    })}
+                                            </div>
+                                            <div className="mt-2 flex gap-1.5">
+                                                <input
+                                                    type="number"
+                                                    min={1950}
+                                                    max={2100}
+                                                    value={customYearInput}
+                                                    onChange={(e) =>
+                                                        setCustomYearInput(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="Add year (e.g. 2015)"
+                                                    className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2.5 text-xs"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={addCustomBatchYear}
+                                                    className="h-8 rounded-lg border border-[#dce2d9] bg-white px-3 text-[11px] font-semibold text-[#2b5139] hover:bg-[#edf2eb]"
+                                                >
+                                                    Add Batch
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Google Forms Live Preview Mode */}
+                            {builderTab === 'preview' && (
+                                <div className="space-y-3 rounded-xl border border-[#dce3d9] bg-white p-5">
+                                    <div className="flex items-center justify-between border-b border-[#eff1ed] pb-3">
+                                        <span className="text-xs font-bold text-[#2b5139] uppercase">
+                                            Live Respondent Form Preview
+                                        </span>
                                         <button
                                             type="button"
-                                            onClick={addCustomBatchYear}
-                                            className="h-8 rounded-lg border border-[#dce2d9] bg-white px-3 text-[11px] font-semibold text-[#2b5139] hover:bg-[#edf2eb]"
+                                            onClick={() => setBuilderTab('questions')}
+                                            className="text-xs font-semibold text-[#2b5139] hover:underline"
                                         >
-                                            Add Batch
+                                            ← Back to editing questions
+                                        </button>
+                                    </div>
+                                    {questions.map((q, qIdx) => (
+                                        <div
+                                            key={qIdx}
+                                            className="rounded-xl border border-[#e3e7df] bg-[#fafbf9] p-4"
+                                        >
+                                            <p className="text-xs font-semibold text-[#233127]">
+                                                {qIdx + 1}.{' '}
+                                                {q.prompt || 'Untitled Question'}
+                                                {q.is_required && (
+                                                    <span className="ml-1 text-[#c93b2b]">
+                                                        *
+                                                    </span>
+                                                )}
+                                            </p>
+                                            <p className="mt-1 text-[11px] text-[#7a8278]">
+                                                Format:{' '}
+                                                {QUESTION_TYPE_LABELS[q.type] ?? q.type}
+                                                {requiresQuestionOptions(q.type)
+                                                    ? ` · Choices: ${q.optionsList.join(', ')}`
+                                                    : ''}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Google Forms Question Cards Stream */}
+                            <div
+                                className={`space-y-3.5 ${builderTab === 'preview' ? 'hidden' : ''
+                                    }`}
+                            >
+                                {questions.map((question, index) => {
+                                    const isFocused = activeQuestionIdx === index;
+                                    const isChoice = requiresQuestionOptions(
+                                        question.type,
+                                    );
+
+                                    return (
+                                        <div
+                                            key={index}
+                                            onClick={() => setActiveQuestionIdx(index)}
+                                            className={`rounded-xl border bg-white p-5 shadow-2xs transition ${isFocused
+                                                    ? 'border-[#cad5c6] border-l-4 border-l-[#2b5139]'
+                                                    : 'border-[#e3e7df]'
+                                                }`}
+                                        >
+                                            <div className="grid gap-3 sm:grid-cols-[1fr_230px]">
+                                                <label className="text-xs font-medium text-[#4d5a4f]">
+                                                    {index === 0
+                                                        ? 'First question'
+                                                        : `Question #${index + 1}`}
+                                                    <input
+                                                        required
+                                                        value={question.prompt}
+                                                        onChange={(event) =>
+                                                            updateQuestion(index, {
+                                                                prompt: event.target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                        placeholder="Question"
+                                                        className="mt-1.5 h-11 w-full rounded-t-lg border-b-2 border-[#d5ddd2] bg-[#f8faf7] px-3.5 text-sm font-medium text-[#233127] transition outline-none focus:border-[#2b5139] focus:bg-[#f1f5ef]"
+                                                    />
+                                                </label>
+
+                                                <label className="text-xs font-medium text-[#4d5a4f]">
+                                                    Question type
+                                                    <select
+                                                        value={question.type}
+                                                        onChange={(event) =>
+                                                            updateQuestion(index, {
+                                                                type: event.target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                        className="mt-1.5 h-11 w-full rounded-lg border border-[#d5ddd2] bg-white px-3 text-xs font-semibold text-[#29382e] outline-none focus:border-[#2b5139]"
+                                                    >
+                                                        {BUILDER_QUESTION_TYPES.map(
+                                                            (typeOption) => (
+                                                                <option
+                                                                    key={
+                                                                        typeOption.value
+                                                                    }
+                                                                    value={
+                                                                        typeOption.value
+                                                                    }
+                                                                >
+                                                                    {typeOption.label}
+                                                                </option>
+                                                            ),
+                                                        )}
+                                                    </select>
+                                                </label>
+                                            </div>
+
+                                            {/* Google Forms Interactive Answer Area */}
+                                            <div className="mt-4">
+                                                {isChoice ? (
+                                                    <div className="space-y-2">
+                                                        {question.optionsList.map(
+                                                            (optVal, optIdx) => (
+                                                                <div
+                                                                    key={optIdx}
+                                                                    className="flex items-center gap-2.5"
+                                                                >
+                                                                    <span className="w-5 text-center text-xs font-bold text-[#838c81]">
+                                                                        {question.type ===
+                                                                            'radio'
+                                                                            ? '○'
+                                                                            : question.type ===
+                                                                                'multiselect'
+                                                                                ? '☐'
+                                                                                : `${optIdx + 1}.`}
+                                                                    </span>
+                                                                    <input
+                                                                        type="text"
+                                                                        required
+                                                                        value={optVal}
+                                                                        onChange={(e) =>
+                                                                            updateQuestionOptionItem(
+                                                                                index,
+                                                                                optIdx,
+                                                                                e.target
+                                                                                    .value,
+                                                                            )
+                                                                        }
+                                                                        placeholder={`Option ${optIdx + 1}`}
+                                                                        className="h-9 flex-1 border-b border-transparent bg-transparent px-1 text-xs text-[#29382e] transition outline-none hover:border-[#dce2d9] focus:border-b-2 focus:border-[#2b5139]"
+                                                                    />
+                                                                    {question
+                                                                        .optionsList
+                                                                        .length > 1 && (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() =>
+                                                                                    removeQuestionOptionItem(
+                                                                                        index,
+                                                                                        optIdx,
+                                                                                    )
+                                                                                }
+                                                                                title="Remove option"
+                                                                                className="rounded p-1 text-xs text-[#8a9289] hover:bg-[#f2f4f0] hover:text-[#8b4e43]"
+                                                                            >
+                                                                                ✕
+                                                                            </button>
+                                                                        )}
+                                                                </div>
+                                                            ),
+                                                        )}
+
+                                                        <div className="flex flex-wrap items-center gap-3 pt-1">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    addQuestionOptionItem(
+                                                                        index,
+                                                                    )
+                                                                }
+                                                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2b5139] hover:underline"
+                                                            >
+                                                                <span>
+                                                                    {question.type ===
+                                                                        'radio'
+                                                                        ? '○'
+                                                                        : question.type ===
+                                                                            'multiselect'
+                                                                            ? '☐'
+                                                                            : '+'}
+                                                                </span>
+                                                                <span>Add option</span>
+                                                            </button>
+                                                        </div>
+
+                                                        <label className="mt-2 block text-[11px] font-medium text-[#7a8278]">
+                                                            Answer choices (comma
+                                                            separated quick-fill)
+                                                            <input
+                                                                value={question.options}
+                                                                onChange={(event) => {
+                                                                    const raw =
+                                                                        event.target
+                                                                            .value;
+                                                                    const split = raw
+                                                                        .split(',')
+                                                                        .map((s) =>
+                                                                            s.trim(),
+                                                                        )
+                                                                        .filter(
+                                                                            Boolean,
+                                                                        );
+                                                                    updateQuestion(
+                                                                        index,
+                                                                        {
+                                                                            options:
+                                                                                raw,
+                                                                            optionsList:
+                                                                                split.length
+                                                                                    ? split
+                                                                                    : [
+                                                                                        '',
+                                                                                    ],
+                                                                        },
+                                                                    );
+                                                                }}
+                                                                placeholder="e.g., Very Relevant, Moderately Relevant, Not Relevant"
+                                                                className="mt-1 h-8 w-full rounded-lg border border-[#e6eae3] bg-[#fafbf9] px-2.5 text-[11px] text-[#4d5a4f]"
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                ) : question.type === 'text' ? (
+                                                    <div className="max-w-xs border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                        Short answer text
+                                                    </div>
+                                                ) : question.type === 'textarea' ? (
+                                                    <div className="max-w-lg border-b border-dotted border-[#b8c2b6] pb-4 text-xs text-[#8a9289]">
+                                                        Long answer paragraph text
+                                                    </div>
+                                                ) : question.type === 'rating' ? (
+                                                    <div className="flex items-center gap-4 py-1 text-xs text-[#687267]">
+                                                        <span>Linear scale:</span>
+                                                        {[1, 2, 3, 4, 5].map((n) => (
+                                                            <span
+                                                                key={n}
+                                                                className="inline-flex size-7 items-center justify-center rounded-full border border-[#d5ddd2] bg-[#fafbf9] font-semibold"
+                                                            >
+                                                                {n}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ) : question.type === 'boolean' ? (
+                                                    <div className="flex gap-3 text-xs text-[#687267]">
+                                                        <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
+                                                            ○ Yes
+                                                        </span>
+                                                        <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
+                                                            ○ No
+                                                        </span>
+                                                    </div>
+                                                ) : question.type === 'date' ? (
+                                                    <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                        Month, day, year 📅
+                                                    </div>
+                                                ) : (
+                                                    <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                        Numeric value (0–9)
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Google Forms Bottom Card Action Toolbar */}
+                                            <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[#eff1ed] pt-3">
+                                                <span className="text-[11px] font-medium text-[#7a8278]">
+                                                    Question {index + 1} of{' '}
+                                                    {questions.length}
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        disabled={index === 0}
+                                                        onClick={() =>
+                                                            moveQuestion(index, -1)
+                                                        }
+                                                        title="Move question up"
+                                                        className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
+                                                    >
+                                                        ↑
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            index ===
+                                                            questions.length - 1
+                                                        }
+                                                        onClick={() =>
+                                                            moveQuestion(index, 1)
+                                                        }
+                                                        title="Move question down"
+                                                        className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
+                                                    >
+                                                        ↓
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            duplicateQuestion(index)
+                                                        }
+                                                        className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4d5a4f] hover:bg-[#f4f6f2]"
+                                                    >
+                                                        Duplicate
+                                                    </button>
+                                                    {questions.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                removeQuestion(index)
+                                                            }
+                                                            className="rounded-lg border border-[#ecd8d2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#fcf5f3]"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    )}
+                                                    <div className="mx-1 h-4 w-px bg-[#e3e7df]" />
+                                                    <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#4d5a4f]">
+                                                        <span>Required</span>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={
+                                                                question.is_required
+                                                            }
+                                                            onChange={(e) =>
+                                                                updateQuestion(index, {
+                                                                    is_required:
+                                                                        e.target
+                                                                            .checked,
+                                                                })
+                                                            }
+                                                            className="size-4 accent-[#2b5139]"
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Google Forms Floating-Style Bottom Add Bar */}
+                                <div className="flex items-center justify-between rounded-xl border border-[#dce3d9] bg-white px-4 py-3 shadow-2xs">
+                                    <button
+                                        type="button"
+                                        onClick={addQuestion}
+                                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#edf2eb] px-4 text-xs font-bold text-[#2b5139] transition hover:bg-[#dfe8dc]"
+                                    >
+                                        ⊕ Add question
+                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                resetBuilder();
+                                                onCloseCreate();
+                                            }}
+                                            className="h-9 rounded-lg border border-[#e3e7df] px-3 text-xs font-medium text-[#687267]"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={creating}
+                                            className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
+                                        >
+                                            {creating
+                                                ? 'Saving…'
+                                                : editingSurveyId !== null
+                                                    ? 'Save changes'
+                                                    : 'Create survey'}
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </form>
+                    ) : null}
 
-                    {/* Google Forms Live Preview Mode */}
-                    {builderTab === 'preview' && (
-                        <div className="space-y-3 rounded-xl border border-[#dce3d9] bg-white p-5">
-                            <div className="flex items-center justify-between border-b border-[#eff1ed] pb-3">
-                                <span className="text-xs font-bold text-[#2b5139] uppercase">
-                                    Live Respondent Form Preview
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={() => setBuilderTab('questions')}
-                                    className="text-xs font-semibold text-[#2b5139] hover:underline"
-                                >
-                                    ← Back to editing questions
-                                </button>
-                            </div>
-                            {questions.map((q, qIdx) => (
-                                <div
-                                    key={qIdx}
-                                    className="rounded-xl border border-[#e3e7df] bg-[#fafbf9] p-4"
-                                >
-                                    <p className="text-xs font-semibold text-[#233127]">
-                                        {qIdx + 1}.{' '}
-                                        {q.prompt || 'Untitled Question'}
-                                        {q.is_required && (
-                                            <span className="ml-1 text-[#c93b2b]">
-                                                *
-                                            </span>
-                                        )}
-                                    </p>
-                                    <p className="mt-1 text-[11px] text-[#7a8278]">
-                                        Format:{' '}
-                                        {QUESTION_TYPE_LABELS[q.type] ?? q.type}
-                                        {requiresQuestionOptions(q.type)
-                                            ? ` · Choices: ${q.optionsList.join(', ')}`
-                                            : ''}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Google Forms Question Cards Stream */}
-                    <div
-                        className={`space-y-3.5 ${
-                            builderTab === 'preview' ? 'hidden' : ''
-                        }`}
-                    >
-                        {questions.map((question, index) => {
-                            const isFocused = activeQuestionIdx === index;
-                            const isChoice = requiresQuestionOptions(
-                                question.type,
+                    {surveys.length ? (
+                        surveys.map((survey) => {
+                            const hasCohortRules = Boolean(
+                                survey.target_department_ids?.length ||
+                                survey.target_program_ids?.length ||
+                                survey.target_graduation_years?.length,
                             );
 
                             return (
-                                <div
-                                    key={index}
-                                    onClick={() => setActiveQuestionIdx(index)}
-                                    className={`rounded-xl border bg-white p-5 shadow-2xs transition ${
-                                        isFocused
-                                            ? 'border-[#cad5c6] border-l-4 border-l-[#2b5139]'
-                                            : 'border-[#e3e7df]'
-                                    }`}
+                                <article
+                                    key={survey.id}
+                                    className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
                                 >
-                                    <div className="grid gap-3 sm:grid-cols-[1fr_230px]">
-                                        <label className="text-xs font-medium text-[#4d5a4f]">
-                                            {index === 0
-                                                ? 'First question'
-                                                : `Question #${index + 1}`}
-                                            <input
-                                                required
-                                                value={question.prompt}
-                                                onChange={(event) =>
-                                                    updateQuestion(index, {
-                                                        prompt: event.target
-                                                            .value,
-                                                    })
-                                                }
-                                                placeholder="Question"
-                                                className="mt-1.5 h-11 w-full rounded-t-lg border-b-2 border-[#d5ddd2] bg-[#f8faf7] px-3.5 text-sm font-medium text-[#233127] transition outline-none focus:border-[#2b5139] focus:bg-[#f1f5ef]"
-                                            />
-                                        </label>
-
-                                        <label className="text-xs font-medium text-[#4d5a4f]">
-                                            Question type
-                                            <select
-                                                value={question.type}
-                                                onChange={(event) =>
-                                                    updateQuestion(index, {
-                                                        type: event.target
-                                                            .value,
-                                                    })
-                                                }
-                                                className="mt-1.5 h-11 w-full rounded-lg border border-[#d5ddd2] bg-white px-3 text-xs font-semibold text-[#29382e] outline-none focus:border-[#2b5139]"
-                                            >
-                                                {BUILDER_QUESTION_TYPES.map(
-                                                    (typeOption) => (
-                                                        <option
-                                                            key={
-                                                                typeOption.value
-                                                            }
-                                                            value={
-                                                                typeOption.value
-                                                            }
-                                                        >
-                                                            {typeOption.label}
-                                                        </option>
-                                                    ),
-                                                )}
-                                            </select>
-                                        </label>
-                                    </div>
-
-                                    {/* Google Forms Interactive Answer Area */}
-                                    <div className="mt-4">
-                                        {isChoice ? (
-                                            <div className="space-y-2">
-                                                {question.optionsList.map(
-                                                    (optVal, optIdx) => (
-                                                        <div
-                                                            key={optIdx}
-                                                            className="flex items-center gap-2.5"
-                                                        >
-                                                            <span className="w-5 text-center text-xs font-bold text-[#838c81]">
-                                                                {question.type ===
-                                                                'radio'
-                                                                    ? '○'
-                                                                    : question.type ===
-                                                                        'multiselect'
-                                                                      ? '☐'
-                                                                      : `${optIdx + 1}.`}
-                                                            </span>
-                                                            <input
-                                                                type="text"
-                                                                required
-                                                                value={optVal}
-                                                                onChange={(e) =>
-                                                                    updateQuestionOptionItem(
-                                                                        index,
-                                                                        optIdx,
-                                                                        e.target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                                placeholder={`Option ${optIdx + 1}`}
-                                                                className="h-9 flex-1 border-b border-transparent bg-transparent px-1 text-xs text-[#29382e] transition outline-none hover:border-[#dce2d9] focus:border-b-2 focus:border-[#2b5139]"
-                                                            />
-                                                            {question
-                                                                .optionsList
-                                                                .length > 1 && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        removeQuestionOptionItem(
-                                                                            index,
-                                                                            optIdx,
-                                                                        )
-                                                                    }
-                                                                    title="Remove option"
-                                                                    className="rounded p-1 text-xs text-[#8a9289] hover:bg-[#f2f4f0] hover:text-[#8b4e43]"
-                                                                >
-                                                                    ✕
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    ),
-                                                )}
-
-                                                <div className="flex flex-wrap items-center gap-3 pt-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            addQuestionOptionItem(
-                                                                index,
-                                                            )
-                                                        }
-                                                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2b5139] hover:underline"
-                                                    >
-                                                        <span>
-                                                            {question.type ===
-                                                            'radio'
-                                                                ? '○'
-                                                                : question.type ===
-                                                                    'multiselect'
-                                                                  ? '☐'
-                                                                  : '+'}
-                                                        </span>
-                                                        <span>Add option</span>
-                                                    </button>
-                                                </div>
-
-                                                <label className="mt-2 block text-[11px] font-medium text-[#7a8278]">
-                                                    Answer choices (comma
-                                                    separated quick-fill)
-                                                    <input
-                                                        value={question.options}
-                                                        onChange={(event) => {
-                                                            const raw =
-                                                                event.target
-                                                                    .value;
-                                                            const split = raw
-                                                                .split(',')
-                                                                .map((s) =>
-                                                                    s.trim(),
-                                                                )
-                                                                .filter(
-                                                                    Boolean,
-                                                                );
-                                                            updateQuestion(
-                                                                index,
-                                                                {
-                                                                    options:
-                                                                        raw,
-                                                                    optionsList:
-                                                                        split.length
-                                                                            ? split
-                                                                            : [
-                                                                                  '',
-                                                                              ],
-                                                                },
-                                                            );
-                                                        }}
-                                                        placeholder="e.g., Very Relevant, Moderately Relevant, Not Relevant"
-                                                        className="mt-1 h-8 w-full rounded-lg border border-[#e6eae3] bg-[#fafbf9] px-2.5 text-[11px] text-[#4d5a4f]"
-                                                    />
-                                                </label>
-                                            </div>
-                                        ) : question.type === 'text' ? (
-                                            <div className="max-w-xs border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
-                                                Short answer text
-                                            </div>
-                                        ) : question.type === 'textarea' ? (
-                                            <div className="max-w-lg border-b border-dotted border-[#b8c2b6] pb-4 text-xs text-[#8a9289]">
-                                                Long answer paragraph text
-                                            </div>
-                                        ) : question.type === 'rating' ? (
-                                            <div className="flex items-center gap-4 py-1 text-xs text-[#687267]">
-                                                <span>Linear scale:</span>
-                                                {[1, 2, 3, 4, 5].map((n) => (
-                                                    <span
-                                                        key={n}
-                                                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#d5ddd2] bg-[#fafbf9] font-semibold"
-                                                    >
-                                                        {n}
+                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h2 className="text-sm font-semibold text-[#39463b]">
+                                                    {survey.title}
+                                                </h2>
+                                                <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                                                    {survey.status}
+                                                </span>
+                                                {survey.is_anonymous && (
+                                                    <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-semibold text-[#2b5139]">
+                                                        Anonymous
                                                     </span>
-                                                ))}
+                                                )}
+                                                {survey.responses_count !==
+                                                    undefined && (
+                                                        <span className="rounded-full bg-[#f4f5f2] px-2.5 py-1 text-[10px] font-semibold text-[#546055]">
+                                                            {survey.responses_count}{' '}
+                                                            {survey.responses_count === 1
+                                                                ? 'response'
+                                                                : 'responses'}
+                                                        </span>
+                                                    )}
                                             </div>
-                                        ) : question.type === 'boolean' ? (
-                                            <div className="flex gap-3 text-xs text-[#687267]">
-                                                <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
-                                                    ○ Yes
-                                                </span>
-                                                <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
-                                                    ○ No
-                                                </span>
-                                            </div>
-                                        ) : question.type === 'date' ? (
-                                            <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
-                                                Month, day, year 📅
-                                            </div>
-                                        ) : (
-                                            <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
-                                                Numeric value (0–9)
-                                            </div>
-                                        )}
-                                    </div>
+                                            {survey.description ? (
+                                                <p className="mt-1 text-xs leading-5 text-[#7a8278]">
+                                                    {survey.description}
+                                                </p>
+                                            ) : null}
 
-                                    {/* Google Forms Bottom Card Action Toolbar */}
-                                    <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[#eff1ed] pt-3">
-                                        <span className="text-[11px] font-medium text-[#7a8278]">
-                                            Question {index + 1} of{' '}
-                                            {questions.length}
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                disabled={index === 0}
-                                                onClick={() =>
-                                                    moveQuestion(index, -1)
-                                                }
-                                                title="Move question up"
-                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
-                                            >
-                                                ↑
-                                            </button>
-                                            <button
-                                                type="button"
-                                                disabled={
-                                                    index ===
-                                                    questions.length - 1
-                                                }
-                                                onClick={() =>
-                                                    moveQuestion(index, 1)
-                                                }
-                                                title="Move question down"
-                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
-                                            >
-                                                ↓
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    duplicateQuestion(index)
-                                                }
-                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4d5a4f] hover:bg-[#f4f6f2]"
-                                            >
-                                                Duplicate
-                                            </button>
-                                            {questions.length > 1 && (
+                                            {/* Cohort & Schedule Badges */}
+                                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[#7c847a]">
+                                                <span className="rounded bg-[#f6f7f4] px-2 py-0.5 font-medium">
+                                                    {hasCohortRules
+                                                        ? [
+                                                            survey
+                                                                .target_department_ids
+                                                                ?.length
+                                                                ? `${survey.target_department_ids.length} dept(s)`
+                                                                : null,
+                                                            survey.target_program_ids
+                                                                ?.length
+                                                                ? `${survey.target_program_ids.length} program(s)`
+                                                                : null,
+                                                            survey
+                                                                .target_graduation_years
+                                                                ?.length
+                                                                ? `Batches: ${survey.target_graduation_years.join(', ')}`
+                                                                : null,
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(' · ')
+                                                        : 'All alumni cohorts'}
+                                                </span>
+                                                {survey.starts_at && (
+                                                    <span>
+                                                        Opens{' '}
+                                                        {new Date(
+                                                            survey.starts_at,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                                {survey.closes_at && (
+                                                    <span>
+                                                        Closes{' '}
+                                                        {new Date(
+                                                            survey.closes_at,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {canViewAnalytics && (
                                                 <button
                                                     type="button"
                                                     onClick={() =>
-                                                        removeQuestion(index)
+                                                        void toggleAnalytics(survey.id)
                                                     }
-                                                    className="rounded-lg border border-[#ecd8d2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#fcf5f3]"
+                                                    className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-2 text-[11px] font-semibold text-[#3f5242] hover:bg-[#eff2ed]"
                                                 >
-                                                    Delete
+                                                    {activeAnalyticsId === survey.id
+                                                        ? 'Hide analytics'
+                                                        : 'Analytics'}
                                                 </button>
                                             )}
-                                            <div className="mx-1 h-4 w-px bg-[#e3e7df]" />
-                                            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#4d5a4f]">
-                                                <span>Required</span>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={
-                                                        question.is_required
+                                            {canManage &&
+                                                (survey.responses_count ?? 0) === 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            openEditSurvey(survey)
+                                                        }
+                                                        className="rounded-lg border border-[#e3e7df] bg-white px-3 py-2 text-[11px] font-semibold text-[#526054] hover:bg-[#f6f7f4]"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                )}
+                                            {canManage && survey.status === 'draft' ? (
+                                                <button
+                                                    type="button"
+                                                    disabled={publishing === survey.id}
+                                                    onClick={() =>
+                                                        void publishSurvey(survey.id)
                                                     }
-                                                    onChange={(e) =>
-                                                        updateQuestion(index, {
-                                                            is_required:
-                                                                e.target
-                                                                    .checked,
-                                                        })
+                                                    className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                                                >
+                                                    {publishing === survey.id
+                                                        ? 'Publishing…'
+                                                        : 'Publish'}
+                                                </button>
+                                            ) : null}
+                                            {canManage &&
+                                                survey.status === 'published' ? (
+                                                <button
+                                                    type="button"
+                                                    disabled={closing === survey.id}
+                                                    onClick={() =>
+                                                        void closeSurvey(survey.id)
                                                     }
-                                                    className="size-4 accent-[#2b5139]"
-                                                />
-                                            </label>
+                                                    className="rounded-lg border border-[#ecd8d2] bg-white px-3 py-2 text-[11px] font-semibold text-[#8b4e43] disabled:opacity-60"
+                                                >
+                                                    {closing === survey.id
+                                                        ? 'Closing…'
+                                                        : 'Close survey'}
+                                                </button>
+                                            ) : null}
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
 
-                        {/* Google Forms Floating-Style Bottom Add Bar */}
-                        <div className="flex items-center justify-between rounded-xl border border-[#dce3d9] bg-white px-4 py-3 shadow-2xs">
-                            <button
-                                type="button"
-                                onClick={addQuestion}
-                                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#edf2eb] px-4 text-xs font-bold text-[#2b5139] transition hover:bg-[#dfe8dc]"
-                            >
-                                ⊕ Add question
-                            </button>
-                            <div className="flex items-center gap-2">
+                                    {canManage ? (
+                                        <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
+                                            {survey.questions.map((question, qIdx) => (
+                                                <li
+                                                    key={question.id}
+                                                    className="text-[11px] text-[#6f786e]"
+                                                >
+                                                    {qIdx + 1}. {question.prompt}{' '}
+                                                    <span className="text-[#969c94]">
+                                                        ·{' '}
+                                                        {QUESTION_TYPE_LABELS[
+                                                            question.type
+                                                        ] ?? question.type}
+                                                        {question.is_required
+                                                            ? ' (Required)'
+                                                            : ' (Optional)'}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : canRespond && survey.has_responded ? (
+                                        <p className="mt-3 border-t border-[#eff0ec] pt-3 text-xs font-medium text-[#587057]">
+                                            Your response has been submitted.
+                                        </p>
+                                    ) : canRespond ? (
+                                        <SurveyResponseForm
+                                            survey={survey}
+                                            onSubmitted={reload}
+                                        />
+                                    ) : (
+                                        <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
+                                            {survey.questions.map((question, qIdx) => (
+                                                <li
+                                                    key={question.id}
+                                                    className="text-[11px] text-[#6f786e]"
+                                                >
+                                                    {qIdx + 1}. {question.prompt}{' '}
+                                                    <span className="text-[#969c94]">
+                                                        ·{' '}
+                                                        {QUESTION_TYPE_LABELS[
+                                                            question.type
+                                                        ] ?? question.type}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+
+                                    {/* Inline Survey Analytics Breakdown */}
+                                    {activeAnalyticsId === survey.id && (
+                                        <div className="mt-4 rounded-xl border border-[#dfe6dc] bg-[#f8faf7] p-4">
+                                            {analyticsLoading ? (
+                                                <p className="text-xs text-[#6e776d]">
+                                                    Loading survey response analytics…
+                                                </p>
+                                            ) : analyticsData ? (
+                                                <div className="space-y-4">
+                                                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5eae2] pb-2.5">
+                                                        <h3 className="text-xs font-bold text-[#2b5139] uppercase">
+                                                            Response Analytics ·{' '}
+                                                            {
+                                                                analyticsData.total_responses
+                                                            }{' '}
+                                                            Total Submissions
+                                                        </h3>
+                                                        <span className="text-[11px] text-[#687267]">
+                                                            {analyticsData.is_anonymous
+                                                                ? 'Anonymous mode active'
+                                                                : 'Identifiable responses'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid gap-3 md:grid-cols-2">
+                                                        {analyticsData.questions.map(
+                                                            (q) => (
+                                                                <div
+                                                                    key={q.id}
+                                                                    className="rounded-xl border border-[#e6eae3] bg-white p-3.5"
+                                                                >
+                                                                    <div className="flex items-start justify-between gap-2">
+                                                                        <p className="text-xs font-semibold text-[#314034]">
+                                                                            {q.prompt}
+                                                                        </p>
+                                                                        <span className="shrink-0 text-[10px] font-medium text-[#69866c]">
+                                                                            {
+                                                                                q.answered_count
+                                                                            }{' '}
+                                                                            answered (
+                                                                            {
+                                                                                q.response_rate
+                                                                            }
+                                                                            %)
+                                                                        </span>
+                                                                    </div>
+                                                                    {q.distribution
+                                                                        .length > 0 ? (
+                                                                        <div className="mt-2.5 space-y-1.5">
+                                                                            {q.distribution.map(
+                                                                                (d) => (
+                                                                                    <div
+                                                                                        key={
+                                                                                            d.label
+                                                                                        }
+                                                                                        className="text-[11px]"
+                                                                                    >
+                                                                                        <div className="flex justify-between text-[#556156]">
+                                                                                            <span className="truncate">
+                                                                                                {
+                                                                                                    d.label
+                                                                                                }
+                                                                                            </span>
+                                                                                            <span className="font-semibold">
+                                                                                                {
+                                                                                                    d.count
+                                                                                                }{' '}
+                                                                                                (
+                                                                                                {
+                                                                                                    d.percentage
+                                                                                                }
+                                                                                                %)
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#eef1ec]">
+                                                                                            <div
+                                                                                                className="h-full rounded-full bg-[#4b7254]"
+                                                                                                style={{
+                                                                                                    width: `${Math.min(100, d.percentage)}%`,
+                                                                                                }}
+                                                                                            />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ),
+                                                                            )}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <p className="mt-2 text-[11px] text-[#8a9289]">
+                                                                            No responses
+                                                                            recorded for
+                                                                            this
+                                                                            question
+                                                                            yet.
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    )}
+                                </article>
+                            );
+                        })
+                    ) : (
+                        <EmptyState>
+                            {canManage
+                                ? 'No surveys have been created yet.'
+                                : 'There are no open surveys right now.'}
+                        </EmptyState>
+                    )}
+                </div>
+            );
+        }
+
+        export function AnnouncementCenter({
+            role,
+            createOpen,
+            onCloseCreate,
+        }: {
+            role: WorkspaceRole;
+            createOpen: boolean;
+            onCloseCreate: () => void;
+        }) {
+            const canManage = role === 'Administrator' || role === 'Alumni coordinator';
+            const { data, loading, error, reload } = useApiResource<
+                ApiEnvelope<RawPagination<Announcement>>
+            >(canManage ? '/api/announcements/manage' : '/api/announcements');
+            const [form, setForm] = useState({
+                title: '',
+                body: '',
+                audience_roles: [] as string[],
+            });
+            const [creating, setCreating] = useState(false);
+            const [publishing, setPublishing] = useState<number | null>(null);
+
+            async function createAnnouncement(event: FormEvent<HTMLFormElement>) {
+                event.preventDefault();
+                setCreating(true);
+                try {
+                    await apiRequest<ApiEnvelope<Announcement>>('/api/announcements', {
+                        method: 'POST',
+                        body: {
+                            title: form.title,
+                            body: form.body,
+                            audience_roles: form.audience_roles.length
+                                ? form.audience_roles
+                                : null,
+                        },
+                    });
+                    setForm({ title: '', body: '', audience_roles: [] });
+                    onCloseCreate();
+                    reload();
+                    toast.success('Announcement created as a draft.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Announcement could not be created.',
+                    );
+                } finally {
+                    setCreating(false);
+                }
+            }
+
+            async function publishAnnouncement(id: number) {
+                setPublishing(id);
+                try {
+                    await apiRequest<ApiEnvelope<Announcement>>(
+                        `/api/announcements/${id}/publish`,
+                        { method: 'POST' },
+                    );
+                    reload();
+                    toast.success('Announcement published.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Announcement could not be published.',
+                    );
+                } finally {
+                    setPublishing(null);
+                }
+            }
+
+            if (loading) {
+                return <LoadingState />;
+            }
+
+            if (error) {
+                return <ErrorState message={error} />;
+            }
+
+            const announcements = data?.data.data ?? [];
+            return (
+                <div className="space-y-3">
+                    {canManage && createOpen ? (
+                        <form
+                            onSubmit={createAnnouncement}
+                            className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                        >
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Title
+                                <input
+                                    required
+                                    value={form.title}
+                                    onChange={(event) =>
+                                        setForm({ ...form, title: event.target.value })
+                                    }
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                />
+                            </label>
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Announcement
+                                <textarea
+                                    required
+                                    value={form.body}
+                                    onChange={(event) =>
+                                        setForm({ ...form, body: event.target.value })
+                                    }
+                                    className="mt-1.5 min-h-28 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                                />
+                            </label>
+                            <fieldset className="flex flex-wrap gap-4 text-xs text-[#687267]">
+                                <legend className="mb-2 font-medium text-[#4d5a4f]">
+                                    Audience (leave blank for all authenticated users)
+                                </legend>
+                                {[
+                                    ['alumni', 'Alumni'],
+                                    ['employer', 'Employers'],
+                                    ['alumni-coordinator', 'Alumni coordinators'],
+                                    [
+                                        'department-coordinator',
+                                        'Department coordinators',
+                                    ],
+                                ].map(([value, label]) => (
+                                    <label
+                                        key={value}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={form.audience_roles.includes(
+                                                value,
+                                            )}
+                                            onChange={(event) =>
+                                                setForm({
+                                                    ...form,
+                                                    audience_roles: event.target.checked
+                                                        ? [
+                                                            ...form.audience_roles,
+                                                            value,
+                                                        ]
+                                                        : form.audience_roles.filter(
+                                                            (item) => item !== value,
+                                                        ),
+                                                })
+                                            }
+                                        />
+                                        {label}
+                                    </label>
+                                ))}
+                            </fieldset>
+                            <div className="flex items-center justify-end gap-2">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        resetBuilder();
-                                        onCloseCreate();
-                                    }}
-                                    className="h-9 rounded-lg border border-[#e3e7df] px-3 text-xs font-medium text-[#687267]"
+                                    onClick={onCloseCreate}
+                                    className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={creating}
-                                    className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
                                 >
-                                    {creating
-                                        ? 'Saving…'
-                                        : editingSurveyId !== null
-                                          ? 'Save changes'
-                                          : 'Create survey'}
+                                    {creating ? 'Saving…' : 'Create announcement'}
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                </form>
-            ) : null}
-
-            {surveys.length ? (
-                surveys.map((survey) => {
-                    const hasCohortRules = Boolean(
-                        survey.target_department_ids?.length ||
-                            survey.target_program_ids?.length ||
-                            survey.target_graduation_years?.length,
-                    );
-
-                    return (
-                        <article
-                            key={survey.id}
-                            className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
-                        >
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                        </form>
+                    ) : null}
+                    {announcements.length ? (
+                        announcements.map((announcement) => (
+                            <article
+                                key={announcement.id}
+                                className="flex flex-col gap-4 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-start sm:p-5"
+                            >
+                                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef2eb] text-[#5e795f]">
+                                    <MessageSquareText className="size-4" />
+                                </span>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <h2 className="text-sm font-semibold text-[#39463b]">
-                                            {survey.title}
+                                            {announcement.title}
                                         </h2>
                                         <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                            {survey.status}
+                                            {announcement.status}
                                         </span>
-                                        {survey.is_anonymous && (
-                                            <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-semibold text-[#2b5139]">
-                                                Anonymous
-                                            </span>
-                                        )}
-                                        {survey.responses_count !==
-                                            undefined && (
-                                            <span className="rounded-full bg-[#f4f5f2] px-2.5 py-1 text-[10px] font-semibold text-[#546055]">
-                                                {survey.responses_count}{' '}
-                                                {survey.responses_count === 1
-                                                    ? 'response'
-                                                    : 'responses'}
-                                            </span>
-                                        )}
                                     </div>
-                                    {survey.description ? (
-                                        <p className="mt-1 text-xs leading-5 text-[#7a8278]">
-                                            {survey.description}
-                                        </p>
-                                    ) : null}
-
-                                    {/* Cohort & Schedule Badges */}
-                                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[#7c847a]">
-                                        <span className="rounded bg-[#f6f7f4] px-2 py-0.5 font-medium">
-                                            {hasCohortRules
-                                                ? [
-                                                      survey
-                                                          .target_department_ids
-                                                          ?.length
-                                                          ? `${survey.target_department_ids.length} dept(s)`
-                                                          : null,
-                                                      survey.target_program_ids
-                                                          ?.length
-                                                          ? `${survey.target_program_ids.length} program(s)`
-                                                          : null,
-                                                      survey
-                                                          .target_graduation_years
-                                                          ?.length
-                                                          ? `Batches: ${survey.target_graduation_years.join(', ')}`
-                                                          : null,
-                                                  ]
-                                                      .filter(Boolean)
-                                                      .join(' · ')
-                                                : 'All alumni cohorts'}
-                                        </span>
-                                        {survey.starts_at && (
-                                            <span>
-                                                Opens{' '}
-                                                {new Date(
-                                                    survey.starts_at,
-                                                ).toLocaleDateString()}
-                                            </span>
-                                        )}
-                                        {survey.closes_at && (
-                                            <span>
-                                                Closes{' '}
-                                                {new Date(
-                                                    survey.closes_at,
-                                                ).toLocaleDateString()}
-                                            </span>
-                                        )}
-                                    </div>
+                                    <p className="mt-1 text-xs leading-5 whitespace-pre-line text-[#7a8278]">
+                                        {announcement.body}
+                                    </p>
+                                    <p className="mt-2 text-[10px] text-[#858b82]">
+                                        {announcement.published_at
+                                            ? `Published ${new Date(announcement.published_at).toLocaleDateString()}`
+                                            : `Created ${new Date(announcement.created_at).toLocaleDateString()}`}
+                                    </p>
                                 </div>
+                                {canManage && announcement.status === 'draft' ? (
+                                    <button
+                                        type="button"
+                                        disabled={publishing === announcement.id}
+                                        onClick={() =>
+                                            void publishAnnouncement(announcement.id)
+                                        }
+                                        className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                                    >
+                                        {publishing === announcement.id
+                                            ? 'Publishing…'
+                                            : 'Publish'}
+                                    </button>
+                                ) : null}
+                            </article>
+                        ))
+                    ) : (
+                        <EmptyState>
+                            {canManage
+                                ? 'No announcements have been created yet.'
+                                : 'No announcements are available for your audience.'}
+                        </EmptyState>
+                    )}
+                </div>
+            );
+        }
 
-                                <div className="flex flex-wrap items-center gap-2">
-                                    {canViewAnalytics && (
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                void toggleAnalytics(survey.id)
-                                            }
-                                            className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-2 text-[11px] font-semibold text-[#3f5242] hover:bg-[#eff2ed]"
-                                        >
-                                            {activeAnalyticsId === survey.id
-                                                ? 'Hide analytics'
-                                                : 'Analytics'}
-                                        </button>
-                                    )}
-                                    {canManage &&
-                                        (survey.responses_count ?? 0) === 0 && (
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    openEditSurvey(survey)
-                                                }
-                                                className="rounded-lg border border-[#e3e7df] bg-white px-3 py-2 text-[11px] font-semibold text-[#526054] hover:bg-[#f6f7f4]"
-                                            >
-                                                Edit
-                                            </button>
-                                        )}
-                                    {canManage && survey.status === 'draft' ? (
-                                        <button
-                                            type="button"
-                                            disabled={publishing === survey.id}
-                                            onClick={() =>
-                                                void publishSurvey(survey.id)
-                                            }
-                                            className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
-                                        >
-                                            {publishing === survey.id
-                                                ? 'Publishing…'
-                                                : 'Publish'}
-                                        </button>
-                                    ) : null}
-                                    {canManage &&
-                                    survey.status === 'published' ? (
-                                        <button
-                                            type="button"
-                                            disabled={closing === survey.id}
-                                            onClick={() =>
-                                                void closeSurvey(survey.id)
-                                            }
-                                            className="rounded-lg border border-[#ecd8d2] bg-white px-3 py-2 text-[11px] font-semibold text-[#8b4e43] disabled:opacity-60"
-                                        >
-                                            {closing === survey.id
-                                                ? 'Closing…'
-                                                : 'Close survey'}
-                                        </button>
-                                    ) : null}
-                                </div>
-                            </div>
+        export function EmployerDirectory() {
+            const { data, loading, error, reload } =
+                useApiResource<ApiEnvelope<RawPagination<Employer>>>('/api/employers');
+            const [reviewing, setReviewing] = useState<number | null>(null);
 
-                            {canManage ? (
-                                <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
-                                    {survey.questions.map((question, qIdx) => (
-                                        <li
-                                            key={question.id}
-                                            className="text-[11px] text-[#6f786e]"
-                                        >
-                                            {qIdx + 1}. {question.prompt}{' '}
-                                            <span className="text-[#969c94]">
-                                                ·{' '}
-                                                {QUESTION_TYPE_LABELS[
-                                                    question.type
-                                                ] ?? question.type}
-                                                {question.is_required
-                                                    ? ' (Required)'
-                                                    : ' (Optional)'}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : canRespond && survey.has_responded ? (
-                                <p className="mt-3 border-t border-[#eff0ec] pt-3 text-xs font-medium text-[#587057]">
-                                    Your response has been submitted.
-                                </p>
-                            ) : canRespond ? (
-                                <SurveyResponseForm
-                                    survey={survey}
-                                    onSubmitted={reload}
-                                />
-                            ) : (
-                                <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
-                                    {survey.questions.map((question, qIdx) => (
-                                        <li
-                                            key={question.id}
-                                            className="text-[11px] text-[#6f786e]"
-                                        >
-                                            {qIdx + 1}. {question.prompt}{' '}
-                                            <span className="text-[#969c94]">
-                                                ·{' '}
-                                                {QUESTION_TYPE_LABELS[
-                                                    question.type
-                                                ] ?? question.type}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-
-                            {/* Inline Survey Analytics Breakdown */}
-                            {activeAnalyticsId === survey.id && (
-                                <div className="mt-4 rounded-xl border border-[#dfe6dc] bg-[#f8faf7] p-4">
-                                    {analyticsLoading ? (
-                                        <p className="text-xs text-[#6e776d]">
-                                            Loading survey response analytics…
-                                        </p>
-                                    ) : analyticsData ? (
-                                        <div className="space-y-4">
-                                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5eae2] pb-2.5">
-                                                <h3 className="text-xs font-bold text-[#2b5139] uppercase">
-                                                    Response Analytics ·{' '}
-                                                    {
-                                                        analyticsData.total_responses
-                                                    }{' '}
-                                                    Total Submissions
-                                                </h3>
-                                                <span className="text-[11px] text-[#687267]">
-                                                    {analyticsData.is_anonymous
-                                                        ? 'Anonymous mode active'
-                                                        : 'Identifiable responses'}
-                                                </span>
-                                            </div>
-                                            <div className="grid gap-3 md:grid-cols-2">
-                                                {analyticsData.questions.map(
-                                                    (q) => (
-                                                        <div
-                                                            key={q.id}
-                                                            className="rounded-xl border border-[#e6eae3] bg-white p-3.5"
-                                                        >
-                                                            <div className="flex items-start justify-between gap-2">
-                                                                <p className="text-xs font-semibold text-[#314034]">
-                                                                    {q.prompt}
-                                                                </p>
-                                                                <span className="shrink-0 text-[10px] font-medium text-[#69866c]">
-                                                                    {
-                                                                        q.answered_count
-                                                                    }{' '}
-                                                                    answered (
-                                                                    {
-                                                                        q.response_rate
-                                                                    }
-                                                                    %)
-                                                                </span>
-                                                            </div>
-                                                            {q.distribution
-                                                                .length > 0 ? (
-                                                                <div className="mt-2.5 space-y-1.5">
-                                                                    {q.distribution.map(
-                                                                        (d) => (
-                                                                            <div
-                                                                                key={
-                                                                                    d.label
-                                                                                }
-                                                                                className="text-[11px]"
-                                                                            >
-                                                                                <div className="flex justify-between text-[#556156]">
-                                                                                    <span className="truncate">
-                                                                                        {
-                                                                                            d.label
-                                                                                        }
-                                                                                    </span>
-                                                                                    <span className="font-semibold">
-                                                                                        {
-                                                                                            d.count
-                                                                                        }{' '}
-                                                                                        (
-                                                                                        {
-                                                                                            d.percentage
-                                                                                        }
-                                                                                        %)
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#eef1ec]">
-                                                                                    <div
-                                                                                        className="h-full rounded-full bg-[#4b7254]"
-                                                                                        style={{
-                                                                                            width: `${Math.min(100, d.percentage)}%`,
-                                                                                        }}
-                                                                                    />
-                                                                                </div>
-                                                                            </div>
-                                                                        ),
-                                                                    )}
-                                                                </div>
-                                                            ) : (
-                                                                <p className="mt-2 text-[11px] text-[#8a9289]">
-                                                                    No responses
-                                                                    recorded for
-                                                                    this
-                                                                    question
-                                                                    yet.
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    ),
-                                                )}
-                                            </div>
-                                        </div>
-                                    ) : null}
-                                </div>
-                            )}
-                        </article>
+            async function reviewEmployer(
+                employerId: number,
+                verificationStatus: 'verified' | 'rejected',
+            ) {
+                setReviewing(employerId);
+                try {
+                    await apiRequest<ApiEnvelope<Employer>>(
+                        `/api/employers/${employerId}/verification`,
+                        {
+                            method: 'PATCH',
+                            body: { verification_status: verificationStatus },
+                        },
                     );
-                })
+                    reload();
+                    toast.success(`Employer ${verificationStatus}.`);
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Employer review could not be saved.',
+                    );
+                } finally {
+                    setReviewing(null);
+                }
+            }
+
+            if (loading) {
+                return <LoadingState />;
+            }
+
+            if (error) {
+                return <ErrorState message={error} />;
+            }
+
+            const employers = data?.data.data ?? [];
+            return employers.length ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                    {employers.map((employer) => (
+                        <article
+                            key={employer.id}
+                            className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <h2 className="text-sm font-semibold text-[#39463b]">
+                                        {employer.company_name}
+                                    </h2>
+                                    <p className="mt-1 text-xs text-[#7a8278]">
+                                        {employer.industry ?? 'Industry not listed'}
+                                    </p>
+                                </div>
+                                <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                                    {employer.verification_status}
+                                </span>
+                            </div>
+                            <p className="mt-4 text-xs text-[#7a8278]">
+                                {employer.contact_email}
+                            </p>
+                            {employer.verification_status === 'pending' ? (
+                                <div className="mt-4 flex justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        disabled={reviewing === employer.id}
+                                        onClick={() =>
+                                            void reviewEmployer(employer.id, 'rejected')
+                                        }
+                                        className="rounded-lg border border-[#e8eae4] px-3 py-2 text-[11px] font-semibold text-[#7e564e] disabled:opacity-60"
+                                    >
+                                        Reject
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={reviewing === employer.id}
+                                        onClick={() =>
+                                            void reviewEmployer(employer.id, 'verified')
+                                        }
+                                        className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                                    >
+                                        Verify
+                                    </button>
+                                </div>
+                            ) : null}
+                        </article>
+                    ))}
+                </div>
             ) : (
-                <EmptyState>
-                    {canManage
-                        ? 'No surveys have been created yet.'
-                        : 'There are no open surveys right now.'}
-                </EmptyState>
-            )}
-        </div>
-    );
-}
-
-export function AnnouncementCenter({
-    role,
-    createOpen,
-    onCloseCreate,
-}: {
-    role: WorkspaceRole;
-    createOpen: boolean;
-    onCloseCreate: () => void;
-}) {
-    const canManage = role === 'Administrator' || role === 'Alumni coordinator';
-    const { data, loading, error, reload } = useApiResource<
-        ApiEnvelope<RawPagination<Announcement>>
-    >(canManage ? '/api/announcements/manage' : '/api/announcements');
-    const [form, setForm] = useState({
-        title: '',
-        body: '',
-        audience_roles: [] as string[],
-    });
-    const [creating, setCreating] = useState(false);
-    const [publishing, setPublishing] = useState<number | null>(null);
-
-    async function createAnnouncement(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setCreating(true);
-        try {
-            await apiRequest<ApiEnvelope<Announcement>>('/api/announcements', {
-                method: 'POST',
-                body: {
-                    title: form.title,
-                    body: form.body,
-                    audience_roles: form.audience_roles.length
-                        ? form.audience_roles
-                        : null,
-                },
-            });
-            setForm({ title: '', body: '', audience_roles: [] });
-            onCloseCreate();
-            reload();
-            toast.success('Announcement created as a draft.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Announcement could not be created.',
+                <EmptyState>No employer records were found.</EmptyState>
             );
-        } finally {
-            setCreating(false);
         }
-    }
 
-    async function publishAnnouncement(id: number) {
-        setPublishing(id);
-        try {
-            await apiRequest<ApiEnvelope<Announcement>>(
-                `/api/announcements/${id}/publish`,
-                { method: 'POST' },
+        type EmployerForm = {
+            company_name: string;
+            website: string;
+            description: string;
+            industry: string;
+            registration_number: string;
+            contact_email: string;
+            contact_phone: string;
+            address: string;
+        };
+
+        const emptyEmployerForm: EmployerForm = {
+            company_name: '',
+            website: '',
+            description: '',
+            industry: '',
+            registration_number: '',
+            contact_email: '',
+            contact_phone: '',
+            address: '',
+        };
+
+        export function CompanyProfileCenter({
+            editOpen,
+            onCloseEdit,
+        }: {
+            editOpen: boolean;
+            onCloseEdit: () => void;
+        }) {
+            const employers = useApiResource<ApiEnvelope<Employer[]>>(
+                '/api/employers/mine',
             );
-            reload();
-            toast.success('Announcement published.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Announcement could not be published.',
+            const employerId = employers.data?.data[0]?.id;
+            const profile = useApiResource<ApiEnvelope<Employer>>(
+                employerId ? `/api/employers/${employerId}` : null,
             );
-        } finally {
-            setPublishing(null);
-        }
-    }
+            const employer = profile.data?.data;
+            const showForm = editOpen || !employerId;
+            const [form, setForm] = useState(emptyEmployerForm);
+            const [saving, setSaving] = useState(false);
 
-    if (loading) {
-        return <LoadingState />;
-    }
+            useEffect(() => {
+                if (employer) {
+                    setForm({
+                        company_name: employer.company_name,
+                        website: employer.website ?? '',
+                        description: employer.description ?? '',
+                        industry: employer.industry ?? '',
+                        registration_number: employer.registration_number ?? '',
+                        contact_email: employer.contact_email,
+                        contact_phone: employer.contact_phone ?? '',
+                        address: employer.address ?? '',
+                    });
+                }
+            }, [employer]);
 
-    if (error) {
-        return <ErrorState message={error} />;
-    }
+            async function saveCompany(event: FormEvent<HTMLFormElement>) {
+                event.preventDefault();
+                setSaving(true);
+                const body = Object.fromEntries(
+                    Object.entries(form).map(([key, value]) => [key, value || null]),
+                );
 
-    const announcements = data?.data.data ?? [];
-    return (
-        <div className="space-y-3">
-            {canManage && createOpen ? (
-                <form
-                    onSubmit={createAnnouncement}
-                    className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
-                >
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Title
-                        <input
-                            required
-                            value={form.title}
-                            onChange={(event) =>
-                                setForm({ ...form, title: event.target.value })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                        />
-                    </label>
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Announcement
-                        <textarea
-                            required
-                            value={form.body}
-                            onChange={(event) =>
-                                setForm({ ...form, body: event.target.value })
-                            }
-                            className="mt-1.5 min-h-28 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                        />
-                    </label>
-                    <fieldset className="flex flex-wrap gap-4 text-xs text-[#687267]">
-                        <legend className="mb-2 font-medium text-[#4d5a4f]">
-                            Audience (leave blank for all authenticated users)
-                        </legend>
-                        {[
-                            ['alumni', 'Alumni'],
-                            ['employer', 'Employers'],
-                            ['alumni-coordinator', 'Alumni coordinators'],
-                            [
-                                'department-coordinator',
-                                'Department coordinators',
-                            ],
-                        ].map(([value, label]) => (
-                            <label
-                                key={value}
-                                className="flex items-center gap-2"
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={form.audience_roles.includes(
-                                        value,
-                                    )}
+                try {
+                    if (employerId) {
+                        await apiRequest<ApiEnvelope<Employer>>(
+                            `/api/employers/${employerId}`,
+                            { method: 'PATCH', body },
+                        );
+                        profile.reload();
+                        toast.success('Company profile updated.');
+                    } else {
+                        await apiRequest<ApiEnvelope<Employer>>('/api/employers', {
+                            method: 'POST',
+                            body,
+                        });
+                        employers.reload();
+                        toast.success('Company submitted for verification.');
+                    }
+                    onCloseEdit();
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Company profile could not be saved.',
+                    );
+                } finally {
+                    setSaving(false);
+                }
+            }
+
+            if (employers.loading || (employerId !== undefined && profile.loading)) {
+                return <LoadingState />;
+            }
+
+            if (employers.error) {
+                return <ErrorState message={employers.error} />;
+            }
+
+            if (profile.error) {
+                return <ErrorState message={profile.error} />;
+            }
+
+            return (
+                <div className="space-y-4">
+                    {showForm ? (
+                        <form
+                            onSubmit={saveCompany}
+                            className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
+                        >
+                            {(
+                                [
+                                    ['company_name', 'Company name', 'text'],
+                                    ['contact_email', 'Contact email', 'email'],
+                                    ['website', 'Website', 'url'],
+                                    ['industry', 'Industry', 'text'],
+                                    [
+                                        'registration_number',
+                                        'Registration number',
+                                        'text',
+                                    ],
+                                    ['contact_phone', 'Contact phone', 'tel'],
+                                ] as const
+                            ).map(([name, label, type]) => (
+                                <label
+                                    key={name}
+                                    className="text-xs font-medium text-[#4d5a4f]"
+                                >
+                                    {label}
+                                    <input
+                                        type={type}
+                                        required={[
+                                            'company_name',
+                                            'contact_email',
+                                        ].includes(name)}
+                                        value={form[name]}
+                                        onChange={(event) =>
+                                            setForm({
+                                                ...form,
+                                                [name]: event.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                    />
+                                </label>
+                            ))}
+                            <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                                Description
+                                <textarea
+                                    value={form.description}
                                     onChange={(event) =>
                                         setForm({
                                             ...form,
-                                            audience_roles: event.target.checked
-                                                ? [
-                                                      ...form.audience_roles,
-                                                      value,
-                                                  ]
-                                                : form.audience_roles.filter(
-                                                      (item) => item !== value,
-                                                  ),
+                                            description: event.target.value,
                                         })
                                     }
-                                />
-                                {label}
-                            </label>
-                        ))}
-                    </fieldset>
-                    <div className="flex items-center justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={onCloseCreate}
-                            className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={creating}
-                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                            {creating ? 'Saving…' : 'Create announcement'}
-                        </button>
-                    </div>
-                </form>
-            ) : null}
-            {announcements.length ? (
-                announcements.map((announcement) => (
-                    <article
-                        key={announcement.id}
-                        className="flex flex-col gap-4 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-start sm:p-5"
-                    >
-                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#eef2eb] text-[#5e795f]">
-                            <MessageSquareText className="size-4" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <h2 className="text-sm font-semibold text-[#39463b]">
-                                    {announcement.title}
-                                </h2>
-                                <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                    {announcement.status}
-                                </span>
-                            </div>
-                            <p className="mt-1 text-xs leading-5 whitespace-pre-line text-[#7a8278]">
-                                {announcement.body}
-                            </p>
-                            <p className="mt-2 text-[10px] text-[#858b82]">
-                                {announcement.published_at
-                                    ? `Published ${new Date(announcement.published_at).toLocaleDateString()}`
-                                    : `Created ${new Date(announcement.created_at).toLocaleDateString()}`}
-                            </p>
-                        </div>
-                        {canManage && announcement.status === 'draft' ? (
-                            <button
-                                type="button"
-                                disabled={publishing === announcement.id}
-                                onClick={() =>
-                                    void publishAnnouncement(announcement.id)
-                                }
-                                className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
-                            >
-                                {publishing === announcement.id
-                                    ? 'Publishing…'
-                                    : 'Publish'}
-                            </button>
-                        ) : null}
-                    </article>
-                ))
-            ) : (
-                <EmptyState>
-                    {canManage
-                        ? 'No announcements have been created yet.'
-                        : 'No announcements are available for your audience.'}
-                </EmptyState>
-            )}
-        </div>
-    );
-}
-
-export function EmployerDirectory() {
-    const { data, loading, error, reload } =
-        useApiResource<ApiEnvelope<RawPagination<Employer>>>('/api/employers');
-    const [reviewing, setReviewing] = useState<number | null>(null);
-
-    async function reviewEmployer(
-        employerId: number,
-        verificationStatus: 'verified' | 'rejected',
-    ) {
-        setReviewing(employerId);
-        try {
-            await apiRequest<ApiEnvelope<Employer>>(
-                `/api/employers/${employerId}/verification`,
-                {
-                    method: 'PATCH',
-                    body: { verification_status: verificationStatus },
-                },
-            );
-            reload();
-            toast.success(`Employer ${verificationStatus}.`);
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Employer review could not be saved.',
-            );
-        } finally {
-            setReviewing(null);
-        }
-    }
-
-    if (loading) {
-        return <LoadingState />;
-    }
-
-    if (error) {
-        return <ErrorState message={error} />;
-    }
-
-    const employers = data?.data.data ?? [];
-    return employers.length ? (
-        <div className="grid gap-3 md:grid-cols-2">
-            {employers.map((employer) => (
-                <article
-                    key={employer.id}
-                    className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
-                >
-                    <div className="flex items-start justify-between gap-3">
-                        <div>
-                            <h2 className="text-sm font-semibold text-[#39463b]">
-                                {employer.company_name}
-                            </h2>
-                            <p className="mt-1 text-xs text-[#7a8278]">
-                                {employer.industry ?? 'Industry not listed'}
-                            </p>
-                        </div>
-                        <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                            {employer.verification_status}
-                        </span>
-                    </div>
-                    <p className="mt-4 text-xs text-[#7a8278]">
-                        {employer.contact_email}
-                    </p>
-                    {employer.verification_status === 'pending' ? (
-                        <div className="mt-4 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                disabled={reviewing === employer.id}
-                                onClick={() =>
-                                    void reviewEmployer(employer.id, 'rejected')
-                                }
-                                className="rounded-lg border border-[#e8eae4] px-3 py-2 text-[11px] font-semibold text-[#7e564e] disabled:opacity-60"
-                            >
-                                Reject
-                            </button>
-                            <button
-                                type="button"
-                                disabled={reviewing === employer.id}
-                                onClick={() =>
-                                    void reviewEmployer(employer.id, 'verified')
-                                }
-                                className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
-                            >
-                                Verify
-                            </button>
-                        </div>
-                    ) : null}
-                </article>
-            ))}
-        </div>
-    ) : (
-        <EmptyState>No employer records were found.</EmptyState>
-    );
-}
-
-type EmployerForm = {
-    company_name: string;
-    website: string;
-    description: string;
-    industry: string;
-    registration_number: string;
-    contact_email: string;
-    contact_phone: string;
-    address: string;
-};
-
-const emptyEmployerForm: EmployerForm = {
-    company_name: '',
-    website: '',
-    description: '',
-    industry: '',
-    registration_number: '',
-    contact_email: '',
-    contact_phone: '',
-    address: '',
-};
-
-export function CompanyProfileCenter({
-    editOpen,
-    onCloseEdit,
-}: {
-    editOpen: boolean;
-    onCloseEdit: () => void;
-}) {
-    const employers = useApiResource<ApiEnvelope<Employer[]>>(
-        '/api/employers/mine',
-    );
-    const employerId = employers.data?.data[0]?.id;
-    const profile = useApiResource<ApiEnvelope<Employer>>(
-        employerId ? `/api/employers/${employerId}` : null,
-    );
-    const employer = profile.data?.data;
-    const showForm = editOpen || !employerId;
-    const [form, setForm] = useState(emptyEmployerForm);
-    const [saving, setSaving] = useState(false);
-
-    useEffect(() => {
-        if (employer) {
-            setForm({
-                company_name: employer.company_name,
-                website: employer.website ?? '',
-                description: employer.description ?? '',
-                industry: employer.industry ?? '',
-                registration_number: employer.registration_number ?? '',
-                contact_email: employer.contact_email,
-                contact_phone: employer.contact_phone ?? '',
-                address: employer.address ?? '',
-            });
-        }
-    }, [employer]);
-
-    async function saveCompany(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setSaving(true);
-        const body = Object.fromEntries(
-            Object.entries(form).map(([key, value]) => [key, value || null]),
-        );
-
-        try {
-            if (employerId) {
-                await apiRequest<ApiEnvelope<Employer>>(
-                    `/api/employers/${employerId}`,
-                    { method: 'PATCH', body },
-                );
-                profile.reload();
-                toast.success('Company profile updated.');
-            } else {
-                await apiRequest<ApiEnvelope<Employer>>('/api/employers', {
-                    method: 'POST',
-                    body,
-                });
-                employers.reload();
-                toast.success('Company submitted for verification.');
-            }
-            onCloseEdit();
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Company profile could not be saved.',
-            );
-        } finally {
-            setSaving(false);
-        }
-    }
-
-    if (employers.loading || (employerId !== undefined && profile.loading)) {
-        return <LoadingState />;
-    }
-
-    if (employers.error) {
-        return <ErrorState message={employers.error} />;
-    }
-
-    if (profile.error) {
-        return <ErrorState message={profile.error} />;
-    }
-
-    return (
-        <div className="space-y-4">
-            {showForm ? (
-                <form
-                    onSubmit={saveCompany}
-                    className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
-                >
-                    {(
-                        [
-                            ['company_name', 'Company name', 'text'],
-                            ['contact_email', 'Contact email', 'email'],
-                            ['website', 'Website', 'url'],
-                            ['industry', 'Industry', 'text'],
-                            [
-                                'registration_number',
-                                'Registration number',
-                                'text',
-                            ],
-                            ['contact_phone', 'Contact phone', 'tel'],
-                        ] as const
-                    ).map(([name, label, type]) => (
-                        <label
-                            key={name}
-                            className="text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {label}
-                            <input
-                                type={type}
-                                required={[
-                                    'company_name',
-                                    'contact_email',
-                                ].includes(name)}
-                                value={form[name]}
-                                onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        [name]: event.target.value,
-                                    })
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                            />
-                        </label>
-                    ))}
-                    <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                        Description
-                        <textarea
-                            value={form.description}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    description: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 min-h-20 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                        />
-                    </label>
-                    <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                        Address
-                        <textarea
-                            value={form.address}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    address: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 min-h-16 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                        />
-                    </label>
-                    <div className="flex items-center justify-end gap-2 sm:col-span-2">
-                        {employerId ? (
-                            <button
-                                type="button"
-                                onClick={onCloseEdit}
-                                className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
-                            >
-                                Cancel
-                            </button>
-                        ) : null}
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                            {saving ? 'Saving…' : 'Save company profile'}
-                        </button>
-                    </div>
-                </form>
-            ) : employer ? (
-                <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                            <h2 className="text-lg font-semibold text-[#2e3c31]">
-                                {employer.company_name}
-                            </h2>
-                            <p className="mt-1 text-xs text-[#7a8278]">
-                                {employer.industry ?? 'Industry not listed'}
-                            </p>
-                        </div>
-                        <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                            {employer.verification_status}
-                        </span>
-                    </div>
-                    <p className="mt-4 text-xs leading-5 text-[#747c72]">
-                        {employer.description ??
-                            'Add a company description to introduce your organization to alumni.'}
-                    </p>
-                    <div className="mt-5 grid gap-2 border-t border-[#eff0ec] pt-4 text-xs text-[#737b71] sm:grid-cols-2">
-                        <span>{employer.contact_email}</span>
-                        <span>{employer.website ?? 'Website not listed'}</span>
-                    </div>
-                </section>
-            ) : null}
-        </div>
-    );
-}
-
-export function PublicJobs() {
-    const jobs =
-        useApiResource<ApiEnvelope<RawPagination<JobPosting>>>('/api/jobs');
-    const applications = useApiResource<
-        ApiEnvelope<RawPagination<JobApplication>>
-    >('/api/applications/me');
-    const [coverLetters, setCoverLetters] = useState<Record<number, string>>(
-        {},
-    );
-    const [applying, setApplying] = useState<number | null>(null);
-
-    async function apply(jobId: number) {
-        setApplying(jobId);
-        try {
-            await apiRequest<ApiEnvelope<JobApplication>>(
-                `/api/jobs/${jobId}/applications`,
-                {
-                    method: 'POST',
-                    body: {
-                        cover_letter: coverLetters[jobId] || null,
-                    },
-                },
-            );
-            applications.reload();
-            toast.success('Application submitted.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Application could not be submitted.',
-            );
-        } finally {
-            setApplying(null);
-        }
-    }
-
-    if (jobs.loading || applications.loading) {
-        return <LoadingState />;
-    }
-
-    if (jobs.error) {
-        return <ErrorState message={jobs.error} />;
-    }
-
-    if (applications.error) {
-        return <ErrorState message={applications.error} />;
-    }
-
-    const appliedIds = new Set(
-        applications.data?.data.data.map((application) =>
-            Number(application.job_posting_id),
-        ),
-    );
-    const postings = jobs.data?.data.data ?? [];
-
-    return postings.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-            {postings.map((job) => (
-                <article
-                    key={job.id}
-                    className="rounded-2xl border border-[#e9ebe5] bg-white p-5 transition hover:border-[#dce3d8] hover:shadow-sm"
-                >
-                    <div className="flex items-start justify-between gap-3">
-                        <span className="grid size-11 place-items-center rounded-xl bg-[#e7eee6] text-base font-bold text-[#426147]">
-                            {initials(job.employer?.company_name ?? 'Company')}
-                        </span>
-                        <span className="rounded-full bg-[#f3f5f0] px-2.5 py-1 text-[10px] font-medium text-[#687667]">
-                            {job.employment_type ??
-                                'Employment type not listed'}
-                        </span>
-                    </div>
-                    <h2 className="mt-4 font-semibold text-[#2e3c31]">
-                        {job.title}
-                    </h2>
-                    <p className="mt-1 text-sm text-[#687267]">
-                        {job.employer?.company_name ?? 'Employer'}
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-[#778075]">
-                        <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1">
-                            {job.location ?? 'Location not listed'}
-                        </span>
-                        {job.workplace_type ? (
-                            <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1 capitalize">
-                                {job.workplace_type}
-                            </span>
-                        ) : null}
-                        {job.closes_at ? (
-                            <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1">
-                                Closes{' '}
-                                {new Date(job.closes_at).toLocaleDateString()}
-                            </span>
-                        ) : null}
-                    </div>
-                    <p className="mt-4 line-clamp-4 text-xs leading-5 whitespace-pre-line text-[#737b71]">
-                        {job.description}
-                    </p>
-                    {appliedIds.has(job.id) ? (
-                        <p className="mt-5 rounded-xl bg-[#edf2eb] px-3 py-2.5 text-xs font-medium text-[#4c654f]">
-                            Application submitted
-                        </p>
-                    ) : (
-                        <div className="mt-5 space-y-2 border-t border-[#eff0ec] pt-4">
-                            <label className="block text-[11px] font-medium text-[#4d5a4f]">
-                                Cover letter (optional)
-                                <textarea
-                                    value={coverLetters[job.id] ?? ''}
-                                    onChange={(event) =>
-                                        setCoverLetters({
-                                            ...coverLetters,
-                                            [job.id]: event.target.value,
-                                        })
-                                    }
-                                    maxLength={10000}
                                     className="mt-1.5 min-h-20 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
                                 />
                             </label>
-                            <div className="flex justify-end">
-                                <button
-                                    type="button"
-                                    disabled={applying === job.id}
-                                    onClick={() => void apply(job.id)}
-                                    className="rounded-lg bg-[#2b5139] px-4 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
-                                >
-                                    {applying === job.id
-                                        ? 'Applying…'
-                                        : 'Apply now'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </article>
-            ))}
-        </div>
-    ) : (
-        <EmptyState>
-            There are no published jobs available right now.
-        </EmptyState>
-    );
-}
-
-type JobForm = {
-    employer_id: string;
-    title: string;
-    description: string;
-    location: string;
-    employment_type: string;
-    workplace_type: string;
-    salary_min: string;
-    salary_max: string;
-    closes_at: string;
-};
-
-const emptyJobForm: JobForm = {
-    employer_id: '',
-    title: '',
-    description: '',
-    location: '',
-    employment_type: 'full-time',
-    workplace_type: 'onsite',
-    salary_min: '',
-    salary_max: '',
-    closes_at: '',
-};
-
-export function EmployerJobs({
-    createOpen,
-    onCloseCreate,
-    onNavigate,
-}: {
-    createOpen: boolean;
-    onCloseCreate: () => void;
-    onNavigate: (page: string) => void;
-}) {
-    const employers = useApiResource<ApiEnvelope<Employer[]>>(
-        '/api/employers/mine',
-    );
-    const jobs =
-        useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
-            '/api/employer/jobs',
-        );
-    const [form, setForm] = useState(emptyJobForm);
-    const [creating, setCreating] = useState(false);
-    const [publishing, setPublishing] = useState<number | null>(null);
-
-    useEffect(() => {
-        const firstEmployer = employers.data?.data[0];
-        if (firstEmployer && !form.employer_id) {
-            setForm((current) => ({
-                ...current,
-                employer_id: String(firstEmployer.id),
-            }));
-        }
-    }, [employers.data, form.employer_id]);
-
-    async function createJob(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        setCreating(true);
-        try {
-            await apiRequest<ApiEnvelope<JobPosting>>('/api/employer/jobs', {
-                method: 'POST',
-                body: {
-                    ...form,
-                    employer_id: Number(form.employer_id),
-                    salary_min: form.salary_min
-                        ? Number(form.salary_min)
-                        : null,
-                    salary_max: form.salary_max
-                        ? Number(form.salary_max)
-                        : null,
-                    closes_at: form.closes_at || null,
-                },
-            });
-            setForm({
-                ...emptyJobForm,
-                employer_id: form.employer_id,
-            });
-            onCloseCreate();
-            jobs.reload();
-            toast.success('Job posting saved as a draft.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Job posting could not be created.',
-            );
-        } finally {
-            setCreating(false);
-        }
-    }
-
-    async function publishJob(jobId: number) {
-        setPublishing(jobId);
-        try {
-            await apiRequest<ApiEnvelope<JobPosting>>(
-                `/api/employer/jobs/${jobId}/publish`,
-                { method: 'POST' },
-            );
-            jobs.reload();
-            toast.success('Job posting published.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Job posting could not be published.',
-            );
-        } finally {
-            setPublishing(null);
-        }
-    }
-
-    if (employers.loading || jobs.loading) {
-        return <LoadingState />;
-    }
-
-    if (employers.error) {
-        return <ErrorState message={employers.error} />;
-    }
-
-    if (jobs.error) {
-        return <ErrorState message={jobs.error} />;
-    }
-
-    const companies = employers.data?.data ?? [];
-    const postings = jobs.data?.data.data ?? [];
-    return (
-        <div className="space-y-4">
-            {!companies.length ? (
-                <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
-                    <h2 className="text-sm font-semibold text-[#39463b]">
-                        Company profile required
-                    </h2>
-                    <p className="mt-2 text-xs text-[#7a8278]">
-                        Register your company before creating job postings.
-                    </p>
-                    <button
-                        type="button"
-                        onClick={() => onNavigate('Company profile')}
-                        className="mt-4 rounded-lg bg-[#2b5139] px-4 py-2 text-xs font-semibold text-white"
-                    >
-                        Set up company profile
-                    </button>
-                </section>
-            ) : null}
-            {createOpen && companies.length ? (
-                <form
-                    onSubmit={createJob}
-                    className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
-                >
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Company
-                        <select
-                            required
-                            value={form.employer_id}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    employer_id: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                        >
-                            {companies.map((company) => (
-                                <option key={company.id} value={company.id}>
-                                    {company.company_name} ·{' '}
-                                    {company.verification_status}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Job title
-                        <input
-                            required
-                            value={form.title}
-                            onChange={(event) =>
-                                setForm({ ...form, title: event.target.value })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                        />
-                    </label>
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Employment type
-                        <select
-                            value={form.employment_type}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    employment_type: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                        >
-                            {[
-                                ['full-time', 'Full-time'],
-                                ['part-time', 'Part-time'],
-                                ['contract', 'Contract'],
-                                ['internship', 'Internship'],
-                                ['temporary', 'Temporary'],
-                            ].map(([value, label]) => (
-                                <option key={value} value={value}>
-                                    {label}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Workplace
-                        <select
-                            value={form.workplace_type}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    workplace_type: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                        >
-                            {[
-                                ['onsite', 'On-site'],
-                                ['hybrid', 'Hybrid'],
-                                ['remote', 'Remote'],
-                            ].map(([value, label]) => (
-                                <option key={value} value={value}>
-                                    {label}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                    {(
-                        [
-                            ['location', 'Location', 'text'],
-                            ['salary_min', 'Salary minimum', 'number'],
-                            ['salary_max', 'Salary maximum', 'number'],
-                            ['closes_at', 'Closing date', 'date'],
-                        ] as const
-                    ).map(([name, label, type]) => (
-                        <label
-                            key={name}
-                            className="text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {label}
-                            <input
-                                type={type}
-                                min={type === 'number' ? '0' : undefined}
-                                value={form[name]}
-                                onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        [name]: event.target.value,
-                                    })
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                            />
-                        </label>
-                    ))}
-                    <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                        Description
-                        <textarea
-                            required
-                            value={form.description}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    description: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 min-h-28 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                        />
-                    </label>
-                    <div className="flex items-center justify-end gap-2 sm:col-span-2">
-                        <button
-                            type="button"
-                            onClick={onCloseCreate}
-                            className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={creating}
-                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                            {creating ? 'Saving…' : 'Save draft'}
-                        </button>
-                    </div>
-                </form>
-            ) : null}
-            {postings.length ? (
-                <div className="grid gap-3 lg:grid-cols-2">
-                    {postings.map((job) => {
-                        const employer = companies.find(
-                            (company) => company.id === job.employer_id,
-                        );
-                        const canPublish =
-                            employer?.verification_status === 'verified';
-                        return (
-                            <article
-                                key={job.id}
-                                className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <h2 className="text-sm font-semibold text-[#39463b]">
-                                            {job.title}
-                                        </h2>
-                                        <p className="mt-1 text-xs text-[#7a8278]">
-                                            {job.employer?.company_name ??
-                                                employer?.company_name}
-                                        </p>
-                                    </div>
-                                    <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                        {job.status}
-                                    </span>
-                                </div>
-                                <p className="mt-3 line-clamp-3 text-xs leading-5 text-[#737b71]">
-                                    {job.description}
-                                </p>
-                                <p className="mt-3 text-[10px] text-[#858b82]">
-                                    {job.applications_count ?? 0} applications
-                                    {job.location ? ` · ${job.location}` : ''}
-                                </p>
-                                <div className="mt-4 flex flex-wrap justify-end gap-2">
+                            <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                                Address
+                                <textarea
+                                    value={form.address}
+                                    onChange={(event) =>
+                                        setForm({
+                                            ...form,
+                                            address: event.target.value,
+                                        })
+                                    }
+                                    className="mt-1.5 min-h-16 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                                />
+                            </label>
+                            <div className="flex items-center justify-end gap-2 sm:col-span-2">
+                                {employerId ? (
                                     <button
                                         type="button"
-                                        onClick={() => onNavigate('Applicants')}
-                                        className="rounded-lg border border-[#e8eae4] px-3 py-2 text-[11px] font-semibold text-[#526754]"
+                                        onClick={onCloseEdit}
+                                        className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
                                     >
-                                        View applicants
+                                        Cancel
                                     </button>
-                                    {job.status === 'draft' ? (
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                !canPublish ||
-                                                publishing === job.id
-                                            }
-                                            onClick={() =>
-                                                void publishJob(job.id)
-                                            }
-                                            title={
-                                                canPublish
-                                                    ? undefined
-                                                    : 'Company verification is required to publish jobs.'
-                                            }
-                                            className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-40"
-                                        >
-                                            {publishing === job.id
-                                                ? 'Publishing…'
-                                                : canPublish
-                                                  ? 'Publish'
-                                                  : 'Verification required'}
-                                        </button>
-                                    ) : null}
-                                </div>
-                            </article>
-                        );
-                    })}
-                </div>
-            ) : (
-                <EmptyState>No job postings have been created.</EmptyState>
-            )}
-        </div>
-    );
-}
-
-export function AlumniApplications() {
-    const { data, loading, error } = useApiResource<
-        ApiEnvelope<RawPagination<JobApplication>>
-    >('/api/applications/me');
-
-    if (loading) {
-        return <LoadingState />;
-    }
-
-    if (error) {
-        return <ErrorState message={error} />;
-    }
-
-    const applications = data?.data.data ?? [];
-    return applications.length ? (
-        <div className="grid gap-3">
-            {applications.map((application) => (
-                <article
-                    key={application.id}
-                    className="flex flex-col gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-center sm:p-5"
-                >
-                    <div className="min-w-0 flex-1">
-                        <h2 className="text-sm font-semibold text-[#39463b]">
-                            {application.job_posting?.title ??
-                                'Job posting no longer available'}
-                        </h2>
-                        <p className="mt-1 text-xs text-[#7a8278]">
-                            {application.job_posting?.employer?.company_name ??
-                                'Employer'}
-                            {application.job_posting?.location
-                                ? ` · ${application.job_posting.location}`
-                                : ''}
-                        </p>
-                        <p className="mt-2 text-[10px] text-[#858b82]">
-                            Submitted{' '}
-                            {new Date(
-                                application.created_at,
-                            ).toLocaleDateString()}
-                        </p>
-                    </div>
-                    <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                        {application.status.replaceAll('_', ' ')}
-                    </span>
-                </article>
-            ))}
-        </div>
-    ) : (
-        <EmptyState>
-            You have not submitted any job applications yet.
-        </EmptyState>
-    );
-}
-
-export function EmployerApplicants() {
-    const jobs =
-        useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
-            '/api/employer/jobs',
-        );
-    const [selectedJobId, setSelectedJobId] = useState('');
-    const postings = jobs.data?.data.data ?? [];
-    const selectedJob =
-        selectedJobId || (postings[0] ? String(postings[0].id) : '');
-    const applications = useApiResource<
-        ApiEnvelope<RawPagination<JobApplication>>
-    >(selectedJob ? `/api/employer/jobs/${selectedJob}/applications` : null);
-    const [updating, setUpdating] = useState<number | null>(null);
-
-    async function updateStatus(applicationId: number, status: string) {
-        setUpdating(applicationId);
-        try {
-            await apiRequest<ApiEnvelope<JobApplication>>(
-                `/api/applications/${applicationId}/status`,
-                { method: 'PATCH', body: { status } },
-            );
-            applications.reload();
-            toast.success('Application status updated.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Application status could not be updated.',
-            );
-        } finally {
-            setUpdating(null);
-        }
-    }
-
-    if (jobs.loading) {
-        return <LoadingState />;
-    }
-
-    if (jobs.error) {
-        return <ErrorState message={jobs.error} />;
-    }
-
-    if (!postings.length) {
-        return (
-            <EmptyState>No job postings are available to review.</EmptyState>
-        );
-    }
-
-    return (
-        <div className="space-y-4">
-            <label className="block text-xs font-medium text-[#4d5a4f]">
-                Job posting
-                <select
-                    value={selectedJob}
-                    onChange={(event) => setSelectedJobId(event.target.value)}
-                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs sm:max-w-md"
-                >
-                    {postings.map((job) => (
-                        <option key={job.id} value={job.id}>
-                            {job.title}
-                        </option>
-                    ))}
-                </select>
-            </label>
-            {applications.loading ? (
-                <LoadingState />
-            ) : applications.error ? (
-                <ErrorState message={applications.error} />
-            ) : applications.data?.data.data.length ? (
-                <div className="grid gap-3">
-                    {applications.data.data.data.map((application) => (
-                        <article
-                            key={application.id}
-                            className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
-                        >
-                            <div className="flex flex-col justify-between gap-3 sm:flex-row">
+                                ) : null}
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
+                                >
+                                    {saving ? 'Saving…' : 'Save company profile'}
+                                </button>
+                            </div>
+                        </form>
+                    ) : employer ? (
+                        <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
-                                    <h2 className="text-sm font-semibold text-[#39463b]">
-                                        {application.alumni_profile?.name ??
-                                            'Alumni applicant'}
+                                    <h2 className="text-lg font-semibold text-[#2e3c31]">
+                                        {employer.company_name}
                                     </h2>
                                     <p className="mt-1 text-xs text-[#7a8278]">
-                                        {application.alumni_profile?.email}
+                                        {employer.industry ?? 'Industry not listed'}
                                     </p>
-                                    {application.cover_letter ? (
-                                        <p className="mt-3 text-xs leading-5 whitespace-pre-line text-[#737b71]">
-                                            {application.cover_letter}
-                                        </p>
-                                    ) : null}
-                                    {application.profile_snapshot?.education?.length ? (
-                                        <div className="mt-3 space-y-1 rounded-xl bg-[#fafbf9] p-2.5 text-[11px] text-[#556153]">
-                                            <p className="font-semibold text-[#344436]">Academic Qualifications (Snapshot):</p>
-                                            {application.profile_snapshot.education.map((edu: any, i: number) => (
-                                                <p key={i}>
-                                                    • {edu.program ?? 'Degree'} ({edu.graduation_year ?? 'N/A'})
-                                                    {edu.honors ? ` — ${edu.honors}` : ''}
-                                                    {edu.gwa ? ` (GWA: ${edu.gwa})` : ''}
-                                                </p>
-                                            ))}
-                                        </div>
-                                    ) : null}
-                                    {application.resume_snapshot_path ? (
-                                        <a
-                                            href={`/api/applications/${application.id}/resume`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#d2ddd0] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#2c5339] hover:bg-[#edf2ea]"
-                                        >
-                                            Download Resume Snapshot
-                                        </a>
-                                    ) : null}
                                 </div>
-                                <label className="text-[11px] font-medium text-[#4d5a4f]">
-                                    Application status
-                                    <select
-                                        value={application.status}
-                                        disabled={updating === application.id}
-                                        onChange={(event) =>
-                                            void updateStatus(
-                                                application.id,
-                                                event.target.value,
-                                            )
-                                        }
-                                        className="mt-1.5 h-9 rounded-lg border border-[#e3e7df] bg-white px-2 text-xs"
-                                    >
-                                        {[
-                                            'submitted',
-                                            'reviewing',
-                                            'shortlisted',
-                                            'rejected',
-                                            'hired',
-                                        ].map((status) => (
-                                            <option key={status} value={status}>
-                                                {status.replaceAll('_', ' ')}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
+                                <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                                    {employer.verification_status}
+                                </span>
                             </div>
+                            <p className="mt-4 text-xs leading-5 text-[#747c72]">
+                                {employer.description ??
+                                    'Add a company description to introduce your organization to alumni.'}
+                            </p>
+                            <div className="mt-5 grid gap-2 border-t border-[#eff0ec] pt-4 text-xs text-[#737b71] sm:grid-cols-2">
+                                <span>{employer.contact_email}</span>
+                                <span>{employer.website ?? 'Website not listed'}</span>
+                            </div>
+                        </section>
+                    ) : null}
+                </div>
+            );
+        }
+
+        export function PublicJobs() {
+            const jobs =
+                useApiResource<ApiEnvelope<RawPagination<JobPosting>>>('/api/jobs');
+            const applications = useApiResource<
+                ApiEnvelope<RawPagination<JobApplication>>
+            >('/api/applications/me');
+            const [coverLetters, setCoverLetters] = useState<Record<number, string>>(
+                {},
+            );
+            const [applying, setApplying] = useState<number | null>(null);
+
+            async function apply(jobId: number) {
+                setApplying(jobId);
+                try {
+                    await apiRequest<ApiEnvelope<JobApplication>>(
+                        `/api/jobs/${jobId}/applications`,
+                        {
+                            method: 'POST',
+                            body: {
+                                cover_letter: coverLetters[jobId] || null,
+                            },
+                        },
+                    );
+                    applications.reload();
+                    toast.success('Application submitted.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Application could not be submitted.',
+                    );
+                } finally {
+                    setApplying(null);
+                }
+            }
+
+            if (jobs.loading || applications.loading) {
+                return <LoadingState />;
+            }
+
+            if (jobs.error) {
+                return <ErrorState message={jobs.error} />;
+            }
+
+            if (applications.error) {
+                return <ErrorState message={applications.error} />;
+            }
+
+            const appliedIds = new Set(
+                applications.data?.data.data.map((application) =>
+                    Number(application.job_posting_id),
+                ),
+            );
+            const postings = jobs.data?.data.data ?? [];
+
+            return postings.length ? (
+                <div className="grid gap-4 lg:grid-cols-2">
+                    {postings.map((job) => (
+                        <article
+                            key={job.id}
+                            className="rounded-2xl border border-[#e9ebe5] bg-white p-5 transition hover:border-[#dce3d8] hover:shadow-sm"
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <span className="grid size-11 place-items-center rounded-xl bg-[#e7eee6] text-base font-bold text-[#426147]">
+                                    {initials(job.employer?.company_name ?? 'Company')}
+                                </span>
+                                <span className="rounded-full bg-[#f3f5f0] px-2.5 py-1 text-[10px] font-medium text-[#687667]">
+                                    {job.employment_type ??
+                                        'Employment type not listed'}
+                                </span>
+                            </div>
+                            <h2 className="mt-4 font-semibold text-[#2e3c31]">
+                                {job.title}
+                            </h2>
+                            <p className="mt-1 text-sm text-[#687267]">
+                                {job.employer?.company_name ?? 'Employer'}
+                            </p>
+                            <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-[#778075]">
+                                <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1">
+                                    {job.location ?? 'Location not listed'}
+                                </span>
+                                {job.workplace_type ? (
+                                    <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1 capitalize">
+                                        {job.workplace_type}
+                                    </span>
+                                ) : null}
+                                {job.closes_at ? (
+                                    <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1">
+                                        Closes{' '}
+                                        {new Date(job.closes_at).toLocaleDateString()}
+                                    </span>
+                                ) : null}
+                            </div>
+                            <p className="mt-4 line-clamp-4 text-xs leading-5 whitespace-pre-line text-[#737b71]">
+                                {job.description}
+                            </p>
+                            {appliedIds.has(job.id) ? (
+                                <p className="mt-5 rounded-xl bg-[#edf2eb] px-3 py-2.5 text-xs font-medium text-[#4c654f]">
+                                    Application submitted
+                                </p>
+                            ) : (
+                                <div className="mt-5 space-y-2 border-t border-[#eff0ec] pt-4">
+                                    <label className="block text-[11px] font-medium text-[#4d5a4f]">
+                                        Cover letter (optional)
+                                        <textarea
+                                            value={coverLetters[job.id] ?? ''}
+                                            onChange={(event) =>
+                                                setCoverLetters({
+                                                    ...coverLetters,
+                                                    [job.id]: event.target.value,
+                                                })
+                                            }
+                                            maxLength={10000}
+                                            className="mt-1.5 min-h-20 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                                        />
+                                    </label>
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            disabled={applying === job.id}
+                                            onClick={() => void apply(job.id)}
+                                            className="rounded-lg bg-[#2b5139] px-4 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                                        >
+                                            {applying === job.id
+                                                ? 'Applying…'
+                                                : 'Apply now'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </article>
                     ))}
                 </div>
             ) : (
                 <EmptyState>
-                    No applicants have applied to this posting.
+                    There are no published jobs available right now.
                 </EmptyState>
-            )}
-        </div>
-    );
-}
-
-export function RegistrationAssistanceQueue() {
-    const resource = useApiResource<PaginatedApiResponse<RegistrationAssistanceRequest>>(
-        '/api/registration-assistance',
-    );
-    const [selectedRequest, setSelectedRequest] = useState<RegistrationAssistanceRequest | null>(null);
-    const [reviewStatus, setReviewStatus] = useState<'reviewed' | 'needs_more_information' | 'rejected'>('reviewed');
-    const [reviewNote, setReviewNote] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-
-    async function handleReviewSubmit(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        if (!selectedRequest) return;
-
-        setSubmitting(true);
-        try {
-            await apiRequest(`/api/registration-assistance/${selectedRequest.id}`, {
-                method: 'PATCH',
-                body: {
-                    status: reviewStatus,
-                    review_note: reviewNote || null,
-                },
-            });
-            toast.success('Registration claim assistance request updated.');
-            setSelectedRequest(null);
-            setReviewNote('');
-            resource.reload();
-        } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : 'Failed to update request.');
-        } finally {
-            setSubmitting(false);
+            );
         }
-    }
 
-    if (resource.loading) {
-        return <LoadingState />;
-    }
+        type JobForm = {
+            employer_id: string;
+            title: string;
+            description: string;
+            location: string;
+            employment_type: string;
+            workplace_type: string;
+            salary_min: string;
+            salary_max: string;
+            closes_at: string;
+        };
 
-    if (resource.error) {
-        return <ErrorState message={resource.error} />;
-    }
+        const emptyJobForm: JobForm = {
+            employer_id: '',
+            title: '',
+            description: '',
+            location: '',
+            employment_type: 'full-time',
+            workplace_type: 'onsite',
+            salary_min: '',
+            salary_max: '',
+            closes_at: '',
+        };
 
-    const items = resource.data?.data ?? [];
+        export function EmployerJobs({
+            createOpen,
+            onCloseCreate,
+            onNavigate,
+        }: {
+            createOpen: boolean;
+            onCloseCreate: () => void;
+            onNavigate: (page: string) => void;
+        }) {
+            const employers = useApiResource<ApiEnvelope<Employer[]>>(
+                '/api/employers/mine',
+            );
+            const jobs =
+                useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
+                    '/api/employer/jobs',
+                );
+            const [form, setForm] = useState(emptyJobForm);
+            const [creating, setCreating] = useState(false);
+            const [publishing, setPublishing] = useState<number | null>(null);
 
-    if (!items.length) {
-        return (
-            <EmptyState>
-                No pending registration assistance requests for your academic programs.
-            </EmptyState>
-        );
-    }
+            useEffect(() => {
+                const firstEmployer = employers.data?.data[0];
+                if (firstEmployer && !form.employer_id) {
+                    setForm((current) => ({
+                        ...current,
+                        employer_id: String(firstEmployer.id),
+                    }));
+                }
+            }, [employers.data, form.employer_id]);
 
-    return (
-        <div className="space-y-4">
-            <div className="grid gap-3">
-                {items.map((request) => (
-                    <article
-                        key={request.id}
-                        className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
-                    >
-                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h3 className="text-sm font-semibold text-[#29382e]">
-                                        {request.name}
-                                    </h3>
-                                    <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#305338]">
-                                        {request.student_number}
-                                    </span>
-                                    {request.program && (
-                                        <span className="rounded bg-[#f0f4ee] px-2 py-0.5 text-[10px] font-medium text-[#465a49]">
-                                            {request.program.code}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="mt-1 flex flex-wrap gap-x-4 text-xs text-[#70796e]">
-                                    <p>Email: <span className="text-[#3b473d]">{request.email}</span></p>
-                                    <p>Birthdate: <span className="text-[#3b473d]">{request.date_of_birth}</span></p>
-                                    <p>Requested: <span className="text-[#3b473d]">{new Date(request.created_at).toLocaleDateString()}</span></p>
-                                </div>
-                                {request.message && (
-                                    <p className="mt-3 rounded-xl bg-[#fafbf9] p-3 text-xs leading-5 text-[#526051]">
-                                        "{request.message}"
-                                    </p>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSelectedRequest(request);
-                                        setReviewStatus('reviewed');
-                                        setReviewNote('Verified with official registrar records. Account approved.');
-                                    }}
-                                    className="rounded-xl bg-[#2b5139] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#22442e]"
-                                >
-                                    Approve claim
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSelectedRequest(request);
-                                        setReviewStatus('needs_more_information');
-                                        setReviewNote('');
-                                    }}
-                                    className="rounded-xl border border-[#d2ddd0] bg-white px-3 py-1.5 text-xs font-medium text-[#435245] hover:bg-[#f4f6f2]"
-                                >
-                                    Review
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-                ))}
-            </div>
+            async function createJob(event: FormEvent<HTMLFormElement>) {
+                event.preventDefault();
+                setCreating(true);
+                try {
+                    await apiRequest<ApiEnvelope<JobPosting>>('/api/employer/jobs', {
+                        method: 'POST',
+                        body: {
+                            ...form,
+                            employer_id: Number(form.employer_id),
+                            salary_min: form.salary_min
+                                ? Number(form.salary_min)
+                                : null,
+                            salary_max: form.salary_max
+                                ? Number(form.salary_max)
+                                : null,
+                            closes_at: form.closes_at || null,
+                        },
+                    });
+                    setForm({
+                        ...emptyJobForm,
+                        employer_id: form.employer_id,
+                    });
+                    onCloseCreate();
+                    jobs.reload();
+                    toast.success('Job posting saved as a draft.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Job posting could not be created.',
+                    );
+                } finally {
+                    setCreating(false);
+                }
+            }
 
-            {selectedRequest && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    <div className="w-full max-w-md rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-xl">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <h3 className="text-sm font-semibold text-[#29382e]">
-                                    Review Registration Claim
-                                </h3>
-                                <p className="mt-0.5 text-xs text-[#70796e]">
-                                    {selectedRequest.name} ({selectedRequest.student_number})
-                                </p>
-                            </div>
+            async function publishJob(jobId: number) {
+                setPublishing(jobId);
+                try {
+                    await apiRequest<ApiEnvelope<JobPosting>>(
+                        `/api/employer/jobs/${jobId}/publish`,
+                        { method: 'POST' },
+                    );
+                    jobs.reload();
+                    toast.success('Job posting published.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Job posting could not be published.',
+                    );
+                } finally {
+                    setPublishing(null);
+                }
+            }
+
+            if (employers.loading || jobs.loading) {
+                return <LoadingState />;
+            }
+
+            if (employers.error) {
+                return <ErrorState message={employers.error} />;
+            }
+
+            if (jobs.error) {
+                return <ErrorState message={jobs.error} />;
+            }
+
+            const companies = employers.data?.data ?? [];
+            const postings = jobs.data?.data.data ?? [];
+            return (
+                <div className="space-y-4">
+                    {!companies.length ? (
+                        <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
+                            <h2 className="text-sm font-semibold text-[#39463b]">
+                                Company profile required
+                            </h2>
+                            <p className="mt-2 text-xs text-[#7a8278]">
+                                Register your company before creating job postings.
+                            </p>
                             <button
                                 type="button"
-                                onClick={() => setSelectedRequest(null)}
-                                className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
+                                onClick={() => onNavigate('Company profile')}
+                                className="mt-4 rounded-lg bg-[#2b5139] px-4 py-2 text-xs font-semibold text-white"
                             >
-                                ✕
+                                Set up company profile
                             </button>
-                        </div>
-
-                        <form onSubmit={handleReviewSubmit} className="mt-4 space-y-3">
-                            <label className="block text-xs font-medium text-[#4d5a4f]">
-                                Decision outcome
+                        </section>
+                    ) : null}
+                    {createOpen && companies.length ? (
+                        <form
+                            onSubmit={createJob}
+                            className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
+                        >
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Company
                                 <select
-                                    value={reviewStatus}
-                                    onChange={(e) => setReviewStatus(e.target.value as any)}
-                                    className="mt-1 h-9 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                    required
+                                    value={form.employer_id}
+                                    onChange={(event) =>
+                                        setForm({
+                                            ...form,
+                                            employer_id: event.target.value,
+                                        })
+                                    }
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
                                 >
-                                    <option value="reviewed">Approve & verify (Reviewed)</option>
-                                    <option value="needs_more_information">Request more info</option>
-                                    <option value="rejected">Reject claim</option>
+                                    {companies.map((company) => (
+                                        <option key={company.id} value={company.id}>
+                                            {company.company_name} ·{' '}
+                                            {company.verification_status}
+                                        </option>
+                                    ))}
                                 </select>
                             </label>
-
-                            <label className="block text-xs font-medium text-[#4d5a4f]">
-                                Review note
-                                <textarea
-                                    rows={3}
-                                    value={reviewNote}
-                                    onChange={(e) => setReviewNote(e.target.value)}
-                                    placeholder="Enter review explanation or instructions for applicant..."
-                                    className="mt-1 w-full rounded-lg border border-[#e3e7df] p-2.5 text-xs outline-none focus:border-[#819981]"
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Job title
+                                <input
+                                    required
+                                    value={form.title}
+                                    onChange={(event) =>
+                                        setForm({ ...form, title: event.target.value })
+                                    }
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
                                 />
                             </label>
-
-                            <div className="flex items-center justify-end gap-2 pt-2">
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Employment type
+                                <select
+                                    value={form.employment_type}
+                                    onChange={(event) =>
+                                        setForm({
+                                            ...form,
+                                            employment_type: event.target.value,
+                                        })
+                                    }
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                >
+                                    {[
+                                        ['full-time', 'Full-time'],
+                                        ['part-time', 'Part-time'],
+                                        ['contract', 'Contract'],
+                                        ['internship', 'Internship'],
+                                        ['temporary', 'Temporary'],
+                                    ].map(([value, label]) => (
+                                        <option key={value} value={value}>
+                                            {label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Workplace
+                                <select
+                                    value={form.workplace_type}
+                                    onChange={(event) =>
+                                        setForm({
+                                            ...form,
+                                            workplace_type: event.target.value,
+                                        })
+                                    }
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                >
+                                    {[
+                                        ['onsite', 'On-site'],
+                                        ['hybrid', 'Hybrid'],
+                                        ['remote', 'Remote'],
+                                    ].map(([value, label]) => (
+                                        <option key={value} value={value}>
+                                            {label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            {(
+                                [
+                                    ['location', 'Location', 'text'],
+                                    ['salary_min', 'Salary minimum', 'number'],
+                                    ['salary_max', 'Salary maximum', 'number'],
+                                    ['closes_at', 'Closing date', 'date'],
+                                ] as const
+                            ).map(([name, label, type]) => (
+                                <label
+                                    key={name}
+                                    className="text-xs font-medium text-[#4d5a4f]"
+                                >
+                                    {label}
+                                    <input
+                                        type={type}
+                                        min={type === 'number' ? '0' : undefined}
+                                        value={form[name]}
+                                        onChange={(event) =>
+                                            setForm({
+                                                ...form,
+                                                [name]: event.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                    />
+                                </label>
+                            ))}
+                            <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                                Description
+                                <textarea
+                                    required
+                                    value={form.description}
+                                    onChange={(event) =>
+                                        setForm({
+                                            ...form,
+                                            description: event.target.value,
+                                        })
+                                    }
+                                    className="mt-1.5 min-h-28 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                                />
+                            </label>
+                            <div className="flex items-center justify-end gap-2 sm:col-span-2">
                                 <button
                                     type="button"
-                                    onClick={() => setSelectedRequest(null)}
-                                    className="rounded-xl border border-[#e2e7df] px-3 py-1.5 text-xs text-[#5c685b] hover:bg-[#f4f6f2]"
+                                    onClick={onCloseCreate}
+                                    className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={submitting}
-                                    className="rounded-xl bg-[#2b5139] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#22442e] disabled:opacity-50"
+                                    disabled={creating}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
                                 >
-                                    {submitting ? 'Submitting…' : 'Confirm decision'}
+                                    {creating ? 'Saving…' : 'Save draft'}
                                 </button>
                             </div>
                         </form>
-                    </div>
+                    ) : null}
+                    {postings.length ? (
+                        <div className="grid gap-3 lg:grid-cols-2">
+                            {postings.map((job) => {
+                                const employer = companies.find(
+                                    (company) => company.id === job.employer_id,
+                                );
+                                const canPublish =
+                                    employer?.verification_status === 'verified';
+                                return (
+                                    <article
+                                        key={job.id}
+                                        className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <h2 className="text-sm font-semibold text-[#39463b]">
+                                                    {job.title}
+                                                </h2>
+                                                <p className="mt-1 text-xs text-[#7a8278]">
+                                                    {job.employer?.company_name ??
+                                                        employer?.company_name}
+                                                </p>
+                                            </div>
+                                            <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                                                {job.status}
+                                            </span>
+                                        </div>
+                                        <p className="mt-3 line-clamp-3 text-xs leading-5 text-[#737b71]">
+                                            {job.description}
+                                        </p>
+                                        <p className="mt-3 text-[10px] text-[#858b82]">
+                                            {job.applications_count ?? 0} applications
+                                            {job.location ? ` · ${job.location}` : ''}
+                                        </p>
+                                        <div className="mt-4 flex flex-wrap justify-end gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => onNavigate('Applicants')}
+                                                className="rounded-lg border border-[#e8eae4] px-3 py-2 text-[11px] font-semibold text-[#526754]"
+                                            >
+                                                View applicants
+                                            </button>
+                                            {job.status === 'draft' ? (
+                                                <button
+                                                    type="button"
+                                                    disabled={
+                                                        !canPublish ||
+                                                        publishing === job.id
+                                                    }
+                                                    onClick={() =>
+                                                        void publishJob(job.id)
+                                                    }
+                                                    title={
+                                                        canPublish
+                                                            ? undefined
+                                                            : 'Company verification is required to publish jobs.'
+                                                    }
+                                                    className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-40"
+                                                >
+                                                    {publishing === job.id
+                                                        ? 'Publishing…'
+                                                        : canPublish
+                                                            ? 'Publish'
+                                                            : 'Verification required'}
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <EmptyState>No job postings have been created.</EmptyState>
+                    )}
                 </div>
-            )}
-        </div>
-    );
-}
+            );
+        }
+
+        export function AlumniApplications() {
+            const { data, loading, error } = useApiResource<
+                ApiEnvelope<RawPagination<JobApplication>>
+            >('/api/applications/me');
+
+            if (loading) {
+                return <LoadingState />;
+            }
+
+            if (error) {
+                return <ErrorState message={error} />;
+            }
+
+            const applications = data?.data.data ?? [];
+            return applications.length ? (
+                <div className="grid gap-3">
+                    {applications.map((application) => (
+                        <article
+                            key={application.id}
+                            className="flex flex-col gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-center sm:p-5"
+                        >
+                            <div className="min-w-0 flex-1">
+                                <h2 className="text-sm font-semibold text-[#39463b]">
+                                    {application.job_posting?.title ??
+                                        'Job posting no longer available'}
+                                </h2>
+                                <p className="mt-1 text-xs text-[#7a8278]">
+                                    {application.job_posting?.employer?.company_name ??
+                                        'Employer'}
+                                    {application.job_posting?.location
+                                        ? ` · ${application.job_posting.location}`
+                                        : ''}
+                                </p>
+                                <p className="mt-2 text-[10px] text-[#858b82]">
+                                    Submitted{' '}
+                                    {new Date(
+                                        application.created_at,
+                                    ).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                                {application.status.replaceAll('_', ' ')}
+                            </span>
+                        </article>
+                    ))}
+                </div>
+            ) : (
+                <EmptyState>
+                    You have not submitted any job applications yet.
+                </EmptyState>
+            );
+        }
+
+        export function EmployerApplicants() {
+            const jobs =
+                useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
+                    '/api/employer/jobs',
+                );
+            const [selectedJobId, setSelectedJobId] = useState('');
+            const postings = jobs.data?.data.data ?? [];
+            const selectedJob =
+                selectedJobId || (postings[0] ? String(postings[0].id) : '');
+            const applications = useApiResource<
+                ApiEnvelope<RawPagination<JobApplication>>
+            >(selectedJob ? `/api/employer/jobs/${selectedJob}/applications` : null);
+            const [updating, setUpdating] = useState<number | null>(null);
+
+            async function updateStatus(applicationId: number, status: string) {
+                setUpdating(applicationId);
+                try {
+                    await apiRequest<ApiEnvelope<JobApplication>>(
+                        `/api/applications/${applicationId}/status`,
+                        { method: 'PATCH', body: { status } },
+                    );
+                    applications.reload();
+                    toast.success('Application status updated.');
+                } catch (error) {
+                    toast.error(
+                        error instanceof ApiError
+                            ? error.message
+                            : 'Application status could not be updated.',
+                    );
+                } finally {
+                    setUpdating(null);
+                }
+            }
+
+            if (jobs.loading) {
+                return <LoadingState />;
+            }
+
+            if (jobs.error) {
+                return <ErrorState message={jobs.error} />;
+            }
+
+            if (!postings.length) {
+                return (
+                    <EmptyState>No job postings are available to review.</EmptyState>
+                );
+            }
+
+            return (
+                <div className="space-y-4">
+                    <label className="block text-xs font-medium text-[#4d5a4f]">
+                        Job posting
+                        <select
+                            value={selectedJob}
+                            onChange={(event) => setSelectedJobId(event.target.value)}
+                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs sm:max-w-md"
+                        >
+                            {postings.map((job) => (
+                                <option key={job.id} value={job.id}>
+                                    {job.title}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                    {applications.loading ? (
+                        <LoadingState />
+                    ) : applications.error ? (
+                        <ErrorState message={applications.error} />
+                    ) : applications.data?.data.data.length ? (
+                        <div className="grid gap-3">
+                            {applications.data.data.data.map((application) => (
+                                <article
+                                    key={application.id}
+                                    className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                                >
+                                    <div className="flex flex-col justify-between gap-3 sm:flex-row">
+                                        <div>
+                                            <h2 className="text-sm font-semibold text-[#39463b]">
+                                                {application.alumni_profile?.name ??
+                                                    'Alumni applicant'}
+                                            </h2>
+                                            <p className="mt-1 text-xs text-[#7a8278]">
+                                                {application.alumni_profile?.email}
+                                            </p>
+                                            {application.cover_letter ? (
+                                                <p className="mt-3 text-xs leading-5 whitespace-pre-line text-[#737b71]">
+                                                    {application.cover_letter}
+                                                </p>
+                                            ) : null}
+                                            {application.profile_snapshot?.education?.length ? (
+                                                <div className="mt-3 space-y-1 rounded-xl bg-[#fafbf9] p-2.5 text-[11px] text-[#556153]">
+                                                    <p className="font-semibold text-[#344436]">Academic Qualifications (Snapshot):</p>
+                                                    {application.profile_snapshot.education.map((edu: any, i: number) => (
+                                                        <p key={i}>
+                                                            • {edu.program ?? 'Degree'} ({edu.graduation_year ?? 'N/A'})
+                                                            {edu.honors ? ` — ${edu.honors}` : ''}
+                                                            {edu.gwa ? ` (GWA: ${edu.gwa})` : ''}
+                                                        </p>
+                                                    ))}
+                                                </div>
+                                            ) : null}
+                                            {application.resume_snapshot_path ? (
+                                                <a
+                                                    href={`/api/applications/${application.id}/resume`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#d2ddd0] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#2c5339] hover:bg-[#edf2ea]"
+                                                >
+                                                    Download Resume Snapshot
+                                                </a>
+                                            ) : null}
+                                        </div>
+                                        <label className="text-[11px] font-medium text-[#4d5a4f]">
+                                            Application status
+                                            <select
+                                                value={application.status}
+                                                disabled={updating === application.id}
+                                                onChange={(event) =>
+                                                    void updateStatus(
+                                                        application.id,
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                className="mt-1.5 h-9 rounded-lg border border-[#e3e7df] bg-white px-2 text-xs"
+                                            >
+                                                {[
+                                                    'submitted',
+                                                    'reviewing',
+                                                    'shortlisted',
+                                                    'rejected',
+                                                    'hired',
+                                                ].map((status) => (
+                                                    <option key={status} value={status}>
+                                                        {status.replaceAll('_', ' ')}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyState>
+                            No applicants have applied to this posting.
+                        </EmptyState>
+                    )}
+                </div>
+            );
+        }
+
+        export function RegistrationAssistanceQueue() {
+            const resource = useApiResource<PaginatedApiResponse<RegistrationAssistanceRequest>>(
+                '/api/registration-assistance',
+            );
+            const [selectedRequest, setSelectedRequest] = useState<RegistrationAssistanceRequest | null>(null);
+            const [reviewStatus, setReviewStatus] = useState<'reviewed' | 'needs_more_information' | 'rejected'>('reviewed');
+            const [reviewNote, setReviewNote] = useState('');
+            const [submitting, setSubmitting] = useState(false);
+
+            async function handleReviewSubmit(e: FormEvent<HTMLFormElement>) {
+                e.preventDefault();
+                if (!selectedRequest) return;
+
+                setSubmitting(true);
+                try {
+                    await apiRequest(`/api/registration-assistance/${selectedRequest.id}`, {
+                        method: 'PATCH',
+                        body: {
+                            status: reviewStatus,
+                            review_note: reviewNote || null,
+                        },
+                    });
+                    toast.success('Registration claim assistance request updated.');
+                    setSelectedRequest(null);
+                    setReviewNote('');
+                    resource.reload();
+                } catch (err) {
+                    toast.error(err instanceof ApiError ? err.message : 'Failed to update request.');
+                } finally {
+                    setSubmitting(false);
+                }
+            }
+
+            if (resource.loading) {
+                return <LoadingState />;
+            }
+
+            if (resource.error) {
+                return <ErrorState message={resource.error} />;
+            }
+
+            const items = resource.data?.data ?? [];
+
+            if (!items.length) {
+                return (
+                    <EmptyState>
+                        No pending registration assistance requests for your academic programs.
+                    </EmptyState>
+                );
+            }
+
+            return (
+                <div className="space-y-4">
+                    <div className="grid gap-3">
+                        {items.map((request) => (
+                            <article
+                                key={request.id}
+                                className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                            >
+                                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-sm font-semibold text-[#29382e]">
+                                                {request.name}
+                                            </h3>
+                                            <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#305338]">
+                                                {request.student_number}
+                                            </span>
+                                            {request.program && (
+                                                <span className="rounded bg-[#f0f4ee] px-2 py-0.5 text-[10px] font-medium text-[#465a49]">
+                                                    {request.program.code}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="mt-1 flex flex-wrap gap-x-4 text-xs text-[#70796e]">
+                                            <p>Email: <span className="text-[#3b473d]">{request.email}</span></p>
+                                            <p>Birthdate: <span className="text-[#3b473d]">{request.date_of_birth}</span></p>
+                                            <p>Requested: <span className="text-[#3b473d]">{new Date(request.created_at).toLocaleDateString()}</span></p>
+                                        </div>
+                                        {request.message && (
+                                            <p className="mt-3 rounded-xl bg-[#fafbf9] p-3 text-xs leading-5 text-[#526051]">
+                                                "{request.message}"
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedRequest(request);
+                                                setReviewStatus('reviewed');
+                                                setReviewNote('Verified with official registrar records. Account approved.');
+                                            }}
+                                            className="rounded-xl bg-[#2b5139] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#22442e]"
+                                        >
+                                            Approve claim
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedRequest(request);
+                                                setReviewStatus('needs_more_information');
+                                                setReviewNote('');
+                                            }}
+                                            className="rounded-xl border border-[#d2ddd0] bg-white px-3 py-1.5 text-xs font-medium text-[#435245] hover:bg-[#f4f6f2]"
+                                        >
+                                            Review
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+
+                    {selectedRequest && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                            <div className="w-full max-w-md rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-xl">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-[#29382e]">
+                                            Review Registration Claim
+                                        </h3>
+                                        <p className="mt-0.5 text-xs text-[#70796e]">
+                                            {selectedRequest.name} ({selectedRequest.student_number})
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedRequest(null)}
+                                        className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleReviewSubmit} className="mt-4 space-y-3">
+                                    <label className="block text-xs font-medium text-[#4d5a4f]">
+                                        Decision outcome
+                                        <select
+                                            value={reviewStatus}
+                                            onChange={(e) => setReviewStatus(e.target.value as any)}
+                                            className="mt-1 h-9 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                        >
+                                            <option value="reviewed">Approve & verify (Reviewed)</option>
+                                            <option value="needs_more_information">Request more info</option>
+                                            <option value="rejected">Reject claim</option>
+                                        </select>
+                                    </label>
+
+                                    <label className="block text-xs font-medium text-[#4d5a4f]">
+                                        Review note
+                                        <textarea
+                                            rows={3}
+                                            value={reviewNote}
+                                            onChange={(e) => setReviewNote(e.target.value)}
+                                            placeholder="Enter review explanation or instructions for applicant..."
+                                            className="mt-1 w-full rounded-lg border border-[#e3e7df] p-2.5 text-xs outline-none focus:border-[#819981]"
+                                        />
+                                    </label>
+
+                                    <div className="flex items-center justify-end gap-2 pt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedRequest(null)}
+                                            className="rounded-xl border border-[#e2e7df] px-3 py-1.5 text-xs text-[#5c685b] hover:bg-[#f4f6f2]"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={submitting}
+                                            className="rounded-xl bg-[#2b5139] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#22442e] disabled:opacity-50"
+                                        >
+                                            {submitting ? 'Submitting…' : 'Confirm decision'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }

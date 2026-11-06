@@ -262,3 +262,49 @@ test('employment outcome reports apply program scope and use current status', fu
         ->assertJsonPath('data.0.status', 'Further Studies')
         ->assertJsonPath('data.0.alumni_count', 1);
 });
+
+test('administrators can create and update departments, academic programs, and degree offerings', function () {
+    $admin = User::factory()->create();
+    assignRole($admin, 'system-administrator');
+    Sanctum::actingAs($admin, ['api']);
+
+    // 1. Create Department
+    $deptRes = $this->postJson('/api/departments', [
+        'code' => 'coe',
+        'name' => 'College of Engineering',
+        'description' => 'Engineering programs and research.',
+    ])->assertCreated()
+        ->assertJsonPath('data.code', 'COE')
+        ->assertJsonPath('data.name', 'College of Engineering');
+
+    $deptId = $deptRes->json('data.id');
+
+    // 2. Update Department
+    $this->patchJson("/api/departments/{$deptId}", [
+        'name' => 'College of Engineering & Architecture',
+    ])->assertOk()
+        ->assertJsonPath('data.name', 'College of Engineering & Architecture');
+
+    // 3. Create Program with initial degree offering
+    $progRes = $this->postJson("/api/departments/{$deptId}/programs", [
+        'code' => 'bsce',
+        'name' => 'BS in Civil Engineering',
+        'degree_title' => 'Bachelor of Science in Civil Engineering',
+    ])->assertCreated()
+        ->assertJsonPath('data.code', 'BSCE')
+        ->assertJsonCount(1, 'data.program_degrees');
+
+    $progId = $progRes->json('data.id');
+
+    // 4. Update Program
+    $this->patchJson("/api/programs/{$progId}", [
+        'name' => 'Bachelor of Science in Civil Engineering (Honors)',
+    ])->assertOk()
+        ->assertJsonPath('data.name', 'Bachelor of Science in Civil Engineering (Honors)');
+
+    // 5. Add another degree offering inline
+    $this->postJson("/api/programs/{$progId}/degrees", [
+        'degree_title' => 'Master of Science in Structural Engineering',
+    ])->assertCreated()
+        ->assertJsonPath('data.degree.title', 'Master of Science in Structural Engineering');
+});

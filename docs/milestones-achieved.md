@@ -2,7 +2,7 @@
 
 **Project:** Alumni Tracer Management System (ATMS)  
 **Architecture:** Inertia.js React Hybrid (Laravel 12 + React 19 + TypeScript + Tailwind CSS + shadcn/ui)  
-**Test Suite:** 98 Tests Passed (782 Assertions) — 100% Green  
+**Test Suite:** 99 Tests Passed (794 Assertions) — 100% Green  
 **Status Date:** November 2026  
 
 ---
@@ -25,6 +25,7 @@ flowchart TD
     M10 --> M11["M11: Public Portal & Dual-Mode Registration UX"]
     M11 --> M12["M12: Survey Builder & Dynamic Question Engine"]
     M12 --> M13["M13: Users, Roles, Program Scoping & Permissions Matrix"]
+    M13 --> M14["M14: Modular Academic Departments & Programs Catalog"]
 ```
 
 ---
@@ -160,6 +161,13 @@ flowchart TD
   * Records activity logs (`user.invited`, `user.roles_updated`, `user.programs_assigned`, `role.permissions_updated`, `user.suspended`, `user.reactivated`, `user.deleted`).
   * Seeded dedicated accounts for every role (`admin@atms.local`, `coordinator@atms.local`, `dept.ccs@atms.local`, `employer@atms.local`, and claimed alumni accounts).
 
+### Milestone 14: Modular Academic Departments & Programs Management (Section 5)
+* **Department Creation & Editing (`POST /api/departments` & `PATCH /api/departments/{department}`)**:
+  * System Administrators and Alumni Coordinators can create and edit academic departments/colleges (`code`, `name`, `description`) either from a dedicated `+ Create department` form or inline while adding a new academic program (`+ Create new department inline`).
+* **Modular Department View & Program Management (`AcademicCatalog` in `resources/js/components/alumni-portal-data.tsx`)**:
+  * Toggle between **Modular by Department** (where each Department card groups its own Academic Programs with quick actions like `+ Add program here` and `Edit department`) and **All Programs Grid**.
+  * Supports editing existing programs (`PATCH /api/programs/{program}`), creating an initial degree offering on program creation, and adding additional degree offerings inline (`POST /api/programs/{program}/degrees`).
+
 ---
 
 ## 3. Automated Test Suite Status
@@ -175,7 +183,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Api/AlumniClaimStatusTest.php` | 2 | 13 | **Passed** |
 | `tests/Feature/Api/StrategicDecisionsTest.php` | 5 | 39 | **Passed** |
 | `tests/Feature/Api/AlumniImportTest.php` | 4 | 21 | **Passed** |
-| `tests/Feature/Api/AlumniBackendApiTest.php` | 13 | 55 | **Passed** |
+| `tests/Feature/Api/AlumniBackendApiTest.php` | 14 | 67 | **Passed** |
 | `tests/Feature/Api/PhaseFiveApiTest.php` | 15 | 88 | **Passed** |
 | `tests/Feature/Auth/AlumniRegistrationTest.php` | 6 | 28 | **Passed** |
 | `tests/Feature/Auth/RegistrationTest.php` | 2 | 11 | **Passed** |
@@ -184,7 +192,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Auth/TwoFactorAuthenticationTest.php` | 6 | 22 | **Passed** |
 | `tests/Feature/Settings/ProfileUpdateTest.php` | 8 | 44 | **Passed** |
 | `tests/Feature/Settings/SecurityTest.php` | 6 | 28 | **Passed** |
-| **Total Test Suite** | **98** | **782** | **100% Passed** |
+| **Total Test Suite** | **99** | **794** | **100% Passed** |
 
 ---
 

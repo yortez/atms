@@ -65,6 +65,8 @@ export type AcademicDepartment = {
     code: string;
     name: string;
     description: string | null;
+    programs_count?: number;
+    programs?: AcademicProgram[];
 };
 
 export type AcademicProgram = {

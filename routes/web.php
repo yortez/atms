@@ -59,9 +59,12 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
         ->name('api.alumni-documents.destroy');
     Route::get('/departments', [AcademicCatalogController::class, 'departments'])->name('api.departments.index');
     Route::post('/departments', [AcademicCatalogController::class, 'storeDepartment'])->name('api.departments.store');
+    Route::patch('/departments/{department}', [AcademicCatalogController::class, 'updateDepartment'])->name('api.departments.update');
     Route::get('/programs', [AcademicCatalogController::class, 'programs'])->name('api.programs.index');
     Route::post('/departments/{department}/programs', [AcademicCatalogController::class, 'storeProgram'])
         ->name('api.programs.store');
+    Route::patch('/programs/{program}', [AcademicCatalogController::class, 'updateProgram'])
+        ->name('api.programs.update');
     Route::post('/programs/{program}/degrees', [AcademicCatalogController::class, 'storeProgramDegree'])
         ->name('api.program-degrees.store');
     Route::get('/reports', [AlumniReportController::class, 'index'])
