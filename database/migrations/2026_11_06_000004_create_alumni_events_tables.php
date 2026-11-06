@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('format', 24)->default('in_person')->index();
             $table->string('venue', 200)->nullable();
             $table->string('meeting_url', 500)->nullable();
-            $table->timestamp('starts_at')->index();
+            $table->timestamp('starts_at')->useCurrent()->index();
             $table->timestamp('ends_at')->nullable();
             $table->timestamp('registration_deadline')->nullable();
             $table->unsignedInteger('capacity')->nullable();

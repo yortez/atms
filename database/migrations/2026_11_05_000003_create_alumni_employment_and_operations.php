@@ -9,33 +9,49 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('alumni_registration_assistance_requests', function (Blueprint $table) {
-            $table->foreignId('reviewed_by_user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('reviewed_at')->nullable();
-            $table->text('review_note')->nullable();
+            if (! Schema::hasColumn('alumni_registration_assistance_requests', 'reviewed_by_user_id')) {
+                $table->unsignedBigInteger('reviewed_by_user_id')->nullable();
+            }
+            $table->foreign('reviewed_by_user_id', 'arar_reviewed_by_user_fk')
+                ->references('id')
+                ->on('users')
+                ->nullOnDelete();
+            if (! Schema::hasColumn('alumni_registration_assistance_requests', 'reviewed_at')) {
+                $table->timestamp('reviewed_at')->nullable();
+            }
+            if (! Schema::hasColumn('alumni_registration_assistance_requests', 'review_note')) {
+                $table->text('review_note')->nullable();
+            }
         });
 
-        Schema::table('alumni_profiles', function (Blueprint $table) {
-            $table->string('first_name', 100)->nullable()->index();
-            $table->string('middle_name', 100)->nullable();
-            $table->string('last_name', 100)->nullable();
-            $table->string('suffix', 30)->nullable();
-            $table->string('preferred_name', 100)->nullable();
-            $table->string('profile_status', 24)->default('active')->index();
-            $table->unsignedBigInteger('merged_into_alumni_id')->nullable();
-            $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreign('merged_into_alumni_id')->references('id')->on('alumni_profiles')->nullOnDelete();
-            $table->index(['last_name', 'first_name']);
-        });
+        if (! Schema::hasColumn('alumni_profiles', 'first_name')) {
+            Schema::table('alumni_profiles', function (Blueprint $table) {
+                $table->string('first_name', 100)->nullable()->index();
+                $table->string('middle_name', 100)->nullable();
+                $table->string('last_name', 100)->nullable();
+                $table->string('suffix', 30)->nullable();
+                $table->string('preferred_name', 100)->nullable();
+                $table->string('profile_status', 24)->default('active')->index();
+                $table->unsignedBigInteger('merged_into_alumni_id')->nullable();
+                $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreign('merged_into_alumni_id')->references('id')->on('alumni_profiles')->nullOnDelete();
+                $table->index(['last_name', 'first_name']);
+            });
+        }
 
-        Schema::rename('alumni_student_numbers', 'alumni_education_records');
+        if (Schema::hasTable('alumni_student_numbers') && ! Schema::hasTable('alumni_education_records')) {
+            Schema::rename('alumni_student_numbers', 'alumni_education_records');
+        }
 
-        Schema::table('alumni_education_records', function (Blueprint $table) {
-            $table->foreignId('program_degree_id')->nullable()->constrained('program_degrees')->restrictOnDelete();
-            $table->unsignedSmallInteger('graduation_year')->nullable();
-            $table->string('honors', 120)->nullable();
-            $table->index(['alumni_profile_id', 'graduation_year']);
-            $table->index(['program_degree_id', 'graduation_year']);
-        });
+        if (! Schema::hasColumn('alumni_education_records', 'program_degree_id')) {
+            Schema::table('alumni_education_records', function (Blueprint $table) {
+                $table->foreignId('program_degree_id')->nullable()->constrained('program_degrees')->restrictOnDelete();
+                $table->unsignedSmallInteger('graduation_year')->nullable();
+                $table->string('honors', 120)->nullable();
+                $table->index(['alumni_profile_id', 'graduation_year'], 'aer_profile_grad_year_idx');
+                $table->index(['program_degree_id', 'graduation_year'], 'aer_prog_degree_grad_year_idx');
+            });
+        }
 
         Schema::create('alumni_contact_methods', function (Blueprint $table) {
             $table->id();
@@ -71,7 +87,7 @@ return new class extends Migration
             $table->string('student_number', 64);
             $table->foreignId('education_record_id')->nullable()->constrained('alumni_education_records')->nullOnDelete();
             $table->string('status', 24)->default('pending');
-            $table->timestamp('submitted_at');
+            $table->timestamp('submitted_at')->useCurrent();
             $table->foreignId('reviewed_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->text('decision_note')->nullable();
@@ -88,7 +104,7 @@ return new class extends Migration
             $table->foreignId('target_alumni_id')->constrained('alumni_profiles')->restrictOnDelete();
             $table->foreignId('merged_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->text('reason');
-            $table->timestamp('merged_at');
+            $table->timestamp('merged_at')->useCurrent();
             $table->json('snapshot')->nullable();
             $table->index(['target_alumni_id', 'merged_at']);
         });
@@ -140,11 +156,11 @@ return new class extends Migration
             $table->string('work_location', 180)->nullable();
             $table->date('started_on')->nullable();
             $table->date('ended_on')->nullable();
-            $table->timestamp('reported_at');
+            $table->timestamp('reported_at')->useCurrent();
             $table->foreignId('reported_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->index(['alumni_id', 'reported_at']);
-            $table->index(['employment_status_id', 'reported_at']);
+            $table->index(['employment_status_id', 'reported_at'], 'aemp_status_reported_at_idx');
             $table->index(['alumni_id', 'started_on']);
         });
 
@@ -158,7 +174,7 @@ return new class extends Migration
             $table->string('original_name', 255);
             $table->string('mime_type', 120);
             $table->unsignedBigInteger('size_bytes');
-            $table->timestamp('uploaded_at');
+            $table->timestamp('uploaded_at')->useCurrent();
             $table->timestamps();
             $table->index(['alumni_id', 'document_type']);
             $table->index('path');
@@ -168,7 +184,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('notice_version', 40);
-            $table->timestamp('accepted_at');
+            $table->timestamp('accepted_at')->useCurrent();
             $table->string('ip_address', 45)->nullable();
             $table->timestamps();
             $table->unique(['user_id', 'notice_version']);
@@ -216,8 +232,8 @@ return new class extends Migration
         Schema::dropIfExists('alumni_contact_methods');
         Schema::table('alumni_education_records', function (Blueprint $table) {
             $table->dropConstrainedForeignId('program_degree_id');
-            $table->dropIndex(['alumni_profile_id', 'graduation_year']);
-            $table->dropIndex(['program_degree_id', 'graduation_year']);
+            $table->dropIndex('aer_profile_grad_year_idx');
+            $table->dropIndex('aer_prog_degree_grad_year_idx');
             $table->dropColumn(['graduation_year', 'honors']);
         });
         Schema::rename('alumni_education_records', 'alumni_student_numbers');
@@ -236,8 +252,8 @@ return new class extends Migration
             ]);
         });
         Schema::table('alumni_registration_assistance_requests', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('reviewed_by_user_id');
-            $table->dropColumn(['reviewed_at', 'review_note']);
+            $table->dropForeign('arar_reviewed_by_user_fk');
+            $table->dropColumn(['reviewed_by_user_id', 'reviewed_at', 'review_note']);
         });
     }
 };

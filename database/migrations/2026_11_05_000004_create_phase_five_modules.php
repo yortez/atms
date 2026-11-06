@@ -37,7 +37,7 @@ return new class extends Migration
             $table->foreignId('survey_id')->constrained()->cascadeOnDelete();
             $table->foreignId('alumni_profile_id')->constrained('alumni_profiles')->cascadeOnDelete();
             $table->json('answers');
-            $table->timestamp('submitted_at');
+            $table->timestamp('submitted_at')->useCurrent();
             $table->timestamps();
             $table->unique(['survey_id', 'alumni_profile_id']);
         });
