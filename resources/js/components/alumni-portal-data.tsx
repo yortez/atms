@@ -4756,20 +4756,20 @@ export function SurveyCenter({
                     onSubmit={saveSurvey}
                     className="mx-auto max-w-4xl space-y-4 rounded-2xl border border-[#dfe5dc] bg-[#f1f4ef] p-4 sm:p-6"
                 >
-                    {/* Google Forms Top Navigation Bar */}
+                    {/* Survey Builder Top Navigation Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e2e7df] bg-white px-4 py-2.5 shadow-2xs">
                         <div className="flex items-center gap-2.5">
                             <span className="grid size-8 place-items-center rounded-lg bg-[#2b5139] text-xs font-bold text-white">
-                                GF
+                                SB
                             </span>
                             <div>
                                 <p className="text-xs font-bold text-[#29382e]">
-                                    {title.trim() || 'Untitled Tracer Form'}
+                                    {title.trim() || 'Untitled Tracer Survey'}
                                 </p>
                                 <p className="text-[10px] text-[#7a8278]">
                                     {editingSurveyId !== null
-                                        ? 'Editing Draft Form'
-                                        : 'Google Forms-Style Survey Builder'}{' '}
+                                        ? 'Editing Draft Survey'
+                                        : 'Visual Survey Builder & Dynamic Question Engine'}{' '}
                                     · {questions.length}{' '}
                                     {questions.length === 1
                                         ? 'Question'

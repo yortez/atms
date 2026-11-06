@@ -2,7 +2,7 @@
 
 **Project:** Alumni Tracer Management System (ATMS)  
 **Architecture:** Inertia.js React Hybrid (Laravel 12 + React 19 + TypeScript + Tailwind CSS + shadcn/ui)  
-**Test Suite:** 87 Tests Passed (488 Assertions) — 100% Green  
+**Test Suite:** 98 Tests Passed (782 Assertions) — 100% Green  
 **Status Date:** November 2026  
 
 ---
@@ -12,12 +12,19 @@
 The platform has established a production-ready, test-driven foundation combining the Laravel monolith backend with a responsive Inertia.js React frontend. All strategic architectural decisions, data isolation boundaries, and core modules outlined in `docs/master-prompt.md` have been implemented and verified.
 
 ```mermaid
-flowchart LR
-    M1["Milestone 1\nArchitecture & Roles\n(Inertia Hybrid + Multi-Role)"] --> M2["Milestone 2\nSchema & Storage\n(Relevance, Snapshots, GWA)"]
-    M2 --> M3["Milestone 3\nRegistration & Claiming\n(3-Field Tuple + Dept Assistance)"]
-    M3 --> M4["Milestone 4\nBatch Import Engine\n(CSV Parser + Profile Consolidation)"]
-    M4 --> M5["Milestone 5\nDept Coordinator Scoping\n(Option A Isolation + Queue UI)"]
-    M5 --> M6["Milestone 6\nRecruitment Snapshots\n(RA 10173 Immutability + Resumes)"]
+flowchart TD
+    M1["M1: Inertia Hybrid & Multi-Role Architecture"] --> M2["M2: Normalized 42-Table Schema & Storage"]
+    M2 --> M3["M3: 3-Field Alumni Claiming & Dept Assistance"]
+    M3 --> M4["M4: CSV Batch Import Engine & Auto-Cataloging"]
+    M4 --> M5["M5: Option A Dept Coordinator Isolation & Queue"]
+    M5 --> M6["M6: Option B Employment Tracer & Degree Relevance"]
+    M6 --> M7["M7: RA 10173 Job Application Frozen Snapshots"]
+    M7 --> M8["M8: Verified Employer Tenancy & Job Board"]
+    M8 --> M9["M9: Directory Claim Status & Profile Slide-Over"]
+    M9 --> M10["M10: 18 Institutional Reports & Excel/PDF Exports"]
+    M10 --> M11["M11: Public Portal & Dual-Mode Registration UX"]
+    M11 --> M12["M12: Survey Builder & Dynamic Question Engine"]
+    M12 --> M13["M13: Users, Roles, Program Scoping & Permissions Matrix"]
 ```
 
 ---
@@ -134,10 +141,10 @@ flowchart LR
 * **Deep-Linked Portal Navigation (`resources/js/components/alumni-portal.tsx`)**:
   * Supports `?page=` and `?role=` query parameters on `/dashboard` so public website CTAs open the exact target workspace module immediately.
 
-### Milestone 12: Google Forms-Style Survey Builder & Dynamic Question Engine (Section 9)
-* **Google Forms Builder & Respondent Experience (`resources/js/components/alumni-portal-data.tsx`)**:
-  * Top tabbed builder (`Questions` | `Settings & Cohorts` | `Preview Form`), header card with top accent bar, active question focus indicator, interactive option list (`○` radio / `☐` checkbox / `1.` dropdown + `+ Add option` + remove option `✕`), question duplication, reordering (`↑` / `↓`), deletion, and `Required` toggle switch.
-  * Google Forms-style respondent view (`SurveyResponseForm`) with individual question cards, interactive 1–5 Linear Scale circles, required indicators (`*`), and `Clear form` button.
+### Milestone 12: Survey Builder & Dynamic Question Engine (Section 9)
+* **Visual Survey Builder & Respondent Experience (`resources/js/components/alumni-portal-data.tsx`)**:
+  * Tabbed builder (`Questions` | `Settings & Cohorts` | `Preview Form`), header card, active question focus indicator, interactive option list (`○` radio / `☐` checkbox / `1.` dropdown + `+ Add option` + remove option `✕`), question duplication, reordering (`↑` / `↓`), deletion, and `Required` toggle switch.
+  * Structured respondent view (`SurveyResponseForm`) with individual question cards, interactive 1–5 Linear Scale circles, required indicators (`*`), and `Clear form` button.
 * **9 Question Types & Cohort Targeting (`App\Models\Survey` & `App\Http\Controllers\Api\SurveyController`)**:
   * Supports Short Text (`text`), Long Text (`textarea`), Multiple Choice (`radio`), Checkbox (`multiselect`), Dropdown (`select`), Rating Scale (`rating` 1–5), Date (`date`), Number (`number`), and Yes/No (`boolean`).
   * Targets cohorts by Department (`target_department_ids`), Academic Program (`target_program_ids`), and Graduation Batch Years (`target_graduation_years`), matching multi-degree alumni if any degree matches while enforcing 1 response per unique alumnus (`409 Conflict` on duplicate).
@@ -185,9 +192,23 @@ Executed via `php artisan test`:
 
 | Role | Available Workspace Modules | Data Scope |
 | :--- | :--- | :--- |
-| **System Administrator** | Overview, Notifications, Alumni Directory, Claim Assistance, Academic Programs, Surveys (Google Forms Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF), Users & Roles (with Program Scoping & Permissions Matrix), Activity Log | Institution-wide |
-| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Claim Assistance, Surveys (Google Forms Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF) | Institution-wide |
+| **System Administrator** | Overview, Notifications, Alumni Directory, Claim Assistance, Academic Programs, Surveys (Visual Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF), Users & Roles (with Program Scoping & Permissions Matrix), Activity Log | Institution-wide |
+| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Claim Assistance, Surveys (Visual Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF) | Institution-wide |
 | **Department Coordinator** | Overview, Notifications, Program Alumni, Claim Assistance Queue, Employment Outcomes, Surveys, Announcements, Department Reports (18 Reports Scoped) | Assigned Programs Only (Option A) |
-| **Alumni** | My Dashboard, Notifications, My Profile, Academic Records, Employment Tracer (Option B), Surveys (Google Forms Respondent), Announcements, Career Opportunities, My Applications | Self-profile Only |
+| **Alumni** | My Dashboard, Notifications, My Profile, Academic Records, Employment Tracer (Option B), Surveys, Announcements, Career Opportunities, My Applications | Self-profile Only |
 | **Employer** | Overview, Notifications, Company Profile, Job Postings, Applicants (with Frozen Snapshots & Resumes), Recruitment Analytics | Owned Postings Only |
+
+---
+
+## 5. Seeded Institutional & Demo Accounts
+
+Seeded via `php artisan db:seed --class=SystemAdminSeeder` (default password: `Password123!`):
+
+| Role | Name | Email | Scope / Linked Entity |
+| :--- | :--- | :--- | :--- |
+| **System Administrator** | System Administrator | `admin@atms.local` | Institution-wide + multi-role workspace preview |
+| **Alumni Coordinator** | Elena Vance | `coordinator@atms.local` | Institution-wide alumni, surveys, announcements & reports |
+| **Department Coordinator** | Dr. Alan Grant | `dept.ccs@atms.local` | Scoped to `BSCS` & `BSIT` (`user_program_assignments`) |
+| **Employer Partner** | Sophia Lin (TechNova HR) | `employer@atms.local` | Linked to verified company *TechNova Solutions Inc.* |
+| **Claimed Alumni** | Maria Clara Reyes | `maria.reyes@example.com` | Linked to `AlumniProfile #3` |
 
