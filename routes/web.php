@@ -92,6 +92,10 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
         ->name('api.announcements.update');
     Route::post('/announcements/{announcement}/publish', [AnnouncementController::class, 'publish'])
         ->name('api.announcements.publish');
+    Route::post('/announcements/{announcement}/unpublish', [AnnouncementController::class, 'unpublish'])
+        ->name('api.announcements.unpublish');
+    Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])
+        ->name('api.announcements.destroy');
     Route::get('/jobs', [JobController::class, 'index'])->name('api.jobs.index');
     Route::get('/jobs/{jobPosting}', [JobController::class, 'show'])->name('api.jobs.show');
     Route::post('/jobs/{jobPosting}/applications', [JobController::class, 'apply'])->name('api.jobs.apply');

@@ -134,14 +134,35 @@ export type Survey = {
     has_responded?: boolean;
 };
 
+export type AnnouncementCategory =
+    | 'general'
+    | 'event'
+    | 'career'
+    | 'tracer'
+    | 'scholarship'
+    | 'urgent';
+
 export type Announcement = {
     id: number;
     title: string;
     body: string;
+    category?: AnnouncementCategory;
+    is_pinned?: boolean;
+    is_public?: boolean;
+    action_label?: string | null;
+    action_url?: string | null;
     audience_roles: string[] | null;
-    status: 'draft' | 'published';
+    target_department_ids?: number[] | null;
+    target_program_ids?: number[] | null;
+    target_graduation_years?: number[] | null;
+    status: 'draft' | 'published' | 'archived';
     published_at: string | null;
+    expires_at?: string | null;
     created_at: string;
+    author?: {
+        id: number;
+        name: string;
+    } | null;
 };
 
 export type Employer = {

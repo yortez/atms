@@ -368,6 +368,7 @@ export default function AlumniPortal() {
         (['Surveys', 'Announcements'].includes(activePage) &&
             !canManageContent) ||
         [
+            'Academic programs',
             'Employment tracer',
             'Employers & jobs',
             'Recruitment analytics',

@@ -25,6 +25,10 @@ type PublicAnnouncement = {
     id: number;
     title: string;
     body: string;
+    category?: string;
+    is_pinned?: boolean;
+    action_label?: string | null;
+    action_url?: string | null;
     published_at: string | null;
 };
 
@@ -776,9 +780,15 @@ export default function Welcome({
                                 >
                                     <div>
                                         <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[#6b836c]">
-                                            <span className="inline-flex items-center gap-1.5">
+                                            <span className="inline-flex items-center gap-1.5 uppercase">
                                                 <Megaphone className="size-3.5" />
-                                                OFFICIAL BULLETIN
+                                                {item.is_pinned
+                                                    ? '📌 Pinned · '
+                                                    : ''}
+                                                {item.category &&
+                                                item.category !== 'general'
+                                                    ? item.category
+                                                    : 'OFFICIAL BULLETIN'}
                                             </span>
                                             <span>
                                                 {item.published_at ?? 'Recent'}

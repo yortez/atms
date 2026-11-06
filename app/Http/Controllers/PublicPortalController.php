@@ -17,20 +17,30 @@ class PublicPortalController extends Controller
     {
         $announcements = Announcement::query()
             ->where('status', 'published')
+            ->where('is_public', true)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
+            ->where(function ($query): void {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>=', now());
+            })
             ->where(function ($query): void {
                 $query->whereNull('audience_roles')
                     ->orWhereJsonContains('audience_roles', 'alumni')
                     ->orWhereJsonContains('audience_roles', 'public');
             })
+            ->orderByDesc('is_pinned')
             ->orderByDesc('published_at')
             ->limit(6)
-            ->get(['id', 'title', 'body', 'published_at'])
+            ->get(['id', 'title', 'body', 'category', 'is_pinned', 'action_label', 'action_url', 'published_at'])
             ->map(fn (Announcement $item) => [
                 'id' => $item->id,
                 'title' => $item->title,
                 'body' => $item->body,
+                'category' => $item->category ?? 'general',
+                'is_pinned' => (bool) $item->is_pinned,
+                'action_label' => $item->action_label,
+                'action_url' => $item->action_url,
                 'published_at' => $item->published_at?->toDateString(),
             ])
             ->values();
