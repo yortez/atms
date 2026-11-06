@@ -27,14 +27,19 @@ return new class extends Migration
             });
         }
 
-        Schema::table('alumni_registration_assistance_requests', function (Blueprint $table) {
+        $hasProgramFk = collect(Schema::getForeignKeys('alumni_registration_assistance_requests'))
+            ->contains(fn (array $fk) => in_array('academic_program_id', $fk['columns'] ?? [], true));
+
+        Schema::table('alumni_registration_assistance_requests', function (Blueprint $table) use ($hasProgramFk) {
             if (! Schema::hasColumn('alumni_registration_assistance_requests', 'academic_program_id')) {
                 $table->unsignedBigInteger('academic_program_id')->nullable()->after('student_number');
             }
-            $table->foreign('academic_program_id', 'arar_academic_program_fk')
-                ->references('id')
-                ->on('academic_programs')
-                ->nullOnDelete();
+            if (! $hasProgramFk) {
+                $table->foreign('academic_program_id', 'arar_academic_program_fk')
+                    ->references('id')
+                    ->on('academic_programs')
+                    ->nullOnDelete();
+            }
         });
     }
 

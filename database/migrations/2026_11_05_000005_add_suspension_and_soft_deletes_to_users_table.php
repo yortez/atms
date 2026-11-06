@@ -9,8 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('suspended_at')->nullable()->after('password');
-            $table->softDeletes();
+            if (! Schema::hasColumn('users', 'suspended_at')) {
+                $table->timestamp('suspended_at')->nullable()->after('password');
+            }
+            if (! Schema::hasColumn('users', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
     }
 

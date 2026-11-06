@@ -8,7 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('alumni_registration_assistance_requests', function (Blueprint $table) {
+        $hasResolvedProfileFk = collect(Schema::getForeignKeys('alumni_registration_assistance_requests'))
+            ->contains(fn (array $fk) => in_array('resolved_alumni_profile_id', $fk['columns'] ?? [], true));
+
+        Schema::table('alumni_registration_assistance_requests', function (Blueprint $table) use ($hasResolvedProfileFk) {
             if (! Schema::hasColumn('alumni_registration_assistance_requests', 'graduation_year')) {
                 $table->unsignedSmallInteger('graduation_year')->nullable()->after('academic_program_id');
             }
@@ -18,10 +21,12 @@ return new class extends Migration
             if (! Schema::hasColumn('alumni_registration_assistance_requests', 'resolved_alumni_profile_id')) {
                 $table->unsignedBigInteger('resolved_alumni_profile_id')->nullable()->after('resolution_action');
             }
-            $table->foreign('resolved_alumni_profile_id', 'arar_resolved_profile_fk')
-                ->references('id')
-                ->on('alumni_profiles')
-                ->nullOnDelete();
+            if (! $hasResolvedProfileFk) {
+                $table->foreign('resolved_alumni_profile_id', 'arar_resolved_profile_fk')
+                    ->references('id')
+                    ->on('alumni_profiles')
+                    ->nullOnDelete();
+            }
         });
     }
 
