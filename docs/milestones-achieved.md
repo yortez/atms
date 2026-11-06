@@ -121,6 +121,19 @@ flowchart LR
   * `GET /api/reports/export/excel`: Downloads styled SpreadsheetML (`.xls`) workbooks with summary KPI cards and tabular data.
   * `GET /api/reports/export/pdf`: Generates native binary `%PDF-1.4` documents with multi-page layout, KPI summary banner, and formatted rows.
 
+### Milestone 11: Public Website & Registration UX Polish (Section 4)
+* **Live Public Website Controller (`App\Http\Controllers\PublicPortalController`)**:
+  * Serves `GET /` with real-time published announcements, open job postings from verified employers, active academic departments/programs, and public summary metrics without exposing any confidential alumni data.
+* **Interactive Public Job Board, Announcements & Events (`resources/js/pages/welcome.tsx`)**:
+  * Searchable and workplace-filterable (`All`, `On-site`, `Hybrid`, `Remote`) Public Job Board with a **Job Details Modal** that deep-links authenticated users directly to `/dashboard?page=Career+opportunities` or prompts guests to sign in / claim their alumni account.
+  * Live **Public Announcements** section with an **Announcement Reader Modal** and deep-link to `/dashboard?page=Announcements`.
+  * **Alumni Information & Verification Guide** detailing the 3-credential claim workflow (`Student Number` + `Last Name` + `Date of Birth`) and Department Coordinator assistance fallback.
+* **Dual-Mode Registration UX (`resources/js/pages/auth/register.tsx` & `CreateNewUser.php`)**:
+  * Seamless switcher between **Alumni Claim** (`/register`) and **Employer Partner Registration** (`/register?type=employer`).
+  * Employer registration automatically provisions the corporate profile in `pending` verification status and opens the Employer workspace.
+* **Deep-Linked Portal Navigation (`resources/js/components/alumni-portal.tsx`)**:
+  * Supports `?page=` and `?role=` query parameters on `/dashboard` so public website CTAs open the exact target workspace module immediately.
+
 ---
 
 ## 3. Automated Test Suite Status
@@ -129,6 +142,7 @@ Executed via `php artisan test`:
 
 | Test Suite File | Tests | Assertions | Status |
 | :--- | :---: | :---: | :---: |
+| `tests/Feature/PublicPortalAndRegistrationTest.php` | 2 | 49 | **Passed** |
 | `tests/Feature/Api/InstitutionalReportsTest.php` | 4 | 197 | **Passed** |
 | `tests/Feature/Api/AlumniClaimStatusTest.php` | 2 | 13 | **Passed** |
 | `tests/Feature/Api/StrategicDecisionsTest.php` | 5 | 39 | **Passed** |
@@ -142,7 +156,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Auth/TwoFactorAuthenticationTest.php` | 6 | 22 | **Passed** |
 | `tests/Feature/Settings/ProfileUpdateTest.php` | 8 | 44 | **Passed** |
 | `tests/Feature/Settings/SecurityTest.php` | 6 | 28 | **Passed** |
-| **Total Test Suite** | **93** | **698** | **100% Passed** |
+| **Total Test Suite** | **95** | **747** | **100% Passed** |
 
 ---
 
@@ -160,6 +174,5 @@ Executed via `php artisan test`:
 
 ## 5. Next Planned Milestones
 
-1. **Public Website & Guest Experience (Section 4)**: Public job board, public announcements, and guest registration landing.
-2. **Custom Survey Builder (Section 9)**: Visual question builder with cohort targeting by academic program and graduation year.
+1. **Custom Survey Builder (Section 9)**: Visual question builder with cohort targeting by academic program and graduation year.
 

@@ -296,9 +296,44 @@ export default function AlumniPortal() {
     const availableRoles = rolePriority.filter((role) =>
         user?.roles?.includes(roleCodes[role]),
     );
-    const [role, setRole] = useState<Role>(() => availableRoles[0] ?? 'Alumni');
+    const initialPortalState = (): { role: Role; page: string } => {
+        const defaultRole: Role = availableRoles[0] ?? 'Alumni';
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const requestedRole = params.get('role') as Role | null;
+            const requestedPage = params.get('page');
+
+            if (requestedRole && availableRoles.includes(requestedRole)) {
+                const validPage = navigation[requestedRole].find(
+                    (item) => item.label === requestedPage,
+                );
+                return {
+                    role: requestedRole,
+                    page: validPage?.label ?? navigation[requestedRole][0].label,
+                };
+            }
+
+            if (requestedPage) {
+                for (const candidateRole of availableRoles) {
+                    const match = navigation[candidateRole].find(
+                        (item) =>
+                            item.label.toLowerCase() ===
+                            requestedPage.toLowerCase(),
+                    );
+                    if (match) {
+                        return { role: candidateRole, page: match.label };
+                    }
+                }
+            }
+        }
+        return {
+            role: defaultRole,
+            page: navigation[defaultRole][0].label,
+        };
+    };
+    const [role, setRole] = useState<Role>(() => initialPortalState().role);
     const [activePage, setActivePage] = useState(
-        () => navigation[availableRoles[0] ?? 'Alumni'][0].label,
+        () => initialPortalState().page,
     );
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -320,9 +355,9 @@ export default function AlumniPortal() {
     const pageDefinition =
         activePage === 'Overview' || activePage === 'My dashboard'
             ? {
-                  ...(pageCopy[activePage] ?? pageCopy.Overview),
-                  title: `${activePage === 'My dashboard' ? 'Welcome back' : 'Good morning'}, ${profile.name.split(' ')[0]}`,
-              }
+                ...(pageCopy[activePage] ?? pageCopy.Overview),
+                title: `${activePage === 'My dashboard' ? 'Welcome back' : 'Good morning'}, ${profile.name.split(' ')[0]}`,
+            }
             : (pageCopy[activePage] ?? pageCopy.Overview);
     const canManageContent = ['Administrator', 'Alumni coordinator'].includes(
         role,
@@ -442,8 +477,8 @@ export default function AlumniPortal() {
             onCloseCreate={() => setDialogOpen(false)}
         />
     ) : ['Reports', 'Employment outcomes', 'Department reports'].includes(
-          activePage,
-      ) ? (
+        activePage,
+    ) ? (
         <EmploymentReports />
     ) : activePage === 'Notifications' ? (
         <Notifications />
@@ -667,38 +702,38 @@ export default function AlumniPortal() {
                             'Alumni coordinator',
                             'Department coordinator',
                         ].includes(role) && (
-                            <label className="hidden h-9 w-48 items-center gap-2 rounded-xl border border-[#e8eae4] bg-white px-2.5 lg:flex">
-                                <Search className="size-3.5 text-[#929990]" />
-                                <input
-                                    value={search}
-                                    onChange={(event) => {
-                                        const value = event.target.value;
-                                        setSearch(value);
-                                        if (value.trim()) {
-                                            const directoryPage = navigation[
-                                                role
-                                            ].find((item) =>
-                                                [
-                                                    'Alumni directory',
-                                                    'Program alumni',
-                                                ].includes(item.label),
-                                            );
-                                            if (directoryPage) {
-                                                setActivePage(
-                                                    directoryPage.label,
+                                <label className="hidden h-9 w-48 items-center gap-2 rounded-xl border border-[#e8eae4] bg-white px-2.5 lg:flex">
+                                    <Search className="size-3.5 text-[#929990]" />
+                                    <input
+                                        value={search}
+                                        onChange={(event) => {
+                                            const value = event.target.value;
+                                            setSearch(value);
+                                            if (value.trim()) {
+                                                const directoryPage = navigation[
+                                                    role
+                                                ].find((item) =>
+                                                    [
+                                                        'Alumni directory',
+                                                        'Program alumni',
+                                                    ].includes(item.label),
                                                 );
+                                                if (directoryPage) {
+                                                    setActivePage(
+                                                        directoryPage.label,
+                                                    );
+                                                }
                                             }
-                                        }
-                                    }}
-                                    aria-label="Search alumni records"
-                                    placeholder="Search anything..."
-                                    className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-[#9ca198]"
-                                />
-                                <kbd className="rounded border border-[#e8eae4] px-1 py-0.5 text-[9px] text-[#929990]">
-                                    ⌘ K
-                                </kbd>
-                            </label>
-                        )}
+                                        }}
+                                        aria-label="Search alumni records"
+                                        placeholder="Search anything..."
+                                        className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-[#9ca198]"
+                                    />
+                                    <kbd className="rounded border border-[#e8eae4] px-1 py-0.5 text-[9px] text-[#929990]">
+                                        ⌘ K
+                                    </kbd>
+                                </label>
+                            )}
                         <button
                             type="button"
                             aria-label="Notifications"

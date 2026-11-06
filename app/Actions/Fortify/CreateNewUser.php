@@ -5,7 +5,9 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\AlumniProfile;
+use App\Models\AlumniRegistrationAssistanceRequest;
 use App\Models\AlumniStudentNumber;
+use App\Models\Employer;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AlumniRegistrationLogger;
@@ -30,6 +32,14 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        $registrationType = isset($input['registration_type']) && is_string($input['registration_type'])
+            ? strtolower(trim($input['registration_type']))
+            : 'alumni';
+
+        if ($registrationType === 'employer') {
+            return $this->createEmployerUser($input);
+        }
+
         $rateLimitKey = 'alumni-registration:'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
@@ -64,7 +74,7 @@ class CreateNewUser implements CreatesNewUsers
             'last_name' => ['nullable', 'string', 'max:100'],
         ])->validate();
 
-        $inputLastName = ! empty($input['last_name'])
+        $inputLastName = ! empty($input['last_name']) && is_string($input['last_name'])
             ? trim($input['last_name'])
             : $this->extractLastName($input['name'] ?? '');
 
@@ -130,7 +140,7 @@ class CreateNewUser implements CreatesNewUsers
 
             $programId = $existingStudentNumber?->programDegree?->program_id;
 
-            \App\Models\AlumniRegistrationAssistanceRequest::create([
+            AlumniRegistrationAssistanceRequest::create([
                 'name' => $input['name'] ?? $inputLastName,
                 'email' => $input['email'],
                 'student_number' => $input['student_number'],
@@ -148,6 +158,65 @@ class CreateNewUser implements CreatesNewUsers
         }
 
         return $user;
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    private function createEmployerUser(array $input): User
+    {
+        if (is_string($input['email'] ?? null)) {
+            $input['email'] = Str::lower(trim($input['email']));
+        }
+
+        if (is_string($input['name'] ?? null)) {
+            $input['name'] = trim($input['name']);
+        }
+
+        Validator::make($input, [
+            ...$this->profileRules(),
+            'company_name' => ['required', 'string', 'max:180'],
+            'industry' => ['nullable', 'string', 'max:120'],
+            'website' => ['nullable', 'url', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:40'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'password' => $this->passwordRules(),
+        ])->validate();
+
+        return DB::transaction(function () use ($input): User {
+            $user = new User([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'password' => $input['password'],
+            ]);
+            $user->email_verified_at = Carbon::instance(now());
+            $user->save();
+
+            $employerRole = Role::query()->firstOrCreate(
+                ['name' => 'employer'],
+                ['label' => 'Employer'],
+            );
+            $user->roles()->syncWithoutDetaching([
+                $employerRole->id => ['created_at' => now()],
+            ]);
+
+            $employer = Employer::create([
+                'company_name' => trim((string) $input['company_name']),
+                'industry' => ! empty($input['industry']) ? trim((string) $input['industry']) : null,
+                'website' => ! empty($input['website']) ? trim((string) $input['website']) : null,
+                'contact_email' => $input['email'],
+                'contact_phone' => ! empty($input['contact_phone']) ? trim((string) $input['contact_phone']) : null,
+                'address' => ! empty($input['address']) ? trim((string) $input['address']) : null,
+                'verification_status' => 'pending',
+            ]);
+
+            $employer->users()->attach($user->id, [
+                'membership_role' => 'owner',
+                'created_at' => now(),
+            ]);
+
+            return $user;
+        });
     }
 
     private function extractLastName(string $name): string

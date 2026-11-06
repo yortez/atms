@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AlumniRegistrationAssistanceController;
+use App\Http\Controllers\PublicPortalController;
 use App\Http\Controllers\Api\AcademicCatalogController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\AlumniController;
@@ -18,7 +19,7 @@ use App\Http\Controllers\Api\SurveyController;
 use App\Http\Middleware\EnsureUserIsNotSuspended;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', [PublicPortalController::class, 'index'])->name('home');
 Route::inertia('/preview', 'preview')->name('preview');
 
 Route::get('/alumni/registration-assistance', [AlumniRegistrationAssistanceController::class, 'create'])
