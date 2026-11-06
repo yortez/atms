@@ -63,6 +63,12 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
         ->name('api.programs.store');
     Route::post('/programs/{program}/degrees', [AcademicCatalogController::class, 'storeProgramDegree'])
         ->name('api.program-degrees.store');
+    Route::get('/reports', [AlumniReportController::class, 'index'])
+        ->name('api.reports.index');
+    Route::get('/reports/export/excel', [AlumniReportController::class, 'exportExcel'])
+        ->name('api.reports.export.excel');
+    Route::get('/reports/export/pdf', [AlumniReportController::class, 'exportPdf'])
+        ->name('api.reports.export.pdf');
     Route::get('/reports/employment-outcomes', [AlumniReportController::class, 'employmentOutcomes'])
         ->name('api.reports.employment-outcomes');
     Route::get('/dashboard', DashboardStatsController::class)->name('api.dashboard');

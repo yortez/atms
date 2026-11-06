@@ -92,6 +92,35 @@ flowchart LR
 * **1-to-1 Corporate Tenancy**: Each company profile is owned and operated by a single user account without team invitation overhead.
 * **Gated Job Publication**: Company verification status starts as `pending` upon registration; job vacancies cannot be published until verified by an Administrator or Alumni Coordinator.
 
+### Milestone 9: Alumni Directory Claim Status & Profile Drawer
+* **Claim Status Column & Filter**: Added `is_claimed` (`Claimed` vs `Unclaimed` badge with claim date tooltip) and `?claim_status=claimed|unclaimed` filter to `GET /api/alumni`.
+* **Interactive Profile Slide-Over Drawer**: Clicking any alumnus name or `"View profile"` button opens `<AlumniProfileDialog />` displaying personal details, academic degrees (`student_number`, `program`, `degree`, `graduation_year`, `honors`, `gwa`), and full employment history timeline.
+
+### Milestone 10: Institutional Reports & Exports (Section 12)
+* **All 18 Institutional Reports**: Implemented in `App\Services\AlumniReportService`:
+  1. Alumni Masterlist (`alumni_masterlist`)
+  2. Alumni Population by Department (`population_by_department`)
+  3. Alumni Population by Academic Program (`population_by_program`)
+  4. Alumni Population by Graduation Year (`population_by_graduation_year`)
+  5. Employment Rate (`employment_rate`)
+  6. Employment Rate by Academic Program (`employment_rate_by_program`)
+  7. Employment Rate by Graduation Year (`employment_rate_by_graduation_year`)
+  8. Employment Related to Degree (`employment_related_to_degree`)
+  9. First Employment Statistics (`first_employment_statistics`)
+  10. Average Time to First Employment (`average_time_to_first_employment`)
+  11. Further Studies Statistics (`further_studies_statistics`)
+  12. Employment History (`employment_history`)
+  13. Survey Participation Rate (`survey_participation_rate`)
+  14. Survey Response Summary (`survey_response_summary`)
+  15. Job Portal Analytics (`job_portal_analytics`)
+  16. Job Application Statistics (`job_application_statistics`)
+  17. Successful Job Placements (`successful_job_placements`)
+  18. Graduate Tracer Summary (`graduate_tracer_summary`)
+* **5-Filter Engine & Option A Isolation**: Filtering by Department, Academic Program, Graduation Year, Employment Status, and Date Range (`date_from` / `date_to`), with strict program scoping for Department Coordinators.
+* **Native Excel & PDF Export Generators**:
+  * `GET /api/reports/export/excel`: Downloads styled SpreadsheetML (`.xls`) workbooks with summary KPI cards and tabular data.
+  * `GET /api/reports/export/pdf`: Generates native binary `%PDF-1.4` documents with multi-page layout, KPI summary banner, and formatted rows.
+
 ---
 
 ## 3. Automated Test Suite Status
@@ -100,6 +129,8 @@ Executed via `php artisan test`:
 
 | Test Suite File | Tests | Assertions | Status |
 | :--- | :---: | :---: | :---: |
+| `tests/Feature/Api/InstitutionalReportsTest.php` | 4 | 197 | **Passed** |
+| `tests/Feature/Api/AlumniClaimStatusTest.php` | 2 | 13 | **Passed** |
 | `tests/Feature/Api/StrategicDecisionsTest.php` | 5 | 39 | **Passed** |
 | `tests/Feature/Api/AlumniImportTest.php` | 4 | 21 | **Passed** |
 | `tests/Feature/Api/AlumniBackendApiTest.php` | 13 | 55 | **Passed** |
@@ -111,7 +142,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Auth/TwoFactorAuthenticationTest.php` | 6 | 22 | **Passed** |
 | `tests/Feature/Settings/ProfileUpdateTest.php` | 8 | 44 | **Passed** |
 | `tests/Feature/Settings/SecurityTest.php` | 6 | 28 | **Passed** |
-| **Total Test Suite** | **87** | **488** | **100% Passed** |
+| **Total Test Suite** | **93** | **698** | **100% Passed** |
 
 ---
 
@@ -119,9 +150,9 @@ Executed via `php artisan test`:
 
 | Role | Available Workspace Modules | Data Scope |
 | :--- | :--- | :--- |
-| **System Administrator** | Overview, Notifications, Alumni Directory, Academic Programs, Surveys, Announcements, Employers & Jobs, Reports, Users & Roles, Activity Log | Institution-wide |
-| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Surveys, Announcements, Employers & Jobs, Reports | Institution-wide |
-| **Department Coordinator** | Overview, Notifications, Program Alumni, Claim Assistance Queue, Employment Outcomes, Surveys, Announcements, Department Reports | Assigned Programs Only (Option A) |
+| **System Administrator** | Overview, Notifications, Alumni Directory, Academic Programs, Surveys, Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF), Users & Roles, Activity Log | Institution-wide |
+| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Surveys, Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF) | Institution-wide |
+| **Department Coordinator** | Overview, Notifications, Program Alumni, Claim Assistance Queue, Employment Outcomes, Surveys, Announcements, Department Reports (18 Reports Scoped) | Assigned Programs Only (Option A) |
 | **Alumni** | My Dashboard, Notifications, My Profile, Academic Records, Employment Tracer (Option B), Surveys, Announcements, Career Opportunities, My Applications | Self-profile Only |
 | **Employer** | Overview, Notifications, Company Profile, Job Postings, Applicants (with Frozen Snapshots & Resumes), Recruitment Analytics | Owned Postings Only |
 
@@ -129,7 +160,6 @@ Executed via `php artisan test`:
 
 ## 5. Next Planned Milestones
 
-1. **Institutional Reports & Exports (Section 12)**: The 18 tracer reports with PDF & Excel download generators.
-2. **Public Website & Guest Experience (Section 4)**: Public job board, public announcements, and guest registration landing.
-3. **Custom Survey Builder (Section 9)**: Visual question builder with cohort targeting by academic program and graduation year.
+1. **Public Website & Guest Experience (Section 4)**: Public job board, public announcements, and guest registration landing.
+2. **Custom Survey Builder (Section 9)**: Visual question builder with cohort targeting by academic program and graduation year.
 
