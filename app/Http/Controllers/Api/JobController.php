@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AlumniDocument;
+use App\Models\AlumniProfile;
 use App\Models\Employer;
 use App\Models\JobApplication;
 use App\Models\JobPosting;
@@ -10,7 +12,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class JobController extends Controller
 {
@@ -101,7 +106,10 @@ class JobController extends Controller
             404,
         );
 
-        $data = $request->validate(['cover_letter' => ['nullable', 'string', 'max:10000']]);
+        $data = $request->validate([
+            'cover_letter' => ['nullable', 'string', 'max:10000'],
+            'resume' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+        ]);
         abort_if(
             JobApplication::query()->where('job_posting_id', $jobPosting->id)
                 ->where('alumni_profile_id', $user->alumni_profile_id)->exists(),
@@ -109,11 +117,60 @@ class JobController extends Controller
             'You have already applied to this posting.',
         );
 
+        $profile = AlumniProfile::with([
+            'educationRecords.programDegree.program',
+            'educationRecords.programDegree.degree',
+            'employmentRecords.status',
+        ])->findOrFail($user->alumni_profile_id);
+
+        $profileSnapshot = [
+            'alumni_id' => $profile->id,
+            'name' => $profile->name,
+            'first_name' => $profile->first_name,
+            'middle_name' => $profile->middle_name,
+            'last_name' => $profile->last_name,
+            'email' => $user->email,
+            'date_of_birth' => $profile->date_of_birth->toDateString(),
+            'applied_at' => now()->toISOString(),
+            'education' => $profile->educationRecords->map(fn ($record) => [
+                'student_number' => $record->student_number,
+                'program' => $record->programDegree?->program?->name,
+                'degree' => $record->programDegree?->degree?->title,
+                'graduation_year' => $record->graduation_year,
+                'honors' => $record->honors,
+                'gwa' => $record->gwa,
+            ])->all(),
+            'employment' => $profile->employmentRecords->map(fn ($record) => [
+                'job_title' => $record->job_title,
+                'employer_name' => $record->employer_name,
+                'status' => $record->status?->label,
+                'industry' => $record->industry,
+                'is_related_to_degree' => (bool) $record->is_related_to_degree,
+                'started_on' => $record->started_on?->toDateString(),
+                'ended_on' => $record->ended_on?->toDateString(),
+            ])->all(),
+        ];
+
+        $resumeSnapshotPath = null;
+        if ($request->hasFile('resume')) {
+            $resumeSnapshotPath = $request->file('resume')->store("applications/{$jobPosting->id}/resumes", 'local');
+        } else {
+            $latestDoc = $profile->documents()->where('document_type', 'resume')->latest('uploaded_at')->first();
+            if ($latestDoc && Storage::disk('local')->exists($latestDoc->path)) {
+                $ext = pathinfo($latestDoc->path, PATHINFO_EXTENSION) ?: 'pdf';
+                $snapshotPath = "applications/{$jobPosting->id}/resumes/snapshot_{$user->id}_" . Str::random(12) . ".{$ext}";
+                Storage::disk('local')->copy($latestDoc->path, $snapshotPath);
+                $resumeSnapshotPath = $snapshotPath;
+            }
+        }
+
         $application = JobApplication::create([
             'job_posting_id' => $jobPosting->id,
             'alumni_profile_id' => $user->alumni_profile_id,
             'applicant_user_id' => $user->id,
             'cover_letter' => $data['cover_letter'] ?? null,
+            'profile_snapshot' => $profileSnapshot,
+            'resume_snapshot_path' => $resumeSnapshotPath,
             'status' => 'submitted',
         ]);
 
@@ -136,9 +193,36 @@ class JobController extends Controller
         $this->authorizeJob($request, $jobPosting);
 
         return response()->json([
-            'data' => $jobPosting->applications()->with('alumniProfile:id,name,first_name,last_name,email')
+            'data' => $jobPosting->applications()
+                ->select([
+                    'id', 'job_posting_id', 'alumni_profile_id', 'applicant_user_id',
+                    'cover_letter', 'profile_snapshot', 'resume_snapshot_path', 'status', 'created_at',
+                ])
+                ->with('alumniProfile:id,name,first_name,last_name,email')
                 ->latest()->paginate(25),
         ]);
+    }
+
+    public function downloadResume(Request $request, JobApplication $application): StreamedResponse
+    {
+        abort_unless(
+            $this->isMember($request, $application->jobPosting->employer)
+                || $this->isStaff($request)
+                || $request->user()->id === $application->applicant_user_id,
+            403,
+            'Unauthorized to download this resume snapshot.'
+        );
+
+        abort_unless(
+            $application->resume_snapshot_path && Storage::disk('local')->exists($application->resume_snapshot_path),
+            404,
+            'Resume snapshot not found.'
+        );
+
+        return Storage::disk('local')->download(
+            $application->resume_snapshot_path,
+            "Application_Resume_{$application->id}.pdf"
+        );
     }
 
     public function reviewApplication(Request $request, JobApplication $application): JsonResponse

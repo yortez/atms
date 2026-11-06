@@ -39,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manageRegistrationAssistance', fn ($user) => $user->hasRole(
             'system-administrator',
             'alumni-coordinator',
+            'department-coordinator',
         ));
         Gate::define('manageSurveys', fn ($user) => $user->hasRole(
             'system-administrator',

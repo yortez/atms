@@ -61,9 +61,14 @@ class CreateNewUser implements CreatesNewUsers
             'student_number' => ['required', 'string', 'max:255'],
             'date_of_birth' => ['required', 'date_format:Y-m-d'],
             'password' => $this->passwordRules(),
+            'last_name' => ['nullable', 'string', 'max:100'],
         ])->validate();
 
-        $user = DB::transaction(function () use ($input): ?User {
+        $inputLastName = ! empty($input['last_name'])
+            ? trim($input['last_name'])
+            : $this->extractLastName($input['name'] ?? '');
+
+        $user = DB::transaction(function () use ($input, $inputLastName): ?User {
             $studentNumber = AlumniStudentNumber::query()
                 ->where('student_number', $input['student_number'])
                 ->lockForUpdate()
@@ -78,18 +83,23 @@ class CreateNewUser implements CreatesNewUsers
                 ->lockForUpdate()
                 ->first();
 
+            if ($profile === null || $profile->user()->exists()) {
+                return null;
+            }
+
+            $profileLastName = ! empty($profile->last_name)
+                ? trim($profile->last_name)
+                : $this->extractLastName($profile->name ?? '');
+
             if (
-                $profile === null
-                || $profile->user()->exists()
-                || $this->normalizeName($profile->name) !== $this->normalizeName($input['name'])
-                || Str::lower(trim($profile->email)) !== $input['email']
+                $this->normalizeName($profileLastName) !== $this->normalizeName($inputLastName)
                 || $profile->date_of_birth->toDateString() !== $input['date_of_birth']
             ) {
                 return null;
             }
 
             $user = new User([
-                'name' => $input['name'],
+                'name' => $input['name'] ?? $profile->name,
                 'email' => $input['email'],
                 'password' => $input['password'],
                 'alumni_profile_id' => $profile->id,
@@ -113,12 +123,38 @@ class CreateNewUser implements CreatesNewUsers
         if ($user === null) {
             $this->logger->record('registration_denied', $input['student_number']);
 
+            $existingStudentNumber = AlumniStudentNumber::query()
+                ->with('programDegree')
+                ->where('student_number', $input['student_number'])
+                ->first();
+
+            $programId = $existingStudentNumber?->programDegree?->program_id;
+
+            \App\Models\AlumniRegistrationAssistanceRequest::create([
+                'name' => $input['name'] ?? $inputLastName,
+                'email' => $input['email'],
+                'student_number' => $input['student_number'],
+                'date_of_birth' => $input['date_of_birth'],
+                'academic_program_id' => $programId,
+                'status' => 'pending',
+                'message' => 'Automated assistance request submitted due to registration credential mismatch.',
+            ]);
+
+            $this->logger->record('assistance_requested', $input['student_number']);
+
             throw ValidationException::withMessages([
-                'student_number' => 'We could not verify these details. If your alumni record needs updating, request administrative assistance.',
+                'student_number' => 'We could not verify your details with our records. A registration assistance request has been submitted for review by your Department Coordinator.',
             ]);
         }
 
         return $user;
+    }
+
+    private function extractLastName(string $name): string
+    {
+        $parts = preg_split('/\s+/', trim($name));
+
+        return $parts ? (string) end($parts) : '';
     }
 
     private function normalizeName(string $name): string

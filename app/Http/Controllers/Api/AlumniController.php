@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AlumniProfileResource;
 use App\Models\AlumniProfile;
 use App\Services\ActivityLogger;
+use App\Services\AlumniImportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 
 class AlumniController extends Controller
@@ -23,9 +25,17 @@ class AlumniController extends Controller
                 'educationRecords.programDegree.program',
                 'educationRecords.programDegree.degree',
                 'employmentRecords.status',
+                'user:id,alumni_profile_id,created_at',
             ]);
 
-        if ($request->user()->hasRole('department-coordinator')) {
+        if ($request->filled('claim_status')) {
+            $request->validate(['claim_status' => [Rule::in(['claimed', 'unclaimed'])]]);
+            $request->query('claim_status') === 'claimed'
+                ? $query->whereHas('user')
+                : $query->whereDoesntHave('user');
+        }
+
+        if ($request->user()->hasRole('department-coordinator') && ! $request->user()->hasRole('system-administrator', 'alumni-coordinator')) {
             $programIds = $request->user()->assignedPrograms()->select('academic_programs.id');
             $query->whereHas('educationRecords.programDegree', fn (Builder $programDegree) => $programDegree
                 ->whereIn('program_id', $programIds));
@@ -166,5 +176,40 @@ class AlumniController extends Controller
                 'program_degree_id' => $record->program_degree_id,
             ],
         ], 201);
+    }
+
+    public function import(Request $request, AlumniImportService $importService, ActivityLogger $activityLogger): JsonResponse
+    {
+        $this->authorize('import', AlumniProfile::class);
+
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:20480'],
+        ]);
+
+        $stats = $importService->importFile($request->file('file'), $request->user());
+
+        $activityLogger->record('alumni.batch_imported', null, [
+            'total' => $stats['total'],
+            'successful' => $stats['successful'],
+            'failed' => $stats['failed'],
+            'profiles_created' => $stats['profiles_created'],
+        ]);
+
+        return response()->json([
+            'message' => "Import complete. {$stats['successful']} of {$stats['total']} records processed successfully.",
+            'data' => $stats,
+        ]);
+    }
+
+    public function importTemplate(AlumniImportService $importService): Response
+    {
+        $this->authorize('import', AlumniProfile::class);
+
+        $csv = $importService->generateCsvTemplate();
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="alumni_import_template.csv"',
+        ]);
     }
 }

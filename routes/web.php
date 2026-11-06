@@ -36,6 +36,8 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
     Route::get('/me/alumni', [AlumniController::class, 'me'])->name('api.me.alumni');
     Route::get('/alumni', [AlumniController::class, 'index'])->name('api.alumni.index');
     Route::post('/alumni', [AlumniController::class, 'store'])->name('api.alumni.store');
+    Route::post('/alumni/import', [AlumniController::class, 'import'])->name('api.alumni.import');
+    Route::get('/alumni/import-template', [AlumniController::class, 'importTemplate'])->name('api.alumni.import-template');
     Route::get('/alumni/{profile}', [AlumniController::class, 'show'])->name('api.alumni.show');
     Route::patch('/alumni/{profile}', [AlumniController::class, 'update'])->name('api.alumni.update');
     Route::post('/alumni/{profile}/education-records', [AlumniController::class, 'storeEducationRecord'])
@@ -90,6 +92,8 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
     Route::get('/employer/jobs/{jobPosting}/applications', [JobController::class, 'applications'])
         ->name('api.employer.jobs.applications');
     Route::get('/applications/me', [JobController::class, 'myApplications'])->name('api.applications.mine');
+    Route::get('/applications/{application}/resume', [JobController::class, 'downloadResume'])
+        ->name('api.applications.resume.download');
     Route::patch('/applications/{application}/status', [JobController::class, 'reviewApplication'])
         ->name('api.applications.review');
     Route::get('/employers', [EmployerController::class, 'index'])->name('api.employers.index');

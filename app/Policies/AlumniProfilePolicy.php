@@ -51,6 +51,12 @@ class AlumniProfilePolicy
             || $user->hasPermission('alumni.create');
     }
 
+    public function import(User $user): bool
+    {
+        return $user->hasRole('system-administrator', 'alumni-coordinator')
+            || $user->hasPermission('alumni.import');
+    }
+
     public function delete(User $user, AlumniProfile $profile): bool
     {
         return $user->hasRole('system-administrator');

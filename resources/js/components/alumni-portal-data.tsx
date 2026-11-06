@@ -29,6 +29,7 @@ import type {
     Employer,
     JobApplication,
     JobPosting,
+    RegistrationAssistanceRequest,
     Survey,
     UserNotification,
 } from '@/types/alumni';
@@ -518,11 +519,34 @@ export function AlumniDirectory({
 }) {
     const [page, setPage] = useState(1);
     const [creating, setCreating] = useState(false);
+    const [importModalOpen, setImportModalOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
+    const [importing, setImporting] = useState(false);
+    const [importStats, setImportStats] = useState<{
+        total: number;
+        successful: number;
+        failed: number;
+        profiles_created: number;
+        education_records_created: number;
+        errors: string[];
+    } | null>(null);
     const [form, setForm] = useState({
         first_name: '',
+        middle_name: '',
         last_name: '',
-        email: '',
+        suffix: '',
         date_of_birth: '',
+        sex: '',
+        civil_status: '',
+        contact_number: '',
+        email: '',
+        current_address: '',
+        permanent_address: '',
+        student_number: '',
+        program: '',
+        batch_year: '',
+        latin_honors: '',
+        gwa: '',
     });
     const params = new URLSearchParams({ page: String(page) });
 
@@ -530,7 +554,7 @@ export function AlumniDirectory({
         params.set('search', query.trim());
     }
 
-    const { data, loading, error } = useApiResource<
+    const { data, loading, error, reload } = useApiResource<
         PaginatedApiResponse<AlumniProfile>
     >(`/api/alumni?${params.toString()}`);
 
@@ -539,21 +563,49 @@ export function AlumniDirectory({
         setCreating(true);
 
         try {
+            const fullName = [
+                form.first_name,
+                form.middle_name,
+                form.last_name,
+                form.suffix,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .trim();
+
             await apiRequest<ApiEnvelope<AlumniProfile>>('/api/alumni', {
                 method: 'POST',
                 body: {
-                    ...form,
-                    name: `${form.first_name} ${form.last_name}`.trim(),
+                    first_name: form.first_name,
+                    middle_name: form.middle_name || null,
+                    last_name: form.last_name,
+                    suffix: form.suffix || null,
+                    name: fullName,
+                    email: form.email,
+                    date_of_birth: form.date_of_birth,
                 },
             });
             setForm({
                 first_name: '',
+                middle_name: '',
                 last_name: '',
-                email: '',
+                suffix: '',
                 date_of_birth: '',
+                sex: '',
+                civil_status: '',
+                contact_number: '',
+                email: '',
+                current_address: '',
+                permanent_address: '',
+                student_number: '',
+                program: '',
+                batch_year: '',
+                latin_honors: '',
+                gwa: '',
             });
             onCloseCreate();
             toast.success('Alumni record created.');
+            reload();
         } catch (error) {
             toast.error(
                 error instanceof ApiError
@@ -565,73 +617,439 @@ export function AlumniDirectory({
         }
     }
 
+    function updateField(name: string, value: string) {
+        setForm((current) => ({
+            ...current,
+            [name]: value,
+        }));
+    }
+
+    async function handleImportSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!importFile) {
+            toast.error('Please select a CSV file to import.');
+            return;
+        }
+
+        setImporting(true);
+        setImportStats(null);
+
+        const formData = new FormData();
+        formData.append('file', importFile);
+
+        try {
+            const res = await apiRequest<{
+                message: string;
+                data: {
+                    total: number;
+                    successful: number;
+                    failed: number;
+                    profiles_created: number;
+                    education_records_created: number;
+                    errors: string[];
+                };
+            }>('/api/alumni/import', {
+                method: 'POST',
+                body: formData,
+            });
+
+            setImportStats(res.data);
+            if (res.data.successful > 0) {
+                toast.success(res.message);
+                reload();
+            } else {
+                toast.error('Import completed with errors.');
+            }
+        } catch (err) {
+            toast.error(
+                err instanceof ApiError ? err.message : 'Import failed.',
+            );
+        } finally {
+            setImporting(false);
+        }
+    }
+
     return (
         <div className="space-y-4">
             {createOpen && (
                 <form
                     onSubmit={createAlumnus}
-                    className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
+                    className="rounded-2xl border border-[#e9ebe5] bg-white p-4 shadow-[0_1px_2px_rgba(27,39,30,0.03)] sm:p-5"
                 >
-                    {(
-                        [
-                            ['first_name', 'First name', 'text'],
-                            ['last_name', 'Last name', 'text'],
-                            ['email', 'Email address', 'email'],
-                            ['date_of_birth', 'Date of birth', 'date'],
-                        ] as const
-                    ).map(([name, label, type]) => (
-                        <label
-                            key={name}
-                            className="text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {label}
-                            <input
-                                type={type}
-                                required
-                                value={form[name]}
-                                onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        [name]: event.target.value,
-                                    })
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs outline-none focus:border-[#819981]"
-                            />
-                        </label>
-                    ))}
-                    <div className="flex items-center justify-end gap-2 sm:col-span-2">
-                        <button
-                            type="button"
-                            onClick={onCloseCreate}
-                            className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={creating}
-                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                            {creating ? 'Saving…' : 'Create alumni'}
-                        </button>
+                    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_220px]">
+                        <div className="space-y-5">
+                            <section className="rounded-2xl border border-[#e9ebe5] bg-[#fafbf9] p-4">
+                                <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#495a4f]">
+                                    Personal Information
+                                </h3>
+                                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                    {[
+                                        ['first_name', 'First name', 'text'],
+                                        ['middle_name', 'Middle name', 'text'],
+                                        ['last_name', 'Last name', 'text'],
+                                        ['suffix', 'Suffix', 'text'],
+                                        ['date_of_birth', 'Birthdate', 'date'],
+                                        ['sex', 'Sex', 'select'],
+                                        ['civil_status', 'Civil status', 'select'],
+                                        ['contact_number', 'Contact number', 'tel'],
+                                        ['email', 'Email address', 'email'],
+                                    ].map(([name, label, type]) => {
+                                        const sharedClasses =
+                                            'mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]';
+
+                                        if (type === 'select') {
+                                            const selectName =
+                                                name === 'sex'
+                                                    ? 'sex'
+                                                    : 'civil_status';
+                                            const options =
+                                                selectName === 'sex'
+                                                    ? [
+                                                          ['','Select'],
+                                                          ['male','Male'],
+                                                          ['female','Female'],
+                                                          ['other','Other'],
+                                                      ]
+                                                    : [
+                                                          ['','Select'],
+                                                          ['single','Single'],
+                                                          ['married','Married'],
+                                                          ['widowed','Widowed'],
+                                                      ];
+
+                                            return (
+                                                <label
+                                                    key={name}
+                                                    className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267]"
+                                                >
+                                                    {label}
+                                                    <select
+                                                        value={
+                                                            selectName === 'sex'
+                                                                ? form.sex
+                                                                : form.civil_status
+                                                        }
+                                                        onChange={(event) =>
+                                                            updateField(
+                                                                selectName,
+                                                                event.target.value,
+                                                            )
+                                                        }
+                                                        className={sharedClasses}
+                                                    >
+                                                        {options.map(([value, text]) => (
+                                                            <option key={value || 'empty'} value={value}>
+                                                                {text}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </label>
+                                            );
+                                        }
+
+                                        return (
+                                            <label
+                                                key={name}
+                                                className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267]"
+                                            >
+                                                {label}
+                                                <input
+                                                    type={type}
+                                                    required={name === 'first_name' || name === 'last_name' || name === 'email'}
+                                                    value={
+                                                        form[
+                                                            name as keyof typeof form
+                                                        ] as string
+                                                    }
+                                                    onChange={(event) =>
+                                                        updateField(
+                                                            name,
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    className={sharedClasses}
+                                                />
+                                            </label>
+                                        );
+                                    })}
+                                    <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267] md:col-span-2">
+                                        Current address
+                                        <input
+                                            value={form.current_address}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    'current_address',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                                        />
+                                    </label>
+                                    <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267] md:col-span-2">
+                                        Permanent address
+                                        <input
+                                            value={form.permanent_address}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    'permanent_address',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                                        />
+                                    </label>
+                                </div>
+                            </section>
+
+                            <section className="rounded-2xl border border-[#e9ebe5] bg-[#fafbf9] p-4">
+                                <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#495a4f]">
+                                    Academic Information
+                                </h3>
+                                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                    <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267]">
+                                        Student number
+                                        <input
+                                            value={form.student_number}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    'student_number',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                                        />
+                                    </label>
+                                    <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267]">
+                                        Program
+                                        <select
+                                            value={form.program}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    'program',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                                        >
+                                            <option value="">Select program</option>
+                                            <option value="computer-science">Computer Science</option>
+                                            <option value="information-technology">Information Technology</option>
+                                            <option value="marketing">Marketing</option>
+                                        </select>
+                                    </label>
+                                    <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267]">
+                                        Batch year
+                                        <input
+                                            type="number"
+                                            value={form.batch_year}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    'batch_year',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                                        />
+                                    </label>
+                                    <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267]">
+                                        Latin honors
+                                        <select
+                                            value={form.latin_honors}
+                                            onChange={(event) =>
+                                                updateField(
+                                                    'latin_honors',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                                        >
+                                            <option value="">None</option>
+                                            <option value="summa-cum-laude">Summa Cum Laude</option>
+                                            <option value="magna-cum-laude">Magna Cum Laude</option>
+                                            <option value="cum-laude">Cum Laude</option>
+                                        </select>
+                                    </label>
+                                    <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#687267]">
+                                        GWA
+                                        <input
+                                            value={form.gwa}
+                                            onChange={(event) =>
+                                                updateField('gwa', event.target.value)
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                                        />
+                                    </label>
+                                </div>
+                            </section>
+                        </div>
+
+                        <aside className="space-y-4">
+                            <div className="rounded-2xl border border-[#e9ebe5] bg-[#fafbf9] p-4 text-center">
+                                <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#495a4f]">
+                                    Profile Photo
+                                </h3>
+                                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-[#e9eee5] text-2xl font-semibold text-[#45634a]">
+                                    {form.first_name ? form.first_name[0]?.toUpperCase() : 'A'}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="mt-4 w-full rounded-lg border border-[#dfe4dc] bg-white px-3 py-2 text-[10px] font-medium uppercase tracking-[0.12em] text-[#4d5a4f] transition hover:border-[#b9c5b5]"
+                                >
+                                    Choose file
+                                </button>
+                                <p className="mt-2 text-[10px] text-[#7a8278]">
+                                    JPG, PNG, GIF, max 5MB
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-[#e9ebe5] bg-[#fafbf9] p-4 text-center">
+                                <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#495a4f]">
+                                    Documents
+                                </h3>
+                                <button
+                                    type="button"
+                                    className="w-full rounded-lg border border-dashed border-[#dfe4dc] bg-white px-3 py-4 text-[10px] font-medium uppercase tracking-[0.12em] text-[#4d5a4f] transition hover:border-[#b9c5b5]"
+                                >
+                                    Choose file
+                                </button>
+                                <p className="mt-2 text-[10px] text-[#7a8278]">
+                                    PDF, DOC, DOCX, max 5MB
+                                </p>
+                            </div>
+
+                            <div className="space-y-2 rounded-2xl border border-[#e9ebe5] bg-[#fafbf9] p-3">
+                                <button
+                                    type="submit"
+                                    disabled={creating}
+                                    className="w-full rounded-lg bg-[#2b5139] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-[#21442d] disabled:opacity-70"
+                                >
+                                    {creating ? 'Saving…' : 'Create record'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={onCloseCreate}
+                                    className="w-full rounded-lg border border-[#dfe4dc] bg-white px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#4d5a4f] transition hover:border-[#b9c5b5]"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </aside>
                     </div>
                 </form>
             )}
-            <label className="flex h-10 items-center gap-2 rounded-xl border border-[#e7e9e3] bg-white px-3">
-                <span aria-hidden="true" className="text-sm text-[#899087]">
-                    ⌕
-                </span>
-                <input
-                    aria-label="Search alumni"
-                    value={query}
-                    onChange={(event) => {
-                        onQueryChange(event.target.value);
-                        setPage(1);
-                    }}
-                    placeholder="Search by name, student number, or program"
-                    className="w-full bg-transparent text-xs outline-none placeholder:text-[#9ca198]"
-                />
-            </label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <label className="flex h-10 flex-1 items-center gap-2 rounded-xl border border-[#e7e9e3] bg-white px-3">
+                    <span aria-hidden="true" className="text-sm text-[#899087]">
+                        ⌕
+                    </span>
+                    <input
+                        aria-label="Search alumni"
+                        value={query}
+                        onChange={(event) => {
+                            onQueryChange(event.target.value);
+                            setPage(1);
+                        }}
+                        placeholder="Search by name, student number, or program"
+                        className="w-full bg-transparent text-xs outline-none placeholder:text-[#9ca198]"
+                    />
+                </label>
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setImportModalOpen(true);
+                            setImportStats(null);
+                            setImportFile(null);
+                        }}
+                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-[#d2ddd0] bg-white px-3.5 text-xs font-semibold text-[#2c5339] shadow-xs transition hover:bg-[#edf2ea]"
+                    >
+                        <span>Import CSV</span>
+                    </button>
+                    <a
+                        href="/api/alumni/import-template"
+                        className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea]"
+                        title="Download sample import template"
+                    >
+                        <span>Template</span>
+                    </a>
+                </div>
+            </div>
+
+            {importModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-lg rounded-2xl border border-[#e3e7df] bg-white p-6 shadow-xl">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-sm font-semibold text-[#2a382e]">
+                                    Batch Import Alumni Records
+                                </h3>
+                                <p className="mt-1 text-xs text-[#737c71]">
+                                    Upload a CSV file containing historical graduate records. Multiple student numbers belonging to the same individual will automatically be consolidated into a single profile.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setImportModalOpen(false)}
+                                className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleImportSubmit} className="mt-5 space-y-4">
+                            <div className="rounded-xl border border-dashed border-[#c7d4c4] bg-[#f9fbf8] p-5 text-center">
+                                <input
+                                    type="file"
+                                    accept=".csv,.txt"
+                                    onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                                    className="block w-full text-xs text-[#526051] file:mr-3 file:rounded-lg file:border-0 file:bg-[#2b5139] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-[#234530]"
+                                />
+                                {importFile && (
+                                    <p className="mt-2 text-[11px] font-medium text-[#3b593e]">
+                                        Selected: {importFile.name} ({(importFile.size / 1024).toFixed(1)} KB)
+                                    </p>
+                                )}
+                            </div>
+
+                            {importStats && (
+                                <div className="rounded-xl border border-[#d8e3d6] bg-[#f4f7f2] p-3 text-xs text-[#394d3c]">
+                                    <p className="font-semibold">
+                                        Import Summary: {importStats.successful} / {importStats.total} successful
+                                    </p>
+                                    <p className="mt-0.5 text-[11px] text-[#556453]">
+                                        • Profiles created: {importStats.profiles_created} | Education records: {importStats.education_records_created}
+                                    </p>
+                                    {importStats.failed > 0 && (
+                                        <div className="mt-2 max-h-32 overflow-y-auto rounded-lg border border-[#e8cecb] bg-[#fdf5f4] p-2 text-[10px] text-[#8e453c]">
+                                            <p className="font-bold">Errors ({importStats.failed}):</p>
+                                            {importStats.errors.map((err, i) => (
+                                                <p key={i}>• {err}</p>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-end gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setImportModalOpen(false)}
+                                    className="rounded-xl border border-[#e2e7df] px-3.5 py-2 text-xs font-medium text-[#5c685b] hover:bg-[#f4f6f2]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!importFile || importing}
+                                    className="rounded-xl bg-[#2b5139] px-4 py-2 text-xs font-semibold text-white hover:bg-[#234530] disabled:opacity-50"
+                                >
+                                    {importing ? 'Processing Import…' : 'Start Import'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             {loading ? (
                 <LoadingState />
             ) : error ? (
@@ -651,6 +1069,7 @@ export function AlumniDirectory({
                                     <th className="px-4 py-3">
                                         Current employer
                                     </th>
+                                    <th className="px-4 py-3">Account</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#f0f1ed]">
@@ -707,13 +1126,31 @@ export function AlumniDirectory({
                                                     {employment?.employer_name ??
                                                         '—'}
                                                 </td>
+                                                <td className="px-4 py-3.5">
+                                                    {alumnus.is_claimed ? (
+                                                        <span
+                                                            title={
+                                                                alumnus.claimed_at
+                                                                    ? `Claimed on ${new Date(alumnus.claimed_at).toLocaleDateString()}`
+                                                                    : 'Claimed'
+                                                            }
+                                                            className="rounded-full bg-[#e3eee0] px-2.5 py-1 text-[10px] font-medium text-[#2f5a37]"
+                                                        >
+                                                            Claimed
+                                                        </span>
+                                                    ) : (
+                                                        <span className="rounded-full bg-[#f3efe6] px-2.5 py-1 text-[10px] font-medium text-[#8a6a35]">
+                                                            Unclaimed
+                                                        </span>
+                                                    )}
+                                                </td>
                                             </tr>
                                         );
                                     })
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={5}
+                                            colSpan={6}
                                             className="px-5 py-12 text-center text-sm text-[#858b82]"
                                         >
                                             No alumni records found.
@@ -990,6 +1427,7 @@ type EmploymentForm = {
     employment_type: string;
     work_location: string;
     started_on: string;
+    is_related_to_degree: boolean;
 };
 
 const emptyEmploymentForm: EmploymentForm = {
@@ -1000,6 +1438,7 @@ const emptyEmploymentForm: EmploymentForm = {
     employment_type: '',
     work_location: '',
     started_on: '',
+    is_related_to_degree: true,
 };
 
 export function EmploymentTracer() {
@@ -1038,6 +1477,7 @@ export function EmploymentTracer() {
                         employment_type: form.employment_type || null,
                         work_location: form.work_location || null,
                         started_on: form.started_on || null,
+                        is_related_to_degree: form.is_related_to_degree,
                     },
                 },
             );
@@ -1136,6 +1576,20 @@ export function EmploymentTracer() {
                             />
                         </label>
                     ))}
+                    <label className="flex items-center gap-2.5 text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                        <input
+                            type="checkbox"
+                            checked={form.is_related_to_degree}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    is_related_to_degree: event.target.checked,
+                                })
+                            }
+                            className="size-4 rounded border-[#e3e7df] text-[#2b5139] focus:ring-[#819981]"
+                        />
+                        <span>This employment is related to my college degree / field of study</span>
+                    </label>
                     <div className="flex items-end sm:justify-end">
                         <button
                             type="submit"
@@ -1169,12 +1623,19 @@ export function EmploymentTracer() {
                                 key={record.id}
                                 className="border-l-2 border-[#dfe7dc] pl-4"
                             >
-                                <p className="text-[10px] font-medium text-[#8a9088]">
-                                    {record.started_on ??
-                                        'Start date not recorded'}
-                                    {record.ended_on
-                                        ? ` – ${record.ended_on}`
-                                        : ' – Present'}
+                                <p className="flex items-center gap-2 text-[10px] font-medium text-[#8a9088]">
+                                    <span>
+                                        {record.started_on ??
+                                            'Start date not recorded'}
+                                        {record.ended_on
+                                            ? ` – ${record.ended_on}`
+                                            : ' – Present'}
+                                    </span>
+                                    {record.is_related_to_degree !== undefined && (
+                                        <span className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-semibold ${record.is_related_to_degree ? 'bg-[#edf2eb] text-[#33583b]' : 'bg-[#f5f5f3] text-[#788077]'}`}>
+                                            {record.is_related_to_degree ? 'Degree-Related' : 'Non-Degree Related'}
+                                        </span>
+                                    )}
                                 </p>
                                 <h3 className="mt-1 text-xs font-semibold text-[#3d4a3f]">
                                     {record.job_title ?? record.status.label}
@@ -3946,6 +4407,28 @@ export function EmployerApplicants() {
                                             {application.cover_letter}
                                         </p>
                                     ) : null}
+                                    {application.profile_snapshot?.education?.length ? (
+                                        <div className="mt-3 space-y-1 rounded-xl bg-[#fafbf9] p-2.5 text-[11px] text-[#556153]">
+                                            <p className="font-semibold text-[#344436]">Academic Qualifications (Snapshot):</p>
+                                            {application.profile_snapshot.education.map((edu: any, i: number) => (
+                                                <p key={i}>
+                                                    • {edu.program ?? 'Degree'} ({edu.graduation_year ?? 'N/A'})
+                                                    {edu.honors ? ` — ${edu.honors}` : ''}
+                                                    {edu.gwa ? ` (GWA: ${edu.gwa})` : ''}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    ) : null}
+                                    {application.resume_snapshot_path ? (
+                                        <a
+                                            href={`/api/applications/${application.id}/resume`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#d2ddd0] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#2c5339] hover:bg-[#edf2ea]"
+                                        >
+                                            Download Resume Snapshot
+                                        </a>
+                                    ) : null}
                                 </div>
                                 <label className="text-[11px] font-medium text-[#4d5a4f]">
                                     Application status
@@ -3981,6 +4464,190 @@ export function EmployerApplicants() {
                 <EmptyState>
                     No applicants have applied to this posting.
                 </EmptyState>
+            )}
+        </div>
+    );
+}
+
+export function RegistrationAssistanceQueue() {
+    const resource = useApiResource<PaginatedApiResponse<RegistrationAssistanceRequest>>(
+        '/api/registration-assistance',
+    );
+    const [selectedRequest, setSelectedRequest] = useState<RegistrationAssistanceRequest | null>(null);
+    const [reviewStatus, setReviewStatus] = useState<'reviewed' | 'needs_more_information' | 'rejected'>('reviewed');
+    const [reviewNote, setReviewNote] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    async function handleReviewSubmit(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        if (!selectedRequest) return;
+
+        setSubmitting(true);
+        try {
+            await apiRequest(`/api/registration-assistance/${selectedRequest.id}`, {
+                method: 'PATCH',
+                body: {
+                    status: reviewStatus,
+                    review_note: reviewNote || null,
+                },
+            });
+            toast.success('Registration claim assistance request updated.');
+            setSelectedRequest(null);
+            setReviewNote('');
+            resource.reload();
+        } catch (err) {
+            toast.error(err instanceof ApiError ? err.message : 'Failed to update request.');
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    if (resource.loading) {
+        return <LoadingState />;
+    }
+
+    if (resource.error) {
+        return <ErrorState message={resource.error} />;
+    }
+
+    const items = resource.data?.data ?? [];
+
+    if (!items.length) {
+        return (
+            <EmptyState>
+                No pending registration assistance requests for your academic programs.
+            </EmptyState>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="grid gap-3">
+                {items.map((request) => (
+                    <article
+                        key={request.id}
+                        className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                    >
+                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-sm font-semibold text-[#29382e]">
+                                        {request.name}
+                                    </h3>
+                                    <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#305338]">
+                                        {request.student_number}
+                                    </span>
+                                    {request.program && (
+                                        <span className="rounded bg-[#f0f4ee] px-2 py-0.5 text-[10px] font-medium text-[#465a49]">
+                                            {request.program.code}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="mt-1 flex flex-wrap gap-x-4 text-xs text-[#70796e]">
+                                    <p>Email: <span className="text-[#3b473d]">{request.email}</span></p>
+                                    <p>Birthdate: <span className="text-[#3b473d]">{request.date_of_birth}</span></p>
+                                    <p>Requested: <span className="text-[#3b473d]">{new Date(request.created_at).toLocaleDateString()}</span></p>
+                                </div>
+                                {request.message && (
+                                    <p className="mt-3 rounded-xl bg-[#fafbf9] p-3 text-xs leading-5 text-[#526051]">
+                                        "{request.message}"
+                                    </p>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedRequest(request);
+                                        setReviewStatus('reviewed');
+                                        setReviewNote('Verified with official registrar records. Account approved.');
+                                    }}
+                                    className="rounded-xl bg-[#2b5139] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#22442e]"
+                                >
+                                    Approve claim
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedRequest(request);
+                                        setReviewStatus('needs_more_information');
+                                        setReviewNote('');
+                                    }}
+                                    className="rounded-xl border border-[#d2ddd0] bg-white px-3 py-1.5 text-xs font-medium text-[#435245] hover:bg-[#f4f6f2]"
+                                >
+                                    Review
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                ))}
+            </div>
+
+            {selectedRequest && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-md rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-xl">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-sm font-semibold text-[#29382e]">
+                                    Review Registration Claim
+                                </h3>
+                                <p className="mt-0.5 text-xs text-[#70796e]">
+                                    {selectedRequest.name} ({selectedRequest.student_number})
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedRequest(null)}
+                                className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleReviewSubmit} className="mt-4 space-y-3">
+                            <label className="block text-xs font-medium text-[#4d5a4f]">
+                                Decision outcome
+                                <select
+                                    value={reviewStatus}
+                                    onChange={(e) => setReviewStatus(e.target.value as any)}
+                                    className="mt-1 h-9 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                >
+                                    <option value="reviewed">Approve & verify (Reviewed)</option>
+                                    <option value="needs_more_information">Request more info</option>
+                                    <option value="rejected">Reject claim</option>
+                                </select>
+                            </label>
+
+                            <label className="block text-xs font-medium text-[#4d5a4f]">
+                                Review note
+                                <textarea
+                                    rows={3}
+                                    value={reviewNote}
+                                    onChange={(e) => setReviewNote(e.target.value)}
+                                    placeholder="Enter review explanation or instructions for applicant..."
+                                    className="mt-1 w-full rounded-lg border border-[#e3e7df] p-2.5 text-xs outline-none focus:border-[#819981]"
+                                />
+                            </label>
+
+                            <div className="flex items-center justify-end gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedRequest(null)}
+                                    className="rounded-xl border border-[#e2e7df] px-3 py-1.5 text-xs text-[#5c685b] hover:bg-[#f4f6f2]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="rounded-xl bg-[#2b5139] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#22442e] disabled:opacity-50"
+                                >
+                                    {submitting ? 'Submitting…' : 'Confirm decision'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
         </div>
     );

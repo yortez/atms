@@ -49,6 +49,7 @@ class AlumniEmploymentController extends Controller
             'industry' => ['nullable', 'string', 'max:120'],
             'employment_type' => ['nullable', 'string', 'max:32'],
             'work_location' => ['nullable', 'string', 'max:180'],
+            'is_related_to_degree' => ['nullable', 'boolean'],
             'started_on' => ['nullable', 'date_format:Y-m-d'],
             'ended_on' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:started_on'],
         ]);

@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
     'industry',
     'employment_type',
     'work_location',
+    'is_related_to_degree',
     'started_on',
     'ended_on',
     'reported_at',
@@ -66,6 +67,7 @@ class AlumniEmploymentRecord extends Model
             'started_on' => 'date',
             'ended_on' => 'date',
             'reported_at' => 'datetime',
+            'is_related_to_degree' => 'boolean',
         ];
     }
 }

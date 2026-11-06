@@ -15,7 +15,7 @@ export type PaginatedApiResponse<T> = {
 
 type JsonRequestOptions = {
     method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
-    body?: Record<string, unknown>;
+    body?: Record<string, unknown> | FormData;
     signal?: AbortSignal;
 };
 
@@ -65,7 +65,9 @@ export async function apiRequest<T>(
         headers.set('X-XSRF-TOKEN', token);
     }
 
-    if (body !== undefined) {
+    const isFormData = body instanceof FormData;
+
+    if (body !== undefined && !isFormData) {
         headers.set('Content-Type', 'application/json');
     }
 
@@ -73,7 +75,7 @@ export async function apiRequest<T>(
         method,
         credentials: 'same-origin',
         headers,
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body: body === undefined ? undefined : (isFormData ? body : JSON.stringify(body)),
         signal,
     });
     const contentType = response.headers.get('content-type') ?? '';

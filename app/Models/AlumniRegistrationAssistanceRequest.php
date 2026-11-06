@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
     'email',
     'date_of_birth',
     'student_number',
+    'academic_program_id',
     'message',
     'status',
     'reviewed_by_user_id',
@@ -29,6 +30,14 @@ use Illuminate\Support\Carbon;
 ])]
 class AlumniRegistrationAssistanceRequest extends Model
 {
+    /**
+     * @return BelongsTo<AcademicProgram, $this>
+     */
+    public function program(): BelongsTo
+    {
+        return $this->belongsTo(AcademicProgram::class, 'academic_program_id');
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */

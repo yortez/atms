@@ -60,6 +60,7 @@ import {
     LiveOverview,
     Notifications,
     PublicJobs,
+    RegistrationAssistanceQueue,
     SurveyCenter,
     UnreadNotificationIndicator,
 } from '@/components/alumni-portal-data';
@@ -115,6 +116,7 @@ const navigation: Record<Role, NavigationItem[]> = {
         { label: 'Overview', icon: LayoutDashboard },
         { label: 'Notifications', icon: Bell },
         { label: 'Program alumni', icon: UsersRound },
+        { label: 'Claim assistance', icon: ShieldCheck },
         { label: 'Employment outcomes', icon: Activity },
         { label: 'Surveys', icon: ClipboardList },
         { label: 'Announcements', icon: MessageSquareText },
@@ -277,6 +279,10 @@ const pageCopy: Record<
     'Activity log': {
         title: 'Activity log',
         description: 'A recent record of important updates across the system.',
+    },
+    'Claim assistance': {
+        title: 'Registration claim assistance',
+        description: 'Review and approve alumni registration verification requests for your academic programs.',
     },
 };
 
@@ -441,6 +447,8 @@ export default function AlumniPortal() {
         <EmploymentReports />
     ) : activePage === 'Notifications' ? (
         <Notifications />
+    ) : activePage === 'Claim assistance' ? (
+        <RegistrationAssistanceQueue />
     ) : activePage === 'Activity log' ? (
         <ActivityLog />
     ) : activePage === 'Users & roles' ? (

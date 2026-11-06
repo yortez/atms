@@ -3,6 +3,7 @@ export type EducationRecord = {
     student_number: string;
     graduation_year: number | null;
     honors: string | null;
+    gwa?: number | string | null;
     program: string | null;
     degree: string | null;
 };
@@ -21,6 +22,7 @@ export type EmploymentRecord = {
     industry: string | null;
     employment_type: string | null;
     work_location: string | null;
+    is_related_to_degree?: boolean;
     started_on: string | null;
     ended_on: string | null;
     reported_at: string;
@@ -35,6 +37,7 @@ export type EmploymentSummary = {
     industry: string | null;
     employment_type: string | null;
     work_location: string | null;
+    is_related_to_degree?: boolean;
     started_on: string | null;
     ended_on: string | null;
     reported_at: string;
@@ -51,6 +54,8 @@ export type AlumniProfile = {
     email: string;
     date_of_birth: string;
     profile_status: 'active' | 'archived';
+    is_claimed?: boolean;
+    claimed_at?: string | null;
     education_records?: EducationRecord[];
     employment_records?: EmploymentSummary[];
 };
@@ -162,12 +167,33 @@ export type JobApplication = {
     applicant_user_id: number;
     cover_letter: string | null;
     status: string;
+    profile_snapshot?: Record<string, any> | null;
+    resume_snapshot_path?: string | null;
     reviewed_at: string | null;
     created_at: string;
     job_posting?: Pick<JobPosting, 'id' | 'title' | 'location' | 'status'> & {
         employer?: Pick<Employer, 'id' | 'company_name'>;
     };
     alumni_profile?: Pick<AlumniProfile, 'id' | 'name' | 'email'>;
+};
+
+export type RegistrationAssistanceRequest = {
+    id: number;
+    name: string;
+    email: string;
+    date_of_birth: string;
+    student_number: string;
+    academic_program_id: number | null;
+    program?: {
+        id: number;
+        code: string;
+        name: string;
+    } | null;
+    message: string | null;
+    status: 'pending' | 'reviewed' | 'needs_more_information' | 'rejected';
+    created_at: string;
+    reviewed_at: string | null;
+    review_note: string | null;
 };
 
 export type DashboardStatistics = {

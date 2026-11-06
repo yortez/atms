@@ -11,15 +11,24 @@ use Illuminate\Validation\Rule;
 
 class RegistrationAssistanceController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $this->authorize('manageRegistrationAssistance');
 
+        $query = AlumniRegistrationAssistanceRequest::query()
+            ->with('program')
+            ->where('status', 'pending');
+
+        if ($request->user()->hasRole('department-coordinator') && ! $request->user()->hasRole('system-administrator', 'alumni-coordinator')) {
+            $assignedProgramIds = $request->user()->assignedPrograms()->pluck('academic_programs.id');
+            $query->where(function ($q) use ($assignedProgramIds) {
+                $q->whereIn('academic_program_id', $assignedProgramIds)
+                    ->orWhereNull('academic_program_id');
+            });
+        }
+
         return response()->json([
-            'data' => AlumniRegistrationAssistanceRequest::query()
-                ->where('status', 'pending')
-                ->latest()
-                ->paginate(25),
+            'data' => $query->latest()->paginate(25),
         ]);
     }
 
@@ -29,6 +38,16 @@ class RegistrationAssistanceController extends Controller
         ActivityLogger $activityLogger,
     ): JsonResponse {
         $this->authorize('manageRegistrationAssistance');
+
+        if ($request->user()->hasRole('department-coordinator') && ! $request->user()->hasRole('system-administrator', 'alumni-coordinator')) {
+            if ($assistanceRequest->academic_program_id !== null) {
+                abort_unless(
+                    $request->user()->assignedPrograms()->where('academic_programs.id', $assistanceRequest->academic_program_id)->exists(),
+                    403,
+                    'You are not authorized to review assistance requests outside your assigned programs.'
+                );
+            }
+        }
 
         $data = $request->validate([
             'status' => ['required', Rule::in(['reviewed', 'needs_more_information', 'rejected'])],

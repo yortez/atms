@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 #[Fillable([
     'job_posting_id', 'alumni_profile_id', 'applicant_user_id', 'cover_letter', 'status',
+    'profile_snapshot', 'resume_snapshot_path',
     'reviewed_at', 'reviewed_by_user_id',
 ])]
 class JobApplication extends Model
@@ -45,6 +46,9 @@ class JobApplication extends Model
 
     protected function casts(): array
     {
-        return ['reviewed_at' => 'datetime'];
+        return [
+            'reviewed_at' => 'datetime',
+            'profile_snapshot' => 'array',
+        ];
     }
 }

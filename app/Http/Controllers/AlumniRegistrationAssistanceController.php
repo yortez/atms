@@ -28,12 +28,20 @@ class AlumniRegistrationAssistanceController extends Controller
             'email' => ['required', 'string', 'email', 'max:255'],
             'date_of_birth' => ['required', 'date_format:Y-m-d'],
             'student_number' => ['required', 'string', 'max:255'],
+            'academic_program_id' => ['nullable', 'integer', 'exists:academic_programs,id'],
             'message' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $validated['name'] = trim($validated['name']);
         $validated['email'] = Str::lower(trim($validated['email']));
         $validated['student_number'] = Str::upper(trim($validated['student_number']));
+
+        if (empty($validated['academic_program_id'])) {
+            $existing = \App\Models\AlumniStudentNumber::with('programDegree')
+                ->where('student_number', $validated['student_number'])
+                ->first();
+            $validated['academic_program_id'] = $existing?->programDegree?->program_id;
+        }
 
         $assistanceRequest = DB::transaction(function () use ($validated, $logger) {
             $assistanceRequest = AlumniRegistrationAssistanceRequest::create($validated);
