@@ -77,6 +77,7 @@ class AlumniController extends Controller
             'educationRecords.programDegree.program',
             'educationRecords.programDegree.degree',
             'employmentRecords.status',
+            'user:id,alumni_profile_id,created_at',
         ]));
     }
 

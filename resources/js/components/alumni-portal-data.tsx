@@ -506,6 +506,192 @@ const statusClass: Record<string, string> = {
     'Seeking work': 'bg-[#edf1f3] text-[#537483]',
 };
 
+function AlumniProfileDialog({
+    profileId,
+    onClose,
+}: {
+    profileId: number;
+    onClose: () => void;
+}) {
+    const { data, loading, error } = useApiResource<ApiEnvelope<AlumniProfile>>(
+        `/api/alumni/${profileId}`,
+    );
+    const profile = data?.data;
+
+    useEffect(() => {
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [onClose]);
+
+    const detail = (label: string, value: string | null | undefined) => (
+        <div>
+            <dt className="text-[10px] font-semibold tracking-wide text-[#8a9088] uppercase">
+                {label}
+            </dt>
+            <dd className="mt-0.5 text-xs text-[#36443a]">{value || '—'}</dd>
+        </div>
+    );
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex justify-end bg-black/40"
+            onClick={onClose}
+        >
+            <aside
+                role="dialog"
+                aria-modal="true"
+                aria-label="Alumni profile"
+                onClick={(event) => event.stopPropagation()}
+                className="h-full w-full max-w-xl overflow-y-auto bg-white shadow-xl"
+            >
+                <div className="sticky top-0 flex items-center justify-between border-b border-[#eff0ec] bg-white px-5 py-4">
+                    <h2 className="text-sm font-semibold text-[#29382e]">
+                        Alumni profile
+                    </h2>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Close profile"
+                        className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div className="space-y-5 p-5">
+                    {loading ? (
+                        <LoadingState />
+                    ) : error ? (
+                        <ErrorState message={error} />
+                    ) : profile ? (
+                        <>
+                            <section className="flex items-center gap-3">
+                                <span className="grid size-12 shrink-0 place-items-center rounded-full bg-[#e9eee5] text-sm font-bold text-[#45634a]">
+                                    {initials(profile.name)}
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="truncate text-base font-semibold text-[#29382e]">
+                                        {profile.name}
+                                    </p>
+                                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                                        {profile.is_claimed ? (
+                                            <span className="rounded-full bg-[#e3eee0] px-2 py-0.5 text-[10px] font-medium text-[#2f5a37]">
+                                                Claimed
+                                                {profile.claimed_at
+                                                    ? ` · ${new Date(profile.claimed_at).toLocaleDateString()}`
+                                                    : ''}
+                                            </span>
+                                        ) : (
+                                            <span className="rounded-full bg-[#f3efe6] px-2 py-0.5 text-[10px] font-medium text-[#8a6a35]">
+                                                Unclaimed
+                                            </span>
+                                        )}
+                                        <span className="rounded-full bg-[#f0f1ed] px-2 py-0.5 text-[10px] font-medium text-[#6d746a] capitalize">
+                                            {profile.profile_status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="rounded-2xl border border-[#e9ebe5] p-4">
+                                <h3 className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[#495a4f] uppercase">
+                                    Personal information
+                                </h3>
+                                <dl className="grid grid-cols-2 gap-3">
+                                    {detail('First name', profile.first_name)}
+                                    {detail('Middle name', profile.middle_name)}
+                                    {detail('Last name', profile.last_name)}
+                                    {detail('Suffix', profile.suffix)}
+                                    {detail('Email', profile.email)}
+                                    {detail('Birthdate', profile.date_of_birth)}
+                                </dl>
+                            </section>
+
+                            <section className="rounded-2xl border border-[#e9ebe5] p-4">
+                                <h3 className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[#495a4f] uppercase">
+                                    Academic records
+                                </h3>
+                                {profile.education_records?.length ? (
+                                    <ul className="space-y-2.5">
+                                        {profile.education_records.map((record) => (
+                                            <li
+                                                key={record.id}
+                                                className="rounded-xl bg-[#fafbf9] p-3 text-xs text-[#4f5c50]"
+                                            >
+                                                <p className="font-semibold text-[#344436]">
+                                                    {record.program ?? 'Program not set'}
+                                                    {record.degree ? ` — ${record.degree}` : ''}
+                                                </p>
+                                                <p className="mt-0.5 text-[11px] text-[#7a8278]">
+                                                    Student no. {record.student_number}
+                                                    {record.graduation_year
+                                                        ? ` · Class of ${record.graduation_year}`
+                                                        : ''}
+                                                    {record.honors ? ` · ${record.honors}` : ''}
+                                                    {record.gwa ? ` · GWA ${record.gwa}` : ''}
+                                                </p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-xs text-[#7a8278]">
+                                        No academic records visible.
+                                    </p>
+                                )}
+                            </section>
+
+                            <section className="rounded-2xl border border-[#e9ebe5] p-4">
+                                <h3 className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[#495a4f] uppercase">
+                                    Employment history
+                                </h3>
+                                {profile.employment_records?.length ? (
+                                    <ol className="space-y-3">
+                                        {profile.employment_records.map((record) => (
+                                            <li
+                                                key={record.id}
+                                                className="border-l-2 border-[#dfe7dc] pl-3 text-xs"
+                                            >
+                                                <p className="text-[10px] font-medium text-[#8a9088]">
+                                                    {record.started_on ?? 'Start not recorded'}
+                                                    {record.ended_on ? ` – ${record.ended_on}` : ' – Present'}
+                                                </p>
+                                                <p className="mt-0.5 font-semibold text-[#3d4a3f]">
+                                                    {record.job_title ?? record.status ?? 'Status update'}
+                                                </p>
+                                                <p className="text-[11px] text-[#6f786d]">
+                                                    {[record.status, record.employer_name, record.work_location]
+                                                        .filter(Boolean)
+                                                        .join(' · ')}
+                                                </p>
+                                                {record.is_related_to_degree !== undefined && (
+                                                    <span
+                                                        className={`mt-1 inline-block rounded px-1.5 py-0.5 text-[9px] font-semibold ${record.is_related_to_degree ? 'bg-[#edf2eb] text-[#33583b]' : 'bg-[#f5f5f3] text-[#788077]'}`}
+                                                    >
+                                                        {record.is_related_to_degree
+                                                            ? 'Degree-related'
+                                                            : 'Not degree-related'}
+                                                    </span>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ol>
+                                ) : (
+                                    <p className="text-xs text-[#7a8278]">
+                                        No employment updates reported yet.
+                                    </p>
+                                )}
+                            </section>
+                        </>
+                    ) : null}
+                </div>
+            </aside>
+        </div>
+    );
+}
+
 export function AlumniDirectory({
     createOpen,
     onCloseCreate,
@@ -519,6 +705,7 @@ export function AlumniDirectory({
 }) {
     const [page, setPage] = useState(1);
     const [creating, setCreating] = useState(false);
+    const [viewingProfileId, setViewingProfileId] = useState<number | null>(null);
     const [importModalOpen, setImportModalOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
     const [importing, setImporting] = useState(false);
@@ -975,6 +1162,13 @@ export function AlumniDirectory({
                 </div>
             </div>
 
+            {viewingProfileId !== null && (
+                <AlumniProfileDialog
+                    profileId={viewingProfileId}
+                    onClose={() => setViewingProfileId(null)}
+                />
+            )}
+
             {importModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                     <div className="w-full max-w-lg rounded-2xl border border-[#e3e7df] bg-white p-6 shadow-xl">
@@ -1070,6 +1264,9 @@ export function AlumniDirectory({
                                         Current employer
                                     </th>
                                     <th className="px-4 py-3">Account</th>
+                                    <th className="px-4 py-3 text-right">
+                                        <span className="sr-only">Actions</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#f0f1ed]">
@@ -1094,9 +1291,17 @@ export function AlumniDirectory({
                                                             )}
                                                         </span>
                                                         <span>
-                                                            <span className="block font-semibold text-[#39463b]">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setViewingProfileId(
+                                                                        alumnus.id,
+                                                                    )
+                                                                }
+                                                                className="block text-left font-semibold text-[#39463b] hover:text-[#2b5139] hover:underline"
+                                                            >
                                                                 {alumnus.name}
-                                                            </span>
+                                                            </button>
                                                             <span className="mt-0.5 block text-[10px] text-[#92978f]">
                                                                 {education?.student_number ??
                                                                     '—'}
@@ -1144,13 +1349,26 @@ export function AlumniDirectory({
                                                         </span>
                                                     )}
                                                 </td>
+                                                <td className="px-4 py-3.5 text-right">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setViewingProfileId(
+                                                                alumnus.id,
+                                                            )
+                                                        }
+                                                        className="rounded-lg border border-[#d2ddd0] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#2c5339] hover:bg-[#edf2ea]"
+                                                    >
+                                                        View profile
+                                                    </button>
+                                                </td>
                                             </tr>
                                         );
                                     })
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={6}
+                                            colSpan={7}
                                             className="px-5 py-12 text-center text-sm text-[#858b82]"
                                         >
                                             No alumni records found.

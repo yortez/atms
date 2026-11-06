@@ -34,3 +34,25 @@ test('alumni listing reports claim status and can filter by it', function () {
     expect(collect($unclaimedOnly)->pluck('id')->all())->toBe([$unclaimed->id]);
 });
 
+
+test('profile detail endpoint includes claim status and is restricted to authorized viewers', function () {
+    $profile = AlumniProfile::create([
+        'name' => 'Detail Person', 'first_name' => 'Detail', 'last_name' => 'Person',
+        'email' => 'detail@example.com', 'date_of_birth' => '1994-02-02',
+    ]);
+    User::factory()->create(['alumni_profile_id' => $profile->id]);
+
+    $coordinator = User::factory()->create();
+    $role = Role::firstOrCreate(['name' => 'alumni-coordinator'], ['label' => 'Alumni Coordinator']);
+    $coordinator->roles()->syncWithoutDetaching([$role->id => ['created_at' => now()]]);
+    Sanctum::actingAs($coordinator, ['api']);
+
+    $this->getJson("/api/alumni/{$profile->id}")
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Detail Person')
+        ->assertJsonPath('data.is_claimed', true);
+
+    $stranger = User::factory()->create();
+    Sanctum::actingAs($stranger, ['api']);
+    $this->getJson("/api/alumni/{$profile->id}")->assertForbidden();
+});
