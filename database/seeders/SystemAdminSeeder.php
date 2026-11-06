@@ -32,13 +32,22 @@ class SystemAdminSeeder extends Seeder
             );
         }
 
-        $password = 'Password123!';
+        $password = (string) env('ADMIN_PASSWORD', 'Password123!');
+        $adminEmail = (string) env('ADMIN_EMAIL', 'admin@atms.local');
+        $adminName = (string) env('ADMIN_NAME', 'System Administrator');
 
         // 1. System Administrator
-        $admin = $this->upsertAccount('admin@atms.local', 'System Administrator', $password);
+        $admin = $this->upsertAccount($adminEmail, $adminName, $password);
         $admin->roles()->syncWithoutDetaching([
             $roles['system-administrator']->id => ['created_at' => now()],
         ]);
+
+        if (Str::lower(trim($adminEmail)) !== 'admin@atms.local') {
+            $defaultAdmin = $this->upsertAccount('admin@atms.local', 'System Administrator', $password);
+            $defaultAdmin->roles()->syncWithoutDetaching([
+                $roles['system-administrator']->id => ['created_at' => now()],
+            ]);
+        }
 
         // 2. Dedicated Alumni Coordinator
         $alumniCoordinator = $this->upsertAccount('coordinator@atms.local', 'Elena Vance (Alumni Coordinator)', $password);

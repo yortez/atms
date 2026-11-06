@@ -20,12 +20,5 @@ class DatabaseSeeder extends Seeder
             SystemAdminSeeder::class,
             EmploymentStatusSeeder::class,
         ]);
-
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
     }
 }
