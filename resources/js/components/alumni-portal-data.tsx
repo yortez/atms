@@ -2724,7 +2724,45 @@ type UserRoleAssignment = {
     name: string;
     email: string;
     roles: string[];
+    assigned_program_ids?: number[];
+    assigned_programs?: Array<{
+        id: number;
+        code: string;
+        name: string;
+    }>;
+    alumni_profile_id?: number | null;
+    is_verified?: boolean;
     is_suspended: boolean;
+    created_at?: string | null;
+};
+
+type AdminRoleCatalogItem = {
+    id: number;
+    name: string;
+    label: string;
+    permissions: string[];
+};
+
+type AdminPermissionCatalogItem = {
+    id: number;
+    name: string;
+    label: string;
+};
+
+type AdminProgramCatalogItem = {
+    id: number;
+    department_id: number;
+    code: string;
+    name: string;
+};
+
+type AdminUsersResponse = {
+    data: UserRoleAssignment[];
+    meta?: {
+        roles_catalog?: AdminRoleCatalogItem[];
+        permissions_catalog?: AdminPermissionCatalogItem[];
+        programs_catalog?: AdminProgramCatalogItem[];
+    };
 };
 
 export function AssignedRoles({
@@ -2742,20 +2780,35 @@ export function AssignedRoles({
         employer: 'Employer',
     };
     const isSystemAdmin = roleCodes.includes('system-administrator');
-    const { data, loading, error, reload } = useApiResource<
-        ApiEnvelope<UserRoleAssignment[]>
-    >(isSystemAdmin ? '/api/admin/users' : null);
+    const { data, loading, error, reload } =
+        useApiResource<AdminUsersResponse>(
+            isSystemAdmin ? '/api/admin/users' : null,
+        );
     const [selectedRoles, setSelectedRoles] = useState<
         Record<number, string[]>
     >({});
+    const [selectedPrograms, setSelectedPrograms] = useState<
+        Record<number, number[]>
+    >({});
     const [saving, setSaving] = useState<Record<number, boolean>>({});
+    const [savingPrograms, setSavingPrograms] = useState<
+        Record<number, boolean>
+    >({});
+    const [savingRolePermissions, setSavingRolePermissions] = useState<
+        Record<number, boolean>
+    >({});
     const [managing, setManaging] = useState<Record<number, boolean>>({});
     const [inviteOpen, setInviteOpen] = useState(false);
+    const [permissionsMatrixOpen, setPermissionsMatrixOpen] = useState(false);
     const [inviting, setInviting] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [roleFilter, setRoleFilter] = useState<string>('all');
     const [inviteForm, setInviteForm] = useState({
         name: '',
         email: '',
+        password: '',
         roles: [] as string[],
+        assigned_program_ids: [] as number[],
     });
     const roleOptions = [
         'alumni-coordinator',
@@ -2772,7 +2825,14 @@ export function AssignedRoles({
         const nextSelectedRoles = Object.fromEntries(
             data.data.map((user) => [user.id, [...user.roles]]),
         );
+        const nextSelectedPrograms = Object.fromEntries(
+            data.data.map((user) => [
+                user.id,
+                [...(user.assigned_program_ids ?? [])],
+            ]),
+        );
         setSelectedRoles(nextSelectedRoles);
+        setSelectedPrograms(nextSelectedPrograms);
     }, [data]);
 
     async function updateUserRoles(userId: number, nextRoles: string[]) {
@@ -2811,22 +2871,106 @@ export function AssignedRoles({
         }
     }
 
+    async function updateUserAssignedPrograms(
+        userId: number,
+        nextProgramIds: number[],
+    ) {
+        setSavingPrograms((current) => ({ ...current, [userId]: true }));
+        try {
+            await apiRequest<ApiEnvelope<UserRoleAssignment>>(
+                `/api/admin/users/${userId}/programs`,
+                {
+                    method: 'PATCH',
+                    body: { assigned_program_ids: nextProgramIds },
+                },
+            );
+            setSelectedPrograms((current) => ({
+                ...current,
+                [userId]: nextProgramIds,
+            }));
+            reload();
+            toast.success('Assigned academic programs updated.');
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'Assigned programs could not be updated.',
+            );
+        } finally {
+            setSavingPrograms((current) => ({ ...current, [userId]: false }));
+        }
+    }
+
+    async function toggleRolePermission(
+        roleItem: AdminRoleCatalogItem,
+        permissionName: string,
+    ) {
+        const nextPermissions = roleItem.permissions.includes(permissionName)
+            ? roleItem.permissions.filter((p) => p !== permissionName)
+            : [...roleItem.permissions, permissionName];
+
+        setSavingRolePermissions((current) => ({
+            ...current,
+            [roleItem.id]: true,
+        }));
+        try {
+            await apiRequest(`/api/admin/roles/${roleItem.id}/permissions`, {
+                method: 'PATCH',
+                body: { permissions: nextPermissions },
+            });
+            reload();
+            toast.success(`Updated permissions for ${roleItem.label}.`);
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'Role permissions could not be updated.',
+            );
+        } finally {
+            setSavingRolePermissions((current) => ({
+                ...current,
+                [roleItem.id]: false,
+            }));
+        }
+    }
+
     async function inviteUser(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setInviting(true);
 
         try {
-            await apiRequest<ApiEnvelope<UserRoleAssignment>>(
-                '/api/admin/users',
-                {
-                    method: 'POST',
-                    body: inviteForm,
-                },
-            );
-            setInviteForm({ name: '', email: '', roles: [] });
+            const payload: Record<string, unknown> = {
+                name: inviteForm.name,
+                email: inviteForm.email,
+                roles: inviteForm.roles,
+            };
+            if (inviteForm.password.trim()) {
+                payload.password = inviteForm.password.trim();
+            }
+            if (
+                inviteForm.roles.includes('department-coordinator') &&
+                inviteForm.assigned_program_ids.length > 0
+            ) {
+                payload.assigned_program_ids = inviteForm.assigned_program_ids;
+            }
+
+            const response = await apiRequest<{
+                data: UserRoleAssignment;
+                message?: string;
+            }>('/api/admin/users', {
+                method: 'POST',
+                body: payload,
+            });
+            setInviteForm({
+                name: '',
+                email: '',
+                password: '',
+                roles: [],
+                assigned_program_ids: [],
+            });
             setInviteOpen(false);
             reload();
-            toast.success('Invitation sent.');
+            toast.success(response.message ?? 'Invitation sent.');
         } catch (requestError) {
             toast.error(
                 requestError instanceof ApiError
@@ -2891,12 +3035,51 @@ export function AssignedRoles({
     }
 
     const users = data?.data ?? [];
+    const rolesCatalog = data?.meta?.roles_catalog ?? [];
+    const permissionsCatalog = data?.meta?.permissions_catalog ?? [];
+    const programsCatalog = data?.meta?.programs_catalog ?? [];
+
+    const filteredUsers = users.filter((u) => {
+        const matchesSearch =
+            !searchQuery.trim() ||
+            u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole =
+            roleFilter === 'all'
+                ? true
+                : roleFilter === 'suspended'
+                  ? u.is_suspended
+                  : u.roles.includes(roleFilter);
+        return matchesSearch && matchesRole;
+    });
 
     return (
         <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
-            <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
-                Roles assigned to your account
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
+                        Roles assigned to your account
+                    </h2>
+                    <p className="mt-0.5 text-xs text-[#7a8278]">
+                        Active permissions and institutional scopes linked to
+                        your credentials.
+                    </p>
+                </div>
+                {isSystemAdmin && rolesCatalog.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setPermissionsMatrixOpen((prev) => !prev)
+                        }
+                        className="rounded-full border border-[#d6dfd3] bg-[#f8faf7] px-3.5 py-1.5 text-[11px] font-semibold text-[#2f4f3e] transition hover:bg-[#edf2eb]"
+                    >
+                        {permissionsMatrixOpen
+                            ? 'Hide Role Permissions Matrix'
+                            : 'Configure Role Permissions'}
+                    </button>
+                )}
+            </div>
+
             {roleCodes.length ? (
                 <ul className="mt-4 flex flex-wrap gap-2">
                     {roleCodes.map((code) => (
@@ -2914,12 +3097,94 @@ export function AssignedRoles({
                 </p>
             )}
 
+            {/* Granular Role Permissions Matrix */}
+            {isSystemAdmin && permissionsMatrixOpen && rolesCatalog.length > 0 && (
+                <div className="mt-5 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 className="text-xs font-bold tracking-wider text-[#2b5139] uppercase">
+                                Role Permissions Matrix
+                            </h3>
+                            <p className="mt-0.5 text-[11px] text-[#6b7669]">
+                                Grant or restrict granular capabilities per role
+                                (e.g., allowing Department Coordinators to edit
+                                alumni records or manage surveys within their
+                                assigned programs).
+                            </p>
+                        </div>
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-2">
+                        {rolesCatalog
+                            .filter(
+                                (r) =>
+                                    r.name === 'alumni-coordinator' ||
+                                    r.name === 'department-coordinator',
+                            )
+                            .map((roleItem) => (
+                                <div
+                                    key={roleItem.id}
+                                    className="rounded-xl border border-[#e3e8e0] bg-white p-3.5"
+                                >
+                                    <div className="mb-2.5 flex items-center justify-between">
+                                        <span className="text-xs font-semibold text-[#29382e]">
+                                            {roleItem.label}
+                                        </span>
+                                        <span className="rounded-full bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                            {roleItem.permissions.length}{' '}
+                                            permissions
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {permissionsCatalog.map((perm) => {
+                                            const active =
+                                                roleItem.permissions.includes(
+                                                    perm.name,
+                                                );
+                                            return (
+                                                <button
+                                                    key={perm.name}
+                                                    type="button"
+                                                    disabled={
+                                                        savingRolePermissions[
+                                                            roleItem.id
+                                                        ]
+                                                    }
+                                                    onClick={() =>
+                                                        void toggleRolePermission(
+                                                            roleItem,
+                                                            perm.name,
+                                                        )
+                                                    }
+                                                    title={perm.label}
+                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
+                                                        active
+                                                            ? 'bg-[#2b5139] text-white'
+                                                            : 'border border-[#dce2d9] bg-[#fafbf9] text-[#5c685d] hover:bg-[#eff2ed]'
+                                                    }`}
+                                                >
+                                                    {perm.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
+                </div>
+            )}
+
             {isSystemAdmin && (
                 <div className="mt-6 border-t border-[#eff0ec] pt-5">
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                        <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
-                            User access management
-                        </h3>
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
+                                User access & program scoping
+                            </h3>
+                            <p className="mt-0.5 text-xs text-[#7a8278]">
+                                Assign institutional roles and academic program
+                                scopes for Department Coordinators.
+                            </p>
+                        </div>
                         <div className="flex items-center gap-2">
                             <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-medium text-[#45664a]">
                                 {users.length} users
@@ -2935,12 +3200,47 @@ export function AssignedRoles({
                         </div>
                     </div>
 
+                    {/* Search & Role Filter Bar */}
+                    <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                        <input
+                            type="search"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search users by name or email…"
+                            className="h-9 w-full rounded-xl border border-[#dfe5dd] bg-[#fafbf9] px-3 text-xs text-[#29382e] outline-none focus:border-[#6d8b72] sm:max-w-xs"
+                        />
+                        <div className="flex flex-wrap gap-1.5">
+                            {[
+                                ['all', 'All'],
+                                ['system-administrator', 'Admins'],
+                                ['alumni-coordinator', 'Alumni Coord.'],
+                                ['department-coordinator', 'Dept. Coord.'],
+                                ['alumni', 'Alumni'],
+                                ['employer', 'Employers'],
+                                ['suspended', 'Suspended'],
+                            ].map(([code, label]) => (
+                                <button
+                                    key={code}
+                                    type="button"
+                                    onClick={() => setRoleFilter(code)}
+                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
+                                        roleFilter === code
+                                            ? 'bg-[#2b5139] text-white'
+                                            : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {inviteOpen && (
                         <form
                             onSubmit={inviteUser}
-                            className="mb-5 space-y-3 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4"
+                            className="mb-5 space-y-3.5 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4"
                         >
-                            <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="grid gap-3 sm:grid-cols-3">
                                 <label className="space-y-1.5 text-xs font-medium text-[#4d5a4f]">
                                     Name
                                     <input
@@ -2972,6 +3272,23 @@ export function AssignedRoles({
                                         }
                                         className="w-full rounded-xl border border-[#dfe5dd] bg-white px-3 py-2 text-sm font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
                                         autoComplete="email"
+                                    />
+                                </label>
+                                <label className="space-y-1.5 text-xs font-medium text-[#4d5a4f]">
+                                    Initial password (optional)
+                                    <input
+                                        type="password"
+                                        minLength={8}
+                                        maxLength={255}
+                                        value={inviteForm.password}
+                                        onChange={(event) =>
+                                            setInviteForm((form) => ({
+                                                ...form,
+                                                password: event.target.value,
+                                            }))
+                                        }
+                                        placeholder="Leave blank to email setup link"
+                                        className="w-full rounded-xl border border-[#dfe5dd] bg-white px-3 py-2 text-sm font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
                                     />
                                 </label>
                             </div>
@@ -3014,6 +3331,61 @@ export function AssignedRoles({
                                     ))}
                                 </div>
                             </fieldset>
+
+                            {inviteForm.roles.includes(
+                                'department-coordinator',
+                            ) &&
+                                programsCatalog.length > 0 && (
+                                    <fieldset className="rounded-xl border border-[#e2e7df] bg-white p-3">
+                                        <legend className="px-1 text-[11px] font-semibold text-[#2b5139]">
+                                            Assigned Academic Programs
+                                            (Department Coordinator Scope)
+                                        </legend>
+                                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                            {programsCatalog.map((prog) => {
+                                                const active =
+                                                    inviteForm.assigned_program_ids.includes(
+                                                        prog.id,
+                                                    );
+                                                return (
+                                                    <button
+                                                        key={prog.id}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setInviteForm(
+                                                                (form) => ({
+                                                                    ...form,
+                                                                    assigned_program_ids:
+                                                                        active
+                                                                            ? form.assigned_program_ids.filter(
+                                                                                  (
+                                                                                      id,
+                                                                                  ) =>
+                                                                                      id !==
+                                                                                      prog.id,
+                                                                              )
+                                                                            : [
+                                                                                  ...form.assigned_program_ids,
+                                                                                  prog.id,
+                                                                              ],
+                                                                }),
+                                                            )
+                                                        }
+                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                                                            active
+                                                                ? 'bg-[#2b5139] text-white'
+                                                                : 'border border-[#dce2d9] bg-[#f9faf7] text-[#4d5a4f]'
+                                                        }`}
+                                                    >
+                                                        {prog.code} ·{' '}
+                                                        {prog.name}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </fieldset>
+                                )}
+
                             <div className="flex justify-end gap-2">
                                 <button
                                     type="button"
@@ -3029,7 +3401,11 @@ export function AssignedRoles({
                                     }
                                     className="rounded-full bg-[#2f4f3e] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#263f32] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    {inviting ? 'Sending…' : 'Send invitation'}
+                                    {inviting
+                                        ? 'Saving…'
+                                        : inviteForm.password.trim()
+                                          ? 'Create user account'
+                                          : 'Send invitation'}
                                 </button>
                             </div>
                         </form>
@@ -3039,16 +3415,24 @@ export function AssignedRoles({
                         <LoadingState />
                     ) : error ? (
                         <ErrorState message={error} />
-                    ) : users.length ? (
+                    ) : filteredUsers.length ? (
                         <div className="space-y-4">
-                            {users.map((user) => {
+                            {filteredUsers.map((user) => {
                                 const currentRoles =
                                     selectedRoles[user.id] ?? user.roles;
+                                const currentProgramIds =
+                                    selectedPrograms[user.id] ??
+                                    user.assigned_program_ids ??
+                                    [];
                                 const isProtected = user.roles.includes(
                                     'system-administrator',
                                 );
                                 const canManage =
                                     !isProtected && user.id !== currentUserId;
+                                const isDeptCoordinator =
+                                    currentRoles.includes(
+                                        'department-coordinator',
+                                    );
 
                                 return (
                                     <div
@@ -3057,9 +3441,29 @@ export function AssignedRoles({
                                     >
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                             <div>
-                                                <p className="text-sm font-semibold text-[#39463b]">
-                                                    {user.name}
-                                                </p>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <p className="text-sm font-semibold text-[#39463b]">
+                                                        {user.name}
+                                                    </p>
+                                                    {user.is_verified && (
+                                                        <span className="rounded-full bg-[#e6efe4] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                                            Verified
+                                                        </span>
+                                                    )}
+                                                    {user.alumni_profile_id && (
+                                                        <span className="rounded-full bg-[#eef2ec] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
+                                                            Claimed Alumni #
+                                                            {
+                                                                user.alumni_profile_id
+                                                            }
+                                                        </span>
+                                                    )}
+                                                    {user.is_suspended && (
+                                                        <span className="rounded-full bg-[#f7e9e5] px-2.5 py-0.5 text-[10px] font-semibold text-[#8b4e43]">
+                                                            Suspended
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="mt-1 text-[11px] text-[#7a8278]">
                                                     {user.email}
                                                 </p>
@@ -3071,12 +3475,6 @@ export function AssignedRoles({
                                                 roles
                                             </span>
                                         </div>
-
-                                        {user.is_suspended && (
-                                            <p className="mt-3 inline-flex rounded-full bg-[#f7e9e5] px-2.5 py-1 text-[10px] font-semibold text-[#8b4e43]">
-                                                Suspended
-                                            </p>
-                                        )}
 
                                         {isProtected ? (
                                             <div className="mt-4 flex flex-wrap gap-2">
@@ -3149,6 +3547,89 @@ export function AssignedRoles({
                                                 })}
                                             </div>
                                         )}
+
+                                        {/* Assigned Academic Programs for Department Coordinators */}
+                                        {isDeptCoordinator &&
+                                            programsCatalog.length > 0 && (
+                                                <div className="mt-3.5 rounded-xl border border-[#e2e7df] bg-white p-3">
+                                                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                                        <span className="text-[11px] font-semibold text-[#2b5139]">
+                                                            Assigned Academic
+                                                            Programs (
+                                                            {
+                                                                currentProgramIds.length
+                                                            }{' '}
+                                                            selected)
+                                                        </span>
+                                                        {currentProgramIds.length ===
+                                                            0 && (
+                                                            <span className="rounded bg-[#fdf4e7] px-2 py-0.5 text-[10px] font-semibold text-[#9a6728]">
+                                                                No programs
+                                                                assigned —
+                                                                select programs
+                                                                to grant record
+                                                                access
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {programsCatalog.map(
+                                                            (prog) => {
+                                                                const active =
+                                                                    currentProgramIds.includes(
+                                                                        prog.id,
+                                                                    );
+                                                                return (
+                                                                    <button
+                                                                        key={
+                                                                            prog.id
+                                                                        }
+                                                                        type="button"
+                                                                        disabled={
+                                                                            savingPrograms[
+                                                                                user
+                                                                                    .id
+                                                                            ]
+                                                                        }
+                                                                        onClick={() => {
+                                                                            const nextIds =
+                                                                                active
+                                                                                    ? currentProgramIds.filter(
+                                                                                          (
+                                                                                              id,
+                                                                                          ) =>
+                                                                                              id !==
+                                                                                              prog.id,
+                                                                                      )
+                                                                                    : [
+                                                                                          ...currentProgramIds,
+                                                                                          prog.id,
+                                                                                      ];
+                                                                            void updateUserAssignedPrograms(
+                                                                                user.id,
+                                                                                nextIds,
+                                                                            );
+                                                                        }}
+                                                                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
+                                                                            active
+                                                                                ? 'bg-[#2b5139] text-white'
+                                                                                : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055] hover:bg-[#edf2eb]'
+                                                                        }`}
+                                                                    >
+                                                                        {
+                                                                            prog.code
+                                                                        }{' '}
+                                                                        ·{' '}
+                                                                        {
+                                                                            prog.name
+                                                                        }
+                                                                    </button>
+                                                                );
+                                                            },
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
 
                                         {!isProtected && (
                                             <div className="mt-4 flex justify-end gap-2">
@@ -3223,14 +3704,15 @@ export function AssignedRoles({
                         </div>
                     ) : (
                         <EmptyState>
-                            No users are available to manage.
+                            No users match your current filter.
                         </EmptyState>
                     )}
                 </div>
             )}
 
             <p className="mt-4 text-xs leading-5 text-[#7a8278]">
-                Role and permission changes are managed by an administrator.
+                Role and permission changes are managed by an administrator and
+                recorded in the system activity log.
             </p>
         </section>
     );
@@ -3506,65 +3988,71 @@ function SurveyResponseForm({
     return (
         <form
             onSubmit={submit}
-            className="mt-4 space-y-4 rounded-xl bg-[#f8f9f6] p-4"
+            className="mt-4 space-y-3.5 rounded-2xl bg-[#f3f6f2] p-4 sm:p-5"
         >
-            {survey.is_anonymous && (
-                <p className="rounded-lg border border-[#dce5d8] bg-[#edf2eb] px-3 py-2 text-[11px] font-medium text-[#2b5139]">
-                    Anonymous Survey: Your identity will be masked in survey
-                    summaries while recording your cohort participation.
-                </p>
-            )}
+            {/* Google Forms Respondent Header Card */}
+            <div className="rounded-xl border border-[#dce4d9] border-t-8 border-t-[#2b5139] bg-white p-4 shadow-2xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] font-semibold text-[#2b5139]">
+                        {survey.is_anonymous
+                            ? '🔒 Anonymous Form · Your name will not be shown in response summaries'
+                            : '📋 Institutional Tracer Form · 1 response per alumnus'}
+                    </span>
+                    <span className="text-[11px] font-medium text-[#b84a39]">
+                        * Indicates required question
+                    </span>
+                </div>
+            </div>
+
             {survey.questions.map((question, qIndex) => {
                 const value = answers[question.id];
-                const fieldClass =
-                    'mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs outline-none focus:border-[#819981]';
                 const qType = question.type;
 
-                if (qType === 'textarea' || qType === 'long_text') {
-                    return (
-                        <label
-                            key={question.id}
-                            className="block text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {qIndex + 1}. {question.prompt}
-                            {question.is_required ? ' *' : ''}
+                return (
+                    <div
+                        key={question.id}
+                        className="rounded-xl border border-[#dfe5dc] bg-white p-4 shadow-2xs sm:p-5"
+                    >
+                        <div className="mb-3 flex items-start justify-between gap-2">
+                            <p className="text-xs font-semibold text-[#233127] sm:text-sm">
+                                {qIndex + 1}. {question.prompt}
+                                {question.is_required && (
+                                    <span className="ml-1 text-[#c93b2b]">
+                                        *
+                                    </span>
+                                )}
+                            </p>
+                            <span className="shrink-0 rounded bg-[#f4f6f2] px-2 py-0.5 text-[10px] font-medium text-[#6f786e]">
+                                {QUESTION_TYPE_LABELS[qType] ?? qType}
+                            </span>
+                        </div>
+
+                        {(qType === 'textarea' || qType === 'long_text') && (
                             <textarea
                                 required={question.is_required}
                                 value={typeof value === 'string' ? value : ''}
+                                placeholder="Your answer"
                                 onChange={(event) =>
                                     updateAnswer(
                                         question.id,
                                         event.target.value,
                                     )
                                 }
-                                className="mt-1.5 min-h-24 w-full rounded-lg border border-[#e3e7df] bg-white p-3 text-xs outline-none focus:border-[#819981]"
+                                className="min-h-24 w-full border-b-2 border-[#dce2d9] bg-[#fafbf9] p-3 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139] focus:bg-white"
                             />
-                        </label>
-                    );
-                }
+                        )}
 
-                if (
-                    qType === 'radio' ||
-                    qType === 'multiple_choice' ||
-                    qType === 'choice'
-                ) {
-                    return (
-                        <fieldset
-                            key={question.id}
-                            className="space-y-2 text-xs text-[#4d5a4f]"
-                        >
-                            <legend className="mb-1.5 font-medium">
-                                {qIndex + 1}. {question.prompt}
-                                {question.is_required ? ' *' : ''}
-                            </legend>
-                            <div className="grid gap-2 sm:grid-cols-2">
+                        {(qType === 'radio' ||
+                            qType === 'multiple_choice' ||
+                            qType === 'choice') && (
+                            <div className="space-y-2">
                                 {(question.options ?? []).map((option) => (
                                     <label
                                         key={option}
-                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 transition ${
+                                        className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${
                                             value === option
                                                 ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                                : 'border-[#e3e7df] bg-white text-[#4d5a4f]'
+                                                : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
                                         }`}
                                     >
                                         <input
@@ -3578,32 +4066,58 @@ function SurveyResponseForm({
                                                     option,
                                                 )
                                             }
-                                            className="accent-[#2b5139]"
+                                            className="size-4 accent-[#2b5139]"
                                         />
                                         <span>{option}</span>
                                     </label>
                                 ))}
                             </div>
-                        </fieldset>
-                    );
-                }
+                        )}
 
-                if (
-                    qType === 'select' ||
-                    qType === 'dropdown' ||
-                    qType === 'rating'
-                ) {
-                    const options =
-                        qType === 'rating'
-                            ? ['1', '2', '3', '4', '5']
-                            : (question.options ?? []);
-                    return (
-                        <label
-                            key={question.id}
-                            className="block text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {qIndex + 1}. {question.prompt}
-                            {question.is_required ? ' *' : ''}
+                        {(qType === 'multiselect' || qType === 'checkbox') && (
+                            <div className="space-y-2">
+                                {(question.options ?? []).map((option) => {
+                                    const selected = Array.isArray(value)
+                                        ? (value as string[])
+                                        : [];
+                                    const isChecked = selected.includes(option);
+                                    return (
+                                        <label
+                                            key={option}
+                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${
+                                                isChecked
+                                                    ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                    : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
+                                            }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={isChecked}
+                                                onChange={(event) =>
+                                                    updateAnswer(
+                                                        question.id,
+                                                        event.target.checked
+                                                            ? [
+                                                                  ...selected,
+                                                                  option,
+                                                              ]
+                                                            : selected.filter(
+                                                                  (item) =>
+                                                                      item !==
+                                                                      option,
+                                                              ),
+                                                    )
+                                                }
+                                                className="size-4 accent-[#2b5139]"
+                                            />
+                                            <span>{option}</span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {(qType === 'select' || qType === 'dropdown') && (
                             <select
                                 required={question.is_required}
                                 value={
@@ -3614,107 +4128,98 @@ function SurveyResponseForm({
                                 onChange={(event) =>
                                     updateAnswer(
                                         question.id,
-                                        qType === 'rating'
-                                            ? Number(event.target.value)
-                                            : event.target.value,
+                                        event.target.value,
                                     )
                                 }
-                                className={fieldClass}
+                                className="h-10 w-full max-w-sm rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
                             >
-                                <option value="">Select an answer</option>
-                                {options.map((option) => (
+                                <option value="">Choose</option>
+                                {(question.options ?? []).map((option) => (
                                     <option key={option} value={option}>
                                         {option}
                                     </option>
                                 ))}
                             </select>
-                        </label>
-                    );
-                }
+                        )}
 
-                if (qType === 'multiselect' || qType === 'checkbox') {
-                    const selected = Array.isArray(value)
-                        ? (value as string[])
-                        : [];
-                    return (
-                        <fieldset
-                            key={question.id}
-                            className="space-y-2 text-xs text-[#4d5a4f]"
-                        >
-                            <legend className="mb-1.5 font-medium">
-                                {qIndex + 1}. {question.prompt}
-                                {question.is_required ? ' *' : ''}
-                            </legend>
-                            <div className="grid gap-2 sm:grid-cols-2">
-                                {(question.options ?? []).map((option) => (
+                        {qType === 'rating' && (
+                            <div className="py-2">
+                                <div className="flex items-center justify-between gap-2 sm:max-w-md">
+                                    <span className="text-[11px] text-[#7a8278]">
+                                        1 (Lowest)
+                                    </span>
+                                    <div className="flex items-center gap-3 sm:gap-5">
+                                        {[1, 2, 3, 4, 5].map((score) => {
+                                            const active =
+                                                Number(value) === score;
+                                            return (
+                                                <label
+                                                    key={score}
+                                                    className="flex cursor-pointer flex-col items-center gap-1.5"
+                                                >
+                                                    <span className="text-xs font-semibold text-[#4d5a4f]">
+                                                        {score}
+                                                    </span>
+                                                    <input
+                                                        type="radio"
+                                                        name={`question-${question.id}`}
+                                                        required={
+                                                            question.is_required
+                                                        }
+                                                        checked={active}
+                                                        onChange={() =>
+                                                            updateAnswer(
+                                                                question.id,
+                                                                score,
+                                                            )
+                                                        }
+                                                        className="size-4 accent-[#2b5139]"
+                                                    />
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                    <span className="text-[11px] text-[#7a8278]">
+                                        5 (Highest)
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {(qType === 'boolean' || qType === 'yes_no') && (
+                            <div className="flex gap-3">
+                                {[
+                                    { label: 'Yes', val: true },
+                                    { label: 'No', val: false },
+                                ].map((item) => (
                                     <label
-                                        key={option}
-                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#e3e7df] bg-white px-3 py-2"
+                                        key={item.label}
+                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-4 py-2 text-xs transition ${
+                                            value === item.val
+                                                ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                : 'border-[#e8ece5] bg-white text-[#3d4a3f]'
+                                        }`}
                                     >
                                         <input
-                                            type="checkbox"
-                                            checked={selected.includes(option)}
-                                            onChange={(event) =>
+                                            type="radio"
+                                            name={`question-${question.id}`}
+                                            required={question.is_required}
+                                            checked={value === item.val}
+                                            onChange={() =>
                                                 updateAnswer(
                                                     question.id,
-                                                    event.target.checked
-                                                        ? [...selected, option]
-                                                        : selected.filter(
-                                                              (item) =>
-                                                                  item !==
-                                                                  option,
-                                                          ),
+                                                    item.val,
                                                 )
                                             }
-                                            className="accent-[#2b5139]"
+                                            className="size-4 accent-[#2b5139]"
                                         />
-                                        <span>{option}</span>
+                                        <span>{item.label}</span>
                                     </label>
                                 ))}
                             </div>
-                        </fieldset>
-                    );
-                }
+                        )}
 
-                if (qType === 'boolean' || qType === 'yes_no') {
-                    return (
-                        <label
-                            key={question.id}
-                            className="block text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {qIndex + 1}. {question.prompt}
-                            {question.is_required ? ' *' : ''}
-                            <select
-                                required={question.is_required}
-                                value={
-                                    typeof value === 'boolean'
-                                        ? String(value)
-                                        : ''
-                                }
-                                onChange={(event) =>
-                                    updateAnswer(
-                                        question.id,
-                                        event.target.value === 'true',
-                                    )
-                                }
-                                className={fieldClass}
-                            >
-                                <option value="">Select an answer</option>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                        </label>
-                    );
-                }
-
-                if (qType === 'date') {
-                    return (
-                        <label
-                            key={question.id}
-                            className="block text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {qIndex + 1}. {question.prompt}
-                            {question.is_required ? ' *' : ''}
+                        {qType === 'date' && (
                             <input
                                 type="date"
                                 required={question.is_required}
@@ -3725,50 +4230,54 @@ function SurveyResponseForm({
                                         event.target.value,
                                     )
                                 }
-                                className={fieldClass}
+                                className="h-10 w-full max-w-xs rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
                             />
-                        </label>
-                    );
-                }
+                        )}
 
-                return (
-                    <label
-                        key={question.id}
-                        className="block text-xs font-medium text-[#4d5a4f]"
-                    >
-                        {qIndex + 1}. {question.prompt}
-                        {question.is_required ? ' *' : ''}
-                        <input
-                            type={qType === 'number' ? 'number' : 'text'}
-                            required={question.is_required}
-                            value={
-                                typeof value === 'string' ||
-                                typeof value === 'number'
-                                    ? value
-                                    : ''
-                            }
-                            onChange={(event) =>
-                                updateAnswer(
-                                    question.id,
-                                    qType === 'number'
-                                        ? event.target.value === ''
-                                            ? ''
-                                            : Number(event.target.value)
-                                        : event.target.value,
-                                )
-                            }
-                            className={fieldClass}
-                        />
-                    </label>
+                        {(qType === 'text' ||
+                            qType === 'short_text' ||
+                            qType === 'number') && (
+                            <input
+                                type={qType === 'number' ? 'number' : 'text'}
+                                required={question.is_required}
+                                placeholder="Your answer"
+                                value={
+                                    typeof value === 'string' ||
+                                    typeof value === 'number'
+                                        ? value
+                                        : ''
+                                }
+                                onChange={(event) =>
+                                    updateAnswer(
+                                        question.id,
+                                        qType === 'number'
+                                            ? event.target.value === ''
+                                                ? ''
+                                                : Number(event.target.value)
+                                            : event.target.value,
+                                    )
+                                }
+                                className="h-10 w-full max-w-md border-b-2 border-[#dce2d9] bg-transparent px-1 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139]"
+                            />
+                        )}
+                    </div>
                 );
             })}
-            <div className="flex justify-end">
+
+            <div className="flex items-center justify-between pt-1">
                 <button
                     type="submit"
                     disabled={saving}
-                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
+                    className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
                 >
-                    {saving ? 'Submitting…' : 'Submit response'}
+                    {saving ? 'Submitting…' : 'Submit'}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setAnswers({})}
+                    className="text-xs font-semibold text-[#2b5139] hover:underline"
+                >
+                    Clear form
                 </button>
             </div>
         </form>
@@ -3779,6 +4288,7 @@ type QuestionDraft = {
     prompt: string;
     type: string;
     options: string;
+    optionsList: string[];
     is_required: boolean;
 };
 
@@ -3834,6 +4344,10 @@ export function SurveyCenter({
         canManage ? '/api/programs' : null,
     );
 
+    const [builderTab, setBuilderTab] = useState<
+        'questions' | 'settings' | 'preview'
+    >('questions');
+    const [activeQuestionIdx, setActiveQuestionIdx] = useState<number>(0);
     const [editingSurveyId, setEditingSurveyId] = useState<number | null>(null);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -3852,8 +4366,9 @@ export function SurveyCenter({
     const [questions, setQuestions] = useState<QuestionDraft[]>([
         {
             prompt: '',
-            type: 'text',
-            options: '',
+            type: 'radio',
+            options: 'Option 1, Option 2',
+            optionsList: ['Option 1', 'Option 2'],
             is_required: true,
         },
     ]);
@@ -3869,6 +4384,8 @@ export function SurveyCenter({
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
     function resetBuilder() {
+        setBuilderTab('questions');
+        setActiveQuestionIdx(0);
         setEditingSurveyId(null);
         setTitle('');
         setDescription('');
@@ -3883,14 +4400,17 @@ export function SurveyCenter({
         setQuestions([
             {
                 prompt: '',
-                type: 'text',
-                options: '',
+                type: 'radio',
+                options: 'Option 1, Option 2',
+                optionsList: ['Option 1', 'Option 2'],
                 is_required: true,
             },
         ]);
     }
 
     function openEditSurvey(survey: Survey) {
+        setBuilderTab('questions');
+        setActiveQuestionIdx(0);
         setEditingSurveyId(survey.id);
         setTitle(survey.title);
         setDescription(survey.description ?? '');
@@ -3908,17 +4428,25 @@ export function SurveyCenter({
         setTargetGraduationYears(survey.target_graduation_years ?? []);
         setQuestions(
             survey.questions.length
-                ? survey.questions.map((q) => ({
-                      prompt: q.prompt,
-                      type: q.type,
-                      options: (q.options ?? []).join(', '),
-                      is_required: q.is_required,
-                  }))
+                ? survey.questions.map((q) => {
+                      const list =
+                          q.options && q.options.length
+                              ? [...q.options]
+                              : ['Option 1'];
+                      return {
+                          prompt: q.prompt,
+                          type: q.type,
+                          options: list.join(', '),
+                          optionsList: list,
+                          is_required: q.is_required,
+                      };
+                  })
                 : [
                       {
                           prompt: '',
-                          type: 'text',
-                          options: '',
+                          type: 'radio',
+                          options: 'Option 1, Option 2',
+                          optionsList: ['Option 1', 'Option 2'],
                           is_required: true,
                       },
                   ],
@@ -3927,22 +4455,109 @@ export function SurveyCenter({
 
     function updateQuestion(index: number, patch: Partial<QuestionDraft>) {
         setQuestions((current) =>
-            current.map((item, idx) =>
-                idx === index ? { ...item, ...patch } : item,
-            ),
+            current.map((item, idx) => {
+                if (idx !== index) return item;
+                const updated = { ...item, ...patch };
+                if (
+                    patch.type &&
+                    requiresQuestionOptions(patch.type) &&
+                    updated.optionsList.length === 0
+                ) {
+                    updated.optionsList = ['Option 1'];
+                    updated.options = 'Option 1';
+                }
+                return updated;
+            }),
+        );
+    }
+
+    function updateQuestionOptionItem(
+        questionIndex: number,
+        optionIndex: number,
+        value: string,
+    ) {
+        setQuestions((current) =>
+            current.map((item, idx) => {
+                if (idx !== questionIndex) return item;
+                const nextList = item.optionsList.map((opt, oIdx) =>
+                    oIdx === optionIndex ? value : opt,
+                );
+                return {
+                    ...item,
+                    optionsList: nextList,
+                    options: nextList.join(', '),
+                };
+            }),
+        );
+    }
+
+    function addQuestionOptionItem(questionIndex: number) {
+        setQuestions((current) =>
+            current.map((item, idx) => {
+                if (idx !== questionIndex) return item;
+                const nextList = [
+                    ...item.optionsList,
+                    `Option ${item.optionsList.length + 1}`,
+                ];
+                return {
+                    ...item,
+                    optionsList: nextList,
+                    options: nextList.join(', '),
+                };
+            }),
+        );
+    }
+
+    function removeQuestionOptionItem(
+        questionIndex: number,
+        optionIndex: number,
+    ) {
+        setQuestions((current) =>
+            current.map((item, idx) => {
+                if (idx !== questionIndex || item.optionsList.length <= 1) {
+                    return item;
+                }
+                const nextList = item.optionsList.filter(
+                    (_, oIdx) => oIdx !== optionIndex,
+                );
+                return {
+                    ...item,
+                    optionsList: nextList,
+                    options: nextList.join(', '),
+                };
+            }),
         );
     }
 
     function addQuestion() {
-        setQuestions((current) => [
-            ...current,
-            {
-                prompt: '',
-                type: 'text',
-                options: '',
-                is_required: true,
-            },
-        ]);
+        setQuestions((current) => {
+            const next = [
+                ...current,
+                {
+                    prompt: '',
+                    type: 'radio',
+                    options: 'Option 1, Option 2',
+                    optionsList: ['Option 1', 'Option 2'],
+                    is_required: true,
+                },
+            ];
+            setActiveQuestionIdx(next.length - 1);
+            return next;
+        });
+    }
+
+    function duplicateQuestion(index: number) {
+        setQuestions((current) => {
+            const copy = [...current];
+            const source = current[index];
+            const clone: QuestionDraft = {
+                ...source,
+                optionsList: [...source.optionsList],
+            };
+            copy.splice(index + 1, 0, clone);
+            setActiveQuestionIdx(index + 1);
+            return copy;
+        });
     }
 
     function removeQuestion(index: number) {
@@ -3962,6 +4577,7 @@ export function SurveyCenter({
             const copy = [...current];
             const [item] = copy.splice(index, 1);
             copy.splice(nextIndex, 0, item);
+            setActiveQuestionIdx(nextIndex);
             return copy;
         });
     }
@@ -3991,10 +4607,14 @@ export function SurveyCenter({
         setCreating(true);
 
         const formattedQuestions = questions.map((q, index) => {
-            const parsedOptions = q.options
+            const fromList = q.optionsList
+                .map((opt) => opt.trim())
+                .filter(Boolean);
+            const fromString = q.options
                 .split(',')
                 .map((opt) => opt.trim())
                 .filter(Boolean);
+            const parsedOptions = fromList.length ? fromList : fromString;
 
             return {
                 prompt: q.prompt,
@@ -4134,30 +4754,81 @@ export function SurveyCenter({
             {builderVisible ? (
                 <form
                     onSubmit={saveSurvey}
-                    className="space-y-5 rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6"
+                    className="mx-auto max-w-4xl space-y-4 rounded-2xl border border-[#dfe5dc] bg-[#f1f4ef] p-4 sm:p-6"
                 >
-                    <div className="flex items-center justify-between border-b border-[#eff0ec] pb-3">
-                        <div>
-                            <h2 className="text-sm font-semibold text-[#29382e]">
-                                {editingSurveyId !== null
-                                    ? 'Edit Tracer Survey'
-                                    : 'Visual Survey Builder & Cohort Targeting'}
-                            </h2>
-                            <p className="mt-0.5 text-xs text-[#7a8278]">
-                                Configure questions across 9 input formats and
-                                target specific graduating cohorts or academic
-                                programs.
-                            </p>
+                    {/* Google Forms Top Navigation Bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e2e7df] bg-white px-4 py-2.5 shadow-2xs">
+                        <div className="flex items-center gap-2.5">
+                            <span className="grid size-8 place-items-center rounded-lg bg-[#2b5139] text-xs font-bold text-white">
+                                GF
+                            </span>
+                            <div>
+                                <p className="text-xs font-bold text-[#29382e]">
+                                    {title.trim() || 'Untitled Tracer Form'}
+                                </p>
+                                <p className="text-[10px] text-[#7a8278]">
+                                    {editingSurveyId !== null
+                                        ? 'Editing Draft Form'
+                                        : 'Google Forms-Style Survey Builder'}{' '}
+                                    · {questions.length}{' '}
+                                    {questions.length === 1
+                                        ? 'Question'
+                                        : 'Questions'}
+                                </p>
+                            </div>
                         </div>
-                        <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-bold text-[#2b5139] uppercase">
-                            {questions.length}{' '}
-                            {questions.length === 1 ? 'Question' : 'Questions'}
-                        </span>
+
+                        <div className="flex items-center gap-1 rounded-lg bg-[#f3f5f1] p-1">
+                            {(
+                                [
+                                    ['questions', 'Questions'],
+                                    ['settings', 'Settings & Cohorts'],
+                                    ['preview', 'Preview Form'],
+                                ] as const
+                            ).map(([tabKey, tabLabel]) => (
+                                <button
+                                    key={tabKey}
+                                    type="button"
+                                    onClick={() => setBuilderTab(tabKey)}
+                                    className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                                        builderTab === tabKey
+                                            ? 'bg-white text-[#2b5139] shadow-2xs'
+                                            : 'text-[#626c61] hover:text-[#29382e]'
+                                    }`}
+                                >
+                                    {tabLabel}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    resetBuilder();
+                                    onCloseCreate();
+                                }}
+                                className="h-8 rounded-lg border border-[#e3e7df] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={creating}
+                                className="h-8 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#21402c] disabled:opacity-60"
+                            >
+                                {creating
+                                    ? 'Saving…'
+                                    : editingSurveyId !== null
+                                      ? 'Save changes'
+                                      : 'Create survey'}
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Survey Metadata & Schedule */}
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                    {/* Google Forms Header Card (Always mounted for form validation) */}
+                    <div className="rounded-xl border border-[#dce3d9] border-t-8 border-t-[#2b5139] bg-white p-5 shadow-2xs">
+                        <label className="block text-[11px] font-semibold tracking-wider text-[#667367] uppercase">
                             Survey title
                             <input
                                 required
@@ -4165,79 +4836,98 @@ export function SurveyCenter({
                                 onChange={(event) =>
                                     setTitle(event.target.value)
                                 }
-                                placeholder="e.g., 2026 Graduate Employment & Curriculum Tracer"
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                placeholder="Untitled Tracer Survey"
+                                className="mt-1 w-full border-b-2 border-[#e3e7df] bg-transparent pb-2 text-lg font-bold text-[#233127] transition outline-none focus:border-[#2b5139]"
                             />
                         </label>
-                        <label className="text-xs font-medium text-[#4d5a4f]">
-                            Opens on (optional)
-                            <input
-                                type="date"
-                                value={startsAt}
-                                onChange={(event) =>
-                                    setStartsAt(event.target.value)
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                            />
-                        </label>
-                        <label className="text-xs font-medium text-[#4d5a4f]">
-                            Closes on
-                            <input
-                                type="date"
-                                value={closesAt}
-                                onChange={(event) =>
-                                    setClosesAt(event.target.value)
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                            />
-                        </label>
-                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-4">
-                            Description
+                        <label className="mt-3 block text-[11px] font-medium text-[#667367]">
+                            Form description
                             <textarea
                                 value={description}
                                 onChange={(event) =>
                                     setDescription(event.target.value)
                                 }
-                                placeholder="Explain the purpose of this survey to alumni respondents…"
-                                className="mt-1.5 min-h-16 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                                rows={2}
+                                placeholder="Form description (explain the purpose of this survey to alumni respondents)…"
+                                className="mt-1 w-full border-b border-[#e5e9e2] bg-transparent pb-1.5 text-xs text-[#4d5a4f] transition outline-none focus:border-[#2b5139]"
                             />
                         </label>
                     </div>
 
-                    {/* Privacy & Cohort Targeting */}
-                    <div className="space-y-4 rounded-xl border border-[#e5e9e2] bg-[#f9faf7] p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#3b4a3e]">
-                                <input
-                                    type="checkbox"
-                                    checked={isAnonymous}
-                                    onChange={(e) =>
-                                        setIsAnonymous(e.target.checked)
-                                    }
-                                    className="size-4 accent-[#2b5139]"
-                                />
-                                <span>
-                                    Collect anonymous responses (mask respondent
-                                    names in summaries)
-                                </span>
-                            </label>
+                    {/* Settings & Cohort Targeting Card */}
+                    <div
+                        className={`space-y-4 rounded-xl border border-[#dce3d9] bg-white p-5 shadow-2xs ${
+                            builderTab === 'preview' ? 'hidden' : ''
+                        }`}
+                    >
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff1ed] pb-3">
+                            <div>
+                                <h3 className="text-xs font-bold tracking-wider text-[#2b5139] uppercase">
+                                    Schedule, Privacy & Cohort Targeting
+                                </h3>
+                                <p className="text-[11px] text-[#758074]">
+                                    Configure opening/closing dates, anonymous
+                                    mode, and target graduation batches or
+                                    programs.
+                                </p>
+                            </div>
+                        </div>
 
-                            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#2b5139]">
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Opens on (optional)
                                 <input
-                                    type="checkbox"
-                                    checked={targetSpecificCohorts}
-                                    onChange={(e) =>
-                                        setTargetSpecificCohorts(
-                                            e.target.checked,
-                                        )
+                                    type="date"
+                                    value={startsAt}
+                                    onChange={(event) =>
+                                        setStartsAt(event.target.value)
                                     }
-                                    className="size-4 accent-[#2b5139]"
+                                    className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
                                 />
-                                <span>
-                                    Target specific departments, programs, or
-                                    graduating batches
-                                </span>
                             </label>
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Closes on
+                                <input
+                                    type="date"
+                                    value={closesAt}
+                                    onChange={(event) =>
+                                        setClosesAt(event.target.value)
+                                    }
+                                    className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                />
+                            </label>
+                            <div className="flex flex-col justify-end gap-2 sm:col-span-2">
+                                <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#3b4a3e]">
+                                    <input
+                                        type="checkbox"
+                                        checked={isAnonymous}
+                                        onChange={(e) =>
+                                            setIsAnonymous(e.target.checked)
+                                        }
+                                        className="size-4 accent-[#2b5139]"
+                                    />
+                                    <span>
+                                        Collect anonymous responses (mask
+                                        respondent names in summaries)
+                                    </span>
+                                </label>
+                                <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#2b5139]">
+                                    <input
+                                        type="checkbox"
+                                        checked={targetSpecificCohorts}
+                                        onChange={(e) =>
+                                            setTargetSpecificCohorts(
+                                                e.target.checked,
+                                            )
+                                        }
+                                        className="size-4 accent-[#2b5139]"
+                                    />
+                                    <span>
+                                        Target specific departments, programs,
+                                        or graduating batches
+                                    </span>
+                                </label>
+                            </div>
                         </div>
 
                         {targetSpecificCohorts && (
@@ -4270,7 +4960,7 @@ export function SurveyCenter({
                                                     className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
                                                         active
                                                             ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-white text-[#536055]'
+                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
                                                     }`}
                                                 >
                                                     {dept.code} · {dept.name}
@@ -4308,7 +4998,7 @@ export function SurveyCenter({
                                                     className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
                                                         active
                                                             ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-white text-[#536055]'
+                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
                                                     }`}
                                                 >
                                                     {prog.code}
@@ -4353,7 +5043,7 @@ export function SurveyCenter({
                                                         className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
                                                             active
                                                                 ? 'bg-[#2b5139] text-white'
-                                                                : 'border border-[#dce2d9] bg-white text-[#536055]'
+                                                                : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
                                                         }`}
                                                     >
                                                         {yr}
@@ -4388,166 +5078,381 @@ export function SurveyCenter({
                         )}
                     </div>
 
-                    {/* Dynamic Question Engine Builder */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-xs font-bold tracking-wider text-[#5f6c60] uppercase">
-                                Survey Questions
-                            </h3>
-                            <button
-                                type="button"
-                                onClick={addQuestion}
-                                className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#cfe0cc] bg-[#edf2eb] px-3 text-xs font-semibold text-[#2b5139] hover:bg-[#e1ebe0]"
-                            >
-                                + Add question
-                            </button>
+                    {/* Google Forms Live Preview Mode */}
+                    {builderTab === 'preview' && (
+                        <div className="space-y-3 rounded-xl border border-[#dce3d9] bg-white p-5">
+                            <div className="flex items-center justify-between border-b border-[#eff1ed] pb-3">
+                                <span className="text-xs font-bold text-[#2b5139] uppercase">
+                                    Live Respondent Form Preview
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setBuilderTab('questions')}
+                                    className="text-xs font-semibold text-[#2b5139] hover:underline"
+                                >
+                                    ← Back to editing questions
+                                </button>
+                            </div>
+                            {questions.map((q, qIdx) => (
+                                <div
+                                    key={qIdx}
+                                    className="rounded-xl border border-[#e3e7df] bg-[#fafbf9] p-4"
+                                >
+                                    <p className="text-xs font-semibold text-[#233127]">
+                                        {qIdx + 1}.{' '}
+                                        {q.prompt || 'Untitled Question'}
+                                        {q.is_required && (
+                                            <span className="ml-1 text-[#c93b2b]">
+                                                *
+                                            </span>
+                                        )}
+                                    </p>
+                                    <p className="mt-1 text-[11px] text-[#7a8278]">
+                                        Format:{' '}
+                                        {QUESTION_TYPE_LABELS[q.type] ?? q.type}
+                                        {requiresQuestionOptions(q.type)
+                                            ? ` · Choices: ${q.optionsList.join(', ')}`
+                                            : ''}
+                                    </p>
+                                </div>
+                            ))}
                         </div>
+                    )}
 
-                        {questions.map((question, index) => (
-                            <div
-                                key={index}
-                                className="rounded-xl border border-[#e3e7df] bg-[#fcfcfa] p-4"
-                            >
-                                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                                    <span className="text-xs font-bold text-[#2b5139]">
-                                        Question #{index + 1}
-                                    </span>
-                                    <div className="flex items-center gap-2">
-                                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-[#536055]">
+                    {/* Google Forms Question Cards Stream */}
+                    <div
+                        className={`space-y-3.5 ${
+                            builderTab === 'preview' ? 'hidden' : ''
+                        }`}
+                    >
+                        {questions.map((question, index) => {
+                            const isFocused = activeQuestionIdx === index;
+                            const isChoice = requiresQuestionOptions(
+                                question.type,
+                            );
+
+                            return (
+                                <div
+                                    key={index}
+                                    onClick={() => setActiveQuestionIdx(index)}
+                                    className={`rounded-xl border bg-white p-5 shadow-2xs transition ${
+                                        isFocused
+                                            ? 'border-[#cad5c6] border-l-4 border-l-[#2b5139]'
+                                            : 'border-[#e3e7df]'
+                                    }`}
+                                >
+                                    <div className="grid gap-3 sm:grid-cols-[1fr_230px]">
+                                        <label className="text-xs font-medium text-[#4d5a4f]">
+                                            {index === 0
+                                                ? 'First question'
+                                                : `Question #${index + 1}`}
                                             <input
-                                                type="checkbox"
-                                                checked={question.is_required}
-                                                onChange={(e) =>
+                                                required
+                                                value={question.prompt}
+                                                onChange={(event) =>
                                                     updateQuestion(index, {
-                                                        is_required:
-                                                            e.target.checked,
+                                                        prompt: event.target
+                                                            .value,
                                                     })
                                                 }
-                                                className="accent-[#2b5139]"
+                                                placeholder="Question"
+                                                className="mt-1.5 h-11 w-full rounded-t-lg border-b-2 border-[#d5ddd2] bg-[#f8faf7] px-3.5 text-sm font-medium text-[#233127] transition outline-none focus:border-[#2b5139] focus:bg-[#f1f5ef]"
                                             />
-                                            Required
                                         </label>
-                                        <button
-                                            type="button"
-                                            disabled={index === 0}
-                                            onClick={() =>
-                                                moveQuestion(index, -1)
-                                            }
-                                            className="rounded border border-[#e3e7df] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#536055] disabled:opacity-40"
-                                        >
-                                            ↑
-                                        </button>
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                index === questions.length - 1
-                                            }
-                                            onClick={() =>
-                                                moveQuestion(index, 1)
-                                            }
-                                            className="rounded border border-[#e3e7df] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#536055] disabled:opacity-40"
-                                        >
-                                            ↓
-                                        </button>
-                                        {questions.length > 1 && (
+
+                                        <label className="text-xs font-medium text-[#4d5a4f]">
+                                            Question type
+                                            <select
+                                                value={question.type}
+                                                onChange={(event) =>
+                                                    updateQuestion(index, {
+                                                        type: event.target
+                                                            .value,
+                                                    })
+                                                }
+                                                className="mt-1.5 h-11 w-full rounded-lg border border-[#d5ddd2] bg-white px-3 text-xs font-semibold text-[#29382e] outline-none focus:border-[#2b5139]"
+                                            >
+                                                {BUILDER_QUESTION_TYPES.map(
+                                                    (typeOption) => (
+                                                        <option
+                                                            key={
+                                                                typeOption.value
+                                                            }
+                                                            value={
+                                                                typeOption.value
+                                                            }
+                                                        >
+                                                            {typeOption.label}
+                                                        </option>
+                                                    ),
+                                                )}
+                                            </select>
+                                        </label>
+                                    </div>
+
+                                    {/* Google Forms Interactive Answer Area */}
+                                    <div className="mt-4">
+                                        {isChoice ? (
+                                            <div className="space-y-2">
+                                                {question.optionsList.map(
+                                                    (optVal, optIdx) => (
+                                                        <div
+                                                            key={optIdx}
+                                                            className="flex items-center gap-2.5"
+                                                        >
+                                                            <span className="w-5 text-center text-xs font-bold text-[#838c81]">
+                                                                {question.type ===
+                                                                'radio'
+                                                                    ? '○'
+                                                                    : question.type ===
+                                                                        'multiselect'
+                                                                      ? '☐'
+                                                                      : `${optIdx + 1}.`}
+                                                            </span>
+                                                            <input
+                                                                type="text"
+                                                                required
+                                                                value={optVal}
+                                                                onChange={(e) =>
+                                                                    updateQuestionOptionItem(
+                                                                        index,
+                                                                        optIdx,
+                                                                        e.target
+                                                                            .value,
+                                                                    )
+                                                                }
+                                                                placeholder={`Option ${optIdx + 1}`}
+                                                                className="h-9 flex-1 border-b border-transparent bg-transparent px-1 text-xs text-[#29382e] transition outline-none hover:border-[#dce2d9] focus:border-b-2 focus:border-[#2b5139]"
+                                                            />
+                                                            {question
+                                                                .optionsList
+                                                                .length > 1 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        removeQuestionOptionItem(
+                                                                            index,
+                                                                            optIdx,
+                                                                        )
+                                                                    }
+                                                                    title="Remove option"
+                                                                    className="rounded p-1 text-xs text-[#8a9289] hover:bg-[#f2f4f0] hover:text-[#8b4e43]"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ),
+                                                )}
+
+                                                <div className="flex flex-wrap items-center gap-3 pt-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            addQuestionOptionItem(
+                                                                index,
+                                                            )
+                                                        }
+                                                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2b5139] hover:underline"
+                                                    >
+                                                        <span>
+                                                            {question.type ===
+                                                            'radio'
+                                                                ? '○'
+                                                                : question.type ===
+                                                                    'multiselect'
+                                                                  ? '☐'
+                                                                  : '+'}
+                                                        </span>
+                                                        <span>Add option</span>
+                                                    </button>
+                                                </div>
+
+                                                <label className="mt-2 block text-[11px] font-medium text-[#7a8278]">
+                                                    Answer choices (comma
+                                                    separated quick-fill)
+                                                    <input
+                                                        value={question.options}
+                                                        onChange={(event) => {
+                                                            const raw =
+                                                                event.target
+                                                                    .value;
+                                                            const split = raw
+                                                                .split(',')
+                                                                .map((s) =>
+                                                                    s.trim(),
+                                                                )
+                                                                .filter(
+                                                                    Boolean,
+                                                                );
+                                                            updateQuestion(
+                                                                index,
+                                                                {
+                                                                    options:
+                                                                        raw,
+                                                                    optionsList:
+                                                                        split.length
+                                                                            ? split
+                                                                            : [
+                                                                                  '',
+                                                                              ],
+                                                                },
+                                                            );
+                                                        }}
+                                                        placeholder="e.g., Very Relevant, Moderately Relevant, Not Relevant"
+                                                        className="mt-1 h-8 w-full rounded-lg border border-[#e6eae3] bg-[#fafbf9] px-2.5 text-[11px] text-[#4d5a4f]"
+                                                    />
+                                                </label>
+                                            </div>
+                                        ) : question.type === 'text' ? (
+                                            <div className="max-w-xs border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                Short answer text
+                                            </div>
+                                        ) : question.type === 'textarea' ? (
+                                            <div className="max-w-lg border-b border-dotted border-[#b8c2b6] pb-4 text-xs text-[#8a9289]">
+                                                Long answer paragraph text
+                                            </div>
+                                        ) : question.type === 'rating' ? (
+                                            <div className="flex items-center gap-4 py-1 text-xs text-[#687267]">
+                                                <span>Linear scale:</span>
+                                                {[1, 2, 3, 4, 5].map((n) => (
+                                                    <span
+                                                        key={n}
+                                                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#d5ddd2] bg-[#fafbf9] font-semibold"
+                                                    >
+                                                        {n}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : question.type === 'boolean' ? (
+                                            <div className="flex gap-3 text-xs text-[#687267]">
+                                                <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
+                                                    ○ Yes
+                                                </span>
+                                                <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
+                                                    ○ No
+                                                </span>
+                                            </div>
+                                        ) : question.type === 'date' ? (
+                                            <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                Month, day, year 📅
+                                            </div>
+                                        ) : (
+                                            <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                Numeric value (0–9)
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Google Forms Bottom Card Action Toolbar */}
+                                    <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[#eff1ed] pt-3">
+                                        <span className="text-[11px] font-medium text-[#7a8278]">
+                                            Question {index + 1} of{' '}
+                                            {questions.length}
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                disabled={index === 0}
+                                                onClick={() =>
+                                                    moveQuestion(index, -1)
+                                                }
+                                                title="Move question up"
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
+                                            >
+                                                ↑
+                                            </button>
+                                            <button
+                                                type="button"
+                                                disabled={
+                                                    index ===
+                                                    questions.length - 1
+                                                }
+                                                onClick={() =>
+                                                    moveQuestion(index, 1)
+                                                }
+                                                title="Move question down"
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
+                                            >
+                                                ↓
+                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    removeQuestion(index)
+                                                    duplicateQuestion(index)
                                                 }
-                                                className="rounded border border-[#ecd8d2] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#8b4e43]"
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4d5a4f] hover:bg-[#f4f6f2]"
                                             >
-                                                Remove
+                                                Duplicate
                                             </button>
-                                        )}
+                                            {questions.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        removeQuestion(index)
+                                                    }
+                                                    className="rounded-lg border border-[#ecd8d2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#fcf5f3]"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
+                                            <div className="mx-1 h-4 w-px bg-[#e3e7df]" />
+                                            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#4d5a4f]">
+                                                <span>Required</span>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={
+                                                        question.is_required
+                                                    }
+                                                    onChange={(e) =>
+                                                        updateQuestion(index, {
+                                                            is_required:
+                                                                e.target
+                                                                    .checked,
+                                                        })
+                                                    }
+                                                    className="size-4 accent-[#2b5139]"
+                                                />
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
+                            );
+                        })}
 
-                                <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
-                                    <label className="text-xs font-medium text-[#4d5a4f]">
-                                        {index === 0
-                                            ? 'First question'
-                                            : 'Question prompt'}
-                                        <input
-                                            required
-                                            value={question.prompt}
-                                            onChange={(event) =>
-                                                updateQuestion(index, {
-                                                    prompt: event.target.value,
-                                                })
-                                            }
-                                            placeholder="Enter question prompt…"
-                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                                        />
-                                    </label>
-
-                                    <label className="text-xs font-medium text-[#4d5a4f]">
-                                        Question type
-                                        <select
-                                            value={question.type}
-                                            onChange={(event) =>
-                                                updateQuestion(index, {
-                                                    type: event.target.value,
-                                                })
-                                            }
-                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                                        >
-                                            {BUILDER_QUESTION_TYPES.map(
-                                                (typeOption) => (
-                                                    <option
-                                                        key={typeOption.value}
-                                                        value={typeOption.value}
-                                                    >
-                                                        {typeOption.label}
-                                                    </option>
-                                                ),
-                                            )}
-                                        </select>
-                                    </label>
-                                </div>
-
-                                {requiresQuestionOptions(question.type) && (
-                                    <label className="mt-3 block text-xs font-medium text-[#4d5a4f]">
-                                        Answer choices (comma separated)
-                                        <input
-                                            required
-                                            value={question.options}
-                                            onChange={(event) =>
-                                                updateQuestion(index, {
-                                                    options: event.target.value,
-                                                })
-                                            }
-                                            placeholder="e.g., Very Relevant, Moderately Relevant, Not Relevant"
-                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                                        />
-                                    </label>
-                                )}
+                        {/* Google Forms Floating-Style Bottom Add Bar */}
+                        <div className="flex items-center justify-between rounded-xl border border-[#dce3d9] bg-white px-4 py-3 shadow-2xs">
+                            <button
+                                type="button"
+                                onClick={addQuestion}
+                                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#edf2eb] px-4 text-xs font-bold text-[#2b5139] transition hover:bg-[#dfe8dc]"
+                            >
+                                ⊕ Add question
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        resetBuilder();
+                                        onCloseCreate();
+                                    }}
+                                    className="h-9 rounded-lg border border-[#e3e7df] px-3 text-xs font-medium text-[#687267]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={creating}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
+                                >
+                                    {creating
+                                        ? 'Saving…'
+                                        : editingSurveyId !== null
+                                          ? 'Save changes'
+                                          : 'Create survey'}
+                                </button>
                             </div>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 border-t border-[#eff0ec] pt-4">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                resetBuilder();
-                                onCloseCreate();
-                            }}
-                            className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={creating}
-                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                            {creating
-                                ? 'Saving…'
-                                : editingSurveyId !== null
-                                  ? 'Save changes'
-                                  : 'Create survey'}
-                        </button>
+                        </div>
                     </div>
                 </form>
             ) : null}

@@ -43,6 +43,16 @@ class HandleInertiaRequests extends Middleware
                     ? [
                         ...$request->user()->toArray(),
                         'roles' => $request->user()->roles()->orderBy('name')->pluck('name')->all(),
+                        'assigned_programs' => $request->user()
+                            ->assignedPrograms()
+                            ->orderBy('code')
+                            ->get(['academic_programs.id', 'academic_programs.code', 'academic_programs.name'])
+                            ->map(fn ($program) => [
+                                'id' => $program->id,
+                                'code' => $program->code,
+                                'name' => $program->name,
+                            ])
+                            ->all(),
                     ]
                     : null,
             ],

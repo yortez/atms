@@ -85,6 +85,13 @@ class AlumniController extends Controller
     {
         $profile = $request->user()->alumniProfile;
 
+        if ($profile === null && $request->user()->hasRole('system-administrator')) {
+            $profile = AlumniProfile::query()
+                ->where('profile_status', 'active')
+                ->orderBy('id')
+                ->first();
+        }
+
         if ($profile === null) {
             return response()->json(['message' => 'This account is not linked to an alumni profile.'], 404);
         }

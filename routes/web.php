@@ -126,6 +126,10 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
         ->name('api.admin.users.invite');
     Route::patch('/admin/users/{user}/roles', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateRoles'])
         ->name('api.admin.users.roles.update');
+    Route::patch('/admin/users/{user}/programs', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updatePrograms'])
+        ->name('api.admin.users.programs.update');
+    Route::patch('/admin/roles/{role}/permissions', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateRolePermissions'])
+        ->name('api.admin.roles.permissions.update');
     Route::patch('/admin/users/{user}/suspension', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateSuspension'])
         ->name('api.admin.users.suspension.update');
     Route::delete('/admin/users/{user}', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'destroy'])

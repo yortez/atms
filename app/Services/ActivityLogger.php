@@ -18,7 +18,16 @@ class ActivityLogger
             'action' => $action,
             'subject_type' => $subject?->getMorphClass(),
             'subject_id' => $subject?->getKey(),
-            'metadata' => Arr::only($metadata, ['changed_fields', 'status', 'document_type', 'count']),
+            'metadata' => Arr::only($metadata, [
+                'changed_fields',
+                'status',
+                'document_type',
+                'count',
+                'roles',
+                'assigned_program_ids',
+                'permissions',
+                'mode',
+            ]),
             'ip_address' => request()->ip(),
         ]);
     }

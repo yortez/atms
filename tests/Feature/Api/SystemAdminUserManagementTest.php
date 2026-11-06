@@ -215,3 +215,67 @@ test('authorization seeding grants the expected role permissions and is repeatab
         ->and(Role::query()->whereIn('name', ['alumni', 'employer'])
             ->whereHas('permissions')->exists())->toBeFalse();
 });
+
+test('system administrators can create users directly with an initial password and assign academic programs to department coordinators', function () {
+    $admin = User::factory()->create();
+    assignSystemRole($admin, 'system-administrator');
+
+    $dept = \App\Models\Department::create(['code' => 'CCS', 'name' => 'College of Computing Studies']);
+    $progCS = $dept->programs()->create(['code' => 'BSCS', 'name' => 'BS Computer Science']);
+    $progIT = $dept->programs()->create(['code' => 'BSIT', 'name' => 'BS Information Technology']);
+
+    $response = $this->actingAs($admin)->postJson('/api/admin/users', [
+        'name' => 'Dr. Alan Grant',
+        'email' => 'alan.grant@atms.local',
+        'password' => 'CoordinatorPass123!',
+        'roles' => ['department-coordinator'],
+        'assigned_program_ids' => [$progCS->id],
+    ])->assertCreated()
+        ->assertJsonPath('data.email', 'alan.grant@atms.local')
+        ->assertJsonPath('data.is_verified', true)
+        ->assertJsonPath('data.assigned_program_ids', [$progCS->id])
+        ->assertJsonPath('message', 'User account created.');
+
+    $coordinatorId = $response->json('data.id');
+
+    $this->actingAs($admin)->patchJson("/api/admin/users/{$coordinatorId}/programs", [
+        'assigned_program_ids' => [$progCS->id, $progIT->id],
+    ])->assertOk()
+        ->assertJsonPath('data.assigned_program_ids', [$progCS->id, $progIT->id]);
+
+    $this->assertDatabaseHas('activity_logs', [
+        'action' => 'user.invited',
+        'subject_id' => $coordinatorId,
+    ]);
+    $this->assertDatabaseHas('activity_logs', [
+        'action' => 'user.programs_assigned',
+        'subject_id' => $coordinatorId,
+    ]);
+});
+
+test('system administrators can update non-admin role permissions while protecting the system administrator role', function () {
+    (new RoleSeeder)->run();
+
+    $admin = User::factory()->create();
+    assignSystemRole($admin, 'system-administrator');
+
+    $adminRole = Role::query()->where('name', 'system-administrator')->firstOrFail();
+    $deptRole = Role::query()->where('name', 'department-coordinator')->firstOrFail();
+
+    $this->actingAs($admin)->patchJson("/api/admin/roles/{$adminRole->id}/permissions", [
+        'permissions' => ['alumni.view'],
+    ])->assertForbidden();
+
+    $this->actingAs($admin)->patchJson("/api/admin/roles/{$deptRole->id}/permissions", [
+        'permissions' => ['alumni.view', 'alumni.update', 'reports.view'],
+    ])->assertOk()
+        ->assertJsonPath('data.permissions', ['alumni.view', 'alumni.update', 'reports.view']);
+
+    expect($deptRole->fresh()->permissions()->pluck('name')->all())
+        ->toContain('alumni.update');
+
+    $this->assertDatabaseHas('activity_logs', [
+        'action' => 'role.permissions_updated',
+        'subject_id' => $deptRole->id,
+    ]);
+});

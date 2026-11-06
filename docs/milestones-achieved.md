@@ -134,6 +134,25 @@ flowchart LR
 * **Deep-Linked Portal Navigation (`resources/js/components/alumni-portal.tsx`)**:
   * Supports `?page=` and `?role=` query parameters on `/dashboard` so public website CTAs open the exact target workspace module immediately.
 
+### Milestone 12: Google Forms-Style Survey Builder & Dynamic Question Engine (Section 9)
+* **Google Forms Builder & Respondent Experience (`resources/js/components/alumni-portal-data.tsx`)**:
+  * Top tabbed builder (`Questions` | `Settings & Cohorts` | `Preview Form`), header card with top accent bar, active question focus indicator, interactive option list (`○` radio / `☐` checkbox / `1.` dropdown + `+ Add option` + remove option `✕`), question duplication, reordering (`↑` / `↓`), deletion, and `Required` toggle switch.
+  * Google Forms-style respondent view (`SurveyResponseForm`) with individual question cards, interactive 1–5 Linear Scale circles, required indicators (`*`), and `Clear form` button.
+* **9 Question Types & Cohort Targeting (`App\Models\Survey` & `App\Http\Controllers\Api\SurveyController`)**:
+  * Supports Short Text (`text`), Long Text (`textarea`), Multiple Choice (`radio`), Checkbox (`multiselect`), Dropdown (`select`), Rating Scale (`rating` 1–5), Date (`date`), Number (`number`), and Yes/No (`boolean`).
+  * Targets cohorts by Department (`target_department_ids`), Academic Program (`target_program_ids`), and Graduation Batch Years (`target_graduation_years`), matching multi-degree alumni if any degree matches while enforcing 1 response per unique alumnus (`409 Conflict` on duplicate).
+  * Includes `POST /api/surveys/{survey}/close` and `GET /api/surveys/{survey}/analytics` with anonymous respondent masking (`is_anonymous`).
+
+### Milestone 13: Users, Roles, Academic Program Scoping & Role Permissions Matrix (Section 3)
+* **Department Coordinator Academic Program Assignment (`PATCH /api/admin/users/{user}/programs`)**:
+  * System Administrators can assign and update specific `AcademicProgram`s (`BSCS`, `BSIT`, `BSBA`, etc.) for any Department Coordinator directly in the `Users & roles` workspace (`AssignedRoles`) or during user creation.
+* **Granular Role Permissions Matrix (`PATCH /api/admin/roles/{role}/permissions`)**:
+  * System Administrators can view and toggle granular permissions (`alumni.view`, `alumni.create`, `alumni.update`, `reports.view`, `surveys.manage`, `announcements.manage`, `jobs.manage`) for coordinator roles while protecting the `system-administrator` role.
+* **Direct Account Creation, Audit Logging & Demo Role Accounts (`SystemAdminUserController` & `SystemAdminSeeder`)**:
+  * Supports both email password-setup invitations and direct account creation with an initial password (`email_verified_at` pre-verified).
+  * Records activity logs (`user.invited`, `user.roles_updated`, `user.programs_assigned`, `role.permissions_updated`, `user.suspended`, `user.reactivated`, `user.deleted`).
+  * Seeded dedicated accounts for every role (`admin@atms.local`, `coordinator@atms.local`, `dept.ccs@atms.local`, `employer@atms.local`, and claimed alumni accounts).
+
 ---
 
 ## 3. Automated Test Suite Status
@@ -142,6 +161,8 @@ Executed via `php artisan test`:
 
 | Test Suite File | Tests | Assertions | Status |
 | :--- | :---: | :---: | :---: |
+| `tests/Feature/Api/SurveyBuilderTargetingTest.php` | 1 | 19 | **Passed** |
+| `tests/Feature/Api/SystemAdminUserManagementTest.php` | 9 | 78 | **Passed** |
 | `tests/Feature/PublicPortalAndRegistrationTest.php` | 2 | 49 | **Passed** |
 | `tests/Feature/Api/InstitutionalReportsTest.php` | 4 | 197 | **Passed** |
 | `tests/Feature/Api/AlumniClaimStatusTest.php` | 2 | 13 | **Passed** |
@@ -156,7 +177,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Auth/TwoFactorAuthenticationTest.php` | 6 | 22 | **Passed** |
 | `tests/Feature/Settings/ProfileUpdateTest.php` | 8 | 44 | **Passed** |
 | `tests/Feature/Settings/SecurityTest.php` | 6 | 28 | **Passed** |
-| **Total Test Suite** | **95** | **747** | **100% Passed** |
+| **Total Test Suite** | **98** | **782** | **100% Passed** |
 
 ---
 
@@ -164,15 +185,9 @@ Executed via `php artisan test`:
 
 | Role | Available Workspace Modules | Data Scope |
 | :--- | :--- | :--- |
-| **System Administrator** | Overview, Notifications, Alumni Directory, Academic Programs, Surveys, Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF), Users & Roles, Activity Log | Institution-wide |
-| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Surveys, Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF) | Institution-wide |
+| **System Administrator** | Overview, Notifications, Alumni Directory, Claim Assistance, Academic Programs, Surveys (Google Forms Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF), Users & Roles (with Program Scoping & Permissions Matrix), Activity Log | Institution-wide |
+| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Claim Assistance, Surveys (Google Forms Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF) | Institution-wide |
 | **Department Coordinator** | Overview, Notifications, Program Alumni, Claim Assistance Queue, Employment Outcomes, Surveys, Announcements, Department Reports (18 Reports Scoped) | Assigned Programs Only (Option A) |
-| **Alumni** | My Dashboard, Notifications, My Profile, Academic Records, Employment Tracer (Option B), Surveys, Announcements, Career Opportunities, My Applications | Self-profile Only |
+| **Alumni** | My Dashboard, Notifications, My Profile, Academic Records, Employment Tracer (Option B), Surveys (Google Forms Respondent), Announcements, Career Opportunities, My Applications | Self-profile Only |
 | **Employer** | Overview, Notifications, Company Profile, Job Postings, Applicants (with Frozen Snapshots & Resumes), Recruitment Analytics | Owned Postings Only |
-
----
-
-## 5. Next Planned Milestones
-
-1. **Custom Survey Builder (Section 9)**: Visual question builder with cohort targeting by academic program and graduation year.
 

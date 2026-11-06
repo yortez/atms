@@ -70,6 +70,15 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             ->withPivot(['assigned_by_user_id', 'created_at']);
     }
 
+    /**
+     * @return BelongsToMany<Employer, $this>
+     */
+    public function employers(): BelongsToMany
+    {
+        return $this->belongsToMany(Employer::class, 'employer_users', 'user_id', 'employer_id')
+            ->withPivot(['membership_role', 'created_at']);
+    }
+
     public function hasRole(string ...$roles): bool
     {
         return $this->roles()->whereIn('name', $roles)->exists();
