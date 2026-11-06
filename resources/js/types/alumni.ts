@@ -165,6 +165,56 @@ export type Announcement = {
     } | null;
 };
 
+export type AlumniEventType =
+    | 'homecoming'
+    | 'career_fair'
+    | 'networking'
+    | 'webinar'
+    | 'workshop'
+    | 'reunion';
+
+export type AlumniEventFormat = 'in_person' | 'online' | 'hybrid';
+
+export type AlumniEvent = {
+    id: number;
+    title: string;
+    description: string;
+    event_type: AlumniEventType;
+    format: AlumniEventFormat;
+    venue: string | null;
+    meeting_url: string | null;
+    starts_at: string;
+    ends_at: string | null;
+    registration_deadline: string | null;
+    capacity: number | null;
+    is_featured: boolean;
+    is_public: boolean;
+    audience_roles: string[] | null;
+    target_department_ids?: number[] | null;
+    target_program_ids?: number[] | null;
+    target_graduation_years?: number[] | null;
+    status: 'draft' | 'published' | 'cancelled' | 'completed';
+    published_at: string | null;
+    created_at: string;
+    going_count?: number;
+    interested_count?: number;
+    my_registration_status?: 'going' | 'interested' | null;
+    author?: {
+        id: number;
+        name: string;
+    } | null;
+};
+
+export type AlumniEventAttendee = {
+    id: number;
+    user_id: number;
+    name: string;
+    email: string;
+    status: 'going' | 'interested';
+    notes: string | null;
+    registered_at: string | null;
+};
+
 export type Employer = {
     id: number;
     company_name: string;

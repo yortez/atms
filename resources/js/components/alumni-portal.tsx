@@ -5,6 +5,7 @@ import {
     Bell,
     BriefcaseBusiness,
     Building2,
+    Calendar,
     ChevronDown,
     ChevronRight,
     CircleHelp,
@@ -56,6 +57,7 @@ import {
     EmployerApplicants,
     EmployerDirectory,
     EmployerJobs,
+    EventCenter,
     exportEmploymentOutcomes,
     LiveOverview,
     Notifications,
@@ -99,6 +101,7 @@ const navigation: Record<Role, NavigationItem[]> = {
         { label: 'Academic programs', icon: GraduationCap },
         { label: 'Surveys', icon: ClipboardList },
         { label: 'Announcements', icon: MessageSquareText },
+        { label: 'Events', icon: Calendar },
         { label: 'Employers & jobs', icon: BriefcaseBusiness },
         { label: 'Reports', icon: Activity },
         { label: 'Users & roles', icon: ShieldCheck },
@@ -111,6 +114,7 @@ const navigation: Record<Role, NavigationItem[]> = {
         { label: 'Claim assistance', icon: ShieldCheck },
         { label: 'Surveys', icon: ClipboardList },
         { label: 'Announcements', icon: MessageSquareText },
+        { label: 'Events', icon: Calendar },
         { label: 'Employers & jobs', icon: BriefcaseBusiness },
         { label: 'Reports', icon: Activity },
     ],
@@ -122,6 +126,7 @@ const navigation: Record<Role, NavigationItem[]> = {
         { label: 'Employment outcomes', icon: Activity },
         { label: 'Surveys', icon: ClipboardList },
         { label: 'Announcements', icon: MessageSquareText },
+        { label: 'Events', icon: Calendar },
         { label: 'Department reports', icon: FileSpreadsheet },
     ],
     Alumni: [
@@ -132,6 +137,7 @@ const navigation: Record<Role, NavigationItem[]> = {
         { label: 'Employment tracer', icon: Activity },
         { label: 'Surveys', icon: ClipboardList },
         { label: 'Announcements', icon: MessageSquareText },
+        { label: 'Events', icon: Calendar },
         { label: 'Career opportunities', icon: BriefcaseBusiness },
         { label: 'My applications', icon: FileSpreadsheet },
     ],
@@ -141,6 +147,7 @@ const navigation: Record<Role, NavigationItem[]> = {
         { label: 'Company profile', icon: Building2 },
         { label: 'Job postings', icon: BriefcaseBusiness },
         { label: 'Applicants', icon: UsersRound },
+        { label: 'Events', icon: Calendar },
         { label: 'Recruitment analytics', icon: Activity },
     ],
 };
@@ -205,6 +212,12 @@ const pageCopy: Record<
         description:
             'Share news and updates with the right alumni communities.',
         action: 'New announcement',
+    },
+    Events: {
+        title: 'Events',
+        description:
+            'Discover upcoming homecomings, career fairs, webinars, and networking gatherings.',
+        action: 'Create event',
     },
     'Employers & jobs': {
         title: 'Employers & jobs',
@@ -365,7 +378,7 @@ export default function AlumniPortal() {
         role,
     );
     const hideAction =
-        (['Surveys', 'Announcements'].includes(activePage) &&
+        (['Surveys', 'Announcements', 'Events'].includes(activePage) &&
             !canManageContent) ||
         [
             'Academic programs',
@@ -469,6 +482,12 @@ export default function AlumniPortal() {
         <EmployerDirectory />
     ) : activePage === 'Announcements' ? (
         <AnnouncementCenter
+            role={role}
+            createOpen={dialogOpen}
+            onCloseCreate={() => setDialogOpen(false)}
+        />
+    ) : activePage === 'Events' ? (
+        <EventCenter
             role={role}
             createOpen={dialogOpen}
             onCloseCreate={() => setDialogOpen(false)}

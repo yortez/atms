@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicProgram;
+use App\Models\AlumniEvent;
 use App\Models\AlumniProfile;
 use App\Models\Announcement;
 use App\Models\Department;
@@ -101,6 +102,29 @@ class PublicPortalController extends Controller
             ])
             ->values();
 
+        $events = AlumniEvent::query()
+            ->where('status', 'published')
+            ->where('is_public', true)
+            ->orderByDesc('is_featured')
+            ->orderBy('starts_at')
+            ->limit(6)
+            ->get(['id', 'title', 'description', 'event_type', 'format', 'venue', 'starts_at'])
+            ->map(fn (AlumniEvent $event) => [
+                'id' => $event->id,
+                'month' => strtoupper($event->starts_at->format('M')),
+                'day' => $event->starts_at->format('d'),
+                'badge' => strtoupper(str_replace('_', ' ', $event->event_type)),
+                'timeAndVenue' => sprintf(
+                    '%s · %s',
+                    $event->starts_at->format('g:i A'),
+                    $event->venue ?? ($event->format === 'online' ? 'Online Event' : 'Northfield Campus'),
+                ),
+                'title' => $event->title,
+                'summary' => \Illuminate\Support\Str::limit($event->description, 160),
+                'details' => $event->description,
+            ])
+            ->values();
+
         return Inertia::render('welcome', [
             'publicStats' => [
                 'graduates_count' => AlumniProfile::query()->count(),
@@ -109,6 +133,7 @@ class PublicPortalController extends Controller
                 'open_jobs_count' => $jobs->count(),
             ],
             'publicAnnouncements' => $announcements,
+            'publicEvents' => $events,
             'publicJobs' => $jobs,
             'publicDepartments' => $departments,
         ]);

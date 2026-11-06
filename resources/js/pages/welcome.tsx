@@ -60,6 +60,17 @@ type PublicDepartment = {
     }>;
 };
 
+type PublicEvent = {
+    id: number;
+    month: string;
+    day: string;
+    badge: string;
+    timeAndVenue: string;
+    title: string;
+    summary: string;
+    details: string;
+};
+
 type WelcomeProps = {
     publicStats?: {
         graduates_count: number;
@@ -68,6 +79,7 @@ type WelcomeProps = {
         open_jobs_count: number;
     };
     publicAnnouncements?: PublicAnnouncement[];
+    publicEvents?: PublicEvent[];
     publicJobs?: PublicJob[];
     publicDepartments?: PublicDepartment[];
 };
@@ -201,6 +213,7 @@ const upcomingEvents = [
 export default function Welcome({
     publicStats,
     publicAnnouncements = [],
+    publicEvents = [],
     publicJobs = [],
     publicDepartments = [],
 }: WelcomeProps) {
@@ -212,14 +225,15 @@ export default function Welcome({
     const [selectedJob, setSelectedJob] = useState<PublicJob | null>(null);
     const [selectedAnnouncement, setSelectedAnnouncement] =
         useState<PublicAnnouncement | null>(null);
-    const [selectedEvent, setSelectedEvent] = useState<
-        (typeof upcomingEvents)[number] | null
-    >(null);
+    const [selectedEvent, setSelectedEvent] = useState<PublicEvent | null>(
+        null,
+    );
 
     const announcements =
         publicAnnouncements.length > 0
             ? publicAnnouncements
             : fallbackAnnouncements;
+    const events = publicEvents.length > 0 ? publicEvents : upcomingEvents;
     const jobs = publicJobs.length > 0 ? publicJobs : fallbackJobs;
 
     const filteredJobs = jobs.filter((job) => {
@@ -982,7 +996,7 @@ export default function Welcome({
                         </div>
 
                         <div className="grid gap-6 lg:grid-cols-2">
-                            {upcomingEvents.map((ev) => (
+                            {events.map((ev) => (
                                 <article
                                     key={ev.id}
                                     className="flex gap-5 rounded-3xl border border-[#e6e8df] bg-white p-6 sm:p-8"
@@ -1302,12 +1316,14 @@ export default function Welcome({
                         <div className="mt-6 flex justify-end gap-2 border-t border-[#eff0ec] pt-4">
                             <Link
                                 href={
-                                    isAuthenticated ? '/dashboard' : register()
+                                    isAuthenticated
+                                        ? '/dashboard?page=Events'
+                                        : register()
                                 }
                                 className="inline-flex h-10 items-center rounded-full bg-[#234a37] px-5 text-xs font-semibold text-white hover:bg-[#183b2a]"
                             >
                                 {isAuthenticated
-                                    ? 'Open Alumni Portal'
+                                    ? 'Open Portal Events & RSVP'
                                     : 'Claim Account to RSVP'}
                                 <ArrowRight className="ml-2 size-3.5" />
                             </Link>

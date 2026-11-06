@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\ApiTokenController;
 use App\Http\Controllers\Api\DashboardStatsController;
 use App\Http\Controllers\Api\EmployerController;
+use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\JobController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RegistrationAssistanceController;
@@ -96,6 +97,15 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
         ->name('api.announcements.unpublish');
     Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])
         ->name('api.announcements.destroy');
+    Route::get('/events', [EventController::class, 'index'])->name('api.events.index');
+    Route::get('/events/manage', [EventController::class, 'manageIndex'])->name('api.events.manage');
+    Route::post('/events', [EventController::class, 'store'])->name('api.events.store');
+    Route::patch('/events/{event}', [EventController::class, 'update'])->name('api.events.update');
+    Route::post('/events/{event}/publish', [EventController::class, 'publish'])->name('api.events.publish');
+    Route::post('/events/{event}/status', [EventController::class, 'updateStatus'])->name('api.events.status');
+    Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('api.events.destroy');
+    Route::post('/events/{event}/rsvp', [EventController::class, 'rsvp'])->name('api.events.rsvp');
+    Route::get('/events/{event}/attendees', [EventController::class, 'attendees'])->name('api.events.attendees');
     Route::get('/jobs', [JobController::class, 'index'])->name('api.jobs.index');
     Route::get('/jobs/{jobPosting}', [JobController::class, 'show'])->name('api.jobs.show');
     Route::post('/jobs/{jobPosting}/applications', [JobController::class, 'apply'])->name('api.jobs.apply');

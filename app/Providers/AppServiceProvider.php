@@ -49,6 +49,10 @@ class AppServiceProvider extends ServiceProvider
             'system-administrator',
             'alumni-coordinator',
         ) || $user->hasPermission('announcements.manage'));
+        Gate::define('manageEvents', fn ($user) => $user->hasRole(
+            'system-administrator',
+            'alumni-coordinator',
+        ) || $user->hasPermission('events.manage') || $user->hasPermission('announcements.manage'));
         Gate::define('manageJobs', fn ($user) => $user->hasRole(
             'system-administrator',
             'alumni-coordinator',
