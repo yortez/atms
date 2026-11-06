@@ -88,17 +88,28 @@ export type UserNotification = {
     created_at: string;
 };
 
+export type SurveyQuestionType =
+    | 'text'
+    | 'short_text'
+    | 'textarea'
+    | 'long_text'
+    | 'radio'
+    | 'multiple_choice'
+    | 'choice'
+    | 'multiselect'
+    | 'checkbox'
+    | 'select'
+    | 'dropdown'
+    | 'rating'
+    | 'date'
+    | 'number'
+    | 'boolean'
+    | 'yes_no';
+
 export type SurveyQuestion = {
     id: number;
     prompt: string;
-    type:
-        | 'text'
-        | 'textarea'
-        | 'number'
-        | 'boolean'
-        | 'select'
-        | 'multiselect'
-        | 'rating';
+    type: SurveyQuestionType;
     options: string[] | null;
     is_required: boolean;
     position: number;
@@ -110,7 +121,13 @@ export type Survey = {
     description: string | null;
     status: 'draft' | 'published' | 'closed';
     published_at: string | null;
+    starts_at?: string | null;
     closes_at: string | null;
+    is_anonymous?: boolean;
+    target_department_ids?: number[] | null;
+    target_program_ids?: number[] | null;
+    target_graduation_years?: number[] | null;
+    responses_count?: number;
     questions: SurveyQuestion[];
     has_responded?: boolean;
 };

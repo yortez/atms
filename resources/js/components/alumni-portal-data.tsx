@@ -3425,6 +3425,49 @@ type RawPagination<T> = {
     total: number;
 };
 
+const QUESTION_TYPE_LABELS: Record<string, string> = {
+    text: 'Short Text',
+    short_text: 'Short Text',
+    textarea: 'Long Text',
+    long_text: 'Long Text',
+    radio: 'Multiple Choice',
+    multiple_choice: 'Multiple Choice',
+    choice: 'Multiple Choice',
+    multiselect: 'Checkbox (Multi-Select)',
+    checkbox: 'Checkbox (Multi-Select)',
+    select: 'Dropdown',
+    dropdown: 'Dropdown',
+    rating: 'Rating Scale (1–5)',
+    date: 'Date',
+    number: 'Number',
+    boolean: 'Yes / No',
+    yes_no: 'Yes / No',
+};
+
+const BUILDER_QUESTION_TYPES = [
+    { value: 'text', label: 'Short Text' },
+    { value: 'textarea', label: 'Long Text' },
+    { value: 'radio', label: 'Multiple Choice (Single)' },
+    { value: 'multiselect', label: 'Checkbox (Multiple)' },
+    { value: 'select', label: 'Dropdown' },
+    { value: 'rating', label: 'Rating Scale (1–5)' },
+    { value: 'date', label: 'Date' },
+    { value: 'number', label: 'Number' },
+    { value: 'boolean', label: 'Yes / No' },
+] as const;
+
+function requiresQuestionOptions(type: string): boolean {
+    return [
+        'radio',
+        'multiple_choice',
+        'choice',
+        'multiselect',
+        'checkbox',
+        'select',
+        'dropdown',
+    ].includes(type);
+}
+
 function SurveyResponseForm({
     survey,
     onSubmitted,
@@ -3465,18 +3508,25 @@ function SurveyResponseForm({
             onSubmit={submit}
             className="mt-4 space-y-4 rounded-xl bg-[#f8f9f6] p-4"
         >
-            {survey.questions.map((question) => {
+            {survey.is_anonymous && (
+                <p className="rounded-lg border border-[#dce5d8] bg-[#edf2eb] px-3 py-2 text-[11px] font-medium text-[#2b5139]">
+                    Anonymous Survey: Your identity will be masked in survey
+                    summaries while recording your cohort participation.
+                </p>
+            )}
+            {survey.questions.map((question, qIndex) => {
                 const value = answers[question.id];
                 const fieldClass =
                     'mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs outline-none focus:border-[#819981]';
+                const qType = question.type;
 
-                if (question.type === 'textarea') {
+                if (qType === 'textarea' || qType === 'long_text') {
                     return (
                         <label
                             key={question.id}
                             className="block text-xs font-medium text-[#4d5a4f]"
                         >
-                            {question.prompt}
+                            {qIndex + 1}. {question.prompt}
                             {question.is_required ? ' *' : ''}
                             <textarea
                                 required={question.is_required}
@@ -3493,9 +3543,58 @@ function SurveyResponseForm({
                     );
                 }
 
-                if (question.type === 'select' || question.type === 'rating') {
+                if (
+                    qType === 'radio' ||
+                    qType === 'multiple_choice' ||
+                    qType === 'choice'
+                ) {
+                    return (
+                        <fieldset
+                            key={question.id}
+                            className="space-y-2 text-xs text-[#4d5a4f]"
+                        >
+                            <legend className="mb-1.5 font-medium">
+                                {qIndex + 1}. {question.prompt}
+                                {question.is_required ? ' *' : ''}
+                            </legend>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                {(question.options ?? []).map((option) => (
+                                    <label
+                                        key={option}
+                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 transition ${
+                                            value === option
+                                                ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                : 'border-[#e3e7df] bg-white text-[#4d5a4f]'
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name={`question-${question.id}`}
+                                            required={question.is_required}
+                                            checked={value === option}
+                                            onChange={() =>
+                                                updateAnswer(
+                                                    question.id,
+                                                    option,
+                                                )
+                                            }
+                                            className="accent-[#2b5139]"
+                                        />
+                                        <span>{option}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </fieldset>
+                    );
+                }
+
+                if (
+                    qType === 'select' ||
+                    qType === 'dropdown' ||
+                    qType === 'rating'
+                ) {
                     const options =
-                        question.type === 'rating'
+                        qType === 'rating'
                             ? ['1', '2', '3', '4', '5']
                             : (question.options ?? []);
                     return (
@@ -3503,15 +3602,19 @@ function SurveyResponseForm({
                             key={question.id}
                             className="block text-xs font-medium text-[#4d5a4f]"
                         >
-                            {question.prompt}
+                            {qIndex + 1}. {question.prompt}
                             {question.is_required ? ' *' : ''}
                             <select
                                 required={question.is_required}
-                                value={typeof value === 'string' ? value : ''}
+                                value={
+                                    value !== undefined && value !== null
+                                        ? String(value)
+                                        : ''
+                                }
                                 onChange={(event) =>
                                     updateAnswer(
                                         question.id,
-                                        question.type === 'rating'
+                                        qType === 'rating'
                                             ? Number(event.target.value)
                                             : event.target.value,
                                     )
@@ -3529,7 +3632,7 @@ function SurveyResponseForm({
                     );
                 }
 
-                if (question.type === 'multiselect') {
+                if (qType === 'multiselect' || qType === 'checkbox') {
                     const selected = Array.isArray(value)
                         ? (value as string[])
                         : [];
@@ -3538,44 +3641,48 @@ function SurveyResponseForm({
                             key={question.id}
                             className="space-y-2 text-xs text-[#4d5a4f]"
                         >
-                            <legend className="mb-2 font-medium">
-                                {question.prompt}
+                            <legend className="mb-1.5 font-medium">
+                                {qIndex + 1}. {question.prompt}
                                 {question.is_required ? ' *' : ''}
                             </legend>
-                            {(question.options ?? []).map((option) => (
-                                <label
-                                    key={option}
-                                    className="flex items-center gap-2"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={selected.includes(option)}
-                                        onChange={(event) =>
-                                            updateAnswer(
-                                                question.id,
-                                                event.target.checked
-                                                    ? [...selected, option]
-                                                    : selected.filter(
-                                                          (item) =>
-                                                              item !== option,
-                                                      ),
-                                            )
-                                        }
-                                    />
-                                    {option}
-                                </label>
-                            ))}
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                {(question.options ?? []).map((option) => (
+                                    <label
+                                        key={option}
+                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#e3e7df] bg-white px-3 py-2"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selected.includes(option)}
+                                            onChange={(event) =>
+                                                updateAnswer(
+                                                    question.id,
+                                                    event.target.checked
+                                                        ? [...selected, option]
+                                                        : selected.filter(
+                                                              (item) =>
+                                                                  item !==
+                                                                  option,
+                                                          ),
+                                                )
+                                            }
+                                            className="accent-[#2b5139]"
+                                        />
+                                        <span>{option}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </fieldset>
                     );
                 }
 
-                if (question.type === 'boolean') {
+                if (qType === 'boolean' || qType === 'yes_no') {
                     return (
                         <label
                             key={question.id}
                             className="block text-xs font-medium text-[#4d5a4f]"
                         >
-                            {question.prompt}
+                            {qIndex + 1}. {question.prompt}
                             {question.is_required ? ' *' : ''}
                             <select
                                 required={question.is_required}
@@ -3600,17 +3707,39 @@ function SurveyResponseForm({
                     );
                 }
 
+                if (qType === 'date') {
+                    return (
+                        <label
+                            key={question.id}
+                            className="block text-xs font-medium text-[#4d5a4f]"
+                        >
+                            {qIndex + 1}. {question.prompt}
+                            {question.is_required ? ' *' : ''}
+                            <input
+                                type="date"
+                                required={question.is_required}
+                                value={typeof value === 'string' ? value : ''}
+                                onChange={(event) =>
+                                    updateAnswer(
+                                        question.id,
+                                        event.target.value,
+                                    )
+                                }
+                                className={fieldClass}
+                            />
+                        </label>
+                    );
+                }
+
                 return (
                     <label
                         key={question.id}
                         className="block text-xs font-medium text-[#4d5a4f]"
                     >
-                        {question.prompt}
+                        {qIndex + 1}. {question.prompt}
                         {question.is_required ? ' *' : ''}
                         <input
-                            type={
-                                question.type === 'number' ? 'number' : 'text'
-                            }
+                            type={qType === 'number' ? 'number' : 'text'}
                             required={question.is_required}
                             value={
                                 typeof value === 'string' ||
@@ -3621,7 +3750,7 @@ function SurveyResponseForm({
                             onChange={(event) =>
                                 updateAnswer(
                                     question.id,
-                                    question.type === 'number'
+                                    qType === 'number'
                                         ? event.target.value === ''
                                             ? ''
                                             : Number(event.target.value)
@@ -3646,6 +3775,43 @@ function SurveyResponseForm({
     );
 }
 
+type QuestionDraft = {
+    prompt: string;
+    type: string;
+    options: string;
+    is_required: boolean;
+};
+
+type SurveyAnalyticsPayload = {
+    survey_id: number;
+    title: string;
+    status: string;
+    is_anonymous: boolean;
+    total_responses: number;
+    questions: Array<{
+        id: number;
+        prompt: string;
+        type: string;
+        is_required: boolean;
+        answered_count: number;
+        response_rate: number;
+        distribution: Array<{
+            label: string;
+            count: number;
+            percentage: number;
+        }>;
+        recent_answers: Array<{
+            respondent: string;
+            answer: string;
+            submitted_at: string | null;
+        }>;
+    }>;
+};
+
+const COHORT_YEAR_OPTIONS = [
+    2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
+];
+
 export function SurveyCenter({
     role,
     createOpen,
@@ -3656,65 +3822,230 @@ export function SurveyCenter({
     onCloseCreate: () => void;
 }) {
     const canManage = role === 'Administrator' || role === 'Alumni coordinator';
+    const canViewAnalytics =
+        canManage || role === 'Department coordinator';
     const canRespond = role === 'Alumni';
     const { data, loading, error, reload } =
         useApiResource<ApiEnvelope<RawPagination<Survey>>>('/api/surveys');
-    const [form, setForm] = useState({
-        title: '',
-        description: '',
-        closes_at: '',
-        prompt: '',
-        question_type: 'text',
-        options: '',
-    });
+    const departmentsRes = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
+        canManage ? '/api/departments' : null,
+    );
+    const programsRes = useApiResource<ApiEnvelope<AcademicProgram[]>>(
+        canManage ? '/api/programs' : null,
+    );
+
+    const [editingSurveyId, setEditingSurveyId] = useState<number | null>(null);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [startsAt, setStartsAt] = useState('');
+    const [closesAt, setClosesAt] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [targetSpecificCohorts, setTargetSpecificCohorts] = useState(false);
+    const [targetDepartmentIds, setTargetDepartmentIds] = useState<number[]>(
+        [],
+    );
+    const [targetProgramIds, setTargetProgramIds] = useState<number[]>([]);
+    const [targetGraduationYears, setTargetGraduationYears] = useState<
+        number[]
+    >([]);
+    const [customYearInput, setCustomYearInput] = useState('');
+    const [questions, setQuestions] = useState<QuestionDraft[]>([
+        {
+            prompt: '',
+            type: 'text',
+            options: '',
+            is_required: true,
+        },
+    ]);
+
     const [creating, setCreating] = useState(false);
     const [publishing, setPublishing] = useState<number | null>(null);
+    const [closing, setClosing] = useState<number | null>(null);
+    const [activeAnalyticsId, setActiveAnalyticsId] = useState<number | null>(
+        null,
+    );
+    const [analyticsData, setAnalyticsData] =
+        useState<SurveyAnalyticsPayload | null>(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
-    async function createSurvey(event: FormEvent<HTMLFormElement>) {
+    function resetBuilder() {
+        setEditingSurveyId(null);
+        setTitle('');
+        setDescription('');
+        setStartsAt('');
+        setClosesAt('');
+        setIsAnonymous(false);
+        setTargetSpecificCohorts(false);
+        setTargetDepartmentIds([]);
+        setTargetProgramIds([]);
+        setTargetGraduationYears([]);
+        setCustomYearInput('');
+        setQuestions([
+            {
+                prompt: '',
+                type: 'text',
+                options: '',
+                is_required: true,
+            },
+        ]);
+    }
+
+    function openEditSurvey(survey: Survey) {
+        setEditingSurveyId(survey.id);
+        setTitle(survey.title);
+        setDescription(survey.description ?? '');
+        setStartsAt(survey.starts_at ? survey.starts_at.slice(0, 10) : '');
+        setClosesAt(survey.closes_at ? survey.closes_at.slice(0, 10) : '');
+        setIsAnonymous(Boolean(survey.is_anonymous));
+        const hasTargeting = Boolean(
+            survey.target_department_ids?.length ||
+                survey.target_program_ids?.length ||
+                survey.target_graduation_years?.length,
+        );
+        setTargetSpecificCohorts(hasTargeting);
+        setTargetDepartmentIds(survey.target_department_ids ?? []);
+        setTargetProgramIds(survey.target_program_ids ?? []);
+        setTargetGraduationYears(survey.target_graduation_years ?? []);
+        setQuestions(
+            survey.questions.length
+                ? survey.questions.map((q) => ({
+                      prompt: q.prompt,
+                      type: q.type,
+                      options: (q.options ?? []).join(', '),
+                      is_required: q.is_required,
+                  }))
+                : [
+                      {
+                          prompt: '',
+                          type: 'text',
+                          options: '',
+                          is_required: true,
+                      },
+                  ],
+        );
+    }
+
+    function updateQuestion(index: number, patch: Partial<QuestionDraft>) {
+        setQuestions((current) =>
+            current.map((item, idx) =>
+                idx === index ? { ...item, ...patch } : item,
+            ),
+        );
+    }
+
+    function addQuestion() {
+        setQuestions((current) => [
+            ...current,
+            {
+                prompt: '',
+                type: 'text',
+                options: '',
+                is_required: true,
+            },
+        ]);
+    }
+
+    function removeQuestion(index: number) {
+        setQuestions((current) =>
+            current.length > 1
+                ? current.filter((_, idx) => idx !== index)
+                : current,
+        );
+    }
+
+    function moveQuestion(index: number, direction: -1 | 1) {
+        const nextIndex = index + direction;
+        if (nextIndex < 0 || nextIndex >= questions.length) {
+            return;
+        }
+        setQuestions((current) => {
+            const copy = [...current];
+            const [item] = copy.splice(index, 1);
+            copy.splice(nextIndex, 0, item);
+            return copy;
+        });
+    }
+
+    function toggleId(list: number[], id: number): number[] {
+        return list.includes(id)
+            ? list.filter((item) => item !== id)
+            : [...list, id];
+    }
+
+    function addCustomBatchYear() {
+        const parsed = Number.parseInt(customYearInput.trim(), 10);
+        if (Number.isNaN(parsed) || parsed < 1950 || parsed > 2100) {
+            toast.error('Enter a valid graduation year between 1950 and 2100.');
+            return;
+        }
+        if (!targetGraduationYears.includes(parsed)) {
+            setTargetGraduationYears((curr) =>
+                [...curr, parsed].sort((a, b) => b - a),
+            );
+        }
+        setCustomYearInput('');
+    }
+
+    async function saveSurvey(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setCreating(true);
-        const options = form.options
-            .split(',')
-            .map((option) => option.trim())
-            .filter(Boolean);
+
+        const formattedQuestions = questions.map((q, index) => {
+            const parsedOptions = q.options
+                .split(',')
+                .map((opt) => opt.trim())
+                .filter(Boolean);
+
+            return {
+                prompt: q.prompt,
+                type: q.type,
+                options: requiresQuestionOptions(q.type) ? parsedOptions : null,
+                is_required: q.is_required,
+                position: index,
+            };
+        });
+
+        const payload = {
+            title,
+            description: description || null,
+            starts_at: startsAt || null,
+            closes_at: closesAt || null,
+            is_anonymous: isAnonymous,
+            target_department_ids: targetSpecificCohorts
+                ? targetDepartmentIds
+                : null,
+            target_program_ids: targetSpecificCohorts ? targetProgramIds : null,
+            target_graduation_years: targetSpecificCohorts
+                ? targetGraduationYears
+                : null,
+            questions: formattedQuestions,
+        };
 
         try {
-            await apiRequest<ApiEnvelope<Survey>>('/api/surveys', {
-                method: 'POST',
-                body: {
-                    title: form.title,
-                    description: form.description || null,
-                    closes_at: form.closes_at || null,
-                    questions: [
-                        {
-                            prompt: form.prompt,
-                            type: form.question_type,
-                            options: ['select', 'multiselect'].includes(
-                                form.question_type,
-                            )
-                                ? options
-                                : null,
-                            is_required: true,
-                        },
-                    ],
-                },
-            });
-            setForm({
-                title: '',
-                description: '',
-                closes_at: '',
-                prompt: '',
-                question_type: 'text',
-                options: '',
-            });
+            if (editingSurveyId !== null) {
+                await apiRequest<ApiEnvelope<Survey>>(
+                    `/api/surveys/${editingSurveyId}`,
+                    {
+                        method: 'PATCH',
+                        body: payload,
+                    },
+                );
+                toast.success('Survey updated.');
+            } else {
+                await apiRequest<ApiEnvelope<Survey>>('/api/surveys', {
+                    method: 'POST',
+                    body: payload,
+                });
+                toast.success('Survey created as a draft.');
+            }
+            resetBuilder();
             onCloseCreate();
             reload();
-            toast.success('Survey created as a draft.');
         } catch (error) {
             toast.error(
                 error instanceof ApiError
                     ? error.message
-                    : 'Survey could not be created.',
+                    : 'Survey could not be saved.',
             );
         } finally {
             setCreating(false);
@@ -3741,6 +4072,50 @@ export function SurveyCenter({
         }
     }
 
+    async function closeSurvey(id: number) {
+        setClosing(id);
+        try {
+            await apiRequest<ApiEnvelope<Survey>>(`/api/surveys/${id}/close`, {
+                method: 'POST',
+            });
+            reload();
+            toast.success('Survey closed.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Survey could not be closed.',
+            );
+        } finally {
+            setClosing(null);
+        }
+    }
+
+    async function toggleAnalytics(surveyId: number) {
+        if (activeAnalyticsId === surveyId) {
+            setActiveAnalyticsId(null);
+            setAnalyticsData(null);
+            return;
+        }
+        setActiveAnalyticsId(surveyId);
+        setAnalyticsLoading(true);
+        try {
+            const response = await apiRequest<
+                ApiEnvelope<SurveyAnalyticsPayload>
+            >(`/api/surveys/${surveyId}/analytics`);
+            setAnalyticsData(response.data);
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Survey analytics could not be loaded.',
+            );
+            setActiveAnalyticsId(null);
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    }
+
     if (loading) {
         return <LoadingState />;
     }
@@ -3750,105 +4125,414 @@ export function SurveyCenter({
     }
 
     const surveys = data?.data.data ?? [];
+    const departments = departmentsRes.data?.data ?? [];
+    const programs = programsRes.data?.data ?? [];
+    const builderVisible = canManage && (createOpen || editingSurveyId !== null);
+
     return (
-        <div className="space-y-3">
-            {canManage && createOpen ? (
+        <div className="space-y-4">
+            {builderVisible ? (
                 <form
-                    onSubmit={createSurvey}
-                    className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
+                    onSubmit={saveSurvey}
+                    className="space-y-5 rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6"
                 >
-                    {(
-                        [
-                            ['title', 'Survey title'],
-                            ['description', 'Description'],
-                            ['closes_at', 'Closes on'],
-                            ['prompt', 'First question'],
-                        ] as const
-                    ).map(([name, label]) => (
-                        <label
-                            key={name}
-                            className="text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {label}
-                            {name === 'description' ? (
-                                <textarea
-                                    value={form[name]}
-                                    required={false}
-                                    onChange={(event) =>
-                                        setForm({
-                                            ...form,
-                                            [name]: event.target.value,
-                                        })
-                                    }
-                                    className="mt-1.5 min-h-20 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                                />
-                            ) : (
-                                <input
-                                    type={
-                                        name === 'closes_at' ? 'date' : 'text'
-                                    }
-                                    required={
-                                        name === 'title' || name === 'prompt'
-                                    }
-                                    value={form[name]}
-                                    onChange={(event) =>
-                                        setForm({
-                                            ...form,
-                                            [name]: event.target.value,
-                                        })
-                                    }
-                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                                />
-                            )}
-                        </label>
-                    ))}
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Question type
-                        <select
-                            value={form.question_type}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    question_type: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                        >
-                            {[
-                                'text',
-                                'textarea',
-                                'number',
-                                'boolean',
-                                'select',
-                                'multiselect',
-                                'rating',
-                            ].map((type) => (
-                                <option key={type} value={type}>
-                                    {type}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                    {['select', 'multiselect'].includes(form.question_type) ? (
-                        <label className="text-xs font-medium text-[#4d5a4f]">
-                            Answer choices (comma separated)
+                    <div className="flex items-center justify-between border-b border-[#eff0ec] pb-3">
+                        <div>
+                            <h2 className="text-sm font-semibold text-[#29382e]">
+                                {editingSurveyId !== null
+                                    ? 'Edit Tracer Survey'
+                                    : 'Visual Survey Builder & Cohort Targeting'}
+                            </h2>
+                            <p className="mt-0.5 text-xs text-[#7a8278]">
+                                Configure questions across 9 input formats and
+                                target specific graduating cohorts or academic
+                                programs.
+                            </p>
+                        </div>
+                        <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-bold text-[#2b5139] uppercase">
+                            {questions.length}{' '}
+                            {questions.length === 1 ? 'Question' : 'Questions'}
+                        </span>
+                    </div>
+
+                    {/* Survey Metadata & Schedule */}
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                            Survey title
                             <input
                                 required
-                                value={form.options}
+                                value={title}
                                 onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        options: event.target.value,
-                                    })
+                                    setTitle(event.target.value)
+                                }
+                                placeholder="e.g., 2026 Graduate Employment & Curriculum Tracer"
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                            />
+                        </label>
+                        <label className="text-xs font-medium text-[#4d5a4f]">
+                            Opens on (optional)
+                            <input
+                                type="date"
+                                value={startsAt}
+                                onChange={(event) =>
+                                    setStartsAt(event.target.value)
                                 }
                                 className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
                             />
                         </label>
-                    ) : null}
-                    <div className="flex items-center justify-end gap-2 sm:col-span-2">
+                        <label className="text-xs font-medium text-[#4d5a4f]">
+                            Closes on
+                            <input
+                                type="date"
+                                value={closesAt}
+                                onChange={(event) =>
+                                    setClosesAt(event.target.value)
+                                }
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                            />
+                        </label>
+                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-4">
+                            Description
+                            <textarea
+                                value={description}
+                                onChange={(event) =>
+                                    setDescription(event.target.value)
+                                }
+                                placeholder="Explain the purpose of this survey to alumni respondents…"
+                                className="mt-1.5 min-h-16 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                            />
+                        </label>
+                    </div>
+
+                    {/* Privacy & Cohort Targeting */}
+                    <div className="space-y-4 rounded-xl border border-[#e5e9e2] bg-[#f9faf7] p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#3b4a3e]">
+                                <input
+                                    type="checkbox"
+                                    checked={isAnonymous}
+                                    onChange={(e) =>
+                                        setIsAnonymous(e.target.checked)
+                                    }
+                                    className="size-4 accent-[#2b5139]"
+                                />
+                                <span>
+                                    Collect anonymous responses (mask respondent
+                                    names in summaries)
+                                </span>
+                            </label>
+
+                            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#2b5139]">
+                                <input
+                                    type="checkbox"
+                                    checked={targetSpecificCohorts}
+                                    onChange={(e) =>
+                                        setTargetSpecificCohorts(
+                                            e.target.checked,
+                                        )
+                                    }
+                                    className="size-4 accent-[#2b5139]"
+                                />
+                                <span>
+                                    Target specific departments, programs, or
+                                    graduating batches
+                                </span>
+                            </label>
+                        </div>
+
+                        {targetSpecificCohorts && (
+                            <div className="grid gap-4 border-t border-[#e6eae3] pt-4 lg:grid-cols-3">
+                                {/* Target Departments */}
+                                <div>
+                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                        Target Departments (
+                                        {targetDepartmentIds.length || 'All'})
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {departments.map((dept) => {
+                                            const active =
+                                                targetDepartmentIds.includes(
+                                                    dept.id,
+                                                );
+                                            return (
+                                                <button
+                                                    key={dept.id}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setTargetDepartmentIds(
+                                                            (curr) =>
+                                                                toggleId(
+                                                                    curr,
+                                                                    dept.id,
+                                                                ),
+                                                        )
+                                                    }
+                                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                                                        active
+                                                            ? 'bg-[#2b5139] text-white'
+                                                            : 'border border-[#dce2d9] bg-white text-[#536055]'
+                                                    }`}
+                                                >
+                                                    {dept.code} · {dept.name}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Target Academic Programs */}
+                                <div>
+                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                        Target Academic Programs (
+                                        {targetProgramIds.length || 'All'})
+                                    </p>
+                                    <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
+                                        {programs.map((prog) => {
+                                            const active =
+                                                targetProgramIds.includes(
+                                                    prog.id,
+                                                );
+                                            return (
+                                                <button
+                                                    key={prog.id}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setTargetProgramIds(
+                                                            (curr) =>
+                                                                toggleId(
+                                                                    curr,
+                                                                    prog.id,
+                                                                ),
+                                                        )
+                                                    }
+                                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                                                        active
+                                                            ? 'bg-[#2b5139] text-white'
+                                                            : 'border border-[#dce2d9] bg-white text-[#536055]'
+                                                    }`}
+                                                >
+                                                    {prog.code}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Target Graduation Years / Batches */}
+                                <div>
+                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                        Target Graduation Batches (
+                                        {targetGraduationYears.length || 'All'})
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {Array.from(
+                                            new Set([
+                                                ...COHORT_YEAR_OPTIONS,
+                                                ...targetGraduationYears,
+                                            ]),
+                                        )
+                                            .sort((a, b) => b - a)
+                                            .map((yr) => {
+                                                const active =
+                                                    targetGraduationYears.includes(
+                                                        yr,
+                                                    );
+                                                return (
+                                                    <button
+                                                        key={yr}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setTargetGraduationYears(
+                                                                (curr) =>
+                                                                    toggleId(
+                                                                        curr,
+                                                                        yr,
+                                                                    ),
+                                                            )
+                                                        }
+                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
+                                                            active
+                                                                ? 'bg-[#2b5139] text-white'
+                                                                : 'border border-[#dce2d9] bg-white text-[#536055]'
+                                                        }`}
+                                                    >
+                                                        {yr}
+                                                    </button>
+                                                );
+                                            })}
+                                    </div>
+                                    <div className="mt-2 flex gap-1.5">
+                                        <input
+                                            type="number"
+                                            min={1950}
+                                            max={2100}
+                                            value={customYearInput}
+                                            onChange={(e) =>
+                                                setCustomYearInput(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="Add year (e.g. 2015)"
+                                            className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2.5 text-xs"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={addCustomBatchYear}
+                                            className="h-8 rounded-lg border border-[#dce2d9] bg-white px-3 text-[11px] font-semibold text-[#2b5139] hover:bg-[#edf2eb]"
+                                        >
+                                            Add Batch
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Dynamic Question Engine Builder */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-bold tracking-wider text-[#5f6c60] uppercase">
+                                Survey Questions
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={addQuestion}
+                                className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#cfe0cc] bg-[#edf2eb] px-3 text-xs font-semibold text-[#2b5139] hover:bg-[#e1ebe0]"
+                            >
+                                + Add question
+                            </button>
+                        </div>
+
+                        {questions.map((question, index) => (
+                            <div
+                                key={index}
+                                className="rounded-xl border border-[#e3e7df] bg-[#fcfcfa] p-4"
+                            >
+                                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                    <span className="text-xs font-bold text-[#2b5139]">
+                                        Question #{index + 1}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-[#536055]">
+                                            <input
+                                                type="checkbox"
+                                                checked={question.is_required}
+                                                onChange={(e) =>
+                                                    updateQuestion(index, {
+                                                        is_required:
+                                                            e.target.checked,
+                                                    })
+                                                }
+                                                className="accent-[#2b5139]"
+                                            />
+                                            Required
+                                        </label>
+                                        <button
+                                            type="button"
+                                            disabled={index === 0}
+                                            onClick={() =>
+                                                moveQuestion(index, -1)
+                                            }
+                                            className="rounded border border-[#e3e7df] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#536055] disabled:opacity-40"
+                                        >
+                                            ↑
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={
+                                                index === questions.length - 1
+                                            }
+                                            onClick={() =>
+                                                moveQuestion(index, 1)
+                                            }
+                                            className="rounded border border-[#e3e7df] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#536055] disabled:opacity-40"
+                                        >
+                                            ↓
+                                        </button>
+                                        {questions.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeQuestion(index)
+                                                }
+                                                className="rounded border border-[#ecd8d2] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#8b4e43]"
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
+                                    <label className="text-xs font-medium text-[#4d5a4f]">
+                                        {index === 0
+                                            ? 'First question'
+                                            : 'Question prompt'}
+                                        <input
+                                            required
+                                            value={question.prompt}
+                                            onChange={(event) =>
+                                                updateQuestion(index, {
+                                                    prompt: event.target.value,
+                                                })
+                                            }
+                                            placeholder="Enter question prompt…"
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                        />
+                                    </label>
+
+                                    <label className="text-xs font-medium text-[#4d5a4f]">
+                                        Question type
+                                        <select
+                                            value={question.type}
+                                            onChange={(event) =>
+                                                updateQuestion(index, {
+                                                    type: event.target.value,
+                                                })
+                                            }
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                        >
+                                            {BUILDER_QUESTION_TYPES.map(
+                                                (typeOption) => (
+                                                    <option
+                                                        key={typeOption.value}
+                                                        value={typeOption.value}
+                                                    >
+                                                        {typeOption.label}
+                                                    </option>
+                                                ),
+                                            )}
+                                        </select>
+                                    </label>
+                                </div>
+
+                                {requiresQuestionOptions(question.type) && (
+                                    <label className="mt-3 block text-xs font-medium text-[#4d5a4f]">
+                                        Answer choices (comma separated)
+                                        <input
+                                            required
+                                            value={question.options}
+                                            onChange={(event) =>
+                                                updateQuestion(index, {
+                                                    options: event.target.value,
+                                                })
+                                            }
+                                            placeholder="e.g., Very Relevant, Moderately Relevant, Not Relevant"
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                        />
+                                    </label>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 border-t border-[#eff0ec] pt-4">
                         <button
                             type="button"
-                            onClick={onCloseCreate}
+                            onClick={() => {
+                                resetBuilder();
+                                onCloseCreate();
+                            }}
                             className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
                         >
                             Cancel
@@ -3858,96 +4542,313 @@ export function SurveyCenter({
                             disabled={creating}
                             className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
                         >
-                            {creating ? 'Saving…' : 'Create survey'}
+                            {creating
+                                ? 'Saving…'
+                                : editingSurveyId !== null
+                                  ? 'Save changes'
+                                  : 'Create survey'}
                         </button>
                     </div>
                 </form>
             ) : null}
+
             {surveys.length ? (
-                surveys.map((survey) => (
-                    <article
-                        key={survey.id}
-                        className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
-                    >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                            <div className="min-w-0 flex-1">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <h2 className="text-sm font-semibold text-[#39463b]">
-                                        {survey.title}
-                                    </h2>
-                                    <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                        {survey.status}
-                                    </span>
+                surveys.map((survey) => {
+                    const hasCohortRules = Boolean(
+                        survey.target_department_ids?.length ||
+                            survey.target_program_ids?.length ||
+                            survey.target_graduation_years?.length,
+                    );
+
+                    return (
+                        <article
+                            key={survey.id}
+                            className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                        >
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <h2 className="text-sm font-semibold text-[#39463b]">
+                                            {survey.title}
+                                        </h2>
+                                        <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                                            {survey.status}
+                                        </span>
+                                        {survey.is_anonymous && (
+                                            <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-semibold text-[#2b5139]">
+                                                Anonymous
+                                            </span>
+                                        )}
+                                        {survey.responses_count !==
+                                            undefined && (
+                                            <span className="rounded-full bg-[#f4f5f2] px-2.5 py-1 text-[10px] font-semibold text-[#546055]">
+                                                {survey.responses_count}{' '}
+                                                {survey.responses_count === 1
+                                                    ? 'response'
+                                                    : 'responses'}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {survey.description ? (
+                                        <p className="mt-1 text-xs leading-5 text-[#7a8278]">
+                                            {survey.description}
+                                        </p>
+                                    ) : null}
+
+                                    {/* Cohort & Schedule Badges */}
+                                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[#7c847a]">
+                                        <span className="rounded bg-[#f6f7f4] px-2 py-0.5 font-medium">
+                                            {hasCohortRules
+                                                ? [
+                                                      survey
+                                                          .target_department_ids
+                                                          ?.length
+                                                          ? `${survey.target_department_ids.length} dept(s)`
+                                                          : null,
+                                                      survey.target_program_ids
+                                                          ?.length
+                                                          ? `${survey.target_program_ids.length} program(s)`
+                                                          : null,
+                                                      survey
+                                                          .target_graduation_years
+                                                          ?.length
+                                                          ? `Batches: ${survey.target_graduation_years.join(', ')}`
+                                                          : null,
+                                                  ]
+                                                      .filter(Boolean)
+                                                      .join(' · ')
+                                                : 'All alumni cohorts'}
+                                        </span>
+                                        {survey.starts_at && (
+                                            <span>
+                                                Opens{' '}
+                                                {new Date(
+                                                    survey.starts_at,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                        {survey.closes_at && (
+                                            <span>
+                                                Closes{' '}
+                                                {new Date(
+                                                    survey.closes_at,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                                {survey.description ? (
-                                    <p className="mt-1 text-xs leading-5 text-[#7a8278]">
-                                        {survey.description}
-                                    </p>
-                                ) : null}
-                                {survey.closes_at ? (
-                                    <p className="mt-2 text-[10px] text-[#858b82]">
-                                        Closes{' '}
-                                        {new Date(
-                                            survey.closes_at,
-                                        ).toLocaleDateString()}
-                                    </p>
-                                ) : null}
+
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {canViewAnalytics && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                void toggleAnalytics(survey.id)
+                                            }
+                                            className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-2 text-[11px] font-semibold text-[#3f5242] hover:bg-[#eff2ed]"
+                                        >
+                                            {activeAnalyticsId === survey.id
+                                                ? 'Hide analytics'
+                                                : 'Analytics'}
+                                        </button>
+                                    )}
+                                    {canManage &&
+                                        (survey.responses_count ?? 0) === 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    openEditSurvey(survey)
+                                                }
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-3 py-2 text-[11px] font-semibold text-[#526054] hover:bg-[#f6f7f4]"
+                                            >
+                                                Edit
+                                            </button>
+                                        )}
+                                    {canManage && survey.status === 'draft' ? (
+                                        <button
+                                            type="button"
+                                            disabled={publishing === survey.id}
+                                            onClick={() =>
+                                                void publishSurvey(survey.id)
+                                            }
+                                            className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                                        >
+                                            {publishing === survey.id
+                                                ? 'Publishing…'
+                                                : 'Publish'}
+                                        </button>
+                                    ) : null}
+                                    {canManage &&
+                                    survey.status === 'published' ? (
+                                        <button
+                                            type="button"
+                                            disabled={closing === survey.id}
+                                            onClick={() =>
+                                                void closeSurvey(survey.id)
+                                            }
+                                            className="rounded-lg border border-[#ecd8d2] bg-white px-3 py-2 text-[11px] font-semibold text-[#8b4e43] disabled:opacity-60"
+                                        >
+                                            {closing === survey.id
+                                                ? 'Closing…'
+                                                : 'Close survey'}
+                                        </button>
+                                    ) : null}
+                                </div>
                             </div>
-                            {canManage && survey.status === 'draft' ? (
-                                <button
-                                    type="button"
-                                    disabled={publishing === survey.id}
-                                    onClick={() =>
-                                        void publishSurvey(survey.id)
-                                    }
-                                    className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
-                                >
-                                    {publishing === survey.id
-                                        ? 'Publishing…'
-                                        : 'Publish'}
-                                </button>
-                            ) : null}
-                        </div>
-                        {canManage ? (
-                            <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
-                                {survey.questions.map((question) => (
-                                    <li
-                                        key={question.id}
-                                        className="text-[11px] text-[#6f786e]"
-                                    >
-                                        {question.prompt}{' '}
-                                        <span className="text-[#969c94] capitalize">
-                                            · {question.type}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : canRespond && survey.has_responded ? (
-                            <p className="mt-3 border-t border-[#eff0ec] pt-3 text-xs font-medium text-[#587057]">
-                                Your response has been submitted.
-                            </p>
-                        ) : canRespond ? (
-                            <SurveyResponseForm
-                                survey={survey}
-                                onSubmitted={reload}
-                            />
-                        ) : (
-                            <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
-                                {survey.questions.map((question) => (
-                                    <li
-                                        key={question.id}
-                                        className="text-[11px] text-[#6f786e]"
-                                    >
-                                        {question.prompt}{' '}
-                                        <span className="text-[#969c94] capitalize">
-                                            · {question.type}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </article>
-                ))
+
+                            {canManage ? (
+                                <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
+                                    {survey.questions.map((question, qIdx) => (
+                                        <li
+                                            key={question.id}
+                                            className="text-[11px] text-[#6f786e]"
+                                        >
+                                            {qIdx + 1}. {question.prompt}{' '}
+                                            <span className="text-[#969c94]">
+                                                ·{' '}
+                                                {QUESTION_TYPE_LABELS[
+                                                    question.type
+                                                ] ?? question.type}
+                                                {question.is_required
+                                                    ? ' (Required)'
+                                                    : ' (Optional)'}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : canRespond && survey.has_responded ? (
+                                <p className="mt-3 border-t border-[#eff0ec] pt-3 text-xs font-medium text-[#587057]">
+                                    Your response has been submitted.
+                                </p>
+                            ) : canRespond ? (
+                                <SurveyResponseForm
+                                    survey={survey}
+                                    onSubmitted={reload}
+                                />
+                            ) : (
+                                <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
+                                    {survey.questions.map((question, qIdx) => (
+                                        <li
+                                            key={question.id}
+                                            className="text-[11px] text-[#6f786e]"
+                                        >
+                                            {qIdx + 1}. {question.prompt}{' '}
+                                            <span className="text-[#969c94]">
+                                                ·{' '}
+                                                {QUESTION_TYPE_LABELS[
+                                                    question.type
+                                                ] ?? question.type}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {/* Inline Survey Analytics Breakdown */}
+                            {activeAnalyticsId === survey.id && (
+                                <div className="mt-4 rounded-xl border border-[#dfe6dc] bg-[#f8faf7] p-4">
+                                    {analyticsLoading ? (
+                                        <p className="text-xs text-[#6e776d]">
+                                            Loading survey response analytics…
+                                        </p>
+                                    ) : analyticsData ? (
+                                        <div className="space-y-4">
+                                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5eae2] pb-2.5">
+                                                <h3 className="text-xs font-bold text-[#2b5139] uppercase">
+                                                    Response Analytics ·{' '}
+                                                    {
+                                                        analyticsData.total_responses
+                                                    }{' '}
+                                                    Total Submissions
+                                                </h3>
+                                                <span className="text-[11px] text-[#687267]">
+                                                    {analyticsData.is_anonymous
+                                                        ? 'Anonymous mode active'
+                                                        : 'Identifiable responses'}
+                                                </span>
+                                            </div>
+                                            <div className="grid gap-3 md:grid-cols-2">
+                                                {analyticsData.questions.map(
+                                                    (q) => (
+                                                        <div
+                                                            key={q.id}
+                                                            className="rounded-xl border border-[#e6eae3] bg-white p-3.5"
+                                                        >
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <p className="text-xs font-semibold text-[#314034]">
+                                                                    {q.prompt}
+                                                                </p>
+                                                                <span className="shrink-0 text-[10px] font-medium text-[#69866c]">
+                                                                    {
+                                                                        q.answered_count
+                                                                    }{' '}
+                                                                    answered (
+                                                                    {
+                                                                        q.response_rate
+                                                                    }
+                                                                    %)
+                                                                </span>
+                                                            </div>
+                                                            {q.distribution
+                                                                .length > 0 ? (
+                                                                <div className="mt-2.5 space-y-1.5">
+                                                                    {q.distribution.map(
+                                                                        (d) => (
+                                                                            <div
+                                                                                key={
+                                                                                    d.label
+                                                                                }
+                                                                                className="text-[11px]"
+                                                                            >
+                                                                                <div className="flex justify-between text-[#556156]">
+                                                                                    <span className="truncate">
+                                                                                        {
+                                                                                            d.label
+                                                                                        }
+                                                                                    </span>
+                                                                                    <span className="font-semibold">
+                                                                                        {
+                                                                                            d.count
+                                                                                        }{' '}
+                                                                                        (
+                                                                                        {
+                                                                                            d.percentage
+                                                                                        }
+                                                                                        %)
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#eef1ec]">
+                                                                                    <div
+                                                                                        className="h-full rounded-full bg-[#4b7254]"
+                                                                                        style={{
+                                                                                            width: `${Math.min(100, d.percentage)}%`,
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        ),
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <p className="mt-2 text-[11px] text-[#8a9289]">
+                                                                    No responses
+                                                                    recorded for
+                                                                    this
+                                                                    question
+                                                                    yet.
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            )}
+                        </article>
+                    );
+                })
             ) : (
                 <EmptyState>
                     {canManage

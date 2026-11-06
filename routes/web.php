@@ -78,6 +78,8 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
     Route::post('/surveys', [SurveyController::class, 'store'])->name('api.surveys.store');
     Route::patch('/surveys/{survey}', [SurveyController::class, 'update'])->name('api.surveys.update');
     Route::post('/surveys/{survey}/publish', [SurveyController::class, 'publish'])->name('api.surveys.publish');
+    Route::post('/surveys/{survey}/close', [SurveyController::class, 'close'])->name('api.surveys.close');
+    Route::get('/surveys/{survey}/analytics', [SurveyController::class, 'analytics'])->name('api.surveys.analytics');
     Route::post('/surveys/{survey}/responses', [SurveyController::class, 'respond'])->name('api.surveys.respond');
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('api.announcements.index');
     Route::get('/announcements/manage', [AnnouncementController::class, 'manageIndex'])
