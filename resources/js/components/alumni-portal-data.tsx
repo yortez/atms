@@ -3718,11 +3718,8 @@ export function AcademicCatalog({
     createOpen: boolean;
     onCloseCreate: () => void;
 }) {
-    const { data, loading, error, reload } =
     const programsRes =
         useApiResource<ApiEnvelope<AcademicProgram[]>>('/api/programs');
-    const departments = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
-        createOpen ? '/api/departments' : null,
     const departmentsRes =
         useApiResource<ApiEnvelope<AcademicDepartment[]>>('/api/departments');
 
@@ -3876,86 +3873,73 @@ export function AcademicCatalog({
         event.preventDefault();
         setCreating(true);
         try {
-            await apiRequest<ApiEnvelope<AcademicProgram>>(
-                `/api/departments/${form.department_id}/programs`,
-                {
-                    let targetDeptId = form.department_id;
+            let targetDeptId = form.department_id;
 
-                    if(createNewDeptInline) {
-                        const newDeptRes = await apiRequest<
-                            ApiEnvelope<AcademicDepartment>
-                        >('/api/departments', {
-                            method: 'POST',
-                            body: {
-                                code: form.code,
-                                name: form.name,
-                                description: form.description || null,
-                                code: inlineDeptForm.code,
-                                name: inlineDeptForm.name,
-                                description: inlineDeptForm.description || null,
-                            },
-                        },
-                        );
-                    });
-            targetDeptId = String(newDeptRes.data.id);
-        }
-
-            if (editingProgramId !== null) {
-            await apiRequest<ApiEnvelope<AcademicProgram>>(
-                `/api/programs/${editingProgramId}`,
-                {
-                    method: 'PATCH',
-                    body: {
-                        department_id: Number(targetDeptId),
-                        code: form.code,
-                        name: form.name,
-                        description: form.description || null,
-                    },
-                },
-            );
-            toast.success('Academic program updated.');
-        } else {
-            await apiRequest<ApiEnvelope<AcademicProgram>>(
-                `/api/departments/${targetDeptId}/programs`,
-                {
+            if (createNewDeptInline) {
+                const newDeptRes = await apiRequest<
+                    ApiEnvelope<AcademicDepartment>
+                >('/api/departments', {
                     method: 'POST',
                     body: {
-                        code: form.code,
-                        name: form.name,
-                        description: form.description || null,
-                        degree_title: form.degree_title || null,
+                        code: inlineDeptForm.code,
+                        name: inlineDeptForm.name,
+                        description: inlineDeptForm.description || null,
                     },
-                },
-            );
-            toast.success('Academic program created.');
-        }
+                });
+                targetDeptId = String(newDeptRes.data.id);
+            }
 
-        setForm({
-            department_id: '',
-            code: '',
-            name: '',
-            description: '',
-            degree_title: '',
-        });
-        onCloseCreate();
-        reload();
-        toast.success('Academic program created.');
-        setInlineDeptForm({ code: '', name: '', description: '' });
-        closeProgramForm();
-        reloadAll();
-    } catch (error) {
-        toast.error(
-            error instanceof ApiError
-                ? error.message
-                : 'Academic program could not be created.',
+            if (editingProgramId !== null) {
+                await apiRequest<ApiEnvelope<AcademicProgram>>(
+                    `/api/programs/${editingProgramId}`,
+                    {
+                        method: 'PATCH',
+                        body: {
+                            department_id: Number(targetDeptId),
+                            code: form.code,
+                            name: form.name,
+                            description: form.description || null,
+                        },
+                    },
+                );
+                toast.success('Academic program updated.');
+            } else {
+                await apiRequest<ApiEnvelope<AcademicProgram>>(
+                    `/api/departments/${targetDeptId}/programs`,
+                    {
+                        method: 'POST',
+                        body: {
+                            code: form.code,
+                            name: form.name,
+                            description: form.description || null,
+                            degree_title: form.degree_title || null,
+                        },
+                    },
+                );
+                toast.success('Academic program created.');
+            }
+
+            setForm({
+                department_id: '',
+                code: '',
+                name: '',
+                description: '',
+                degree_title: '',
+            });
+            setInlineDeptForm({ code: '', name: '', description: '' });
+            closeProgramForm();
+            reloadAll();
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
                     : 'Academic program could not be saved.',
-        );
-    } finally {
-        setCreating(false);
+            );
+        } finally {
+            setCreating(false);
+        }
     }
-}
 
-if (loading) {
     async function addDegreeOffering(programId: number) {
         if (!degreeTitleInput.trim()) return;
         setSavingDegree(true);
@@ -3985,63 +3969,60 @@ if (loading) {
         return <LoadingState />;
     }
 
-    if (error) {
-        return <ErrorState message={error} />;
-        if (programsRes.error) {
-            return <ErrorState message={programsRes.error} />;
+    if (programsRes.error) {
+        return <ErrorState message={programsRes.error} />;
+    }
+
+    const departmentsList = departmentsRes.data?.data ?? [];
+    const programsList = programsRes.data?.data ?? [];
+    const totalDegrees = programsList.reduce(
+        (sum, p) => sum + (p.program_degrees?.length ?? 0),
+        0,
+    );
+
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    const filteredDepartments = departmentsList.filter((dept) => {
+        if (
+            selectedDepartmentFilter !== 'all' &&
+            String(dept.id) !== selectedDepartmentFilter
+        ) {
+            return false;
         }
-
-        const departmentsList = departmentsRes.data?.data ?? [];
-        const programsList = programsRes.data?.data ?? [];
-        const totalDegrees = programsList.reduce(
-            (sum, p) => sum + (p.program_degrees?.length ?? 0),
-            0,
-        );
-
-        const normalizedQuery = searchQuery.trim().toLowerCase();
-
-        const filteredDepartments = departmentsList.filter((dept) => {
-            if (
-                selectedDepartmentFilter !== 'all' &&
-                String(dept.id) !== selectedDepartmentFilter
-            ) {
-                return false;
-            }
-            if (!normalizedQuery) return true;
-            const deptMatches =
-                dept.code.toLowerCase().includes(normalizedQuery) ||
-                dept.name.toLowerCase().includes(normalizedQuery);
-            const progMatches = programsList
-                .filter((p) => p.department_id === dept.id)
-                .some(
-                    (p) =>
-                        p.code.toLowerCase().includes(normalizedQuery) ||
-                        p.name.toLowerCase().includes(normalizedQuery),
-                );
-            return deptMatches || progMatches;
-        });
-
-        const filteredPrograms = programsList.filter((prog) => {
-            if (
-                selectedDepartmentFilter !== 'all' &&
-                String(prog.department_id) !== selectedDepartmentFilter
-            ) {
-                return false;
-            }
-            if (!normalizedQuery) return true;
-            return (
-                prog.code.toLowerCase().includes(normalizedQuery) ||
-                prog.name.toLowerCase().includes(normalizedQuery) ||
-                (prog.department?.name.toLowerCase().includes(normalizedQuery) ??
-                    false)
+        if (!normalizedQuery) return true;
+        const deptMatches =
+            dept.code.toLowerCase().includes(normalizedQuery) ||
+            dept.name.toLowerCase().includes(normalizedQuery);
+        const progMatches = programsList
+            .filter((p) => p.department_id === dept.id)
+            .some(
+                (p) =>
+                    p.code.toLowerCase().includes(normalizedQuery) ||
+                    p.name.toLowerCase().includes(normalizedQuery),
             );
-        });
+        return deptMatches || progMatches;
+    });
 
+    const filteredPrograms = programsList.filter((prog) => {
+        if (
+            selectedDepartmentFilter !== 'all' &&
+            String(prog.department_id) !== selectedDepartmentFilter
+        ) {
+            return false;
+        }
+        if (!normalizedQuery) return true;
         return (
-            <div className="space-y-4">
-                {createOpen && (
-                    {/* Top Modular Action & Filter Toolbar */ }
-                    < div className="flex flex-col gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5">
+            prog.code.toLowerCase().includes(normalizedQuery) ||
+            prog.name.toLowerCase().includes(normalizedQuery) ||
+            (prog.department?.name.toLowerCase().includes(normalizedQuery) ??
+                false)
+        );
+    });
+
+    return (
+        <div className="space-y-4">
+            {/* Top Modular Action & Filter Toolbar */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full bg-[#edf2eb] px-3 py-1 text-xs font-semibold text-[#2b5139]">
@@ -4066,20 +4047,22 @@ if (loading) {
                             <button
                                 type="button"
                                 onClick={() => setViewMode('modular')}
-                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'modular'
+                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${
+                                    viewMode === 'modular'
                                         ? 'bg-white text-[#2b5139] shadow-2xs'
                                         : 'text-[#626c61] hover:text-[#29382e]'
-                                    }`}
+                                }`}
                             >
                                 Modular by Department
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setViewMode('grid')}
-                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'grid'
+                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${
+                                    viewMode === 'grid'
                                         ? 'bg-white text-[#2b5139] shadow-2xs'
                                         : 'text-[#626c61] hover:text-[#29382e]'
-                                    }`}
+                                }`}
                             >
                                 All Programs Grid
                             </button>
@@ -4115,10 +4098,11 @@ if (loading) {
                         <button
                             type="button"
                             onClick={() => setSelectedDepartmentFilter('all')}
-                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${selectedDepartmentFilter === 'all'
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                                selectedDepartmentFilter === 'all'
                                     ? 'bg-[#2b5139] text-white'
                                     : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                }`}
+                            }`}
                         >
                             All Departments ({departmentsList.length})
                         </button>
@@ -4137,10 +4121,11 @@ if (loading) {
                                             active ? 'all' : String(dept.id),
                                         )
                                     }
-                                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${active
+                                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                                        active
                                             ? 'bg-[#2b5139] text-white'
                                             : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                        }`}
+                                    }`}
                                 >
                                     {dept.code} ({count})
                                 </button>
@@ -4150,9 +4135,8 @@ if (loading) {
                 </div>
             </div>
 
-            {/* Create / Edit Department Form */ }
-        {
-            departmentFormOpen && (
+            {/* Create / Edit Department Form */}
+            {departmentFormOpen && (
                 <form
                     onSubmit={saveDepartment}
                     className="space-y-4 rounded-2xl border border-[#cfe0cc] bg-[#f8faf7] p-4 sm:p-5"
@@ -4240,45 +4224,19 @@ if (loading) {
                             {savingDepartment
                                 ? 'Saving…'
                                 : editingDepartmentId !== null
-                                    ? 'Save department'
-                                    : 'Create department'}
+                                  ? 'Save department'
+                                  : 'Create department'}
                         </button>
                     </div>
                 </form>
-            )
-        }
+            )}
 
-        {/* Create / Edit Academic Program Form */ }
-        {
-            isProgramModalActive && (
+            {/* Create / Edit Academic Program Form */}
+            {isProgramModalActive && (
                 <form
                     onSubmit={createProgram}
                     className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
                 >
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Department
-                        <select
-                            required
-                            value={form.department_id}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    department_id: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                        >
-                            <option value="">Select a department</option>
-                            {departments.data?.data.map((department) => (
-                                <option
-                                    key={department.id}
-                                    value={department.id}
-                                >
-                                    {department.name}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff0ec] pb-2.5 sm:col-span-2">
                         <div>
                             <h3 className="text-sm font-semibold text-[#29382e]">
@@ -4433,7 +4391,6 @@ if (loading) {
                     <div className="flex items-center justify-end gap-2 sm:col-span-2">
                         <button
                             type="button"
-                            onClick={onCloseCreate}
                             onClick={closeProgramForm}
                             className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
                         >
@@ -4444,329 +4401,313 @@ if (loading) {
                             disabled={creating}
                             className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
                         >
-                            {creating ? 'Saving…' : 'Add program'}
                             {creating
                                 ? 'Saving…'
                                 : editingProgramId !== null
-                                    ? 'Save changes'
-                                    : 'Add program'}
+                                  ? 'Save changes'
+                                  : 'Add program'}
                         </button>
                     </div>
-                    {departments.error ? (
-                        {
-                            departmentsRes.error ? (
-                                <p role="alert" className="text-xs text-[#8b4e43]">
-                                    {departments.error}
-                                    {departmentsRes.error}
-                                </p>
-                            ) : null
-                        }
+                    {departmentsRes.error ? (
+                        <p role="alert" className="text-xs text-[#8b4e43]">
+                            {departmentsRes.error}
+                        </p>
+                    ) : null}
                 </form>
-            )
-        }
-        {
-            data?.data.length ? (
+            )}
 
-                {/* Modular by Department View */ }
-            {
-                viewMode === 'modular' ? (
-                    filteredDepartments.length ? (
-                        <div className="space-y-4">
-                            {filteredDepartments.map((dept) => {
-                                const deptPrograms = programsList.filter(
-                                    (p) =>
-                                        p.department_id === dept.id &&
-                                        (!normalizedQuery ||
-                                            dept.code
-                                                .toLowerCase()
-                                                .includes(normalizedQuery) ||
-                                            dept.name
-                                                .toLowerCase()
-                                                .includes(normalizedQuery) ||
-                                            p.code
-                                                .toLowerCase()
-                                                .includes(normalizedQuery) ||
-                                            p.name
-                                                .toLowerCase()
-                                                .includes(normalizedQuery)),
-                                );
+            {/* Modular by Department View */}
+            {viewMode === 'modular' ? (
+                filteredDepartments.length ? (
+                    <div className="space-y-4">
+                        {filteredDepartments.map((dept) => {
+                            const deptPrograms = programsList.filter(
+                                (p) =>
+                                    p.department_id === dept.id &&
+                                    (!normalizedQuery ||
+                                        dept.code
+                                            .toLowerCase()
+                                            .includes(normalizedQuery) ||
+                                        dept.name
+                                            .toLowerCase()
+                                            .includes(normalizedQuery) ||
+                                        p.code
+                                            .toLowerCase()
+                                            .includes(normalizedQuery) ||
+                                        p.name
+                                            .toLowerCase()
+                                            .includes(normalizedQuery)),
+                            );
 
-                                return (
-                                    <section
-                                        key={dept.id}
-                                        className="rounded-2xl border border-[#e4e9e1] bg-white p-5"
-                                    >
-                                        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#eff1ed] pb-3.5">
-                                            <div>
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <span className="rounded-lg bg-[#2b5139] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white uppercase">
-                                                        {dept.code}
-                                                    </span>
-                                                    <h2 className="text-sm font-semibold text-[#29382e]">
-                                                        {dept.name}
-                                                    </h2>
-                                                    <span className="rounded-full bg-[#f2f4f0] px-2.5 py-0.5 text-[10px] font-semibold text-[#5b675c]">
-                                                        {deptPrograms.length}{' '}
-                                                        {deptPrograms.length === 1
-                                                            ? 'program'
-                                                            : 'programs'}
-                                                    </span>
-                                                </div>
-                                                {dept.description && (
-                                                    <p className="mt-1 text-xs text-[#737c72]">
-                                                        {dept.description}
-                                                    </p>
-                                                )}
+                            return (
+                                <section
+                                    key={dept.id}
+                                    className="rounded-2xl border border-[#e4e9e1] bg-white p-5"
+                                >
+                                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#eff1ed] pb-3.5">
+                                        <div>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="rounded-lg bg-[#2b5139] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white uppercase">
+                                                    {dept.code}
+                                                </span>
+                                                <h2 className="text-sm font-semibold text-[#29382e]">
+                                                    {dept.name}
+                                                </h2>
+                                                <span className="rounded-full bg-[#f2f4f0] px-2.5 py-0.5 text-[10px] font-semibold text-[#5b675c]">
+                                                    {deptPrograms.length}{' '}
+                                                    {deptPrograms.length === 1
+                                                        ? 'program'
+                                                        : 'programs'}
+                                                </span>
                                             </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        openEditDepartment(dept)
-                                                    }
-                                                    className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#536055] hover:bg-[#f6f7f4]"
-                                                >
-                                                    Edit department
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        openAddProgramForDepartment(
-                                                            dept.id,
-                                                        )
-                                                    }
-                                                    className="rounded-lg bg-[#edf2eb] px-3 py-1.5 text-[11px] font-semibold text-[#2b5139] hover:bg-[#dfe7dc]"
-                                                >
-                                                    + Add program here
-                                                </button>
-                                            </div>
+                                            {dept.description && (
+                                                <p className="mt-1 text-xs text-[#737c72]">
+                                                    {dept.description}
+                                                </p>
+                                            )}
                                         </div>
 
-                                        {deptPrograms.length ? (
-                                            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                                                {deptPrograms.map((program) => (
-                                                    <article
-                                                        key={program.id}
-                                                        className="flex flex-col justify-between rounded-xl border border-[#e9ebe5] bg-[#fafbf9] p-4"
-                                                    >
-                                                        <div>
-                                                            <div className="flex items-start justify-between gap-2">
-                                                                <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase">
-                                                                    {program.code}
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        openEditProgram(
-                                                                            program,
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    openEditDepartment(dept)
+                                                }
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#536055] hover:bg-[#f6f7f4]"
+                                            >
+                                                Edit department
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    openAddProgramForDepartment(
+                                                        dept.id,
+                                                    )
+                                                }
+                                                className="rounded-lg bg-[#edf2eb] px-3 py-1.5 text-[11px] font-semibold text-[#2b5139] hover:bg-[#dfe7dc]"
+                                            >
+                                                + Add program here
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {deptPrograms.length ? (
+                                        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                            {deptPrograms.map((program) => (
+                                                <article
+                                                    key={program.id}
+                                                    className="flex flex-col justify-between rounded-xl border border-[#e9ebe5] bg-[#fafbf9] p-4"
+                                                >
+                                                    <div>
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase">
+                                                                {program.code}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    openEditProgram(
+                                                                        program,
+                                                                    )
+                                                                }
+                                                                className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        </div>
+                                                        <h3 className="mt-2 text-sm font-semibold text-[#39463b]">
+                                                            {program.name}
+                                                        </h3>
+                                                        {program.description && (
+                                                            <p className="mt-1 text-xs text-[#7a8278]">
+                                                                {
+                                                                    program.description
+                                                                }
+                                                            </p>
+                                                        )}
+
+                                                        {program.program_degrees
+                                                            ?.length ? (
+                                                            <ul className="mt-3 space-y-1 border-t border-[#e8ece5] pt-2.5">
+                                                                {program.program_degrees.map(
+                                                                    (
+                                                                        offering,
+                                                                    ) => (
+                                                                        <li
+                                                                            key={
+                                                                                offering.id
+                                                                            }
+                                                                            className="text-[11px] text-[#5e685d]"
+                                                                        >
+                                                                            •{' '}
+                                                                            {
+                                                                                offering
+                                                                                    .degree
+                                                                                    .title
+                                                                            }
+                                                                        </li>
+                                                                    ),
+                                                                )}
+                                                            </ul>
+                                                        ) : (
+                                                            <p className="mt-3 border-t border-[#e8ece5] pt-2.5 text-[11px] text-[#969e95]">
+                                                                No degree
+                                                                offerings linked
+                                                                yet.
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="mt-3 pt-2">
+                                                        {addingDegreeProgramId ===
+                                                        program.id ? (
+                                                            <div className="flex gap-1.5">
+                                                                <input
+                                                                    type="text"
+                                                                    value={
+                                                                        degreeTitleInput
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) =>
+                                                                        setDegreeTitleInput(
+                                                                            e
+                                                                                .target
+                                                                                .value,
                                                                         )
                                                                     }
-                                                                    className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
-                                                                >
-                                                                    Edit
-                                                                </button>
-                                                            </div>
-                                                            <h3 className="mt-2 text-sm font-semibold text-[#39463b]">
-                                                                {program.name}
-                                                            </h3>
-                                                            {program.description && (
-                                                                <p className="mt-1 text-xs text-[#7a8278]">
-                                                                    {
-                                                                        program.description
+                                                                    placeholder="Degree title (e.g. BS in IT)"
+                                                                    className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2 text-[11px]"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={
+                                                                        savingDegree
                                                                     }
-                                                                </p>
-                                                            )}
-
-                                                            {program.program_degrees
-                                                                ?.length ? (
-                                                                <ul className="mt-3 space-y-1 border-t border-[#e8ece5] pt-2.5">
-                                                                    {program.program_degrees.map(
-                                                                        (
-                                                                            offering,
-                                                                        ) => (
-                                                                            <li
-                                                                                key={
-                                                                                    offering.id
-                                                                                }
-                                                                                className="text-[11px] text-[#5e685d]"
-                                                                            >
-                                                                                •{' '}
-                                                                                {
-                                                                                    offering
-                                                                                        .degree
-                                                                                        .title
-                                                                                }
-                                                                            </li>
-                                                                        ),
-                                                                    )}
-                                                                </ul>
-                                                            ) : (
-                                                                <p className="mt-3 border-t border-[#e8ece5] pt-2.5 text-[11px] text-[#969e95]">
-                                                                    No degree
-                                                                    offerings linked
-                                                                    yet.
-                                                                </p>
-                                                            )}
-                                                        </div>
-
-                                                        <div className="mt-3 pt-2">
-                                                            {addingDegreeProgramId ===
-                                                                program.id ? (
-                                                                <div className="flex gap-1.5">
-                                                                    <input
-                                                                        type="text"
-                                                                        value={
-                                                                            degreeTitleInput
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) =>
-                                                                            setDegreeTitleInput(
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            )
-                                                                        }
-                                                                        placeholder="Degree title (e.g. BS in IT)"
-                                                                        className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2 text-[11px]"
-                                                                    />
-                                                                    <button
-                                                                        type="button"
-                                                                        disabled={
-                                                                            savingDegree
-                                                                        }
-                                                                        onClick={() =>
-                                                                            void addDegreeOffering(
-                                                                                program.id,
-                                                                            )
-                                                                        }
-                                                                        className="h-8 rounded-lg bg-[#2b5139] px-2.5 text-[10px] font-semibold text-white"
-                                                                    >
-                                                                        Save
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            setAddingDegreeProgramId(
-                                                                                null,
-                                                                            );
-                                                                            setDegreeTitleInput(
-                                                                                '',
-                                                                            );
-                                                                        }}
-                                                                        className="h-8 rounded-lg border border-[#dce2d9] bg-white px-2 text-[10px] text-[#687267]"
-                                                                    >
-                                                                        ✕
-                                                                    </button>
-                                                                </div>
-                                                            ) : (
+                                                                    onClick={() =>
+                                                                        void addDegreeOffering(
+                                                                            program.id,
+                                                                        )
+                                                                    }
+                                                                    className="h-8 rounded-lg bg-[#2b5139] px-2.5 text-[10px] font-semibold text-white"
+                                                                >
+                                                                    Save
+                                                                </button>
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => {
                                                                         setAddingDegreeProgramId(
-                                                                            program.id,
+                                                                            null,
                                                                         );
                                                                         setDegreeTitleInput(
                                                                             '',
                                                                         );
                                                                     }}
-                                                                    className="text-[11px] font-semibold text-[#2b5139] hover:underline"
+                                                                    className="h-8 rounded-lg border border-[#dce2d9] bg-white px-2 text-[10px] text-[#687267]"
                                                                 >
-                                                                    + Add degree
-                                                                    offering
+                                                                    ✕
                                                                 </button>
-                                                            )}
-                                                        </div>
-                                                    </article>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="mt-3 rounded-xl border border-dashed border-[#dce2d9] bg-[#fafbf9] p-4 text-center text-xs text-[#7a8278]">
-                                                No academic programs under{' '}
-                                                <span className="font-semibold text-[#39463b]">
-                                                    {dept.name}
-                                                </span>{' '}
-                                                yet.{' '}
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        openAddProgramForDepartment(
-                                                            dept.id,
-                                                        )
-                                                    }
-                                                    className="font-semibold text-[#2b5139] hover:underline"
-                                                >
-                                                    Add the first program →
-                                                </button>
-                                            </div>
-                                        )}
-                                    </section>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <EmptyState>
-                            No academic departments match your filter. Click "+
-                            Create department" above to add one.
-                        </EmptyState>
-                    )
-                ) : filteredPrograms.length ? (
-                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                        {data.data.map((program) => (
-                            {
-                                filteredPrograms.map((program) => (
-                                    <article
-                                        key={program.id}
-                                        className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
-                                    >
-                                        <p className="text-[10px] font-semibold tracking-wide text-[#829080] uppercase">
-                                            {program.code}
-                                        </p>
-                                        <div className="flex items-start justify-between gap-2">
-                                            <p className="text-[10px] font-semibold tracking-wide text-[#829080] uppercase">
-                                                {program.code}
-                                            </p>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setAddingDegreeProgramId(
+                                                                        program.id,
+                                                                    );
+                                                                    setDegreeTitleInput(
+                                                                        '',
+                                                                    );
+                                                                }}
+                                                                className="text-[11px] font-semibold text-[#2b5139] hover:underline"
+                                                            >
+                                                                + Add degree
+                                                                offering
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </article>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="mt-3 rounded-xl border border-dashed border-[#dce2d9] bg-[#fafbf9] p-4 text-center text-xs text-[#7a8278]">
+                                            No academic programs under{' '}
+                                            <span className="font-semibold text-[#39463b]">
+                                                {dept.name}
+                                            </span>{' '}
+                                            yet.{' '}
                                             <button
                                                 type="button"
-                                                onClick={() => openEditProgram(program)}
-                                                className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
+                                                onClick={() =>
+                                                    openAddProgramForDepartment(
+                                                        dept.id,
+                                                    )
+                                                }
+                                                className="font-semibold text-[#2b5139] hover:underline"
                                             >
-                                                Edit
+                                                Add the first program →
                                             </button>
                                         </div>
-                                        <h2 className="mt-2 text-sm font-semibold text-[#39463b]">
-                                            {program.name}
-                                        </h2>
-                                        <p className="mt-1 text-xs text-[#7a8278]">
-                                            {program.department?.name ??
-                                                'Department not assigned'}
-                                        </p>
-                                        {program.program_degrees?.length ? (
-                                            <ul className="mt-4 space-y-1 border-t border-[#eff0ec] pt-3">
-                                                {program.program_degrees.map((offering) => (
-                                                    <li
-                                                        key={offering.id}
-                                                        className="text-[11px] text-[#6f786e]"
-                                                    >
-                                                        {offering.degree.title}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : null}
-                                    </article>
-                                ))
-                            }
-                </div>
+                                    )}
+                                </section>
+                            );
+                        })}
+                    </div>
                 ) : (
+                    <EmptyState>
+                        No academic departments match your filter. Click "+
+                        Create department" above to add one.
+                    </EmptyState>
+                )
+            ) : filteredPrograms.length ? (
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {filteredPrograms.map((program) => (
+                        <article
+                            key={program.id}
+                            className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
+                        >
+                            <div className="flex items-start justify-between gap-2">
+                                <p className="text-[10px] font-semibold tracking-wide text-[#829080] uppercase">
+                                    {program.code}
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => openEditProgram(program)}
+                                    className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
+                                >
+                                    Edit
+                                </button>
+                            </div>
+                            <h2 className="mt-2 text-sm font-semibold text-[#39463b]">
+                                {program.name}
+                            </h2>
+                            <p className="mt-1 text-xs text-[#7a8278]">
+                                {program.department?.name ??
+                                    'Department not assigned'}
+                            </p>
+                            {program.program_degrees?.length ? (
+                                <ul className="mt-4 space-y-1 border-t border-[#eff0ec] pt-3">
+                                    {program.program_degrees.map((offering) => (
+                                        <li
+                                            key={offering.id}
+                                            className="text-[11px] text-[#6f786e]"
+                                        >
+                                            {offering.degree.title}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : null}
+                        </article>
+                    ))}
+                </div>
+            ) : (
                 <EmptyState>
                     No academic programs have been configured.
                 </EmptyState>
-            )
-            }
-        </div >
+            )}
+        </div>
     );
-        }
+}
 
         type RawPagination<T> = {
             data: T[];
@@ -4858,7 +4799,7 @@ if (loading) {
                     onSubmit={submit}
                     className="mt-4 space-y-3.5 rounded-2xl bg-[#f3f6f2] p-4 sm:p-5"
                 >
-                    {/* Google Forms Respondent Header Card */}
+                    {/* Respondent Header Card */}
                     <div className="rounded-xl border border-[#dce4d9] border-t-8 border-t-[#2b5139] bg-white p-4 shadow-2xs">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className="text-[11px] font-semibold text-[#2b5139]">
