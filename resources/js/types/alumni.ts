@@ -274,6 +274,7 @@ export type RegistrationAssistanceRequest = {
     date_of_birth: string;
     student_number: string;
     academic_program_id: number | null;
+    graduation_year?: number | null;
     program?: {
         id: number;
         code: string;
@@ -281,9 +282,36 @@ export type RegistrationAssistanceRequest = {
     } | null;
     message: string | null;
     status: 'pending' | 'reviewed' | 'needs_more_information' | 'rejected';
+    resolution_action?: 'sync_record' | 'create_record' | 'provision_account' | 'manual_review' | null;
+    resolved_alumni_profile_id?: number | null;
     created_at: string;
     reviewed_at: string | null;
+    reviewed_by?: {
+        id: number;
+        name: string;
+    } | null;
     review_note: string | null;
+    registrar_match?: {
+        found: boolean;
+        match_status:
+            | 'not_found'
+            | 'already_claimed'
+            | 'ready_to_claim'
+            | 'dob_mismatch'
+            | 'name_mismatch'
+            | 'multiple_mismatches';
+        summary: string;
+        recommended_action: 'create_record' | 'sync_record' | 'provision_account' | 'manual_review';
+        profile: {
+            id: number;
+            name: string;
+            email: string;
+            date_of_birth: string | null;
+            is_claimed: boolean;
+            program_code?: string | null;
+            graduation_year?: number | null;
+        } | null;
+    };
 };
 
 export type DashboardStatistics = {

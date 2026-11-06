@@ -168,6 +168,38 @@ flowchart TD
   * Toggle between **Modular by Department** (where each Department card groups its own Academic Programs with quick actions like `+ Add program here` and `Edit department`) and **All Programs Grid**.
   * Supports editing existing programs (`PATCH /api/programs/{program}`), creating an initial degree offering on program creation, and adding additional degree offerings inline (`POST /api/programs/{program}/degrees`).
 
+### Milestone 15: Announcements Lifecycle & Targeting Overhaul (P1–P5)
+* **Full CRUD & Publishing Lifecycle (`AnnouncementController.php`, `AnnouncementCenter` in `resources/js/components/alumni-portal-data.tsx`)**:
+  * Added `PATCH /api/announcements/{announcement}` and `DELETE /api/announcements/{announcement}` supporting full editing, Draft / Published / Archived status transitions, and safe deletion with confirmation.
+* **Cohort & Program Audience Targeting (P2)**:
+  * Announcements can be targeted not only by role (`audience_roles`), but also by specific Academic Programs (`target_program_ids`) and Graduation Batch Years (`target_graduation_years`).
+  * Department Coordinators are automatically scoped to target only their assigned academic programs.
+* **Categories, Pinning, Expiry & Public Visibility (P3–P4)**:
+  * Added announcement categories (`general`, `event`, `career`, `scholarship`, `survey`, `urgent`), `is_pinned` priority ordering, `expires_at` automatic expiration, `is_public` toggle for the public landing page (`welcome.tsx`), and optional action CTA (`action_label`, `action_url`).
+* **Automated In-App Notifications & Filtering (P5)**:
+  * Publishing an announcement with `notify_audience` dispatches in-app notifications to matching targeted users (`user_notifications`), and `AnnouncementCenter` provides search, status filter pills (`All`, `Pinned`, `Published`, `Drafts`, `Archived`), and category filtering.
+
+### Milestone 16: Dedicated Alumni Events & RSVP Module
+* **Database Schema & Models (`2026_11_06_000004_create_alumni_events_tables.php`, `AlumniEvent.php`, `AlumniEventRegistration.php`)**:
+  * Created `alumni_events` (`event_type`: `homecoming`, `career_fair`, `webinar`, `networking`, `workshop`, `general`; `format`: `in_person`, `online`, `hybrid`; `venue`, `meeting_url`, `starts_at`, `ends_at`, `registration_deadline`, `capacity`, `is_featured`, `is_public`, `audience_roles`, `target_program_ids`, `target_graduation_years`) and `alumni_event_registrations` (`rsvp_status`: `going`, `interested`, `cancelled`).
+* **Event Management & RSVP API (`EventController.php`)**:
+  * Full CRUD (`GET/POST /api/events`, `PATCH/DELETE /api/events/{event}`), one-click alumni/employer RSVP (`POST /api/events/{event}/rsvp`) with capacity and deadline enforcement, and organizer attendee roster (`GET /api/events/{event}/attendees`).
+  * Integrated into the navigation sidebar across all 5 workspaces (`alumni-portal.tsx`) and the public landing page (`PublicPortalController.php`, `welcome.tsx`).
+
+### Milestone 17: Claim Assistance (`RegistrationAssistance`) Diagnostics & Resolution Workflows (P1–P4)
+* **Automated Registrar Match Diagnostics (P1 — `RegistrationAssistanceController::index()`)**:
+  * Automatically cross-references each claim request's `student_number`, `date_of_birth`, and `name` against official `alumni_education_records` and `alumni_profiles`.
+  * Computes live diagnostic badges (`not_found`, `already_claimed`, `ready_to_claim`, `dob_mismatch`, `name_mismatch`, `multiple_mismatches`), human-readable summaries, recommended resolution actions, and a side-by-side comparison (*Submitted Claim Details vs. Official Registrar Record*).
+* **Actionable One-Click Resolution Workflows (P2 — `RegistrationAssistanceController::update()`)**:
+  * Approving a claim request now executes a real registrar resolution action inside a database transaction:
+    * **`sync_record`**: Synchronizes the official `AlumniProfile` (`name`, `date_of_birth`, `email`) with the verified submission so the graduate can immediately self-register at `/register`.
+    * **`create_record`**: Creates a missing `AlumniProfile` and `alumni_education_records` entry (linked to the selected `academic_program_id` and `graduation_year`) for unimported graduates.
+    * **`provision_account`**: Synchronizes/creates the `AlumniProfile` and immediately provisions a verified `User` account with the `alumni` role and a temporary password.
+    * **`manual_review`**: Marks the request reviewed without modifying the underlying alumni record.
+* **Queue History Filters & Applicant Reference Status Checker (P3–P4)**:
+  * Upgraded `RegistrationAssistanceQueue` (`resources/js/components/alumni-portal-data.tsx`) with status filter tabs (`Pending`, `Needs Info`, `Resolved`, `Rejected`, `All History`) and search by name, student number, or email.
+  * Upgraded `resources/js/pages/auth/registration-assistance.tsx` and `AlumniRegistrationAssistanceController.php` with an Academic Program selector, Graduation Year field, and a self-service **Check Request Status** tab (`lookup_reference` + `lookup_identifier`) displaying the coordinator's decision, review note, and direct sign-in/registration links.
+
 ---
 
 ## 3. Automated Test Suite Status
@@ -176,6 +208,9 @@ Executed via `php artisan test`:
 
 | Test Suite File | Tests | Assertions | Status |
 | :--- | :---: | :---: | :---: |
+| `tests/Feature/Api/AnnouncementManagementTest.php` | 2 | 29 | **Passed** |
+| `tests/Feature/Api/EventManagementTest.php` | 2 | 23 | **Passed** |
+| `tests/Feature/Api/RegistrationAssistanceWorkflowTest.php` | 4 | 22 | **Passed** |
 | `tests/Feature/Api/SurveyBuilderTargetingTest.php` | 1 | 19 | **Passed** |
 | `tests/Feature/Api/SystemAdminUserManagementTest.php` | 9 | 78 | **Passed** |
 | `tests/Feature/PublicPortalAndRegistrationTest.php` | 2 | 49 | **Passed** |
@@ -192,7 +227,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Auth/TwoFactorAuthenticationTest.php` | 6 | 22 | **Passed** |
 | `tests/Feature/Settings/ProfileUpdateTest.php` | 8 | 44 | **Passed** |
 | `tests/Feature/Settings/SecurityTest.php` | 6 | 28 | **Passed** |
-| **Total Test Suite** | **99** | **794** | **100% Passed** |
+| **Total Test Suite** | **107** | **862** | **100% Passed** |
 
 ---
 
@@ -200,11 +235,11 @@ Executed via `php artisan test`:
 
 | Role | Available Workspace Modules | Data Scope |
 | :--- | :--- | :--- |
-| **System Administrator** | Overview, Notifications, Alumni Directory, Claim Assistance, Academic Programs, Surveys (Visual Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF), Users & Roles (with Program Scoping & Permissions Matrix), Activity Log | Institution-wide |
-| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Claim Assistance, Surveys (Visual Builder), Announcements, Employers & Jobs, Reports (18 Reports + Excel/PDF) | Institution-wide |
-| **Department Coordinator** | Overview, Notifications, Program Alumni, Claim Assistance Queue, Employment Outcomes, Surveys, Announcements, Department Reports (18 Reports Scoped) | Assigned Programs Only (Option A) |
-| **Alumni** | My Dashboard, Notifications, My Profile, Academic Records, Employment Tracer (Option B), Surveys, Announcements, Career Opportunities, My Applications | Self-profile Only |
-| **Employer** | Overview, Notifications, Company Profile, Job Postings, Applicants (with Frozen Snapshots & Resumes), Recruitment Analytics | Owned Postings Only |
+| **System Administrator** | Overview, Notifications, Alumni Directory, Claim Assistance (Diagnostics & Resolution), Academic Programs (Modular Dept View), Surveys (Visual Builder), Announcements (Targeted), Events (RSVP & Roster), Employers & Jobs, Reports (18 Reports + Excel/PDF), Users & Roles (with Program Scoping & Permissions Matrix), Activity Log | Institution-wide |
+| **Alumni Coordinator** | Overview, Notifications, Alumni Directory (with CSV Import), Claim Assistance (Diagnostics & Resolution), Surveys (Visual Builder), Announcements (Targeted), Events (RSVP & Roster), Employers & Jobs, Reports (18 Reports + Excel/PDF) | Institution-wide |
+| **Department Coordinator** | Overview, Notifications, Program Alumni, Claim Assistance Queue (Scoped), Employment Outcomes, Surveys, Announcements (Scoped), Events (Scoped), Department Reports (18 Reports Scoped) | Assigned Programs Only (Option A) |
+| **Alumni** | My Dashboard, Notifications, My Profile, Academic Records, Employment Tracer (Option B), Surveys, Announcements, Events (One-click RSVP), Career Opportunities, My Applications | Self-profile Only |
+| **Employer** | Overview, Notifications, Company Profile, Job Postings, Applicants (with Frozen Snapshots & Resumes), Events, Recruitment Analytics | Owned Postings Only |
 
 ---
 
