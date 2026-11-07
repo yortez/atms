@@ -298,6 +298,9 @@ export default function Welcome({
     const [selectedEvent, setSelectedEvent] = useState<PublicEvent | null>(
         null,
     );
+    const [selectedLegalDoc, setSelectedLegalDoc] = useState<
+        'terms' | 'privacy' | null
+    >(null);
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
     const lenisRef = useRef<Lenis | null>(null);
 
@@ -353,12 +356,17 @@ export default function Welcome({
             return;
         }
 
-        if (selectedJob || selectedAnnouncement || selectedEvent) {
+        if (
+            selectedJob ||
+            selectedAnnouncement ||
+            selectedEvent ||
+            selectedLegalDoc
+        ) {
             lenis.stop();
         } else {
             lenis.start();
         }
-    }, [selectedJob, selectedAnnouncement, selectedEvent]);
+    }, [selectedJob, selectedAnnouncement, selectedEvent, selectedLegalDoc]);
 
     const scrollToSection = (selector: string) => {
         if (typeof window === 'undefined') {
@@ -373,7 +381,7 @@ export default function Welcome({
         }
     };
 
-    // Deep-linking support (Option A: /?job=ID, /?event=ID, /?announcement=ID)
+    // Deep-linking support (Option A: /?job=ID, /?event=ID, /?announcement=ID, /?legal=terms|privacy)
     useEffect(() => {
         if (typeof window === 'undefined') {
             return;
@@ -384,8 +392,11 @@ export default function Welcome({
             const jobId = Number(params.get('job'));
             const eventId = Number(params.get('event'));
             const announcementId = Number(params.get('announcement'));
+            const legalParam = params.get('legal');
 
-            if (jobId) {
+            if (legalParam === 'terms' || legalParam === 'privacy') {
+                setSelectedLegalDoc(legalParam);
+            } else if (jobId) {
                 const match = publicJobs.find((item) => item.id === jobId);
                 if (match) {
                     setSelectedJob(match);
@@ -414,8 +425,8 @@ export default function Welcome({
     }, [publicJobs, publicEvents, publicAnnouncements]);
 
     const updateDeepLinkParam = (
-        type: 'job' | 'event' | 'announcement' | null,
-        id?: number,
+        type: 'job' | 'event' | 'announcement' | 'legal' | null,
+        value?: number | string,
     ) => {
         if (typeof window === 'undefined') {
             return;
@@ -424,8 +435,9 @@ export default function Welcome({
         url.searchParams.delete('job');
         url.searchParams.delete('event');
         url.searchParams.delete('announcement');
-        if (type && id) {
-            url.searchParams.set(type, String(id));
+        url.searchParams.delete('legal');
+        if (type && value !== undefined) {
+            url.searchParams.set(type, String(value));
         }
         window.history.replaceState({}, '', url.toString());
     };
@@ -433,6 +445,7 @@ export default function Welcome({
     const openJobModal = (job: PublicJob) => {
         setSelectedAnnouncement(null);
         setSelectedEvent(null);
+        setSelectedLegalDoc(null);
         setSelectedJob(job);
         updateDeepLinkParam('job', job.id);
     };
@@ -440,6 +453,7 @@ export default function Welcome({
     const openAnnouncementModal = (item: PublicAnnouncement) => {
         setSelectedJob(null);
         setSelectedEvent(null);
+        setSelectedLegalDoc(null);
         setSelectedAnnouncement(item);
         updateDeepLinkParam('announcement', item.id);
     };
@@ -447,14 +461,24 @@ export default function Welcome({
     const openEventModal = (ev: PublicEvent) => {
         setSelectedJob(null);
         setSelectedAnnouncement(null);
+        setSelectedLegalDoc(null);
         setSelectedEvent(ev);
         updateDeepLinkParam('event', ev.id);
+    };
+
+    const openLegalModal = (doc: 'terms' | 'privacy') => {
+        setSelectedJob(null);
+        setSelectedAnnouncement(null);
+        setSelectedEvent(null);
+        setSelectedLegalDoc(doc);
+        updateDeepLinkParam('legal', doc);
     };
 
     const closeAllModals = () => {
         setSelectedJob(null);
         setSelectedAnnouncement(null);
         setSelectedEvent(null);
+        setSelectedLegalDoc(null);
         updateDeepLinkParam(null);
     };
 
@@ -506,49 +530,6 @@ export default function Welcome({
         <>
             <Head title="SEAIT | Alumni Tracer Management System · South East Asian Institute of Technology, Inc." />
             <div className="min-h-screen bg-[#F5F4EE] font-sans text-zinc-900 antialiased transition-colors duration-200 selection:bg-[#E47818] selection:text-white dark:bg-[#0E1406] dark:text-[#F5F4EE]">
-                {/* Institutional Campus Top Bar (seait.edu.ph pattern) */}
-                <div className="border-b border-zinc-200/80 bg-[#0A1006] text-xs text-[#F5F4EE]/80 dark:border-[#005244]/35">
-                    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-2.5 sm:px-8">
-                        <div className="flex items-center gap-2">
-                            <span className="size-1.5 shrink-0 animate-pulse rounded-full bg-orange-400" />
-                            <span className="font-heading text-[11px] font-bold tracking-wider text-[#F5F4EE] uppercase">
-                                South East Asian Institute of Technology, Inc.
-                            </span>
-                            <span className="hidden text-[#F5F4EE]/35 md:inline">
-                                ·
-                            </span>
-                            <span className="hidden text-[11px] font-medium text-[#6BA886] md:inline">
-                                National Highway, Crossing Rubber, Tupi, South Cotabato 9505
-                            </span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-4 text-[11px]">
-                            <a
-                                href="mailto:support@seait.edu.ph"
-                                className="inline-flex items-center gap-1.5 transition hover:text-orange-400"
-                            >
-                                <Mail className="size-3.5 text-orange-400" />
-                                support@seait.edu.ph
-                            </a>
-                            <a
-                                href="tel:+63832281234"
-                                className="hidden items-center gap-1.5 transition hover:text-orange-400 sm:inline-flex"
-                            >
-                                <Phone className="size-3.5 text-orange-400" />
-                                +63 (083) 228-1234
-                            </a>
-                            <a
-                                href="https://www.facebook.com/SEAITOfficial"
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 font-semibold text-[#6BA886] transition hover:text-orange-400"
-                            >
-                                Visit SEAIT on Facebook
-                                <ExternalLink className="size-3" />
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Sticky Glass Navigation Header (seait.edu.ph Light & Dark glass pattern) */}
                 <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md transition-colors duration-200 dark:border-[#006d5b]/25 dark:bg-[#081110]/90">
                     <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-8">
@@ -2002,6 +1983,28 @@ export default function Welcome({
                                         </Link>
                                     </li>
                                     <li>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                openLegalModal('terms')
+                                            }
+                                            className="cursor-pointer text-left transition hover:text-orange-400"
+                                        >
+                                            Terms & Conditions
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                openLegalModal('privacy')
+                                            }
+                                            className="cursor-pointer text-left transition hover:text-orange-400"
+                                        >
+                                            Data Privacy Policy (RA 10173)
+                                        </button>
+                                    </li>
+                                    <li>
                                         <a
                                             href="https://seait.edu.ph/"
                                             target="_blank"
@@ -2022,10 +2025,28 @@ export default function Welcome({
                                 Institute of Technology, Inc. (SEAIT). All
                                 rights reserved.
                             </p>
-                            <p>
-                                Crossing Rubber, Tupi, South Cotabato,
-                                Philippines 9505
-                            </p>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => openLegalModal('terms')}
+                                    className="cursor-pointer transition hover:text-zinc-300"
+                                >
+                                    Terms & Conditions
+                                </button>
+                                <span>·</span>
+                                <button
+                                    type="button"
+                                    onClick={() => openLegalModal('privacy')}
+                                    className="cursor-pointer transition hover:text-zinc-300"
+                                >
+                                    Privacy Policy
+                                </button>
+                                <span className="hidden sm:inline">·</span>
+                                <span className="hidden sm:inline">
+                                    Crossing Rubber, Tupi, South Cotabato,
+                                    Philippines 9505
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </footer>
@@ -2309,6 +2330,957 @@ export default function Welcome({
                                     : 'Claim Account to RSVP'}
                                 <ArrowRight className="ml-2 size-3.5" />
                             </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Official SEAIT Terms & Conditions / Privacy Policy Modal (Exact seait.edu.ph Legal Content) */}
+            {selectedLegalDoc && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="public-legal-title"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+                >
+                    <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-[#F5F4EE] text-zinc-900 shadow-2xl dark:border-white/15 dark:bg-[#0E1406] dark:text-[#F5F4EE]">
+                        {/* Modal Header with Tab Switcher */}
+                        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 bg-white px-6 py-4 dark:border-white/10 dark:bg-[#15190B]">
+                            <div>
+                                <span className="inline-flex items-center gap-1.5 font-heading text-[10px] font-bold tracking-wider text-[#E47818] uppercase dark:text-orange-400">
+                                    <ShieldCheck className="size-3.5" />
+                                    {selectedLegalDoc === 'terms'
+                                        ? 'Institutional Governance & Terms'
+                                        : 'RA 10173 Data Privacy Act Compliance'}
+                                </span>
+                                <h2
+                                    id="public-legal-title"
+                                    className="mt-0.5 font-heading text-xl font-extrabold text-zinc-900 sm:text-2xl dark:text-white"
+                                >
+                                    {selectedLegalDoc === 'terms' ? (
+                                        <>
+                                            Terms &{' '}
+                                            <span className="text-[#E47818]">
+                                                Conditions
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            Privacy{' '}
+                                            <span className="text-[#E47818]">
+                                                Policy
+                                            </span>
+                                        </>
+                                    )}
+                                </h2>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <div className="flex rounded-xl border border-zinc-200 bg-zinc-100 p-1 text-xs font-semibold dark:border-white/10 dark:bg-[#0A1006]">
+                                    <button
+                                        type="button"
+                                        onClick={() => openLegalModal('terms')}
+                                        className={`rounded-lg px-3 py-1.5 transition ${
+                                            selectedLegalDoc === 'terms'
+                                                ? 'bg-[#E47818] text-white shadow-2xs'
+                                                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                                        }`}
+                                    >
+                                        Terms & Conditions
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            openLegalModal('privacy')
+                                        }
+                                        className={`rounded-lg px-3 py-1.5 transition ${
+                                            selectedLegalDoc === 'privacy'
+                                                ? 'bg-[#E47818] text-white shadow-2xs'
+                                                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                                        }`}
+                                    >
+                                        Privacy Policy
+                                    </button>
+                                </div>
+                                <button
+                                    type="button"
+                                    aria-label="Close legal document"
+                                    onClick={closeAllModals}
+                                    className="flex size-9 items-center justify-center rounded-full border border-zinc-200 text-zinc-500 transition hover:border-[#E47818] hover:text-[#E47818] dark:border-white/15 dark:text-zinc-300"
+                                >
+                                    <X className="size-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Scrollable Body */}
+                        <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+                            {selectedLegalDoc === 'terms' ? (
+                                <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                                    {/* Sidebar Directory & Legal Desk */}
+                                    <aside className="space-y-4 lg:col-span-4">
+                                        <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <span className="mb-2.5 block font-heading text-[11px] font-bold tracking-widest text-[#E47818] uppercase">
+                                                Terms Directory
+                                            </span>
+                                            <ul className="space-y-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                                                {[
+                                                    [
+                                                        '01',
+                                                        'Acceptance & Institutional Scope',
+                                                    ],
+                                                    [
+                                                        '02',
+                                                        'Campus Acceptable Use Policy (AUP)',
+                                                    ],
+                                                    [
+                                                        '03',
+                                                        'Authorized Access & RA 10175',
+                                                    ],
+                                                    [
+                                                        '04',
+                                                        'Intellectual Property & Copyright',
+                                                    ],
+                                                    [
+                                                        '05',
+                                                        'Limitation of Liability & External Links',
+                                                    ],
+                                                    [
+                                                        '06',
+                                                        'Governing Law & Dispute Resolution',
+                                                    ],
+                                                ].map(([num, label]) => (
+                                                    <li
+                                                        key={num}
+                                                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5"
+                                                    >
+                                                        <span className="flex size-5 shrink-0 items-center justify-center rounded-md border border-orange-200/60 bg-orange-50 text-[10px] font-bold text-[#E47818] dark:border-orange-900/50 dark:bg-orange-950/50">
+                                                            {num}
+                                                        </span>
+                                                        <span className="truncate">
+                                                            {label}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+
+                                        <div className="space-y-2.5 rounded-2xl border border-zinc-800 bg-[#050D0C] p-5 text-white shadow-md">
+                                            <span className="block font-heading text-[11px] font-bold tracking-widest text-orange-400 uppercase">
+                                                Institutional Legal Desk
+                                            </span>
+                                            <h3 className="font-heading text-sm font-bold">
+                                                Questions on Governance?
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-300">
+                                                For questions regarding website
+                                                terms, copyright clearances, or
+                                                institutional policies, reach
+                                                out to the Administration
+                                                Office.
+                                            </p>
+                                            <div className="space-y-1 pt-1 text-xs text-zinc-400">
+                                                <div>
+                                                    <strong className="text-white">
+                                                        Location:
+                                                    </strong>{' '}
+                                                    Crossing Rubber, Tupi, South
+                                                    Cotabato
+                                                </div>
+                                                <div>
+                                                    <strong className="text-white">
+                                                        Email:
+                                                    </strong>{' '}
+                                                    <a
+                                                        href="mailto:support@seait.edu.ph"
+                                                        className="text-orange-400 hover:underline"
+                                                    >
+                                                        support@seait.edu.ph
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </aside>
+
+                                    {/* 6 Official Terms Articles */}
+                                    <div className="space-y-5 lg:col-span-8">
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-orange-200/60 bg-orange-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-[#E47818] uppercase dark:border-orange-900/50 dark:bg-orange-950/50">
+                                                    Section 01
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Binding Institutional Agreement
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Acceptance of Terms & Scope
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Welcome to the official
+                                                institutional portal of{' '}
+                                                <strong>
+                                                    South East Asian Institute
+                                                    of Technology, Inc. (SEAIT)
+                                                </strong>
+                                                . By accessing, browsing, or
+                                                using this website, you
+                                                acknowledge that you have read,
+                                                understood, and agree to be
+                                                bound by these Terms and
+                                                Conditions, together with our{' '}
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openLegalModal(
+                                                            'privacy',
+                                                        )
+                                                    }
+                                                    className="font-semibold text-[#E47818] hover:underline"
+                                                >
+                                                    Privacy Policy
+                                                </button>{' '}
+                                                and all applicable Philippine
+                                                laws and regulations.
+                                            </p>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                If you do not agree with any
+                                                part of these Terms, you must
+                                                discontinue your use of this
+                                                digital portal immediately.
+                                            </p>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-amber-200/60 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-amber-700 uppercase dark:border-amber-900/50 dark:bg-amber-950/50 dark:text-amber-300">
+                                                    Section 02
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Campus Rule
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Campus Acceptable Use Policy
+                                                (AUP)
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Students, faculty, staff,
+                                                alumni, and visitors accessing
+                                                the SEAIT network, online
+                                                pre-registration portals, alumni
+                                                tracer hubs, and institutional
+                                                digital resources must conduct
+                                                themselves ethically and
+                                                responsibly.
+                                            </p>
+                                            <div className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-4 text-xs dark:border-white/10 dark:bg-[#0A1006]">
+                                                <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                    Prohibited Activities
+                                                    include:
+                                                </h4>
+                                                <ul className="mt-2 list-disc space-y-1.5 pl-5 text-zinc-600 dark:text-zinc-300">
+                                                    <li>
+                                                        Submitting fraudulent
+                                                        academic documents,
+                                                        counterfeit
+                                                        identification, or
+                                                        falsified personal
+                                                        information during
+                                                        account claiming or
+                                                        inquiry submission.
+                                                    </li>
+                                                    <li>
+                                                        Attempting unauthorized
+                                                        vulnerability probing,
+                                                        penetration testing,
+                                                        denial of service (DoS),
+                                                        or packet interception
+                                                        against SEAIT servers.
+                                                    </li>
+                                                    <li>
+                                                        Disseminating unlawful,
+                                                        defamatory, harassing,
+                                                        or sexually explicit
+                                                        content through
+                                                        institutional contact
+                                                        forms or communication
+                                                        channels.
+                                                    </li>
+                                                    <li>
+                                                        Sharing, lending, or
+                                                        compromising
+                                                        administrative or
+                                                        academic staff
+                                                        credentials.
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-teal-200/60 bg-teal-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-teal-700 uppercase dark:border-teal-900/50 dark:bg-teal-950/50 dark:text-teal-300">
+                                                    Section 03
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    RA 10175 Cybercrime
+                                                    Prevention Act Compliant
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Authorized Access & Cybercrime
+                                                Security
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Administrative interfaces,
+                                                database operations, and user
+                                                management modules are
+                                                restricted exclusively to
+                                                authorized employees granted
+                                                explicit credentials by the
+                                                Board of Trustees and the
+                                                President’s Office.
+                                            </p>
+                                            <div className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-4 text-xs dark:border-white/10 dark:bg-[#0A1006]">
+                                                <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                    Statutory Penalties
+                                                </h4>
+                                                <p className="mt-1.5 leading-relaxed text-zinc-600 dark:text-zinc-300">
+                                                    Unauthorized attempts to
+                                                    bypass security controls,
+                                                    tamper with academic
+                                                    records, or exfiltrate
+                                                    applicant/alumni information
+                                                    constitute violations under{' '}
+                                                    <strong>
+                                                        Republic Act No. 10175
+                                                        (Cybercrime Prevention
+                                                        Act of 2012)
+                                                    </strong>{' '}
+                                                    and will be referred to law
+                                                    enforcement authorities for
+                                                    criminal prosecution.
+                                                </p>
+                                            </div>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-emerald-200/60 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-emerald-700 uppercase dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-300">
+                                                    Section 04
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Institutional Standard
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Intellectual Property &
+                                                Copyright Policy
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                All editorial articles, campus
+                                                photography, academic syllabi,
+                                                360° virtual tour media,
+                                                official seals, logos, and
+                                                custom web graphics on this
+                                                website are the proprietary
+                                                intellectual property of South
+                                                East Asian Institute of
+                                                Technology, Inc. or utilized
+                                                under authorized permission.
+                                            </p>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                No portion of this portal may be
+                                                reproduced, mirrored,
+                                                republished, or redistributed
+                                                for commercial gain without
+                                                express written authorization
+                                                from the SEAIT Board of
+                                                Trustees.
+                                            </p>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-zinc-700 uppercase dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                                                    Section 05
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Disclaimers & Portals
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Limitation of Liability &
+                                                External Links
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                While SEAIT takes every
+                                                reasonable measure to ensure
+                                                academic calendars, tuition
+                                                subsidy guidelines, and course
+                                                requirements are accurate and
+                                                up-to-date, institutional
+                                                schedules and curriculum
+                                                offerings are subject to
+                                                official CHED, DepEd, and TESDA
+                                                circular updates without prior
+                                                notice.
+                                            </p>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Links to external platforms
+                                                (such as government portals,
+                                                scholarship boards, and
+                                                educational accreditation
+                                                bodies) are provided for
+                                                convenience. SEAIT does not
+                                                control and assumes no liability
+                                                for external website contents,
+                                                availability, or privacy
+                                                practices.
+                                            </p>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-blue-200/60 bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-blue-700 uppercase dark:border-blue-900/50 dark:bg-blue-950/50 dark:text-blue-300">
+                                                    Section 06
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Legal Jurisdiction
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Governing Law & Dispute
+                                                Resolution
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                These Terms and Conditions shall
+                                                be governed by, construed, and
+                                                enforced in accordance with the
+                                                laws of the{' '}
+                                                <strong>
+                                                    Republic of the Philippines
+                                                </strong>
+                                                . Any legal dispute or
+                                                proceeding arising out of or
+                                                related to the use of this
+                                                website shall fall under the
+                                                exclusive jurisdiction of the
+                                                competent courts of South
+                                                Cotabato, Philippines.
+                                            </p>
+                                        </article>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                                    {/* Sidebar Privacy Directory & DPO Desk */}
+                                    <aside className="space-y-4 lg:col-span-4">
+                                        <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <span className="mb-2.5 block font-heading text-[11px] font-bold tracking-widest text-[#E47818] uppercase">
+                                                Privacy Notice Directory
+                                            </span>
+                                            <ul className="space-y-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                                                {[
+                                                    [
+                                                        '01',
+                                                        'Personal Information Controller & Scope',
+                                                    ],
+                                                    [
+                                                        '02',
+                                                        'Personal Data We Collect',
+                                                    ],
+                                                    [
+                                                        '03',
+                                                        'Purposes & UniFAST Admissions',
+                                                    ],
+                                                    [
+                                                        '04',
+                                                        'Data Security & Retention Schedule',
+                                                    ],
+                                                    [
+                                                        '05',
+                                                        'Third-Party Sharing & Disclosures',
+                                                    ],
+                                                    [
+                                                        '06',
+                                                        'Rights of Data Subjects & DPO Contact',
+                                                    ],
+                                                ].map(([num, label]) => (
+                                                    <li
+                                                        key={num}
+                                                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5"
+                                                    >
+                                                        <span className="flex size-5 shrink-0 items-center justify-center rounded-md border border-orange-200/60 bg-orange-50 text-[10px] font-bold text-[#E47818] dark:border-orange-900/50 dark:bg-orange-950/50">
+                                                            {num}
+                                                        </span>
+                                                        <span className="truncate">
+                                                            {label}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+
+                                        <div className="space-y-2.5 rounded-2xl border border-zinc-800 bg-[#050D0C] p-5 text-white shadow-md">
+                                            <span className="block font-heading text-[11px] font-bold tracking-widest text-orange-400 uppercase">
+                                                Data Protection Officer (DPO)
+                                            </span>
+                                            <h3 className="font-heading text-sm font-bold">
+                                                Exercise Your Privacy Rights
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-300">
+                                                To request access, correction,
+                                                or deletion of your personal
+                                                data records, submit an official
+                                                inquiry to the SEAIT Data
+                                                Protection Office.
+                                            </p>
+                                            <div className="space-y-1 pt-1 text-xs text-zinc-400">
+                                                <div>
+                                                    <strong className="text-white">
+                                                        Officer:
+                                                    </strong>{' '}
+                                                    Institutional Data
+                                                    Protection Officer
+                                                </div>
+                                                <div>
+                                                    <strong className="text-white">
+                                                        Campus:
+                                                    </strong>{' '}
+                                                    National Highway, Crossing
+                                                    Rubber, Tupi, South Cotabato
+                                                </div>
+                                                <div>
+                                                    <strong className="text-white">
+                                                        Email:
+                                                    </strong>{' '}
+                                                    <a
+                                                        href="mailto:privacy@seait.edu.ph"
+                                                        className="text-orange-400 hover:underline"
+                                                    >
+                                                        privacy@seait.edu.ph
+                                                    </a>
+                                                </div>
+                                                <div>
+                                                    <strong className="text-white">
+                                                        Desk:
+                                                    </strong>{' '}
+                                                    <a
+                                                        href="mailto:support@seait.edu.ph"
+                                                        className="text-zinc-300 hover:underline"
+                                                    >
+                                                        support@seait.edu.ph
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </aside>
+
+                                    {/* 6 Official Privacy Policy Notices */}
+                                    <div className="space-y-5 lg:col-span-8">
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-orange-200/60 bg-orange-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-[#E47818] uppercase dark:border-orange-900/50 dark:bg-orange-950/50">
+                                                    Notice 01
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    RA 10173 Statutory Mandate
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Personal Information Controller
+                                                & Scope
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                <strong>
+                                                    South East Asian Institute
+                                                    of Technology, Inc. (SEAIT)
+                                                </strong>
+                                                , located at Crossing Rubber,
+                                                Tupi, South Cotabato,
+                                                Philippines, operates as the{' '}
+                                                <strong>
+                                                    Personal Information
+                                                    Controller (PIC)
+                                                </strong>{' '}
+                                                under the{' '}
+                                                <strong>
+                                                    Philippine Data Privacy Act
+                                                    of 2012 (Republic Act No.
+                                                    10173)
+                                                </strong>{' '}
+                                                and its Implementing Rules and
+                                                Regulations (IRR).
+                                            </p>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                This Privacy Policy applies to
+                                                all personal data collected
+                                                through our public web portal,
+                                                alumni tracer management system,
+                                                online pre-registration
+                                                services, campus inquiry help
+                                                desks, academic management
+                                                interfaces, and related
+                                                institutional digital services.
+                                            </p>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-teal-200/60 bg-teal-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-teal-700 uppercase dark:border-teal-900/50 dark:bg-teal-950/50 dark:text-teal-300">
+                                                    Notice 02
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Transparency in Collection
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Personal Data We Collect
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Depending on how you interact
+                                                with SEAIT’s digital services,
+                                                we collect the following
+                                                categories of information:
+                                            </p>
+                                            <div className="space-y-2.5 text-xs">
+                                                <div className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-4 dark:border-white/10 dark:bg-[#0A1006]">
+                                                    <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                        A. Alumni, Students &
+                                                        Applicants
+                                                    </h4>
+                                                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-zinc-600 dark:text-zinc-300">
+                                                        <li>
+                                                            Full legal name,
+                                                            student ID number,
+                                                            date of birth, email
+                                                            address, mobile
+                                                            contact number, and
+                                                            permanent residence.
+                                                        </li>
+                                                        <li>
+                                                            Academic program,
+                                                            degree, graduation
+                                                            cohort, employment
+                                                            history, and
+                                                            curriculum alignment
+                                                            records.
+                                                        </li>
+                                                        <li>
+                                                            System-generated
+                                                            verification and
+                                                            registration status.
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-4 dark:border-white/10 dark:bg-[#0A1006]">
+                                                    <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                        B. Public Visitors &
+                                                        Inquirers
+                                                    </h4>
+                                                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-zinc-600 dark:text-zinc-300">
+                                                        <li>
+                                                            Name, email address,
+                                                            inquiry topic,
+                                                            recipient
+                                                            department, and
+                                                            message narrative.
+                                                        </li>
+                                                        <li>
+                                                            Technical metadata
+                                                            including IP
+                                                            address, user-agent
+                                                            string, and
+                                                            timestamp for
+                                                            anti-spam security.
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-4 dark:border-white/10 dark:bg-[#0A1006]">
+                                                    <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                        C. Faculty, Staff &
+                                                        Authorized Operators
+                                                    </h4>
+                                                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-zinc-600 dark:text-zinc-300">
+                                                        <li>
+                                                            Institutional
+                                                            username,
+                                                            cryptographically
+                                                            salted bcrypt hash,
+                                                            role assignments,
+                                                            and immutable
+                                                            administrative audit
+                                                            logs.
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-emerald-200/60 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-emerald-700 uppercase dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-300">
+                                                    Notice 03
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Legitimate Institutional
+                                                    Purpose
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Purpose of Processing, Tracer &
+                                                UniFAST Mandates
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Personal data collected by SEAIT
+                                                is processed strictly for
+                                                legitimate educational,
+                                                academic, and administrative
+                                                functions:
+                                            </p>
+                                            <ul className="list-disc space-y-1.5 pl-5 text-xs text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                <li>
+                                                    <strong>
+                                                        CHED Graduate Tracer
+                                                        Study (GTS):
+                                                    </strong>{' '}
+                                                    Evaluating graduate
+                                                    employability, curriculum
+                                                    relevance, and institutional
+                                                    outcomes for accreditation.
+                                                </li>
+                                                <li>
+                                                    <strong>
+                                                        UniFAST 100% Free Higher
+                                                        Education:
+                                                    </strong>{' '}
+                                                    Validating eligibility under{' '}
+                                                    <strong>
+                                                        Republic Act No. 10931
+                                                    </strong>{' '}
+                                                    for Philippine government
+                                                    tuition subsidies and
+                                                    Tertiary Education Subsidy
+                                                    (TES) grants.
+                                                </li>
+                                                <li>
+                                                    <strong>
+                                                        Admissions, Enrollment &
+                                                        Alumni Verification:
+                                                    </strong>{' '}
+                                                    Managing student and
+                                                    graduate records, course
+                                                    allocation, and verification
+                                                    of student ID numbers.
+                                                </li>
+                                                <li>
+                                                    <strong>
+                                                        Statutory Compliance:
+                                                    </strong>{' '}
+                                                    Generating mandatory
+                                                    statistical and regulatory
+                                                    reports required by CHED,
+                                                    DepEd, and TESDA.
+                                                </li>
+                                            </ul>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-amber-200/60 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-amber-700 uppercase dark:border-amber-900/50 dark:bg-amber-950/50 dark:text-amber-300">
+                                                    Notice 04
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Information Security &
+                                                    Storage
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Data Security Safeguards &
+                                                Retention Schedule
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                SEAIT maintains rigorous
+                                                organizational, physical, and
+                                                technical measures to safeguard
+                                                personal data against accidental
+                                                destruction, unauthorized
+                                                disclosure, or unlawful
+                                                modification:
+                                            </p>
+                                            <div className="space-y-2.5 text-xs">
+                                                <div className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-4 dark:border-white/10 dark:bg-[#0A1006]">
+                                                    <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                        Storage & Encryption
+                                                        Standards
+                                                    </h4>
+                                                    <p className="mt-1 leading-relaxed text-zinc-600 dark:text-zinc-300">
+                                                        Data in transit is
+                                                        protected using TLS 1.3
+                                                        / HTTPS encryption.
+                                                        Administrative access
+                                                        requires authenticated
+                                                        session cookies with
+                                                        strict HTTP-only and
+                                                        Secure flags. Passwords
+                                                        are never stored in
+                                                        plaintext and utilize
+                                                        industry-standard bcrypt
+                                                        hashing.
+                                                    </p>
+                                                </div>
+                                                <div className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-4 dark:border-white/10 dark:bg-[#0A1006]">
+                                                    <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                        Retention Schedule
+                                                    </h4>
+                                                    <p className="mt-1 leading-relaxed text-zinc-600 dark:text-zinc-300">
+                                                        Official student
+                                                        academic transcripts and
+                                                        permanent alumni records
+                                                        are preserved
+                                                        permanently as mandated
+                                                        by the Commission on
+                                                        Higher Education (CHED).
+                                                        Unenrolled
+                                                        pre-registration
+                                                        applications and general
+                                                        website inquiries are
+                                                        retained for up to three
+                                                        (3) academic years
+                                                        before safe,
+                                                        irreversible
+                                                        anonymization.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-blue-200/60 bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-blue-700 uppercase dark:border-blue-900/50 dark:bg-blue-950/50 dark:text-blue-300">
+                                                    Notice 05
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Statutory Disclosure Limits
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Third-Party Sharing & Regulatory
+                                                Disclosures
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                SEAIT does not sell, lease, or
+                                                monetize student, alumni, or
+                                                visitor personal data to
+                                                commercial advertisers or
+                                                third-party marketing brokers
+                                                under any circumstances.
+                                            </p>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Disclosures of personal data are
+                                                made solely under strict
+                                                institutional oversight to
+                                                authorized Philippine government
+                                                entities, including the
+                                                Commission on Higher Education
+                                                (CHED), Department of Education
+                                                (DepEd), Technical Education and
+                                                Skills Development Authority
+                                                (TESDA), Unified Student
+                                                Financial Assistance System for
+                                                Tertiary Education (UniFAST),
+                                                and relevant law enforcement
+                                                bodies upon valid court order.
+                                            </p>
+                                        </article>
+
+                                        <article className="space-y-3 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs dark:border-white/10 dark:bg-[#15190B]">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="rounded-md border border-orange-200/60 bg-orange-50 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-[#E47818] uppercase dark:border-orange-900/50 dark:bg-orange-950/50">
+                                                    Notice 06
+                                                </span>
+                                                <span className="text-xs font-medium text-zinc-400">
+                                                    Data Subject Protections
+                                                </span>
+                                            </div>
+                                            <h3 className="font-heading text-lg font-bold text-zinc-900 dark:text-white">
+                                                Rights of Data Subjects & How to
+                                                Inquire
+                                            </h3>
+                                            <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                                Under the Data Privacy Act of
+                                                2012 (RA 10173), students,
+                                                alumni, parents, faculty, staff,
+                                                and visitors possess the
+                                                following statutory rights:
+                                            </p>
+                                            <div className="grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-2">
+                                                {[
+                                                    [
+                                                        'Right to be Informed',
+                                                        'Know whether your personal data is being processed and understand the purpose.',
+                                                    ],
+                                                    [
+                                                        'Right to Access',
+                                                        'Request reasonable access to the specific personal data held in institutional databases.',
+                                                    ],
+                                                    [
+                                                        'Right to Rectification',
+                                                        'Dispute inaccuracies or errors in your official academic records and request correction.',
+                                                    ],
+                                                    [
+                                                        'Right to File a Complaint',
+                                                        'File complaints regarding privacy violations with the National Privacy Commission (NPC).',
+                                                    ],
+                                                ].map(([title, desc]) => (
+                                                    <div
+                                                        key={title}
+                                                        className="rounded-xl border border-zinc-200/70 bg-zinc-50 p-3.5 dark:border-white/10 dark:bg-[#0A1006]"
+                                                    >
+                                                        <h4 className="font-bold text-zinc-900 dark:text-white">
+                                                            {title}
+                                                        </h4>
+                                                        <p className="mt-1 leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                                            {desc}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <p className="pt-1 text-xs leading-relaxed text-zinc-600 dark:text-zinc-300">
+                                                To exercise any of these rights,
+                                                contact the Institutional Data
+                                                Protection Officer at{' '}
+                                                <a
+                                                    href="mailto:privacy@seait.edu.ph"
+                                                    className="font-semibold text-[#E47818] hover:underline"
+                                                >
+                                                    privacy@seait.edu.ph
+                                                </a>{' '}
+                                                or visit the Main Administration
+                                                Building, Crossing Rubber, Tupi,
+                                                South Cotabato.
+                                            </p>
+                                        </article>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 bg-white px-6 py-4 text-xs dark:border-white/10 dark:bg-[#15190B]">
+                            <span className="text-zinc-500 dark:text-zinc-400">
+                                South East Asian Institute of Technology, Inc. ·
+                                Crossing Rubber, Tupi, South Cotabato
+                            </span>
+                            <button
+                                type="button"
+                                onClick={closeAllModals}
+                                className="inline-flex h-9 items-center rounded-xl bg-[#E47818] px-5 font-heading text-xs font-bold text-white transition hover:bg-[#F36C21]"
+                            >
+                                Done Reading
+                            </button>
                         </div>
                     </div>
                 </div>
