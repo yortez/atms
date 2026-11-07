@@ -23,8 +23,7 @@ import {
     UsersRound,
     X,
 } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
 import { logout } from '@/routes';
 import { edit as profileSettings } from '@/routes/profile';
 import ConfirmationDialog from '@/components/confirmation-dialog';
@@ -74,7 +73,11 @@ type Role =
     | 'Department coordinator'
     | 'Alumni'
     | 'Employer';
-type NavigationItem = { label: string; icon: typeof LayoutDashboard };
+type NavigationItem = {
+    label: string;
+    icon: typeof LayoutDashboard;
+    section?: string;
+};
 
 const roleCodes: Record<Role, string> = {
     Administrator: 'system-administrator',
@@ -94,84 +97,84 @@ const rolePriority: Role[] = [
 
 const navigation: Record<Role, NavigationItem[]> = {
     Administrator: [
-        { label: 'Overview', icon: LayoutDashboard },
-        { label: 'Notifications', icon: Bell },
-        { label: 'Alumni directory', icon: UsersRound },
-        { label: 'Claim assistance', icon: ShieldCheck },
-        { label: 'Academic programs', icon: GraduationCap },
-        { label: 'Surveys', icon: ClipboardList },
-        { label: 'Announcements', icon: MessageSquareText },
-        { label: 'Events', icon: Calendar },
-        { label: 'Employers & jobs', icon: BriefcaseBusiness },
-        { label: 'Reports', icon: Activity },
-        { label: 'Users & roles', icon: ShieldCheck },
-        { label: 'Activity log', icon: FileSpreadsheet },
+        { label: 'Overview', icon: LayoutDashboard, section: 'Core & Insights' },
+        { label: 'Notifications', icon: Bell, section: 'Core & Insights' },
+        { label: 'Reports', icon: Activity, section: 'Core & Insights' },
+        { label: 'Alumni directory', icon: UsersRound, section: 'Records & Catalog' },
+        { label: 'Claim assistance', icon: ShieldCheck, section: 'Records & Catalog' },
+        { label: 'Academic programs', icon: GraduationCap, section: 'Records & Catalog' },
+        { label: 'Surveys', icon: ClipboardList, section: 'Engagement & Career' },
+        { label: 'Announcements', icon: MessageSquareText, section: 'Engagement & Career' },
+        { label: 'Events', icon: Calendar, section: 'Engagement & Career' },
+        { label: 'Employers & jobs', icon: BriefcaseBusiness, section: 'Engagement & Career' },
+        { label: 'Users & roles', icon: ShieldCheck, section: 'Governance' },
+        { label: 'Activity log', icon: FileSpreadsheet, section: 'Governance' },
     ],
     'Alumni coordinator': [
-        { label: 'Overview', icon: LayoutDashboard },
-        { label: 'Notifications', icon: Bell },
-        { label: 'Alumni directory', icon: UsersRound },
-        { label: 'Claim assistance', icon: ShieldCheck },
-        { label: 'Surveys', icon: ClipboardList },
-        { label: 'Announcements', icon: MessageSquareText },
-        { label: 'Events', icon: Calendar },
-        { label: 'Employers & jobs', icon: BriefcaseBusiness },
-        { label: 'Reports', icon: Activity },
+        { label: 'Overview', icon: LayoutDashboard, section: 'Core & Insights' },
+        { label: 'Notifications', icon: Bell, section: 'Core & Insights' },
+        { label: 'Reports', icon: Activity, section: 'Core & Insights' },
+        { label: 'Alumni directory', icon: UsersRound, section: 'Records & Verification' },
+        { label: 'Claim assistance', icon: ShieldCheck, section: 'Records & Verification' },
+        { label: 'Surveys', icon: ClipboardList, section: 'Engagement & Career' },
+        { label: 'Announcements', icon: MessageSquareText, section: 'Engagement & Career' },
+        { label: 'Events', icon: Calendar, section: 'Engagement & Career' },
+        { label: 'Employers & jobs', icon: BriefcaseBusiness, section: 'Engagement & Career' },
     ],
     'Department coordinator': [
-        { label: 'Overview', icon: LayoutDashboard },
-        { label: 'Notifications', icon: Bell },
-        { label: 'Program alumni', icon: UsersRound },
-        { label: 'Claim assistance', icon: ShieldCheck },
-        { label: 'Employment outcomes', icon: Activity },
-        { label: 'Surveys', icon: ClipboardList },
-        { label: 'Announcements', icon: MessageSquareText },
-        { label: 'Events', icon: Calendar },
-        { label: 'Department reports', icon: FileSpreadsheet },
+        { label: 'Overview', icon: LayoutDashboard, section: 'Core & Insights' },
+        { label: 'Notifications', icon: Bell, section: 'Core & Insights' },
+        { label: 'Employment outcomes', icon: Activity, section: 'Core & Insights' },
+        { label: 'Department reports', icon: FileSpreadsheet, section: 'Core & Insights' },
+        { label: 'Program alumni', icon: UsersRound, section: 'Scoped Records' },
+        { label: 'Claim assistance', icon: ShieldCheck, section: 'Scoped Records' },
+        { label: 'Surveys', icon: ClipboardList, section: 'Cohort Engagement' },
+        { label: 'Announcements', icon: MessageSquareText, section: 'Cohort Engagement' },
+        { label: 'Events', icon: Calendar, section: 'Cohort Engagement' },
     ],
     Alumni: [
-        { label: 'My dashboard', icon: LayoutDashboard },
-        { label: 'Notifications', icon: Bell },
-        { label: 'My profile', icon: UsersRound },
-        { label: 'Academic records', icon: GraduationCap },
-        { label: 'Employment tracer', icon: Activity },
-        { label: 'Surveys', icon: ClipboardList },
-        { label: 'Announcements', icon: MessageSquareText },
-        { label: 'Events', icon: Calendar },
-        { label: 'Career opportunities', icon: BriefcaseBusiness },
-        { label: 'My applications', icon: FileSpreadsheet },
+        { label: 'My dashboard', icon: LayoutDashboard, section: 'Overview' },
+        { label: 'Notifications', icon: Bell, section: 'Overview' },
+        { label: 'My profile', icon: UsersRound, section: 'Graduate Record' },
+        { label: 'Academic records', icon: GraduationCap, section: 'Graduate Record' },
+        { label: 'Employment tracer', icon: Activity, section: 'Graduate Record' },
+        { label: 'Surveys', icon: ClipboardList, section: 'Community & Career' },
+        { label: 'Announcements', icon: MessageSquareText, section: 'Community & Career' },
+        { label: 'Events', icon: Calendar, section: 'Community & Career' },
+        { label: 'Career opportunities', icon: BriefcaseBusiness, section: 'Community & Career' },
+        { label: 'My applications', icon: FileSpreadsheet, section: 'Community & Career' },
     ],
     Employer: [
-        { label: 'Overview', icon: LayoutDashboard },
-        { label: 'Notifications', icon: Bell },
-        { label: 'Company profile', icon: Building2 },
-        { label: 'Job postings', icon: BriefcaseBusiness },
-        { label: 'Applicants', icon: UsersRound },
-        { label: 'Events', icon: Calendar },
-        { label: 'Recruitment analytics', icon: Activity },
+        { label: 'Overview', icon: LayoutDashboard, section: 'Overview' },
+        { label: 'Notifications', icon: Bell, section: 'Overview' },
+        { label: 'Company profile', icon: Building2, section: 'Recruitment' },
+        { label: 'Job postings', icon: BriefcaseBusiness, section: 'Recruitment' },
+        { label: 'Applicants', icon: UsersRound, section: 'Recruitment' },
+        { label: 'Events', icon: Calendar, section: 'Community & Insights' },
+        { label: 'Recruitment analytics', icon: Activity, section: 'Community & Insights' },
     ],
 };
 
 const roleDetails: Record<Role, { context: string; scope: string }> = {
     Administrator: {
         context: 'System administrator',
-        scope: 'Institution-wide overview',
+        scope: 'SEAIT Institution-wide',
     },
     'Alumni coordinator': {
         context: 'Alumni coordinator',
-        scope: 'Alumni services',
+        scope: 'SEAIT Alumni Services',
     },
     'Department coordinator': {
         context: 'Department coordinator',
-        scope: 'Assigned programs',
+        scope: 'Assigned Academic Programs',
     },
     Alumni: {
-        context: 'Alumni member',
-        scope: 'Your alumni portal',
+        context: 'SEAIT Alumni Member',
+        scope: 'Your Alumni Portal',
     },
     Employer: {
-        context: 'Employer workspace',
-        scope: 'Employer workspace',
+        context: 'Employer Partner',
+        scope: 'Employer Workspace',
     },
 };
 
@@ -180,129 +183,154 @@ const pageCopy: Record<
     { title: string; description: string; action?: string }
 > = {
     Overview: {
-        title: 'Good morning, Jordan',
-        description: 'Here’s what’s happening across your alumni community.',
+        title: 'Good morning',
+        description:
+            'Here’s what’s happening across the SEAIT alumni community.',
     },
     'My dashboard': {
         title: 'Welcome back',
-        description: 'Keep your profile current and stay close to what’s next.',
+        description:
+            'Keep your SEAIT graduate profile and employment tracer current.',
     },
     'Alumni directory': {
         title: 'Alumni directory',
         description:
-            'Explore graduate records and their latest tracer updates.',
+            'Explore SEAIT graduate records and their latest CHED GTS tracer updates.',
         action: 'Add alumni',
     },
     'Program alumni': {
-        title: 'School of Computing',
-        description: 'Alumni and outcomes for your assigned academic programs.',
+        title: 'Assigned program alumni',
+        description:
+            'SEAIT alumni and employment outcomes scoped to your assigned academic programs.',
     },
     'Academic programs': {
         title: 'Academic programs',
-        description: 'Manage departments, programs, and graduating cohorts.',
+        description:
+            'Manage SEAIT academic units, degree programs, and graduating cohorts.',
         action: 'Add program',
     },
     Surveys: {
         title: 'Surveys',
-        description: 'Keep graduates engaged and make every response count.',
+        description:
+            'Conduct CHED Graduate Tracer Study questionnaires and cohort surveys.',
         action: 'Create survey',
     },
     Announcements: {
         title: 'Announcements',
         description:
-            'Share news and updates with the right alumni communities.',
+            'Share institutional bulletins and updates with targeted SEAIT alumni cohorts.',
         action: 'New announcement',
     },
     Events: {
         title: 'Events',
         description:
-            'Discover upcoming homecomings, career fairs, webinars, and networking gatherings.',
+            'Discover upcoming SEAIT homecomings, career fairs, webinars, and networking gatherings.',
         action: 'Create event',
     },
     'Employers & jobs': {
         title: 'Employers & jobs',
         description:
-            'Review employer partners and opportunities shared with alumni.',
+            'Review partner companies and career opportunities shared with SEAIT alumni.',
         action: 'Review employers',
     },
     Reports: {
         title: 'Reports & insights',
-        description: 'Understand graduate outcomes across the institution.',
+        description:
+            'Analyze CHED GTS graduate outcomes across all SEAIT academic units.',
         action: 'Export report',
     },
     'Employment outcomes': {
         title: 'Employment outcomes',
-        description: 'A focused view of graduate outcomes for your programs.',
+        description:
+            'A focused view of graduate employability and degree alignment for your programs.',
     },
     'Department reports': {
         title: 'Department reports',
         description:
-            'Employment and engagement trends for your assigned programs.',
+            'Employment and engagement trends scoped to your assigned SEAIT programs.',
         action: 'Export report',
     },
     'My profile': {
         title: 'My profile',
-        description: 'Your alumni profile helps Northfield stay connected.',
+        description:
+            'Your official alumni profile helps SEAIT stay connected with your career milestones.',
         action: 'Edit profile',
     },
     'Academic records': {
         title: 'Academic records',
-        description: 'Your Northfield programs and graduation history.',
+        description: 'Your SEAIT degree programs and graduation history.',
     },
     'Employment tracer': {
         title: 'Employment tracer',
-        description: 'Tell us where your professional journey has taken you.',
+        description:
+            'Report your employment history and curriculum alignment for the CHED Graduate Tracer Study.',
         action: 'Update my status',
     },
     'Career opportunities': {
         title: 'Career opportunities',
-        description: 'Roles shared by employers in the Northfield community.',
+        description:
+            'Verified roles shared by partner employers in the SEAIT community.',
     },
     'My applications': {
         title: 'My applications',
-        description: 'Keep track of your applications and next steps.',
+        description:
+            'Track your submitted job applications and RA 10173 frozen profile snapshots.',
     },
     Notifications: {
         title: 'Notifications',
-        description: 'Updates and reminders from your alumni community.',
+        description: 'Updates and reminders from the SEAIT alumni community.',
     },
     'Company profile': {
         title: 'Company profile',
-        description: 'Tell alumni about your company and the people behind it.',
+        description:
+            'Tell SEAIT alumni about your organization and recruitment mission.',
         action: 'Edit company profile',
     },
     'Job postings': {
         title: 'Job postings',
-        description: 'Manage your open roles and reach Northfield graduates.',
+        description: 'Manage your open roles and reach verified SEAIT graduates.',
         action: 'Create job posting',
     },
     Applicants: {
         title: 'Applicants',
-        description: 'Review candidates who applied to your job postings.',
+        description: 'Review SEAIT candidates who applied to your job postings.',
     },
     'Recruitment analytics': {
         title: 'Recruitment analytics',
         description:
-            'A snapshot of your hiring activity in the alumni community.',
+            'A snapshot of your hiring activity across the SEAIT alumni community.',
         action: 'Export report',
     },
     'Users & roles': {
         title: 'Users & roles',
-        description: 'Manage access for the people who support your community.',
+        description:
+            'Manage role assignments, program scoping, and permissions across SEAIT ATMS.',
         action: 'Invite user',
     },
     'Activity log': {
         title: 'Activity log',
-        description: 'A recent record of important updates across the system.',
+        description: 'A recent audit record of administrative and security events.',
     },
     'Claim assistance': {
         title: 'Registration claim assistance',
-        description: 'Review and approve alumni registration verification requests for your academic programs.',
+        description:
+            'Diagnose and resolve alumni registration verification requests for your academic programs.',
     },
 };
 
-function toastDemo(message: string) {
-    toast.info(message);
+function extractFirstName(fullName: string): string {
+    const cleaned = fullName.trim();
+    if (!cleaned) {
+        return 'Alumnus';
+    }
+    if (cleaned.includes(',')) {
+        const afterComma = cleaned.split(',')[1]?.trim() ?? '';
+        const firstToken = afterComma.split(/\s+/)[0]?.replace(/[^a-zA-Z0-9-]/g, '');
+        if (firstToken) {
+            return firstToken;
+        }
+    }
+    return cleaned.split(/\s+/)[0]?.replace(/,+$/, '') || 'Alumnus';
 }
 
 export default function AlumniPortal() {
@@ -311,7 +339,7 @@ export default function AlumniPortal() {
     const availableRoles = rolePriority.filter((role) =>
         user?.roles?.includes(roleCodes[role]),
     );
-    const initialPortalState = (): { role: Role; page: string } => {
+    const resolvePortalStateFromUrl = (): { role: Role; page: string } => {
         const defaultRole: Role = availableRoles[0] ?? 'Alumni';
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -320,7 +348,9 @@ export default function AlumniPortal() {
 
             if (requestedRole && availableRoles.includes(requestedRole)) {
                 const validPage = navigation[requestedRole].find(
-                    (item) => item.label === requestedPage,
+                    (item) =>
+                        item.label.toLowerCase() ===
+                        (requestedPage ?? '').toLowerCase(),
                 );
                 return {
                     role: requestedRole,
@@ -346,9 +376,9 @@ export default function AlumniPortal() {
             page: navigation[defaultRole][0].label,
         };
     };
-    const [role, setRole] = useState<Role>(() => initialPortalState().role);
+    const [role, setRole] = useState<Role>(() => resolvePortalStateFromUrl().role);
     const [activePage, setActivePage] = useState(
-        () => initialPortalState().page,
+        () => resolvePortalStateFromUrl().page,
     );
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -356,6 +386,35 @@ export default function AlumniPortal() {
     const [notificationRefreshKey, setNotificationRefreshKey] = useState(0);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [search, setSearch] = useState('');
+
+    const syncUrlState = (nextRole: Role, nextPage: string) => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const url = new URL(window.location.href);
+        url.searchParams.set('role', nextRole);
+        url.searchParams.set('page', nextPage);
+        window.history.replaceState({}, '', url.toString());
+    };
+
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const handlePopState = () => {
+            const next = resolvePortalStateFromUrl();
+            setRole(next.role);
+            setActivePage(next.page);
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const navigateToPage = (nextPage: string) => {
+        setActivePage(nextPage);
+        syncUrlState(role, nextPage);
+    };
+
     const profile = {
         ...roleDetails[role],
         name: user?.name ?? '',
@@ -370,9 +429,9 @@ export default function AlumniPortal() {
     const pageDefinition =
         activePage === 'Overview' || activePage === 'My dashboard'
             ? {
-                ...(pageCopy[activePage] ?? pageCopy.Overview),
-                title: `${activePage === 'My dashboard' ? 'Welcome back' : 'Good morning'}, ${profile.name.split(' ')[0]}`,
-            }
+                  ...(pageCopy[activePage] ?? pageCopy.Overview),
+                  title: `${activePage === 'My dashboard' ? 'Welcome back' : 'Good morning'}, ${extractFirstName(profile.name)}`,
+              }
             : (pageCopy[activePage] ?? pageCopy.Overview);
     const canManageContent = ['Administrator', 'Alumni coordinator'].includes(
         role,
@@ -400,8 +459,10 @@ export default function AlumniPortal() {
             return;
         }
 
+        const firstPage = navigation[value][0].label;
         setRole(value);
-        setActivePage(navigation[value][0].label);
+        setActivePage(firstPage);
+        syncUrlState(value, firstPage);
         setMobileNavOpen(false);
         setDialogOpen(false);
         setSearch('');
@@ -439,7 +500,7 @@ export default function AlumniPortal() {
             administrator to request access.
         </section>
     ) : isOverview ? (
-        <LiveOverview role={role} onNavigate={(page) => setActivePage(page)} />
+        <LiveOverview role={role} onNavigate={(page) => navigateToPage(page)} />
     ) : ['Alumni directory', 'Program alumni'].includes(activePage) ? (
         <AlumniDirectory
             createOpen={dialogOpen}
@@ -471,7 +532,7 @@ export default function AlumniPortal() {
         <EmployerJobs
             createOpen={dialogOpen}
             onCloseCreate={() => setDialogOpen(false)}
-            onNavigate={(page) => setActivePage(page)}
+            onNavigate={(page) => navigateToPage(page)}
         />
     ) : activePage === 'Company profile' ? (
         <CompanyProfileCenter
@@ -511,7 +572,7 @@ export default function AlumniPortal() {
     ) : activePage === 'Users & roles' ? (
         <AssignedRoles roleCodes={user.roles ?? []} currentUserId={user.id} />
     ) : activePage === 'Recruitment analytics' ? (
-        <LiveOverview role={role} onNavigate={(page) => setActivePage(page)} />
+        <LiveOverview role={role} onNavigate={(page) => navigateToPage(page)} />
     ) : (
         <section
             role="alert"
@@ -522,29 +583,45 @@ export default function AlumniPortal() {
     );
 
     return (
-        <div className="min-h-screen bg-[#f7f8f5] text-[#29362c]">
-            {mobileNavOpen && (
-                <button
-                    aria-label="Close navigation"
-                    type="button"
-                    onClick={() => setMobileNavOpen(false)}
-                    className="fixed inset-0 z-30 bg-[#17241a]/30 md:hidden"
-                />
-            )}
+        <div className="min-h-screen bg-[#F5F4EE] text-zinc-900">
+            <button
+                aria-label="Close navigation"
+                type="button"
+                tabIndex={mobileNavOpen ? 0 : -1}
+                onClick={() => setMobileNavOpen(false)}
+                className={`fixed inset-0 z-30 bg-[#001c17]/40 backdrop-blur-[2px] transition-opacity duration-300 ease-out md:hidden ${
+                    mobileNavOpen
+                        ? 'pointer-events-auto opacity-100'
+                        : 'pointer-events-none opacity-0'
+                }`}
+            />
             <aside
-                className={`fixed inset-y-0 left-0 z-40 flex w-[248px] flex-col border-r border-[#e7e9e3] bg-white transition-transform duration-200 md:translate-x-0 ${mobileNavOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`fixed inset-y-0 left-0 z-40 flex w-[256px] flex-col border-r border-zinc-200/90 bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:translate-x-0 md:shadow-none ${
+                    mobileNavOpen
+                        ? 'translate-x-0 shadow-2xl'
+                        : '-translate-x-full shadow-none'
+                }`}
             >
-                <div className="flex h-16 items-center justify-between border-b border-[#eff0ec] px-4">
-                    <Link href="/" className="flex items-center gap-3">
-                        <span className="grid size-8 place-items-center rounded-xl bg-[#284c36] text-white">
-                            <GraduationCap className="size-[18px]" />
+                <div className="flex h-16 items-center justify-between border-b border-zinc-200/80 px-4">
+                    <Link href="/" className="group flex items-center gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white p-1 shadow-2xs transition group-hover:border-[#E47818]/60">
+                            <img
+                                src="/images/seait-logo.png"
+                                alt="SEAIT Official Seal"
+                                className="size-full object-contain"
+                            />
                         </span>
-                        <span>
-                            <span className="block text-xs font-bold tracking-tight text-[#2c3d30]">
-                                Northfield College
+                        <span className="min-w-0">
+                            <span className="flex items-center gap-1.5">
+                                <span className="font-heading text-sm font-extrabold tracking-tight text-zinc-900">
+                                    SEAIT
+                                </span>
+                                <span className="rounded border border-orange-300/80 bg-orange-50 px-1.5 py-0.5 font-heading text-[9px] font-bold tracking-wider text-[#E47818] uppercase">
+                                    ATMS
+                                </span>
                             </span>
-                            <span className="mt-0.5 block text-[9px] font-semibold tracking-[0.15em] text-[#849083] uppercase">
-                                Alumni portal
+                            <span className="mt-0.5 block truncate text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">
+                                Alumni Tracer Portal
                             </span>
                         </span>
                     </Link>
@@ -552,7 +629,7 @@ export default function AlumniPortal() {
                         type="button"
                         aria-label="Close navigation"
                         onClick={() => setMobileNavOpen(false)}
-                        className="grid size-8 place-items-center rounded-lg text-[#7f877e] hover:bg-[#f4f5f2] md:hidden"
+                        className="grid size-8 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100 md:hidden"
                     >
                         <X className="size-4" />
                     </button>
@@ -560,7 +637,7 @@ export default function AlumniPortal() {
                 <div className="px-3 pt-4">
                     <label
                         htmlFor="role-preview"
-                        className="mb-1.5 block px-1 text-[9px] font-bold tracking-[0.14em] text-[#9aa097] uppercase"
+                        className="mb-1.5 block px-1 text-[10px] font-bold tracking-[0.14em] text-zinc-500 uppercase"
                     >
                         Workspace role
                     </label>
@@ -574,75 +651,90 @@ export default function AlumniPortal() {
                                 );
                                 if (selectedRole) changeRole(selectedRole);
                             }}
-                            className="h-9 w-full appearance-none rounded-xl border border-[#e9ebe5] bg-[#fafbf9] pr-9 pl-3 text-xs font-semibold text-[#48564a] outline-none focus:border-[#9eb29e]"
+                            className="h-9 w-full appearance-none rounded-xl border border-zinc-200 bg-[#F5F4EE]/70 pr-9 pl-3 text-xs font-semibold text-zinc-800 outline-none focus:border-[#E47818]"
                         >
                             {availableRoles.map((item) => (
                                 <option key={item}>{item}</option>
                             ))}
                         </select>
-                        <ChevronDown className="pointer-events-none absolute top-3 right-3 size-3.5 text-[#80897e]" />
+                        <ChevronDown className="pointer-events-none absolute top-3 right-3 size-3.5 text-zinc-500" />
                     </div>
-                </div>
-                <div className="px-4 pt-4 pb-1.5 text-[9px] font-bold tracking-[0.14em] text-[#9aa097] uppercase">
-                    Workspace
                 </div>
                 <nav
                     aria-label={`${role} navigation`}
-                    className="portal-sidebar-nav flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-2.5 pb-3"
+                    className="portal-sidebar-nav mt-3 flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-2.5 pb-3"
                 >
-                    {navItems.map(({ label, icon: Icon }) => {
+                    {navItems.map(({ label, icon: Icon, section }, index) => {
                         const selected = activePage === label;
+                        const prevSection =
+                            index > 0 ? navItems[index - 1]?.section : undefined;
+                        const showSectionHeader =
+                            section && section !== prevSection;
+
                         return (
-                            <button
-                                key={label}
-                                type="button"
-                                onClick={() => {
-                                    setActivePage(label);
-                                    setMobileNavOpen(false);
-                                    setDialogOpen(false);
-                                    setSearch('');
-                                }}
-                                aria-current={selected ? 'page' : undefined}
-                                className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-medium transition ${selected ? 'bg-[#edf2eb] text-[#33583b]' : 'text-[#6e786d] hover:bg-[#f6f7f4] hover:text-[#3e5542]'}`}
-                            >
-                                <Icon className="size-4 shrink-0" />
-                                {label}
-                                {label === 'Surveys' && role === 'Alumni' && (
-                                    <span className="ml-auto grid size-5 place-items-center rounded-full bg-[#e2eadf] text-[9px] font-bold text-[#4f6b51]">
-                                        2
-                                    </span>
+                            <div key={label}>
+                                {showSectionHeader && (
+                                    <div className="px-2 pt-3 pb-1 text-[10px] font-bold tracking-[0.12em] text-zinc-400 uppercase">
+                                        {section}
+                                    </div>
                                 )}
-                            </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        navigateToPage(label);
+                                        setMobileNavOpen(false);
+                                        setDialogOpen(false);
+                                        setSearch('');
+                                    }}
+                                    aria-current={selected ? 'page' : undefined}
+                                    className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-semibold transition ${
+                                        selected
+                                            ? 'bg-[#001c17] text-white shadow-2xs'
+                                            : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                                    }`}
+                                >
+                                    <Icon
+                                        className={`size-4 shrink-0 ${
+                                            selected
+                                                ? 'text-[#E47818]'
+                                                : 'text-zinc-500'
+                                        }`}
+                                    />
+                                    <span className="truncate">{label}</span>
+                                </button>
+                            </div>
                         );
                     })}
-                    <div className="my-3 border-t border-[#eff0ec]" />
+                    <div className="my-3 border-t border-zinc-200/80" />
                     <button
                         type="button"
-                        onClick={() => toastDemo('Help center opened')}
-                        className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-medium text-[#6e786d] hover:bg-[#f6f7f4]"
+                        onClick={() => {
+                            setNotificationsOpen(true);
+                            setMobileNavOpen(false);
+                        }}
+                        className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                     >
-                        <CircleHelp className="size-4" /> Help center
+                        <CircleHelp className="size-4 text-zinc-500" /> Activity & help
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => toastDemo('Settings opened')}
-                        className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-medium text-[#6e786d] hover:bg-[#f6f7f4]"
+                    <Link
+                        href={profileSettings()}
+                        className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                     >
-                        <Settings2 className="size-4" /> Settings
-                    </button>
+                        <Settings2 className="size-4 text-zinc-500" /> Account settings
+                    </Link>
                 </nav>
-                <div className="relative border-t border-[#eff0ec] p-2.5">
+                <div className="relative border-t border-zinc-200/80 p-2.5">
                     {accountMenuOpen && user && (
                         <div
                             role="menu"
                             aria-label="Account menu"
-                            className="absolute right-2 bottom-full z-30 mb-2 min-w-40 rounded-xl border border-[#e9ebe5] bg-white p-1.5 shadow-lg"
+                            className="absolute right-2 bottom-full z-30 mb-2 min-w-40 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg"
                         >
                             <Link
                                 href={profileSettings()}
                                 role="menuitem"
                                 onClick={() => setAccountMenuOpen(false)}
-                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-[#4d5a4f] transition hover:bg-[#f4f6f2]"
+                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-zinc-700 transition hover:bg-zinc-100"
                                 data-test="workspace-account-settings"
                             >
                                 <Settings2 className="size-3.5" />
@@ -659,7 +751,7 @@ export default function AlumniPortal() {
                                 <button
                                     type="button"
                                     role="menuitem"
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-[#8b4e43] transition hover:bg-[#f8f2f0]"
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-700 transition hover:bg-rose-50"
                                     data-test="workspace-logout-button"
                                 >
                                     <LogOut className="size-3.5" />
@@ -668,15 +760,18 @@ export default function AlumniPortal() {
                             </ConfirmationDialog>
                         </div>
                     )}
-                    <div className="flex items-center gap-2 rounded-xl bg-[#f7f8f5] p-2">
-                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e4ece2] text-[10px] font-bold text-[#49664c]">
+                    <div className="flex items-center gap-2 rounded-xl bg-[#F5F4EE] p-2">
+                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#001c17] text-[10px] font-bold text-white">
                             {profile.initials}
                         </span>
                         <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[11px] font-semibold text-[#435044]">
+                            <span
+                                className="block truncate text-xs font-semibold text-zinc-900"
+                                title={profile.name}
+                            >
                                 {profile.name}
                             </span>
-                            <span className="mt-0.5 block truncate text-[10px] text-[#858c83]">
+                            <span className="mt-0.5 block truncate text-[10px] text-zinc-500">
                                 {profile.context}
                             </span>
                         </span>
@@ -688,7 +783,7 @@ export default function AlumniPortal() {
                             aria-label="Open account menu"
                             aria-haspopup="menu"
                             aria-expanded={accountMenuOpen}
-                            className="grid size-7 place-items-center rounded-lg text-[#818980] hover:bg-white"
+                            className="grid size-7 place-items-center rounded-lg text-zinc-500 hover:bg-white"
                         >
                             <ChevronDown className="size-3.5" />
                         </button>
@@ -696,25 +791,25 @@ export default function AlumniPortal() {
                 </div>
             </aside>
 
-            <div className="min-h-screen md:pl-[248px]">
-                <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#e7e9e3] bg-[#ffffff]/95 px-4 backdrop-blur sm:px-6 lg:px-8">
+            <div className="min-h-screen md:pl-[256px]">
+                <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-zinc-200/80 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
                     <div className="flex min-w-0 items-center gap-3">
                         <button
                             type="button"
                             aria-label="Open navigation"
                             onClick={() => setMobileNavOpen(true)}
-                            className="grid size-9 shrink-0 place-items-center rounded-lg border border-[#e9ebe5] bg-white text-[#667166] hover:bg-[#f8f9f6] md:hidden"
+                            className="grid size-9 shrink-0 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 md:hidden"
                         >
                             <Menu className="size-4" />
                         </button>
-                        <div className="hidden items-center gap-2 text-xs text-[#969c94] sm:flex">
-                            <span>Workspace</span>
+                        <div className="hidden items-center gap-2 text-xs text-zinc-500 sm:flex">
+                            <span>SEAIT Workspace</span>
                             <ChevronRight className="size-3" />
                         </div>
-                        <span className="truncate text-xs font-semibold text-[#4c584e]">
+                        <span className="truncate text-xs font-bold text-zinc-900">
                             {activePage}
                         </span>
-                        <span className="hidden rounded-full bg-[#f0f2ed] px-2 py-1 text-[9px] font-medium text-[#7a8278] lg:inline-flex">
+                        <span className="hidden rounded-full border border-teal-600/25 bg-teal-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-teal-800 lg:inline-flex">
                             {profile.scope}
                         </span>
                     </div>
@@ -724,43 +819,43 @@ export default function AlumniPortal() {
                             'Alumni coordinator',
                             'Department coordinator',
                         ].includes(role) && (
-                                <label className="hidden h-9 w-48 items-center gap-2 rounded-xl border border-[#e8eae4] bg-white px-2.5 lg:flex">
-                                    <Search className="size-3.5 text-[#929990]" />
-                                    <input
-                                        value={search}
-                                        onChange={(event) => {
-                                            const value = event.target.value;
-                                            setSearch(value);
-                                            if (value.trim()) {
-                                                const directoryPage = navigation[
-                                                    role
-                                                ].find((item) =>
-                                                    [
-                                                        'Alumni directory',
-                                                        'Program alumni',
-                                                    ].includes(item.label),
+                            <label className="hidden h-9 w-52 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-2.5 lg:flex">
+                                <Search className="size-3.5 text-zinc-400" />
+                                <input
+                                    value={search}
+                                    onChange={(event) => {
+                                        const value = event.target.value;
+                                        setSearch(value);
+                                        if (value.trim()) {
+                                            const directoryPage = navigation[
+                                                role
+                                            ].find((item) =>
+                                                [
+                                                    'Alumni directory',
+                                                    'Program alumni',
+                                                ].includes(item.label),
+                                            );
+                                            if (directoryPage) {
+                                                navigateToPage(
+                                                    directoryPage.label,
                                                 );
-                                                if (directoryPage) {
-                                                    setActivePage(
-                                                        directoryPage.label,
-                                                    );
-                                                }
                                             }
-                                        }}
-                                        aria-label="Search alumni records"
-                                        placeholder="Search anything..."
-                                        className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-[#9ca198]"
-                                    />
-                                    <kbd className="rounded border border-[#e8eae4] px-1 py-0.5 text-[9px] text-[#929990]">
-                                        ⌘ K
-                                    </kbd>
-                                </label>
-                            )}
+                                        }
+                                    }}
+                                    aria-label="Search alumni records"
+                                    placeholder="Search graduate records..."
+                                    className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-400"
+                                />
+                                <kbd className="rounded border border-zinc-200 px-1 py-0.5 text-[9px] text-zinc-400">
+                                    ⌘ K
+                                </kbd>
+                            </label>
+                        )}
                         <button
                             type="button"
                             aria-label="Notifications"
                             onClick={() => setNotificationsOpen(true)}
-                            className="relative grid size-9 place-items-center rounded-xl border border-[#e8eae4] bg-white text-[#687367] hover:bg-[#f8f9f6]"
+                            className="relative grid size-9 place-items-center rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
                             data-test="notifications-button"
                         >
                             <Bell className="size-4" />
@@ -774,15 +869,15 @@ export default function AlumniPortal() {
                                     <button
                                         type="button"
                                         aria-label="Open account menu"
-                                        className="grid size-9 place-items-center rounded-full ring-offset-2 transition hover:ring-2 hover:ring-[#dce6d9] focus-visible:ring-2 focus-visible:ring-[#7e9a7a] focus-visible:outline-none"
+                                        className="grid size-9 place-items-center rounded-full ring-offset-2 transition hover:ring-2 hover:ring-orange-200 focus-visible:ring-2 focus-visible:ring-[#E47818] focus-visible:outline-none"
                                         data-test="header-account-menu-button"
                                     >
-                                        <Avatar className="size-8 overflow-hidden rounded-full bg-[#e4ece2] text-[10px] font-bold text-[#49664c]">
+                                        <Avatar className="size-8 overflow-hidden rounded-full bg-[#001c17] text-[10px] font-bold text-white">
                                             <AvatarImage
                                                 src={user.avatar ?? undefined}
                                                 alt={user.name}
                                             />
-                                            <AvatarFallback className="rounded-full bg-[#e4ece2] text-[10px] font-bold text-[#49664c]">
+                                            <AvatarFallback className="rounded-full bg-[#001c17] text-[10px] font-bold text-white">
                                                 {profile.initials}
                                             </AvatarFallback>
                                         </Avatar>
@@ -802,14 +897,14 @@ export default function AlumniPortal() {
 
                 <main className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
                     <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                        <div>
-                            <p className="text-[10px] font-bold tracking-[0.16em] text-[#829080] uppercase">
-                                {role} workspace
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold tracking-[0.16em] text-[#E47818] uppercase">
+                                SEAIT · {role} Workspace
                             </p>
-                            <h1 className="mt-1.5 text-2xl font-semibold tracking-[-0.04em] text-[#2c3c30] sm:text-[28px]">
+                            <h1 className="mt-1.5 truncate font-heading text-2xl font-bold tracking-tight text-zinc-900 sm:text-[28px]">
                                 {currentPage.title}
                             </h1>
-                            <p className="mt-1.5 text-xs leading-5 text-[#7c847a] sm:text-sm">
+                            <p className="mt-1.5 text-xs leading-5 text-zinc-600 sm:text-sm">
                                 {currentPage.description}
                             </p>
                         </div>
@@ -817,7 +912,7 @@ export default function AlumniPortal() {
                             <button
                                 type="button"
                                 onClick={handleAction}
-                                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2b5139] px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-[#234530]"
+                                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E47818] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#F36C21]"
                             >
                                 {currentPage.action.startsWith('Export') ? (
                                     <FileSpreadsheet className="size-3.5" />
@@ -830,7 +925,7 @@ export default function AlumniPortal() {
                     </div>
 
                     {search && !isOverview && (
-                        <div className="mb-4 flex items-center gap-2 rounded-xl border border-[#dfe8dc] bg-[#f0f5ee] px-3 py-2 text-xs text-[#536c55]">
+                        <div className="mb-4 flex items-center gap-2 rounded-xl border border-teal-600/25 bg-teal-500/10 px-3 py-2 text-xs text-teal-900">
                             <Search className="size-3.5" />
                             Searching records for “{search}”
                             <button
@@ -846,13 +941,13 @@ export default function AlumniPortal() {
 
                     {content}
 
-                    <footer className="mt-8 flex flex-col justify-between gap-2 border-t border-[#e8eae4] pt-4 text-[10px] text-[#929990] sm:flex-row">
+                    <footer className="mt-8 flex flex-col justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-500 sm:flex-row">
                         <span>
-                            Northfield College · Alumni Tracer Management System
+                            South East Asian Institute of Technology, Inc. (SEAIT) · Alumni Tracer Management System
                         </span>
-                        <span className="inline-flex items-center gap-1">
-                            <span className="size-1.5 rounded-full bg-[#8da68a]" />{' '}
-                            Alumni management system
+                        <span className="inline-flex items-center gap-1.5">
+                            <span className="size-2 rounded-full bg-emerald-500" />{' '}
+                            CHED GTS & RA 10173 Compliant Portal
                         </span>
                     </footer>
                 </main>
@@ -860,7 +955,7 @@ export default function AlumniPortal() {
 
             <Link
                 href="/"
-                className="fixed right-4 bottom-4 z-20 inline-flex h-9 items-center gap-2 rounded-full border border-[#e3e7df] bg-white/95 px-3 text-[10px] font-semibold text-[#58665a] shadow-lg backdrop-blur transition hover:bg-white sm:right-6 sm:bottom-5"
+                className="fixed right-4 bottom-4 z-20 inline-flex h-9 items-center gap-2 rounded-full border border-zinc-200 bg-white/95 px-3.5 text-xs font-semibold text-zinc-800 shadow-lg backdrop-blur transition hover:border-[#E47818] hover:text-[#E47818] sm:right-6 sm:bottom-5"
             >
                 <ArrowDownRight className="size-3.5 rotate-[-135deg]" /> Public
                 website

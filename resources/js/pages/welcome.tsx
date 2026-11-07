@@ -173,8 +173,11 @@ function CollegeEmblem({
     name: string;
 }) {
     const key = `${code} ${name}`.toLowerCase();
+    const safeAcronym = (fallback: string) =>
+        (code.trim().slice(0, 5).toUpperCase() || fallback);
+
     let config = {
-        acronym: code.slice(0, 4).toUpperCase() || 'DEPT',
+        acronym: safeAcronym('DEPT'),
         bgGradient: 'from-orange-600 via-amber-600 to-amber-700',
         Icon: HardHat,
     };
@@ -188,7 +191,7 @@ function CollegeEmblem({
         key.includes('it')
     ) {
         config = {
-            acronym: code.toUpperCase() || 'CIT',
+            acronym: safeAcronym('CIT'),
             bgGradient: 'from-teal-600 via-emerald-700 to-teal-900',
             Icon: Cpu,
         };
@@ -201,7 +204,7 @@ function CollegeEmblem({
         key.includes('account')
     ) {
         config = {
-            acronym: code.toUpperCase() || 'CBA',
+            acronym: safeAcronym('CBA'),
             bgGradient: 'from-amber-500 via-yellow-600 to-amber-800',
             Icon: BriefcaseBusiness,
         };
@@ -211,7 +214,7 @@ function CollegeEmblem({
         key.includes('ccje')
     ) {
         config = {
-            acronym: code.toUpperCase() || 'CCJE',
+            acronym: safeAcronym('CCJE'),
             bgGradient: 'from-rose-600 via-red-700 to-rose-900',
             Icon: Scale,
         };
@@ -222,7 +225,7 @@ function CollegeEmblem({
         key.includes('bed')
     ) {
         config = {
-            acronym: code.toUpperCase() || 'CTE',
+            acronym: safeAcronym('CTE'),
             bgGradient: 'from-sky-600 via-blue-700 to-indigo-900',
             Icon: BookOpen,
         };
@@ -232,7 +235,7 @@ function CollegeEmblem({
         key.includes('vocational')
     ) {
         config = {
-            acronym: code.toUpperCase() || 'TVET',
+            acronym: safeAcronym('TVET'),
             bgGradient: 'from-rose-600 via-red-700 to-rose-900',
             Icon: Wrench,
         };
@@ -532,34 +535,34 @@ export default function Welcome({
             <div className="min-h-screen bg-[#F5F4EE] font-sans text-zinc-900 antialiased transition-colors duration-200 selection:bg-[#E47818] selection:text-white dark:bg-[#0E1406] dark:text-[#F5F4EE]">
                 {/* Sticky Glass Navigation Header (seait.edu.ph Light & Dark glass pattern) */}
                 <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md transition-colors duration-200 dark:border-[#006d5b]/25 dark:bg-[#081110]/90">
-                    <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-8">
+                    <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3.5 py-3 sm:px-6 lg:px-8">
                         <Link
                             href="/"
-                            className="group flex items-center gap-3.5"
+                            className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3"
                         >
-                            <div className="relative flex size-12 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white p-1 shadow-xs transition group-hover:border-[#E47818]/60 dark:border-white/15 dark:bg-white/10">
+                            <div className="relative flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white p-1 shadow-xs transition group-hover:border-[#E47818]/60 sm:size-11 dark:border-white/15 dark:bg-white/10">
                                 <img
                                     src="/images/seait-logo.png"
                                     alt="SEAIT Official Seal"
                                     className="size-full object-contain"
                                 />
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <span className="font-heading text-xl font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] dark:text-white">
+                            <div className="min-w-0 whitespace-nowrap">
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <span className="font-heading text-lg font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] sm:text-xl dark:text-white">
                                         SEAIT
                                     </span>
                                     <span className="rounded-lg border border-orange-300/80 bg-orange-50/90 px-2 py-0.5 font-heading text-[10px] font-bold tracking-wider text-[#E47818] uppercase shadow-2xs dark:border-orange-500/30 dark:bg-orange-950/60 dark:text-orange-400">
                                         ATMS
                                     </span>
                                 </div>
-                                <span className="block text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                                <span className="block truncate text-[10px] font-medium text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     Alumni Tracer Management System
                                 </span>
                             </div>
                         </Link>
 
-                        <div className="flex items-center gap-2 lg:hidden">
+                        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
                             <button
                                 type="button"
                                 onClick={toggleTheme}
@@ -568,7 +571,7 @@ export default function Welcome({
                                         ? 'Switch to light mode'
                                         : 'Switch to dark mode'
                                 }
-                                className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100/80 text-zinc-700 transition hover:text-[#E47818] dark:border-white/15 dark:bg-white/5 dark:text-orange-400"
+                                className="flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100/80 text-zinc-700 transition hover:text-[#E47818] sm:size-10 dark:border-white/15 dark:bg-white/5 dark:text-orange-400"
                             >
                                 {isDark ? (
                                     <Sun className="size-4" />
@@ -581,41 +584,66 @@ export default function Welcome({
                                 aria-label="Toggle navigation"
                                 aria-expanded={menuOpen}
                                 onClick={() => setMenuOpen(!menuOpen)}
-                                className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100/80 text-zinc-900 dark:border-white/15 dark:bg-white/5 dark:text-white"
+                                className="relative flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100/80 text-zinc-900 transition-colors hover:border-[#E47818]/50 sm:size-10 dark:border-white/15 dark:bg-white/5 dark:text-white"
                             >
-                                {menuOpen ? (
-                                    <X className="size-5" />
-                                ) : (
-                                    <Menu className="size-5" />
-                                )}
+                                <Menu
+                                    className={`size-5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                                        menuOpen
+                                            ? 'scale-50 rotate-90 opacity-0'
+                                            : 'scale-100 rotate-0 opacity-100'
+                                    }`}
+                                />
+                                <X
+                                    className={`absolute size-5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                                        menuOpen
+                                            ? 'scale-100 rotate-0 opacity-100'
+                                            : 'scale-50 -rotate-90 opacity-0'
+                                    }`}
+                                />
                             </button>
                         </div>
 
                         <nav
-                            className={`${menuOpen
-                                ? 'absolute top-full right-0 left-0 flex border-b border-zinc-200 bg-white p-6 shadow-2xl dark:border-[#006d5b]/30 dark:bg-[#081110]'
-                                : 'hidden'
-                                } flex-col gap-3 lg:static lg:flex lg:flex-row lg:items-center lg:gap-1.5 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none dark:lg:bg-transparent`}
+                            className={`absolute top-full right-0 left-0 z-40 flex origin-top flex-col gap-3.5 border-b border-zinc-200 bg-white/98 px-4 shadow-2xl backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:pointer-events-auto lg:visible lg:static lg:max-h-none lg:translate-y-0 lg:scale-y-100 lg:flex-row lg:items-center lg:gap-0.5 lg:overflow-visible lg:border-0 lg:bg-transparent lg:p-0 lg:opacity-100 lg:shadow-none xl:gap-1 dark:border-[#006d5b]/30 dark:bg-[#081110]/98 dark:lg:bg-transparent ${
+                                menuOpen
+                                    ? 'pointer-events-auto visible max-h-[480px] translate-y-0 scale-y-100 py-4 opacity-100'
+                                    : 'pointer-events-none invisible max-h-0 -translate-y-3 scale-y-95 overflow-hidden border-b-0 py-0 opacity-0'
+                            }`}
                         >
-                            {[
-                                ['Tracer Study', '#tracer-study'],
-                                ['Live Metrics', '#tracer-metrics'],
-                                ['Academic Units', '#alumni-info'],
-                                ['Bulletins', '#announcements'],
-                                ['Job Board', '#opportunities'],
-                                ['Events', '#events'],
-                            ].map(([label, href]) => (
-                                <a
-                                    key={href}
-                                    href={href}
-                                    onClick={() => setMenuOpen(false)}
-                                    className="rounded-xl px-3.5 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-orange-50/90 hover:text-[#E47818] dark:text-zinc-200 dark:hover:bg-orange-950/40 dark:hover:text-orange-400"
-                                >
-                                    {label}
-                                </a>
-                            ))}
+                            <div
+                                className={`grid grid-cols-2 gap-1.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex lg:translate-y-0 lg:flex-row lg:items-center lg:gap-0.5 lg:opacity-100 xl:gap-1 ${
+                                    menuOpen
+                                        ? 'translate-y-0 opacity-100 delay-75'
+                                        : '-translate-y-2 opacity-0'
+                                }`}
+                            >
+                                {[
+                                    ['Tracer Study', '#tracer-study'],
+                                    ['Live Metrics', '#tracer-metrics'],
+                                    ['Academic Units', '#alumni-info'],
+                                    ['Bulletins', '#announcements'],
+                                    ['Job Board', '#opportunities'],
+                                    ['Events', '#events'],
+                                ].map(([label, href]) => (
+                                    <a
+                                        key={href}
+                                        href={href}
+                                        onClick={() => setMenuOpen(false)}
+                                        className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-zinc-50/80 px-3 py-2.5 text-xs font-semibold whitespace-nowrap text-zinc-800 transition hover:border-[#E47818]/40 hover:bg-orange-50/90 hover:text-[#E47818] lg:border-0 lg:bg-transparent lg:px-2 lg:py-2 lg:text-zinc-700 xl:px-2.5 2xl:px-3 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-orange-950/40 dark:hover:text-orange-400 dark:lg:bg-transparent"
+                                    >
+                                        <span>{label}</span>
+                                        <ArrowUpRight className="size-3.5 text-zinc-400 lg:hidden dark:text-zinc-500" />
+                                    </a>
+                                ))}
+                            </div>
 
-                            <div className="mt-2 flex flex-wrap items-center gap-2.5 lg:mt-0 lg:ml-3 lg:border-l lg:border-zinc-200 lg:pl-4 dark:lg:border-white/15">
+                            <div
+                                className={`flex flex-col gap-2 border-t border-zinc-200/80 pt-3.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:mt-0 lg:ml-2 lg:shrink-0 lg:translate-y-0 lg:flex-row lg:flex-nowrap lg:items-center lg:border-t-0 lg:border-l lg:border-zinc-200 lg:pt-0 lg:pl-3 lg:opacity-100 dark:border-white/10 dark:lg:border-white/15 ${
+                                    menuOpen
+                                        ? 'translate-y-0 opacity-100 delay-100'
+                                        : '-translate-y-2 opacity-0'
+                                }`}
+                            >
                                 <button
                                     type="button"
                                     onClick={toggleTheme}
@@ -629,7 +657,7 @@ export default function Welcome({
                                             ? 'Switch to Light Mode'
                                             : 'Switch to Dark Mode'
                                     }
-                                    className="hidden size-10 items-center justify-center rounded-xl border border-zinc-200/80 bg-zinc-100/80 text-zinc-700 transition hover:border-[#E47818]/40 hover:text-[#E47818] lg:flex dark:border-white/15 dark:bg-zinc-800/80 dark:text-orange-400 dark:hover:border-orange-400/50"
+                                    className="hidden size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200/80 bg-zinc-100/80 text-zinc-700 transition hover:border-[#E47818]/40 hover:text-[#E47818] lg:flex dark:border-white/15 dark:bg-zinc-800/80 dark:text-orange-400 dark:hover:border-orange-400/50"
                                 >
                                     {isDark ? (
                                         <Sun className="size-4" />
@@ -641,28 +669,30 @@ export default function Welcome({
                                 {isAuthenticated ? (
                                     <Link
                                         href="/dashboard"
-                                        className="inline-flex h-10 items-center justify-center rounded-xl bg-[#E47818] px-5 font-heading text-xs font-bold text-white shadow-lg shadow-orange-900/25 transition hover:bg-[#F36C21]"
+                                        className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-4 font-heading text-xs font-bold whitespace-nowrap text-white shadow-lg shadow-orange-900/25 transition hover:bg-[#F36C21] lg:h-9 lg:w-auto"
                                     >
                                         Open Portal Dashboard
-                                        <ArrowRight className="ml-2 size-4" />
+                                        <ArrowRight className="ml-1.5 size-3.5" />
                                     </Link>
                                 ) : (
                                     <>
-                                        <Link
-                                            href={login()}
-                                            className="rounded-xl px-3 py-2 text-xs font-bold text-zinc-700 transition hover:text-[#E47818] dark:text-zinc-200 dark:hover:text-orange-400"
-                                        >
-                                            Sign In
-                                        </Link>
-                                        <Link
-                                            href="/register?type=employer"
-                                            className="rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-xs font-semibold text-zinc-800 transition hover:border-[#E47818] hover:text-[#E47818] dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-orange-400/50"
-                                        >
-                                            Employer Partner
-                                        </Link>
+                                        <div className="grid grid-cols-2 gap-2 lg:flex lg:items-center lg:gap-2">
+                                            <Link
+                                                href="/register?type=employer"
+                                                className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-xs font-semibold whitespace-nowrap text-zinc-700 transition hover:border-[#E47818] hover:text-[#E47818] lg:hidden xl:inline-flex xl:h-9 xl:border-0 xl:bg-transparent xl:px-2.5 xl:text-zinc-600 dark:border-white/15 dark:bg-white/5 dark:text-zinc-200 dark:hover:text-orange-400 dark:xl:bg-transparent"
+                                            >
+                                                Employer Partner
+                                            </Link>
+                                            <Link
+                                                href={login()}
+                                                className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-xs font-bold whitespace-nowrap text-zinc-800 transition hover:border-[#E47818] hover:text-[#E47818] lg:h-9 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-orange-400/50"
+                                            >
+                                                Sign In
+                                            </Link>
+                                        </div>
                                         <Link
                                             href={register()}
-                                            className="inline-flex h-10 items-center justify-center rounded-xl bg-[#E47818] px-4 font-heading text-xs font-bold text-white shadow-lg shadow-orange-900/25 transition hover:bg-[#F36C21]"
+                                            className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl border border-[#E47818]/40 bg-[#E47818]/10 px-3.5 font-heading text-xs font-bold whitespace-nowrap text-[#E47818] transition hover:bg-[#E47818] hover:text-white lg:h-9 lg:w-auto dark:border-orange-400/40 dark:bg-orange-500/15 dark:text-orange-300 dark:hover:bg-[#E47818] dark:hover:text-white"
                                         >
                                             Claim Alumni Record
                                             <ArrowRight className="ml-1.5 size-3.5" />
@@ -673,6 +703,19 @@ export default function Welcome({
                         </nav>
                     </div>
                 </header>
+
+                {/* Animated Mobile Drawer Backdrop Overlay */}
+                <button
+                    type="button"
+                    aria-label="Close mobile navigation menu"
+                    tabIndex={menuOpen ? 0 : -1}
+                    onClick={() => setMenuOpen(false)}
+                    className={`fixed inset-0 z-30 bg-zinc-950/35 backdrop-blur-[2px] transition-opacity duration-300 ease-out lg:hidden ${
+                        menuOpen
+                            ? 'pointer-events-auto opacity-100'
+                            : 'pointer-events-none opacity-0'
+                    }`}
+                />
 
                 <main>
                     {/* Hero Section: Exact seait.edu.ph Full-Bleed Campus Hero + Prominent CHED Tracer Study Card */}
@@ -816,9 +859,9 @@ export default function Welcome({
                                                                         ? '/dashboard?page=Surveys'
                                                                         : register()
                                                                 }
-                                                                className="shrink-0 rounded-lg bg-[#E47818] px-3 py-1.5 font-heading text-[11px] font-bold text-white transition hover:bg-[#F36C21]"
+                                                                className="shrink-0 rounded-lg border border-teal-600/30 bg-teal-600/10 px-3 py-1.5 font-heading text-[11px] font-bold text-teal-700 transition hover:bg-teal-600 hover:text-white dark:border-teal-400/30 dark:bg-teal-500/15 dark:text-teal-300 dark:hover:bg-teal-500 dark:hover:text-zinc-950"
                                                             >
-                                                                Answer
+                                                                Answer →
                                                             </Link>
                                                         </div>
                                                     ),
@@ -842,12 +885,12 @@ export default function Welcome({
                                                     ? '/dashboard?page=Surveys'
                                                     : register()
                                             }
-                                            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-[#E47818] px-5 font-heading text-xs font-bold text-white shadow-lg shadow-orange-900/25 transition hover:bg-[#F36C21]"
+                                            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-[#004d40]/30 bg-[#001c17] px-5 font-heading text-xs font-bold text-white shadow-sm transition hover:bg-[#002b24] dark:border-teal-400/30 dark:bg-teal-950/80 dark:text-teal-100 dark:hover:bg-teal-900"
                                         >
                                             {isAuthenticated
                                                 ? 'Open Tracer Surveys'
                                                 : 'Verify & Claim Alumni Account'}
-                                            <ArrowRight className="ml-2 size-4" />
+                                            <ArrowRight className="ml-2 size-4 text-[#E47818] dark:text-orange-400" />
                                         </Link>
                                         <Link
                                             href="/alumni/registration-assistance"
@@ -862,7 +905,7 @@ export default function Welcome({
                         </div>
                     </section>
 
-                    {/* Floating Overlap Live Stats Bar (seait.edu.ph -mt-10 relative z-20 Light/Dark pattern) */}
+                    {/* Floating Overlap Institutional Scale Bar (Distinct from outcome percentage cards below) */}
                     <section className="relative z-20 mx-auto -mt-10 max-w-6xl px-4 sm:px-8">
                         <div className="grid grid-cols-2 gap-6 divide-y divide-zinc-200/80 rounded-3xl border border-zinc-200/80 bg-white p-6 text-center shadow-xl sm:p-8 lg:grid-cols-4 lg:divide-x lg:divide-y-0 dark:divide-white/10 dark:border-white/15 dark:bg-[#15190B] dark:shadow-2xl">
                             <div className="pt-2 lg:pt-0">
@@ -873,31 +916,31 @@ export default function Welcome({
                                     Alumni Masterlist
                                 </span>
                                 <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
-                                    {stats.claimed_graduates_count.toLocaleString()} claimed ({stats.claim_rate}%)
+                                    {stats.claimed_graduates_count.toLocaleString()} claimed accounts
                                 </span>
                             </div>
 
                             <div className="pt-4 lg:pt-0">
                                 <span className="block font-heading text-3xl font-bold tracking-tight text-teal-600 sm:text-4xl dark:text-teal-400">
-                                    {stats.employment_rate}%
+                                    {stats.programs_count.toLocaleString()}
                                 </span>
                                 <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
-                                    Employment Rate
+                                    Academic Programs
                                 </span>
                                 <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
-                                    {stats.employed_graduates_count.toLocaleString()} of {stats.tracked_graduates_count.toLocaleString()} tracked alumni
+                                    Across {stats.departments_count.toLocaleString()} SEAIT academic units
                                 </span>
                             </div>
 
                             <div className="pt-4 lg:pt-0">
                                 <span className="block font-heading text-3xl font-bold tracking-tight text-[#CD7A30] sm:text-4xl dark:text-amber-400">
-                                    {stats.degree_alignment_rate}%
+                                    {stats.survey_responses_count.toLocaleString()}
                                 </span>
                                 <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
-                                    Degree Alignment
+                                    GTS Survey Responses
                                 </span>
                                 <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
-                                    {stats.degree_aligned_count.toLocaleString()} in curriculum-related roles
+                                    {stats.active_surveys_count} active tracer questionnaires
                                 </span>
                             </div>
 
@@ -943,86 +986,120 @@ export default function Welcome({
                             </span>
                         </div>
 
-                        {/* Detailed Progress Breakdown Grid */}
-                        <div className="grid gap-6 md:grid-cols-3">
-                            <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
-                                <div className="flex items-center justify-between">
-                                    <span className="font-heading text-xs font-bold tracking-wider text-[#E47818] uppercase dark:text-orange-400">
-                                        Graduate Employability
-                                    </span>
-                                    <TrendingUp className="size-5 text-[#E47818] dark:text-orange-400" />
+                        {stats.tracked_graduates_count === 0 &&
+                        stats.graduates_count === 0 ? (
+                            <div className="rounded-3xl border border-dashed border-amber-400/60 bg-amber-50/60 p-7 sm:p-9 dark:border-amber-500/30 dark:bg-[#15190B]">
+                                <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+                                    <div className="max-w-2xl space-y-2">
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-bold tracking-wider text-[#CD7A30] uppercase dark:text-amber-300">
+                                            Baseline Cohort Collection Active
+                                        </span>
+                                        <h3 className="font-heading text-xl font-bold text-zinc-900 sm:text-2xl dark:text-white">
+                                            Awaiting Initial Graduate Tracer Submissions
+                                        </h3>
+                                        <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
+                                            Institutional employability and curriculum relevance percentages are automatically published as SEAIT graduates claim their Registrar records and log their employment history.
+                                        </p>
+                                    </div>
+                                    <Link
+                                        href={
+                                            isAuthenticated
+                                                ? '/dashboard?page=Employment+tracer'
+                                                : register()
+                                        }
+                                        className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-5 font-heading text-xs font-bold text-white shadow-md transition hover:bg-[#F36C21]"
+                                    >
+                                        Submit First Tracer Record
+                                        <ArrowRight className="ml-2 size-4" />
+                                    </Link>
                                 </div>
-                                <p className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-                                    {stats.employment_rate}%
-                                </p>
-                                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-[#0A1006]">
-                                    <div
-                                        className="h-full rounded-full bg-gradient-to-r from-[#E47818] to-amber-400 transition-all duration-500"
-                                        style={{
-                                            width: `${Math.min(100, Math.max(0, stats.employment_rate))}%`,
-                                        }}
-                                    />
-                                </div>
-                                <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-                                    {stats.employed_graduates_count.toLocaleString()}{' '}
-                                    currently employed out of{' '}
-                                    {stats.tracked_graduates_count.toLocaleString()}{' '}
-                                    graduates with recorded employment status.
-                                </p>
                             </div>
+                        ) : (
+                            /* Detailed Progress Breakdown Grid */
+                            <div className="grid gap-6 md:grid-cols-3">
+                                <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-heading text-xs font-bold tracking-wider text-[#E47818] uppercase dark:text-orange-400">
+                                            Graduate Employability
+                                        </span>
+                                        <TrendingUp className="size-5 text-[#E47818] dark:text-orange-400" />
+                                    </div>
+                                    <p className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+                                        {stats.tracked_graduates_count > 0
+                                            ? `${stats.employment_rate}%`
+                                            : 'Baseline'}
+                                    </p>
+                                    <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-[#0A1006]">
+                                        <div
+                                            className="h-full rounded-full bg-gradient-to-r from-[#E47818] to-amber-400 transition-all duration-500"
+                                            style={{
+                                                width: `${Math.min(100, Math.max(0, stats.employment_rate))}%`,
+                                            }}
+                                        />
+                                    </div>
+                                    <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                        {stats.employed_graduates_count.toLocaleString()}{' '}
+                                        currently employed out of{' '}
+                                        {stats.tracked_graduates_count.toLocaleString()}{' '}
+                                        graduates with recorded employment status.
+                                    </p>
+                                </div>
 
-                            <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
-                                <div className="flex items-center justify-between">
-                                    <span className="font-heading text-xs font-bold tracking-wider text-teal-700 uppercase dark:text-teal-300">
-                                        Curriculum Relevance
-                                    </span>
-                                    <Award className="size-5 text-teal-600 dark:text-teal-300" />
+                                <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-heading text-xs font-bold tracking-wider text-teal-700 uppercase dark:text-teal-300">
+                                            Curriculum Relevance
+                                        </span>
+                                        <Award className="size-5 text-teal-600 dark:text-teal-300" />
+                                    </div>
+                                    <p className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+                                        {stats.employed_graduates_count > 0
+                                            ? `${stats.degree_alignment_rate}%`
+                                            : 'Baseline'}
+                                    </p>
+                                    <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-[#0A1006]">
+                                        <div
+                                            className="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-500"
+                                            style={{
+                                                width: `${Math.min(100, Math.max(0, stats.degree_alignment_rate))}%`,
+                                            }}
+                                        />
+                                    </div>
+                                    <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                        {stats.degree_aligned_count.toLocaleString()}{' '}
+                                        employed alumni report roles directly aligned
+                                        with their SEAIT academic degree program.
+                                    </p>
                                 </div>
-                                <p className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-                                    {stats.degree_alignment_rate}%
-                                </p>
-                                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-[#0A1006]">
-                                    <div
-                                        className="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-500"
-                                        style={{
-                                            width: `${Math.min(100, Math.max(0, stats.degree_alignment_rate))}%`,
-                                        }}
-                                    />
-                                </div>
-                                <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-                                    {stats.degree_aligned_count.toLocaleString()}{' '}
-                                    employed alumni report roles directly aligned
-                                    with their SEAIT academic degree program.
-                                </p>
-                            </div>
 
-                            <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
-                                <div className="flex items-center justify-between">
-                                    <span className="font-heading text-xs font-bold tracking-wider text-[#CD7A30] uppercase dark:text-amber-300">
-                                        Roster Claim Coverage
-                                    </span>
-                                    <FileCheck2 className="size-5 text-[#CD7A30] dark:text-amber-300" />
+                                <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-heading text-xs font-bold tracking-wider text-[#CD7A30] uppercase dark:text-amber-300">
+                                            Roster Claim Coverage
+                                        </span>
+                                        <FileCheck2 className="size-5 text-[#CD7A30] dark:text-amber-300" />
+                                    </div>
+                                    <p className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+                                        {stats.claim_rate}%
+                                    </p>
+                                    <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-[#0A1006]">
+                                        <div
+                                            className="h-full rounded-full bg-gradient-to-r from-[#CD7A30] to-amber-300 transition-all duration-500"
+                                            style={{
+                                                width: `${Math.min(100, Math.max(0, stats.claim_rate))}%`,
+                                            }}
+                                        />
+                                    </div>
+                                    <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                        {stats.claimed_graduates_count.toLocaleString()}{' '}
+                                        verified portal accounts linked out of{' '}
+                                        {stats.graduates_count.toLocaleString()}{' '}
+                                        total masterlist records across{' '}
+                                        {stats.departments_count} academic units.
+                                    </p>
                                 </div>
-                                <p className="mt-4 font-heading text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-                                    {stats.claim_rate}%
-                                </p>
-                                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-[#0A1006]">
-                                    <div
-                                        className="h-full rounded-full bg-gradient-to-r from-[#CD7A30] to-amber-300 transition-all duration-500"
-                                        style={{
-                                            width: `${Math.min(100, Math.max(0, stats.claim_rate))}%`,
-                                        }}
-                                    />
-                                </div>
-                                <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-                                    {stats.claimed_graduates_count.toLocaleString()}{' '}
-                                    verified portal accounts linked out of{' '}
-                                    {stats.graduates_count.toLocaleString()}{' '}
-                                    total masterlist records across{' '}
-                                    {stats.departments_count} academic units.
-                                </p>
                             </div>
-                        </div>
+                        )}
 
                         {/* Executive Institutional Mandate Banner (Exact seait.edu.ph 12-col card pattern) */}
                         <div className="relative mt-10 overflow-hidden rounded-3xl border border-teal-900/40 bg-gradient-to-br from-zinc-900 via-[#0B1B1A] to-[#072422] p-8 text-white shadow-xl sm:p-12">
