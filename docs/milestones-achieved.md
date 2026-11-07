@@ -1,8 +1,8 @@
 # ATMS — Milestones & Technical Achievements
 
-**Project:** Alumni Tracer Management System (ATMS)  
-**Architecture:** Inertia.js React Hybrid (Laravel 12 + React 19 + TypeScript + Tailwind CSS + shadcn/ui)  
-**Test Suite:** 99 Tests Passed (794 Assertions) — 100% Green  
+**Project:** Alumni Tracer Management System (ATMS) — South East Asian Institute of Technology, Inc. (SEAIT)  
+**Architecture:** Inertia.js React Hybrid (Laravel 12 + React 19 + TypeScript + Tailwind CSS + shadcn/ui + Lenis)  
+**Test Suite:** 107 Tests Passed (884 Assertions) — 100% Green  
 **Status Date:** November 2026  
 
 ---
@@ -26,6 +26,10 @@ flowchart TD
     M11 --> M12["M12: Survey Builder & Dynamic Question Engine"]
     M12 --> M13["M13: Users, Roles, Program Scoping & Permissions Matrix"]
     M13 --> M14["M14: Modular Academic Departments & Programs Catalog"]
+    M14 --> M15["M15: Announcements Lifecycle & Cohort Targeting"]
+    M15 --> M16["M16: Dedicated Alumni Events & RSVP Module"]
+    M16 --> M17["M17: Claim Assistance Diagnostics & Resolution"]
+    M17 --> M18["M18: SEAIT Public Portal, Live GTS Telemetry & Legal Compliance"]
 ```
 
 ---
@@ -200,6 +204,22 @@ flowchart TD
   * Upgraded `RegistrationAssistanceQueue` (`resources/js/components/alumni-portal-data.tsx`) with status filter tabs (`Pending`, `Needs Info`, `Resolved`, `Rejected`, `All History`) and search by name, student number, or email.
   * Upgraded `resources/js/pages/auth/registration-assistance.tsx` and `AlumniRegistrationAssistanceController.php` with an Academic Program selector, Graduation Year field, and a self-service **Check Request Status** tab (`lookup_reference` + `lookup_identifier`) displaying the coordinator's decision, review note, and direct sign-in/registration links.
 
+### Milestone 18: SEAIT Public Portal Redesign, Live CHED GTS Telemetry, Dual-Theme & Legal Compliance
+* **Official SEAIT Branding & `seait.edu.ph` Editorial Alignment (`resources/js/pages/welcome.tsx`, `resources/views/app.blade.php`, `resources/css/app.css`)**:
+  * Rebranded the public portal for **South East Asian Institute of Technology, Inc. (SEAIT)** (*National Highway, Crossing Rubber, Tupi, South Cotabato, Philippines 9505*), replacing all legacy "Northfield College" references and mock fallbacks.
+  * Integrated the official SEAIT seal (`public/images/seait-logo.png`, also configured as favicon) and campus hero photography (`public/images/seait-admin-building.jpg`).
+  * Unified editorial typography with Google Fonts **Outfit** (`--font-heading`) and **Inter** (`--font-sans`), standardized `py-20` section headers, glassmorphic cards, and the official SEAIT palette (Deep Forest Black `#0E1406`, Dark Olive Green `#15190B`, Near Black Green `#0A1006`, Deep Institutional Teal `#001c17`, Burnt Orange `#E47818`, Warm Amber `#CD7A30`, Muted Sage Green `#6BA886`, and Warm White `#F5F4EE`).
+* **Adaptive Light & Dark Mode + Lenis Smooth Scrolling (`useAppearance`, `lenis`)**:
+  * Wired `welcome.tsx` to `useAppearance()` with an interactive Light/Dark theme toggle in the desktop header and mobile drawer, adapting every section, card, and modal between crisp Light surfaces (`#FFFFFF` / `#F8FAFC`) and SEAIT Forest/Teal Dark surfaces (`#0E1406` / `#001c17`).
+  * Installed and configured **Lenis** (`lenis` + `lenis/dist/lenis.css`) for smooth inertial scrolling and anchor navigation, automatically pausing background scroll when modals open (`data-lenis-prevent`).
+* **Live CHED GTS Institutional Telemetry & Tracer Study Callout (`PublicPortalController.php`)**:
+  * Computes real-time database metrics (`graduates_count`, `claimed_graduates_count`, `claim_rate`, `tracked_graduates_count`, `employed_graduates_count`, `employment_rate`, `degree_aligned_count`, `degree_alignment_rate`, `departments_count`, `programs_count`, `open_jobs_count`, `verified_employers_count`, `active_surveys_count`, `survey_responses_count`).
+  * Added a dedicated **CHED Graduate Tracer Study (GTS) Participation Callout** showcasing active published tracer surveys (`publicActiveSurveys`) with target cohorts and live response counters.
+  * Removed all hardcoded fallback arrays (`fallbackAnnouncements`, `fallbackJobs`, `upcomingEvents`); Academic Colleges, Job Board, Announcements, and Events render strictly from the database with clean empty states when counts are `0`.
+* **Option A Shareable Direct Deep Links & Verbatim Legal Compliance Modals (`welcome.tsx`)**:
+  * Supports shareable query-parameter deep links (`/?job=<id>`, `/?event=<id>`, `/?announcement=<id>`, `/?legal=terms`, `/?legal=privacy`) that auto-open the corresponding modal and provide a **Copy Share Link** button.
+  * Extracted and embedded the verbatim **Terms & Conditions** (`Section 01`–`06` + `Terms Directory` + `Institutional Legal Desk`) and **Privacy Policy** (`Notice 01`–`06` under **RA 10173 Data Privacy Act of 2012** + `Privacy Notice Directory` + `Data Protection Officer` desk at `privacy@seait.edu.ph`) from `https://seait.edu.ph/` into the public page footer and interactive legal modal.
+
 ---
 
 ## 3. Automated Test Suite Status
@@ -213,7 +233,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Api/RegistrationAssistanceWorkflowTest.php` | 4 | 22 | **Passed** |
 | `tests/Feature/Api/SurveyBuilderTargetingTest.php` | 1 | 19 | **Passed** |
 | `tests/Feature/Api/SystemAdminUserManagementTest.php` | 9 | 78 | **Passed** |
-| `tests/Feature/PublicPortalAndRegistrationTest.php` | 2 | 49 | **Passed** |
+| `tests/Feature/PublicPortalAndRegistrationTest.php` | 2 | 71 | **Passed** |
 | `tests/Feature/Api/InstitutionalReportsTest.php` | 4 | 197 | **Passed** |
 | `tests/Feature/Api/AlumniClaimStatusTest.php` | 2 | 13 | **Passed** |
 | `tests/Feature/Api/StrategicDecisionsTest.php` | 5 | 39 | **Passed** |
@@ -227,7 +247,7 @@ Executed via `php artisan test`:
 | `tests/Feature/Auth/TwoFactorAuthenticationTest.php` | 6 | 22 | **Passed** |
 | `tests/Feature/Settings/ProfileUpdateTest.php` | 8 | 44 | **Passed** |
 | `tests/Feature/Settings/SecurityTest.php` | 6 | 28 | **Passed** |
-| **Total Test Suite** | **107** | **862** | **100% Passed** |
+| **Total Test Suite** | **107** | **884** | **100% Passed** |
 
 ---
 
