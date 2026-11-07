@@ -712,11 +712,11 @@ export default function Welcome({
                             <div className="lg:col-span-7">
                                 <div className="mb-5 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold tracking-wider text-orange-300 uppercase shadow-sm backdrop-blur-md sm:text-xs">
                                     <span className="size-2 animate-pulse rounded-full bg-orange-400" />
-                                    Official Institutional Portal · Crossing Rubber, Tupi
+                                    Official Institutional Portal
                                 </div>
 
                                 <p className="font-heading text-xs font-bold tracking-[0.2em] text-[#6BA886] uppercase">
-                                    Educating Minds, Transforming Lives · Est. 2006
+                                    Committed to The Total Development of The Student
                                 </p>
 
                                 <h1 className="mt-2 max-w-3xl font-heading text-3xl leading-[1.14] font-extrabold tracking-tight text-balance text-[#F5F4EE] sm:text-5xl lg:text-6xl">
@@ -767,23 +767,7 @@ export default function Welcome({
                                 </div>
 
                                 {/* Institutional Motto & Accreditation Strip */}
-                                <div className="mt-10 flex flex-wrap items-center gap-6 border-t border-white/15 pt-6">
-                                    <div className="flex items-center gap-3">
-                                        <img
-                                            src="/images/seait-logo.png"
-                                            alt="SEAIT Seal"
-                                            className="size-10 object-contain"
-                                        />
-                                        <div>
-                                            <p className="font-heading text-xs font-bold text-white">
-                                                Committed to The Total Development of The Student
-                                            </p>
-                                            <p className="text-[11px] text-teal-300">
-                                                CHED Graduate Tracer Study (GTS) & Quality Assurance
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
 
                             {/* Right 5 Columns: Prominent Tracer Study Participation Callout Card */}
@@ -1268,7 +1252,7 @@ export default function Welcome({
                                     {
                                         step: 'STEP 02',
                                         title: 'Instant Roster Match or Assistance',
-                                        text: 'Exact matches verify immediately. Discrepancies can be routed directly to your Department Coordinator or registrar@seait.edu.ph.',
+                                        text: 'Exact matches verify immediately. Discrepancies can be routed directly to your Department Coordinator.',
                                     },
                                     {
                                         step: 'STEP 03',
@@ -1334,7 +1318,7 @@ export default function Welcome({
                                                                     <strong className="text-teal-700 dark:text-teal-300">
                                                                         {prog.code}
                                                                     </strong>{' '}
-                                                                    · {prog.name}
+                                                                    {/* · {prog.name} */}
                                                                 </span>
                                                             ),
                                                         )}
@@ -1954,13 +1938,8 @@ export default function Welcome({
                                         >
                                             support@seait.edu.ph
                                         </a>
-                                        <span className="text-zinc-600">·</span>
-                                        <a
-                                            href="mailto:registrar@seait.edu.ph"
-                                            className="transition hover:text-orange-400"
-                                        >
-                                            registrar@seait.edu.ph
-                                        </a>
+                                        <span className="text-zinc-600"></span>
+
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <Phone className="size-4 shrink-0 text-orange-400" />
