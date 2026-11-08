@@ -2118,11 +2118,7 @@ export default function Welcome({
                                 >
                                     Privacy Policy
                                 </button>
-                                <span className="hidden sm:inline">·</span>
-                                <span className="hidden sm:inline">
-                                    Crossing Rubber, Tupi, South Cotabato,
-                                    Philippines 9505
-                                </span>
+
                             </div>
                         </div>
                     </div>

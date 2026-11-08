@@ -40,11 +40,18 @@ test('profile photo can be uploaded and is shared as a public avatar url', funct
     Storage::fake('public');
     $user = User::factory()->create();
 
+    $avatar = function_exists('imagecreatetruecolor')
+        ? UploadedFile::fake()->image('profile.png')
+        : UploadedFile::fake()->createWithContent(
+            'profile.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true) ?: '',
+        );
+
     $this->actingAs($user)
         ->patch(route('profile.update'), [
             'name' => $user->name,
             'email' => $user->email,
-            'avatar' => UploadedFile::fake()->image('profile.png'),
+            'avatar' => $avatar,
         ])
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('profile.edit'));
