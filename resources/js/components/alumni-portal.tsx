@@ -495,6 +495,7 @@ export default function AlumniPortal({
         setAccountMenuOpen(false);
         setMobileNavOpen(false);
         return new Promise((resolve) => {
+            router.flushAll();
             router.post(
                 logout().url,
                 {},
@@ -536,6 +537,7 @@ export default function AlumniPortal({
         <AlumniProfileSummary
             editOpen={dialogOpen}
             onCloseEdit={() => setDialogOpen(false)}
+            userAvatar={user?.avatar ?? null}
         />
     ) : activePage === 'Employment tracer' ? (
         <EmploymentTracer />
@@ -757,11 +759,16 @@ export default function AlumniPortal({
                     </Link>
                 </nav>
                 <div className="relative border-t border-zinc-200/80 p-2.5">
-                    {accountMenuOpen && user && (
+                    {user && (
                         <div
                             role="menu"
                             aria-label="Account menu"
-                            className="absolute right-2 bottom-full z-30 mb-2 min-w-40 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg"
+                            aria-hidden={!accountMenuOpen}
+                            className={`absolute right-2 bottom-full left-2 z-30 mb-2 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg transition-all ${
+                                accountMenuOpen
+                                    ? 'pointer-events-auto visible translate-y-0 opacity-100'
+                                    : 'pointer-events-none invisible translate-y-1 opacity-0'
+                            }`}
                         >
                             <Link
                                 href={profileSettings()}
@@ -770,7 +777,7 @@ export default function AlumniPortal({
                                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-zinc-700 transition hover:bg-zinc-100"
                                 data-test="workspace-account-settings"
                             >
-                                <Settings2 className="size-3.5" />
+                                <Settings2 className="size-3.5 text-zinc-500" />
                                 Account settings
                             </Link>
                             <ConfirmationDialog
@@ -784,19 +791,32 @@ export default function AlumniPortal({
                                 <button
                                     type="button"
                                     role="menuitem"
+                                    onClick={() => setAccountMenuOpen(false)}
                                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-700 transition hover:bg-rose-50"
                                     data-test="workspace-logout-button"
                                 >
-                                    <LogOut className="size-3.5" />
+                                    <LogOut className="size-3.5 text-rose-600" />
                                     Log out
                                 </button>
                             </ConfirmationDialog>
                         </div>
                     )}
-                    <div className="flex items-center gap-2 rounded-xl bg-[#F5F4EE] p-2">
-                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#001c17] text-[10px] font-bold text-white">
-                            {profile.initials}
-                        </span>
+                    <div
+                        onClick={() =>
+                            setAccountMenuOpen((isOpen) => !isOpen)
+                        }
+                        className="flex cursor-pointer items-center gap-2.5 rounded-xl bg-[#F5F4EE] p-2 transition hover:bg-[#eceae1]"
+                    >
+                        <Avatar className="size-8 shrink-0 overflow-hidden rounded-full bg-[#001c17] text-[10px] font-bold text-white">
+                            <AvatarImage
+                                src={user?.avatar ?? undefined}
+                                alt={profile.name}
+                                className="object-cover"
+                            />
+                            <AvatarFallback className="rounded-full bg-[#001c17] text-[10px] font-bold text-white">
+                                {profile.initials}
+                            </AvatarFallback>
+                        </Avatar>
                         <span className="min-w-0 flex-1">
                             <span
                                 className="block truncate text-xs font-semibold text-zinc-900"
@@ -810,15 +830,20 @@ export default function AlumniPortal({
                         </span>
                         <button
                             type="button"
-                            onClick={() =>
-                                setAccountMenuOpen((isOpen) => !isOpen)
-                            }
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setAccountMenuOpen((isOpen) => !isOpen);
+                            }}
                             aria-label="Open account menu"
                             aria-haspopup="menu"
                             aria-expanded={accountMenuOpen}
                             className="grid size-7 place-items-center rounded-lg text-zinc-500 hover:bg-white"
                         >
-                            <ChevronDown className="size-3.5" />
+                            <ChevronDown
+                                className={`size-3.5 transition-transform duration-200 ${
+                                    accountMenuOpen ? 'rotate-180' : ''
+                                }`}
+                            />
                         </button>
                     </div>
                 </div>
@@ -909,6 +934,7 @@ export default function AlumniPortal({
                                             <AvatarImage
                                                 src={user.avatar ?? undefined}
                                                 alt={user.name}
+                                                className="object-cover"
                                             />
                                             <AvatarFallback className="rounded-full bg-[#001c17] text-[10px] font-bold text-white">
                                                 {profile.initials}

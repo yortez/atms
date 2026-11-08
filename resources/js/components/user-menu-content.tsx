@@ -64,13 +64,16 @@ export function UserMenuContent({ user }: Props) {
                 variant="default"
                 onConfirm={handleLogout}
             >
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem
+                    asChild
+                    onSelect={(event) => event.preventDefault()}
+                >
                     <button
                         type="button"
-                        className="w-full cursor-pointer"
+                        className="w-full cursor-pointer text-rose-700 focus:bg-rose-50 focus:text-rose-700"
                         data-test="logout-button"
                     >
-                        <LogOut />
+                        <LogOut className="mr-2 size-4 text-rose-600" />
                         Log out
                     </button>
                 </DropdownMenuItem>

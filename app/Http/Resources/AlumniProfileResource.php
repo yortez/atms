@@ -27,6 +27,7 @@ class AlumniProfileResource extends JsonResource
             'email' => $this->email,
             'date_of_birth' => $this->date_of_birth->toDateString(),
             'profile_status' => $this->profile_status,
+            'avatar' => $this->when($this->resource->relationLoaded('user'), fn () => $this->user?->avatar),
             'is_claimed' => $this->when($this->resource->relationLoaded('user'), fn () => $this->user !== null),
             'claimed_at' => $this->when($this->resource->relationLoaded('user'), fn () => $this->user?->created_at?->toISOString()),
             'education_records' => $this->whenLoaded('educationRecords', function () use ($request) {

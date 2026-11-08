@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ConfirmationDialog from '@/components/confirmation-dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useApiResource } from '@/hooks/use-api-resource';
 import {
     ApiError,
@@ -573,9 +574,16 @@ function AlumniProfileDialog({
                     ) : profile ? (
                         <>
                             <section className="flex items-center gap-3">
-                                <span className="grid size-12 shrink-0 place-items-center rounded-full bg-[#e9eee5] text-sm font-bold text-[#45634a]">
-                                    {initials(profile.name)}
-                                </span>
+                                <Avatar className="size-12 shrink-0 overflow-hidden rounded-full ring-2 ring-[#001c17]/10">
+                                    <AvatarImage
+                                        src={profile.avatar ?? undefined}
+                                        alt={profile.name}
+                                        className="object-cover"
+                                    />
+                                    <AvatarFallback className="rounded-full bg-[#e9eee5] text-sm font-bold text-[#45634a]">
+                                        {initials(profile.name)}
+                                    </AvatarFallback>
+                                </Avatar>
                                 <div className="min-w-0">
                                     <p className="truncate text-base font-semibold text-[#29382e]">
                                         {profile.name}
@@ -1289,11 +1297,23 @@ export function AlumniDirectory({
                                             >
                                                 <td className="px-4 py-3.5 sm:px-5">
                                                     <div className="flex items-center gap-2.5">
-                                                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e9eee5] text-[10px] font-bold text-[#45634a]">
-                                                            {initials(
-                                                                alumnus.name,
-                                                            )}
-                                                        </span>
+                                                        <Avatar className="size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-[#001c17]/10">
+                                                            <AvatarImage
+                                                                src={
+                                                                    alumnus.avatar ??
+                                                                    undefined
+                                                                }
+                                                                alt={
+                                                                    alumnus.name
+                                                                }
+                                                                className="object-cover"
+                                                            />
+                                                            <AvatarFallback className="rounded-full bg-[#e9eee5] text-[10px] font-bold text-[#45634a]">
+                                                                {initials(
+                                                                    alumnus.name,
+                                                                )}
+                                                            </AvatarFallback>
+                                                        </Avatar>
                                                         <span>
                                                             <button
                                                                 type="button"
@@ -1490,9 +1510,11 @@ export function AcademicRecords() {
 export function AlumniProfileSummary({
     editOpen,
     onCloseEdit,
+    userAvatar,
 }: {
     editOpen: boolean;
     onCloseEdit: () => void;
+    userAvatar?: string | null;
 }) {
     const { data, loading, error, reload } =
         useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
@@ -1553,9 +1575,16 @@ export function AlumniProfileSummary({
         <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
             <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
                 <div className="flex items-center gap-4">
-                    <span className="grid size-14 place-items-center rounded-2xl bg-[#e9eee5] text-sm font-bold text-[#45634a]">
-                        {initials(profile.name)}
-                    </span>
+                    <Avatar className="size-14 overflow-hidden rounded-2xl ring-2 ring-[#001c17]/10">
+                        <AvatarImage
+                            src={profile.avatar ?? userAvatar ?? undefined}
+                            alt={profile.name}
+                            className="object-cover"
+                        />
+                        <AvatarFallback className="rounded-2xl bg-[#001c17] text-sm font-bold text-white">
+                            {initials(profile.name)}
+                        </AvatarFallback>
+                    </Avatar>
                     <div className="min-w-0">
                         <h2 className="font-semibold text-[#2e3c31]">
                             {profile.preferred_name ?? profile.name}
@@ -2724,6 +2753,7 @@ type UserRoleAssignment = {
     id: number;
     name: string;
     email: string;
+    avatar?: string | null;
     roles: string[];
     assigned_program_ids?: number[];
     assigned_programs?: Array<{
@@ -3438,33 +3468,48 @@ export function AssignedRoles({
                                         className="rounded-2xl border border-[#e9ebe5] bg-[#f9faf7] p-4"
                                     >
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                            <div>
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <p className="text-sm font-semibold text-[#39463b]">
-                                                        {user.name}
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-[#001c17]/10">
+                                                    <AvatarImage
+                                                        src={
+                                                            user.avatar ??
+                                                            undefined
+                                                        }
+                                                        alt={user.name}
+                                                        className="object-cover"
+                                                    />
+                                                    <AvatarFallback className="rounded-full bg-[#e9eee5] text-[11px] font-bold text-[#45634a]">
+                                                        {initials(user.name)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <p className="text-sm font-semibold text-[#39463b]">
+                                                            {user.name}
+                                                        </p>
+                                                        {user.is_verified && (
+                                                            <span className="rounded-full bg-[#e6efe4] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                                                Verified
+                                                            </span>
+                                                        )}
+                                                        {user.alumni_profile_id && (
+                                                            <span className="rounded-full bg-[#eef2ec] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
+                                                                Claimed Alumni #
+                                                                {
+                                                                    user.alumni_profile_id
+                                                                }
+                                                            </span>
+                                                        )}
+                                                        {user.is_suspended && (
+                                                            <span className="rounded-full bg-[#f7e9e5] px-2.5 py-0.5 text-[10px] font-semibold text-[#8b4e43]">
+                                                                Suspended
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="mt-1 text-[11px] text-[#7a8278]">
+                                                        {user.email}
                                                     </p>
-                                                    {user.is_verified && (
-                                                        <span className="rounded-full bg-[#e6efe4] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
-                                                            Verified
-                                                        </span>
-                                                    )}
-                                                    {user.alumni_profile_id && (
-                                                        <span className="rounded-full bg-[#eef2ec] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
-                                                            Claimed Alumni #
-                                                            {
-                                                                user.alumni_profile_id
-                                                            }
-                                                        </span>
-                                                    )}
-                                                    {user.is_suspended && (
-                                                        <span className="rounded-full bg-[#f7e9e5] px-2.5 py-0.5 text-[10px] font-semibold text-[#8b4e43]">
-                                                            Suspended
-                                                        </span>
-                                                    )}
                                                 </div>
-                                                <p className="mt-1 text-[11px] text-[#7a8278]">
-                                                    {user.email}
-                                                </p>
                                             </div>
                                             <span className="text-[10px] font-medium tracking-[0.14em] text-[#6d7d6a] uppercase">
                                                 {currentRoles.length

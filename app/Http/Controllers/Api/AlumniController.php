@@ -25,7 +25,7 @@ class AlumniController extends Controller
                 'educationRecords.programDegree.program',
                 'educationRecords.programDegree.degree',
                 'employmentRecords.status',
-                'user:id,alumni_profile_id,created_at',
+                'user:id,alumni_profile_id,avatar_path,created_at',
             ]);
 
         if ($request->filled('claim_status')) {
@@ -77,7 +77,7 @@ class AlumniController extends Controller
             'educationRecords.programDegree.program',
             'educationRecords.programDegree.degree',
             'employmentRecords.status',
-            'user:id,alumni_profile_id,created_at',
+            'user:id,alumni_profile_id,avatar_path,created_at',
         ]));
     }
 
@@ -102,6 +102,7 @@ class AlumniController extends Controller
             'educationRecords.programDegree.program',
             'educationRecords.programDegree.degree',
             'employmentRecords.status',
+            'user:id,alumni_profile_id,avatar_path,created_at',
         ]));
     }
 

@@ -353,6 +353,7 @@ class SystemAdminUserController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'avatar' => $user->avatar,
             'roles' => $user->roles->pluck('name')->values()->all(),
             'assigned_program_ids' => $user->assignedPrograms->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
             'assigned_programs' => $user->assignedPrograms->map(fn (AcademicProgram $program): array => [
