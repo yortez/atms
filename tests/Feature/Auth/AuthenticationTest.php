@@ -1,7 +1,10 @@
 <?php
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 
 test('login screen can be rendered', function () {
@@ -74,4 +77,38 @@ test('users are rate limited', function () {
     ]);
 
     $response->assertTooManyRequests();
+});
+
+test('system administrator can toggle demo quick-fill login accounts on the login page', function () {
+    Storage::fake('local');
+
+    $adminRole = Role::query()->firstOrCreate(
+        ['name' => 'system-administrator'],
+        ['label' => 'System Administrator'],
+    );
+    $admin = User::factory()->create();
+    $admin->roles()->sync([$adminRole->id => ['created_at' => now()]]);
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('auth/login')
+            ->where('demoQuickLoginEnabled', true)
+            ->has('demoAccounts', 5)
+        );
+
+    $this->actingAs($admin)
+        ->patchJson('/api/admin/settings/demo-quick-login', ['enabled' => false])
+        ->assertOk()
+        ->assertJsonPath('data.demo_quick_login_enabled', false);
+
+    auth('web')->logout();
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('auth/login')
+            ->where('demoQuickLoginEnabled', false)
+            ->has('demoAccounts', 0)
+        );
 });

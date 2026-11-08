@@ -139,6 +139,10 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('api.activity-logs.index');
     Route::get('/admin/users', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'index'])
         ->name('api.admin.users.index');
+    Route::get('/admin/settings/demo-quick-login', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'demoQuickLogin'])
+        ->name('api.admin.settings.demo-quick-login.show');
+    Route::patch('/admin/settings/demo-quick-login', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateDemoQuickLogin'])
+        ->name('api.admin.settings.demo-quick-login.update');
     Route::post('/admin/users', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'invite'])
         ->name('api.admin.users.invite');
     Route::patch('/admin/users/{user}/roles', [\App\Http\Controllers\Api\SystemAdminUserController::class, 'updateRoles'])

@@ -81,6 +81,102 @@ type OverviewProps = {
     onNavigate: (page: string) => void;
 };
 
+function DemoQuickLoginToggleCard() {
+    const { data, loading, reload } = useApiResource<
+        ApiEnvelope<{ demo_quick_login_enabled: boolean }>
+    >('/api/admin/settings/demo-quick-login');
+    const [saving, setSaving] = useState(false);
+
+    const enabled = data?.data?.demo_quick_login_enabled ?? true;
+
+    async function toggleDemoLogin() {
+        const nextValue = !enabled;
+        setSaving(true);
+        try {
+            const response = await apiRequest<{
+                data: { demo_quick_login_enabled: boolean };
+                message?: string;
+            }>('/api/admin/settings/demo-quick-login', {
+                method: 'PATCH',
+                body: { enabled: nextValue },
+            });
+            reload();
+            toast.success(
+                response.message ??
+                    (nextValue
+                        ? 'Demo quick-fill login enabled.'
+                        : 'Demo quick-fill login disabled.'),
+            );
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'Could not update demo quick-login setting.',
+            );
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div
+            data-test="admin-demo-quick-login-card"
+            className="flex flex-col justify-between gap-3 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4 sm:flex-row sm:items-center"
+        >
+            <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-xs font-bold tracking-wider text-[#29382e] uppercase">
+                        Quick-Fill Demo Accounts on Login Page
+                    </h3>
+                    <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            enabled
+                                ? 'bg-[#e3eee0] text-[#2b5139]'
+                                : 'bg-[#eff0ec] text-[#6d746a]'
+                        }`}
+                    >
+                        {loading ? 'Checking…' : enabled ? 'Shown' : 'Hidden'}
+                    </span>
+                </div>
+                <p className="mt-0.5 text-xs text-[#6b7669]">
+                    Show or hide the collapsible Quick-Fill Demo Accounts card on
+                    the public sign-in page (<code>/login</code>).
+                </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2.5">
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={enabled}
+                    disabled={loading || saving}
+                    onClick={toggleDemoLogin}
+                    data-test="toggle-demo-quick-login-button"
+                    className="inline-flex items-center gap-2.5 rounded-full border border-[#d6dfd3] bg-white px-3 py-1.5 text-xs font-semibold text-[#29382e] shadow-2xs transition hover:border-[#2b5139] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    <span
+                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                            enabled ? 'bg-[#2b5139]' : 'bg-[#cbd2c9]'
+                        }`}
+                    >
+                        <span
+                            className={`inline-block size-3.5 transform rounded-full bg-white shadow-xs transition-transform ${
+                                enabled ? 'translate-x-4' : 'translate-x-1'
+                            }`}
+                        />
+                    </span>
+                    <span>
+                        {saving
+                            ? 'Saving…'
+                            : enabled
+                              ? 'Shown on /login'
+                              : 'Hidden on /login'}
+                    </span>
+                </button>
+            </div>
+        </div>
+    );
+}
+
 export function LiveOverview({ role, onNavigate }: OverviewProps) {
     const statsResource = useApiResource<ApiEnvelope<DashboardStatistics>>(
         '/api/dashboard/stats',
@@ -3204,7 +3300,9 @@ export function AssignedRoles({
             )}
 
             {isSystemAdmin && (
-                <div className="mt-6 border-t border-[#eff0ec] pt-5">
+                <div className="mt-6 space-y-5 border-t border-[#eff0ec] pt-5">
+                    <DemoQuickLoginToggleCard />
+
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">

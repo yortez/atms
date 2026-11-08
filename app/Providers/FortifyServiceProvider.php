@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use App\Models\User;
+use App\Support\SystemSettings;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
@@ -61,10 +62,16 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn (Request $request) => Inertia::render('auth/login', [
-            'canResetPassword' => Features::enabled(Features::resetPasswords()),
-            'status' => $request->session()->get('status'),
-        ]));
+        Fortify::loginView(function (Request $request) {
+            $demoQuickLoginEnabled = SystemSettings::demoQuickLoginEnabled();
+
+            return Inertia::render('auth/login', [
+                'canResetPassword' => Features::enabled(Features::resetPasswords()),
+                'status' => $request->session()->get('status'),
+                'demoQuickLoginEnabled' => $demoQuickLoginEnabled,
+                'demoAccounts' => $demoQuickLoginEnabled ? SystemSettings::demoAccounts() : [],
+            ]);
+        });
 
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
             'email' => $request->email,
