@@ -4,13 +4,37 @@
 
 This document is the Phase 2 logical and physical database design for the Alumni
 Tracer Management System. It specifies the MySQL schema, keys, constraints,
-indexes, relationships, and normalization decisions. It does not add migrations;
-database implementation is Phase 3.
+indexes, relationships, and normalization decisions, along with implementation
+notes through **Milestone 18** (`docs/milestones-achieved.md`).
 
 The design covers authentication and authorization, academic records, alumni
 registration and claims, employment tracing, surveys, announcements and events,
 employers and recruitment, reporting support, imports, notifications, and audit
 records.
+
+### Milestone 1–18 implementation notes
+
+In the implemented migrations (`database/migrations/`), the following practical
+refinements were adopted on top of this specification:
+
+- **Account-to-Alumni Claim Link**: Stored via a unique nullable
+  `users.alumni_profile_id` foreign key referencing `alumni_profiles.id`.
+- **Education Credentials (`alumni_education_records`)**: Includes `gwa`
+  (`DECIMAL(4,2) NULL`) alongside `student_number`, `program_degree_id`,
+  `graduation_year`, and `honors`.
+- **Employment Tracer Relevance (`alumni_employment_records`)**: Includes
+  `is_related_to_degree` (`BOOLEAN DEFAULT TRUE`) for Option B curriculum
+  alignment reporting.
+- **RA 10173 Job Application Snapshots (`job_applications`)**: Stores immutable
+  `profile_snapshot` (`JSON`) and `resume_snapshot_path` (`VARCHAR(255)`) at the
+  moment of application submission.
+- **Cohort Targeting Columns**: `surveys`, `announcements`, and `alumni_events`
+  use JSON array targeting columns (`target_department_ids`,
+  `target_program_ids`, `target_graduation_years`, `audience_roles`) to filter
+  multi-degree alumni efficiently.
+- **Claim Assistance Diagnostics (`alumni_registration_assistance_requests`)**:
+  Includes `academic_program_id`, `graduation_year`, `resolution_action`, and
+  `resolved_alumni_profile_id` for coordinator routing and one-click resolution.
 
 ## Database conventions
 
