@@ -483,29 +483,6 @@ export default function AlumniPortal({
     const isOverview =
         activePage === 'Overview' || activePage === 'My dashboard';
 
-    function changeRole(value: Role) {
-        if (!availableRoles.includes(value)) {
-            return;
-        }
-
-        const firstPage = navigation[value][0].label;
-        setRole(value);
-        setActivePage(firstPage);
-        if (typeof window !== 'undefined') {
-            window.sessionStorage.setItem('seait_workspace_role', value);
-        }
-        if (isCustomChildPage) {
-            router.visit(
-                `/dashboard?role=${encodeURIComponent(value)}&page=${encodeURIComponent(firstPage)}`,
-            );
-            return;
-        }
-        syncUrlState(value, firstPage);
-        setMobileNavOpen(false);
-        setDialogOpen(false);
-        setSearch('');
-    }
-
     function handleAction() {
         if (currentPage.action?.startsWith('Export')) {
             void exportEmploymentOutcomes();
@@ -698,35 +675,9 @@ export default function AlumniPortal({
                         <X className="size-4" />
                     </button>
                 </div>
-                <div className="px-3 pt-4">
-                    <label
-                        htmlFor="role-preview"
-                        className="mb-1.5 block px-1 text-[10px] font-bold tracking-[0.14em] text-zinc-500 uppercase"
-                    >
-                        Workspace role
-                    </label>
-                    <div className="relative">
-                        <select
-                            id="role-preview"
-                            value={role}
-                            onChange={(event) => {
-                                const selectedRole = availableRoles.find(
-                                    (item) => item === event.target.value,
-                                );
-                                if (selectedRole) changeRole(selectedRole);
-                            }}
-                            className="h-9 w-full appearance-none rounded-xl border border-zinc-200 bg-[#F5F4EE]/70 pr-9 pl-3 text-xs font-semibold text-zinc-800 outline-none focus:border-[#E47818]"
-                        >
-                            {availableRoles.map((item) => (
-                                <option key={item}>{item}</option>
-                            ))}
-                        </select>
-                        <ChevronDown className="pointer-events-none absolute top-3 right-3 size-3.5 text-zinc-500" />
-                    </div>
-                </div>
                 <nav
                     aria-label={`${role} navigation`}
-                    className="portal-sidebar-nav mt-3 flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-2.5 pb-3"
+                    className="portal-sidebar-nav mt-2 flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-2.5 pb-3"
                 >
                     {navItems.map(({ label, icon: Icon, section }, index) => {
                         const selected =
