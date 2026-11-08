@@ -646,7 +646,19 @@ export default function AlumniPortal({
                 }`}
             >
                 <div className="flex h-16 items-center justify-between border-b border-zinc-200/80 px-4">
-                    <Link href="/" className="group flex items-center gap-3">
+                    <Link
+                        href="/dashboard"
+                        onClick={(event) => {
+                            if (!isCustomChildPage) {
+                                event.preventDefault();
+                                navigateToPage(firstPageForRole[role]);
+                                setMobileNavOpen(false);
+                                setDialogOpen(false);
+                                setSearch('');
+                            }
+                        }}
+                        className="group flex items-center gap-3"
+                    >
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white p-1 shadow-2xs transition group-hover:border-[#E47818]/60">
                             <img
                                 src="/images/seait-logo.png"
