@@ -333,15 +333,32 @@ function extractFirstName(fullName: string): string {
     return cleaned.split(/\s+/)[0]?.replace(/,+$/, '') || 'Alumnus';
 }
 
-export default function AlumniPortal() {
+export default function AlumniPortal({
+    children,
+    activeNavOverride,
+    pageTitle,
+    pageDescription,
+}: {
+    children?: React.ReactNode;
+    activeNavOverride?: string;
+    pageTitle?: string;
+    pageDescription?: string;
+} = {}) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const user = auth.user;
+    const isCustomChildPage = Boolean(children);
     const availableRoles = rolePriority.filter((role) =>
         user?.roles?.includes(roleCodes[role]),
     );
     const resolvePortalStateFromUrl = (): { role: Role; page: string } => {
-        const defaultRole: Role = availableRoles[0] ?? 'Alumni';
+        let defaultRole: Role = availableRoles[0] ?? 'Alumni';
         if (typeof window !== 'undefined') {
+            const storedRole = window.sessionStorage.getItem(
+                'seait_workspace_role',
+            ) as Role | null;
+            if (storedRole && availableRoles.includes(storedRole)) {
+                defaultRole = storedRole;
+            }
             const params = new URLSearchParams(window.location.search);
             const requestedRole = params.get('role') as Role | null;
             const requestedPage = params.get('page');
@@ -387,8 +404,14 @@ export default function AlumniPortal() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [search, setSearch] = useState('');
 
+    useEffect(() => {
+        if (typeof window !== 'undefined' && role) {
+            window.sessionStorage.setItem('seait_workspace_role', role);
+        }
+    }, [role]);
+
     const syncUrlState = (nextRole: Role, nextPage: string) => {
-        if (typeof window === 'undefined') {
+        if (typeof window === 'undefined' || isCustomChildPage) {
             return;
         }
         const url = new URL(window.location.href);
@@ -398,7 +421,7 @@ export default function AlumniPortal() {
     };
 
     useEffect(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === 'undefined' || isCustomChildPage) {
             return;
         }
         const handlePopState = () => {
@@ -408,9 +431,15 @@ export default function AlumniPortal() {
         };
         window.addEventListener('popstate', handlePopState);
         return () => window.removeEventListener('popstate', handlePopState);
-    }, []);
+    }, [isCustomChildPage]);
 
     const navigateToPage = (nextPage: string) => {
+        if (isCustomChildPage) {
+            router.visit(
+                `/dashboard?role=${encodeURIComponent(role)}&page=${encodeURIComponent(nextPage)}`,
+            );
+            return;
+        }
         setActivePage(nextPage);
         syncUrlState(role, nextPage);
     };
@@ -462,6 +491,15 @@ export default function AlumniPortal() {
         const firstPage = navigation[value][0].label;
         setRole(value);
         setActivePage(firstPage);
+        if (typeof window !== 'undefined') {
+            window.sessionStorage.setItem('seait_workspace_role', value);
+        }
+        if (isCustomChildPage) {
+            router.visit(
+                `/dashboard?role=${encodeURIComponent(value)}&page=${encodeURIComponent(firstPage)}`,
+            );
+            return;
+        }
         syncUrlState(value, firstPage);
         setMobileNavOpen(false);
         setDialogOpen(false);
@@ -491,7 +529,9 @@ export default function AlumniPortal() {
         });
     }
 
-    const content = !availableRoles.length ? (
+    const content = isCustomChildPage ? (
+        children
+    ) : !availableRoles.length ? (
         <section
             role="alert"
             className="rounded-2xl border border-[#e9ebe5] bg-white p-6 text-sm text-[#687267]"
@@ -583,7 +623,31 @@ export default function AlumniPortal() {
     );
 
     return (
-        <div className="min-h-screen bg-[#F5F4EE] text-zinc-900">
+        <div
+            className="min-h-screen bg-[#F5F4EE] text-zinc-900"
+            style={
+                {
+                    '--background': 'oklch(1 0 0)',
+                    '--foreground': 'oklch(0.145 0 0)',
+                    '--card': 'oklch(1 0 0)',
+                    '--card-foreground': 'oklch(0.145 0 0)',
+                    '--popover': 'oklch(1 0 0)',
+                    '--popover-foreground': 'oklch(0.145 0 0)',
+                    '--primary': '#E47818',
+                    '--primary-foreground': '#ffffff',
+                    '--secondary': 'oklch(0.97 0 0)',
+                    '--secondary-foreground': 'oklch(0.205 0 0)',
+                    '--muted': 'oklch(0.97 0 0)',
+                    '--muted-foreground': 'oklch(0.556 0 0)',
+                    '--accent': 'oklch(0.97 0 0)',
+                    '--accent-foreground': 'oklch(0.205 0 0)',
+                    '--border': 'oklch(0.922 0 0)',
+                    '--input': 'oklch(0.922 0 0)',
+                    '--ring': '#E47818',
+                    colorScheme: 'light',
+                } as React.CSSProperties
+            }
+        >
             <button
                 aria-label="Close navigation"
                 type="button"
@@ -665,7 +729,8 @@ export default function AlumniPortal() {
                     className="portal-sidebar-nav mt-3 flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-2.5 pb-3"
                 >
                     {navItems.map(({ label, icon: Icon, section }, index) => {
-                        const selected = activePage === label;
+                        const selected =
+                            !isCustomChildPage && activePage === label;
                         const prevSection =
                             index > 0 ? navItems[index - 1]?.section : undefined;
                         const showSectionHeader =
@@ -718,9 +783,26 @@ export default function AlumniPortal() {
                     </button>
                     <Link
                         href={profileSettings()}
-                        className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                        onClick={() => setMobileNavOpen(false)}
+                        aria-current={
+                            activeNavOverride === 'Account settings'
+                                ? 'page'
+                                : undefined
+                        }
+                        className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-semibold transition ${
+                            activeNavOverride === 'Account settings'
+                                ? 'bg-[#001c17] text-white shadow-2xs'
+                                : 'font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                        }`}
                     >
-                        <Settings2 className="size-4 text-zinc-500" /> Account settings
+                        <Settings2
+                            className={`size-4 shrink-0 ${
+                                activeNavOverride === 'Account settings'
+                                    ? 'text-[#E47818]'
+                                    : 'text-zinc-500'
+                            }`}
+                        />{' '}
+                        Account settings
                     </Link>
                 </nav>
                 <div className="relative border-t border-zinc-200/80 p-2.5">
@@ -807,7 +889,7 @@ export default function AlumniPortal() {
                             <ChevronRight className="size-3" />
                         </div>
                         <span className="truncate text-xs font-bold text-zinc-900">
-                            {activePage}
+                            {activeNavOverride ?? activePage}
                         </span>
                         <span className="hidden rounded-full border border-teal-600/25 bg-teal-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-teal-800 lg:inline-flex">
                             {profile.scope}
@@ -902,29 +984,39 @@ export default function AlumniPortal() {
                                 SEAIT · {role} Workspace
                             </p>
                             <h1 className="mt-1.5 truncate font-heading text-2xl font-bold tracking-tight text-zinc-900 sm:text-[28px]">
-                                {currentPage.title}
+                                {pageTitle ?? currentPage.title}
                             </h1>
                             <p className="mt-1.5 text-xs leading-5 text-zinc-600 sm:text-sm">
-                                {currentPage.description}
+                                {pageDescription ?? currentPage.description}
                             </p>
                         </div>
-                        {currentPage.action && (
-                            <button
-                                type="button"
-                                onClick={handleAction}
-                                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E47818] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#F36C21]"
+                        {isCustomChildPage ? (
+                            <Link
+                                href={`/dashboard?role=${encodeURIComponent(role)}&page=${encodeURIComponent(activePage)}`}
+                                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-800 shadow-2xs transition hover:border-[#E47818] hover:text-[#E47818]"
                             >
-                                {currentPage.action.startsWith('Export') ? (
-                                    <FileSpreadsheet className="size-3.5" />
-                                ) : (
-                                    <Plus className="size-3.5" />
-                                )}
-                                {currentPage.action}
-                            </button>
+                                <LayoutDashboard className="size-3.5 text-[#E47818]" />
+                                Back to {role} workspace
+                            </Link>
+                        ) : (
+                            currentPage.action && (
+                                <button
+                                    type="button"
+                                    onClick={handleAction}
+                                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E47818] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#F36C21]"
+                                >
+                                    {currentPage.action.startsWith('Export') ? (
+                                        <FileSpreadsheet className="size-3.5" />
+                                    ) : (
+                                        <Plus className="size-3.5" />
+                                    )}
+                                    {currentPage.action}
+                                </button>
+                            )
                         )}
                     </div>
 
-                    {search && !isOverview && (
+                    {search && !isOverview && !isCustomChildPage && (
                         <div className="mb-4 flex items-center gap-2 rounded-xl border border-teal-600/25 bg-teal-500/10 px-3 py-2 text-xs text-teal-900">
                             <Search className="size-3.5" />
                             Searching records for “{search}”
@@ -939,7 +1031,7 @@ export default function AlumniPortal() {
                         </div>
                     )}
 
-                    {content}
+                    {isCustomChildPage ? children : content}
 
                     <footer className="mt-8 flex flex-col justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-500 sm:flex-row">
                         <span>
