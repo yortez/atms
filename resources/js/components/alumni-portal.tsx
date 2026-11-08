@@ -639,7 +639,7 @@ export default function AlumniPortal({
                 }`}
             />
             <aside
-                className={`fixed inset-y-0 left-0 z-40 flex w-[256px] flex-col border-r border-zinc-200/90 bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:translate-x-0 md:shadow-none ${
+                className={`fixed inset-y-0 left-0 z-40 flex w-[min(272px,85vw)] flex-col border-r border-zinc-200/90 bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:w-[256px] md:translate-x-0 md:shadow-none ${
                     mobileNavOpen
                         ? 'translate-x-0 shadow-2xl'
                         : '-translate-x-full shadow-none'
@@ -861,9 +861,9 @@ export default function AlumniPortal({
                 </div>
             </aside>
 
-            <div className="min-h-screen md:pl-[256px]">
-                <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-zinc-200/80 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
-                    <div className="flex min-w-0 items-center gap-3">
+            <div className="min-h-screen min-w-0 overflow-x-hidden md:pl-[256px]">
+                <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-2 border-b border-zinc-200/80 bg-white/95 px-3 backdrop-blur sm:h-16 sm:px-6 lg:px-8">
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
                         <button
                             type="button"
                             aria-label="Open navigation"
@@ -876,14 +876,14 @@ export default function AlumniPortal({
                             <span>SEAIT Workspace</span>
                             <ChevronRight className="size-3" />
                         </div>
-                        <span className="truncate text-xs font-bold text-zinc-900">
+                        <span className="truncate text-xs font-bold text-zinc-900 sm:text-sm">
                             {activeNavOverride ?? activePage}
                         </span>
                         <span className="hidden rounded-full border border-teal-600/25 bg-teal-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-teal-800 lg:inline-flex">
                             {profile.scope}
                         </span>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
                         {[
                             'Administrator',
                             'Alumni coordinator',
@@ -966,13 +966,13 @@ export default function AlumniPortal({
                     </div>
                 </header>
 
-                <main className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+                <main className="mx-auto w-full min-w-0 max-w-[1500px] px-3.5 py-4 pb-20 sm:px-6 sm:py-6 sm:pb-12 lg:px-8">
                     <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                         <div className="min-w-0">
                             <p className="text-[10px] font-bold tracking-[0.16em] text-[#E47818] uppercase">
                                 SEAIT · {role} Workspace
                             </p>
-                            <h1 className="mt-1.5 truncate font-heading text-2xl font-bold tracking-tight text-zinc-900 sm:text-[28px]">
+                            <h1 className="mt-1.5 font-heading text-xl leading-tight font-bold tracking-tight break-words text-zinc-900 sm:text-[28px]">
                                 {pageTitle ?? currentPage.title}
                             </h1>
                             <p className="mt-1.5 text-xs leading-5 text-zinc-600 sm:text-sm">
@@ -982,7 +982,7 @@ export default function AlumniPortal({
                         {isCustomChildPage ? (
                             <Link
                                 href={`/dashboard?role=${encodeURIComponent(role)}&page=${encodeURIComponent(activePage)}`}
-                                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-800 shadow-2xs transition hover:border-[#E47818] hover:text-[#E47818]"
+                                className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-800 shadow-2xs transition hover:border-[#E47818] hover:text-[#E47818] sm:w-auto"
                             >
                                 <LayoutDashboard className="size-3.5 text-[#E47818]" />
                                 Back to {role} workspace
@@ -992,7 +992,7 @@ export default function AlumniPortal({
                                 <button
                                     type="button"
                                     onClick={handleAction}
-                                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E47818] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#F36C21]"
+                                    className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#E47818] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#F36C21] sm:w-auto"
                                 >
                                     {currentPage.action.startsWith('Export') ? (
                                         <FileSpreadsheet className="size-3.5" />

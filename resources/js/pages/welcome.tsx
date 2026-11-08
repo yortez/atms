@@ -547,16 +547,16 @@ export default function Welcome({
                                     className="size-full object-contain"
                                 />
                             </div>
-                            <div className="min-w-0 whitespace-nowrap">
+                            <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 sm:gap-2">
-                                    <span className="font-heading text-lg font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] sm:text-xl dark:text-white">
+                                    <span className="font-heading text-base font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] sm:text-xl dark:text-white">
                                         SEAIT
                                     </span>
-                                    <span className="rounded-lg border border-orange-300/80 bg-orange-50/90 px-2 py-0.5 font-heading text-[10px] font-bold tracking-wider text-[#E47818] uppercase shadow-2xs dark:border-orange-500/30 dark:bg-orange-950/60 dark:text-orange-400">
+                                    <span className="rounded-lg border border-orange-300/80 bg-orange-50/90 px-1.5 py-0.5 font-heading text-[9px] font-bold tracking-wider text-[#E47818] uppercase shadow-2xs sm:px-2 sm:text-[10px] dark:border-orange-500/30 dark:bg-orange-950/60 dark:text-orange-400">
                                         ATMS
                                     </span>
                                 </div>
-                                <span className="block truncate text-[10px] font-medium text-zinc-500 sm:text-[11px] dark:text-zinc-400">
+                                <span className="hidden truncate text-[10px] font-medium text-zinc-500 sm:block sm:text-[11px] dark:text-zinc-400">
                                     Alumni Tracer Management System
                                 </span>
                             </div>
@@ -907,51 +907,51 @@ export default function Welcome({
 
                     {/* Floating Overlap Institutional Scale Bar (Distinct from outcome percentage cards below) */}
                     <section className="relative z-20 mx-auto -mt-10 max-w-6xl px-4 sm:px-8">
-                        <div className="grid grid-cols-2 gap-6 divide-y divide-zinc-200/80 rounded-3xl border border-zinc-200/80 bg-white p-6 text-center shadow-xl sm:p-8 lg:grid-cols-4 lg:divide-x lg:divide-y-0 dark:divide-white/10 dark:border-white/15 dark:bg-[#15190B] dark:shadow-2xl">
-                            <div className="pt-2 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-[#E47818] sm:text-4xl">
+                        <div className="grid grid-cols-2 gap-3 rounded-3xl border border-zinc-200/80 bg-white p-4 text-center shadow-xl sm:gap-6 sm:p-8 lg:grid-cols-4 lg:divide-x lg:divide-zinc-200/80 dark:border-white/15 dark:bg-[#15190B] dark:shadow-2xl lg:dark:divide-white/10">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-[#E47818] sm:text-4xl">
                                     {stats.graduates_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     Alumni Masterlist
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     {stats.claimed_graduates_count.toLocaleString()} claimed accounts
                                 </span>
                             </div>
 
-                            <div className="pt-4 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-teal-600 sm:text-4xl dark:text-teal-400">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-teal-600 sm:text-4xl dark:text-teal-400">
                                     {stats.programs_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     Academic Programs
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     Across {stats.departments_count.toLocaleString()} SEAIT academic units
                                 </span>
                             </div>
 
-                            <div className="pt-4 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-[#CD7A30] sm:text-4xl dark:text-amber-400">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-[#CD7A30] sm:text-4xl dark:text-amber-400">
                                     {stats.survey_responses_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     GTS Survey Responses
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     {stats.active_surveys_count} active tracer questionnaires
                                 </span>
                             </div>
 
-                            <div className="pt-4 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-emerald-600 sm:text-4xl dark:text-emerald-400">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-emerald-600 sm:text-4xl dark:text-emerald-400">
                                     {stats.open_jobs_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     Open Career Roles
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     {stats.verified_employers_count} verified partner employers
                                 </span>
                             </div>
@@ -1639,10 +1639,10 @@ export default function Welcome({
                                         return (
                                             <article
                                                 key={job.id}
-                                                className="group flex flex-col justify-between gap-4 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs transition hover:border-[#E47818]/40 dark:border-white/10 dark:bg-[#15190B]"
+                                                className="group flex flex-col justify-between gap-4 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-2xs transition hover:border-[#E47818]/40 sm:p-6 dark:border-white/10 dark:bg-[#15190B]"
                                             >
-                                                <div className="flex items-start justify-between gap-4">
-                                                    <div className="flex items-start gap-3.5">
+                                                <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap sm:gap-4">
+                                                    <div className="flex min-w-0 items-start gap-3.5">
                                                         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-orange-500/25 bg-orange-500/10 text-[#E47818] dark:border-orange-500/30 dark:text-orange-400">
                                                             <BriefcaseBusiness className="size-5" />
                                                         </span>

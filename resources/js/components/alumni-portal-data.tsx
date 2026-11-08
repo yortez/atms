@@ -628,11 +628,13 @@ function AlumniProfileDialog({
     }, [onClose]);
 
     const detail = (label: string, value: string | null | undefined) => (
-        <div>
+        <div className="min-w-0">
             <dt className="text-[10px] font-semibold tracking-wide text-[#8a9088] uppercase">
                 {label}
             </dt>
-            <dd className="mt-0.5 text-xs text-[#36443a]">{value || '—'}</dd>
+            <dd className="mt-0.5 text-xs break-words text-[#36443a]">
+                {value || '—'}
+            </dd>
         </div>
     );
 
@@ -708,7 +710,7 @@ function AlumniProfileDialog({
                                 <h3 className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[#495a4f] uppercase">
                                     Personal information
                                 </h3>
-                                <dl className="grid grid-cols-2 gap-3">
+                                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     {detail('First name', profile.first_name)}
                                     {detail('Middle name', profile.middle_name)}
                                     {detail('Last name', profile.last_name)}
@@ -1248,7 +1250,7 @@ export function AlumniDirectory({
                         className="w-full bg-transparent text-xs outline-none placeholder:text-[#9ca198]"
                     />
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full items-center gap-2 sm:w-auto">
                     <button
                         type="button"
                         onClick={() => {
@@ -1256,13 +1258,13 @@ export function AlumniDirectory({
                             setImportStats(null);
                             setImportFile(null);
                         }}
-                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-[#d2ddd0] bg-white px-3.5 text-xs font-semibold text-[#2c5339] shadow-xs transition hover:bg-[#edf2ea]"
+                        className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#d2ddd0] bg-white px-3.5 text-xs font-semibold text-[#2c5339] shadow-xs transition hover:bg-[#edf2ea] sm:flex-initial"
                     >
                         <span>Import CSV</span>
                     </button>
                     <a
                         href="/api/alumni/import-template"
-                        className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea]"
+                        className="inline-flex h-10 flex-1 items-center justify-center gap-1 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea] sm:flex-initial"
                         title="Download sample import template"
                     >
                         <span>Template</span>
@@ -1498,12 +1500,12 @@ export function AlumniDirectory({
                             </tbody>
                         </table>
                     </div>
-                    <div className="flex items-center justify-between border-t border-[#eff0ec] px-4 py-3 text-[11px] text-[#838980] sm:px-5">
+                    <div className="flex flex-col gap-2.5 border-t border-[#eff0ec] px-4 py-3 text-[11px] text-[#838980] sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <span>
                             Showing {data?.data.length ?? 0} of{' '}
                             {data?.meta?.total ?? 0} alumni
                         </span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between gap-2 sm:justify-end">
                             <button
                                 type="button"
                                 disabled={!data?.links?.prev}
@@ -2389,8 +2391,8 @@ export function EmploymentReports() {
 
                 {/* Date Range & Quick Report Pills */}
                 <div className="mt-3 flex flex-wrap items-end justify-between gap-3 border-t border-[#f3f4f0] pt-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                        <label className="flex items-center gap-2 text-[11px] font-medium text-[#667166]">
+                    <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-3">
+                        <label className="flex items-center justify-between gap-2 text-[11px] font-medium text-[#667166] sm:justify-start">
                             <span>Date from</span>
                             <input
                                 type="date"
@@ -2399,7 +2401,7 @@ export function EmploymentReports() {
                                 className="h-8 rounded-lg border border-[#e3e7df] bg-white px-2.5 text-xs text-[#435044] outline-none focus:border-[#819981]"
                             />
                         </label>
-                        <label className="flex items-center gap-2 text-[11px] font-medium text-[#667166]">
+                        <label className="flex items-center justify-between gap-2 text-[11px] font-medium text-[#667166] sm:justify-start">
                             <span>Date to</span>
                             <input
                                 type="date"
@@ -2504,7 +2506,7 @@ export function EmploymentReports() {
                                     return (
                                         <div
                                             key={item.label}
-                                            className="grid grid-cols-[130px_1fr_68px] items-center gap-3 text-xs sm:grid-cols-[160px_1fr_80px]"
+                                            className="grid grid-cols-[100px_1fr_56px] items-center gap-2 text-xs sm:grid-cols-[160px_1fr_80px] sm:gap-3"
                                         >
                                             <span
                                                 className="truncate font-medium text-[#536055]"

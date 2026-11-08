@@ -39,22 +39,22 @@ export default function AuthSimpleLayout({
                                 className="size-full object-contain"
                             />
                         </div>
-                        <div className="min-w-0 whitespace-nowrap">
+                        <div className="min-w-0">
                             <div className="flex items-center gap-1.5 sm:gap-2">
-                                <span className="font-heading text-lg font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] sm:text-xl dark:text-white">
+                                <span className="font-heading text-base font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] sm:text-xl dark:text-white">
                                     SEAIT
                                 </span>
-                                <span className="rounded-lg border border-orange-300/80 bg-orange-50/90 px-2 py-0.5 font-heading text-[10px] font-bold tracking-wider text-[#E47818] uppercase shadow-2xs dark:border-orange-500/30 dark:bg-orange-950/60 dark:text-orange-400">
+                                <span className="rounded-lg border border-orange-300/80 bg-orange-50/90 px-1.5 py-0.5 font-heading text-[9px] font-bold tracking-wider text-[#E47818] uppercase shadow-2xs sm:px-2 sm:text-[10px] dark:border-orange-500/30 dark:bg-orange-950/60 dark:text-orange-400">
                                     ATMS
                                 </span>
                             </div>
-                            <span className="block truncate text-[10px] font-medium text-zinc-500 sm:text-[11px] dark:text-zinc-400">
+                            <span className="hidden truncate text-[10px] font-medium text-zinc-500 sm:block sm:text-[11px] dark:text-zinc-400">
                                 Alumni Tracer Management System
                             </span>
                         </div>
                     </Link>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                         <button
                             type="button"
                             onClick={toggleTheme}
@@ -78,7 +78,7 @@ export default function AuthSimpleLayout({
                         </button>
                         <Link
                             href={home()}
-                            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 font-heading text-xs font-bold text-zinc-800 shadow-2xs transition hover:border-[#E47818] hover:text-[#E47818] dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-orange-400/50"
+                            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-2.5 font-heading text-xs font-bold text-zinc-800 shadow-2xs transition hover:border-[#E47818] hover:text-[#E47818] sm:px-3.5 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-orange-400/50"
                         >
                             <ArrowLeft className="size-3.5 text-[#E47818]" />
                             <span>Public Portal</span>
@@ -88,8 +88,8 @@ export default function AuthSimpleLayout({
             </header>
 
             {/* Main Split Institutional Layout */}
-            <main className="mx-auto flex w-full max-w-6xl flex-1 items-center px-4 py-8 sm:px-8 sm:py-12">
-                <div className="grid w-full items-start gap-8 lg:grid-cols-12">
+            <main className="mx-auto flex w-full max-w-6xl flex-1 items-center px-3.5 py-5 sm:px-8 sm:py-12">
+                <div className="grid w-full min-w-0 items-start gap-8 lg:grid-cols-12">
                     {/* Left Column: SEAIT Institutional Context Card */}
                     <div className="hidden lg:col-span-5 lg:block">
                         <div className="sticky top-24 overflow-hidden rounded-3xl border border-orange-500/30 bg-gradient-to-br from-zinc-900 via-[#001c17] to-[#072422] p-8 text-white shadow-2xl">
@@ -169,13 +169,13 @@ export default function AuthSimpleLayout({
                     </div>
 
                     {/* Right Column: Auth Form Card */}
-                    <div className="w-full lg:col-span-7">
-                        <div className="mx-auto w-full max-w-xl rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xl sm:p-8 dark:border-white/10 dark:bg-[#15190B]">
-                            <div className="mb-6 border-b border-zinc-200/80 pb-5 dark:border-white/10">
+                    <div className="w-full min-w-0 lg:col-span-7">
+                        <div className="mx-auto w-full max-w-xl rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-xl sm:rounded-3xl sm:p-8 dark:border-white/10 dark:bg-[#15190B]">
+                            <div className="mb-5 border-b border-zinc-200/80 pb-4 sm:mb-6 sm:pb-5 dark:border-white/10">
                                 <span className="font-heading text-[11px] font-bold tracking-wider text-[#E47818] uppercase">
                                     SEAIT Institutional Portal
                                 </span>
-                                <h1 className="mt-1 font-heading text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl dark:text-white">
+                                <h1 className="mt-1 font-heading text-xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl dark:text-white">
                                     {title}
                                 </h1>
                                 {description && (
