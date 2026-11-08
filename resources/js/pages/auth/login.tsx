@@ -82,20 +82,32 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-2 h-11 w-full rounded-xl bg-[#E47818] font-heading text-xs font-bold text-white shadow-md transition hover:bg-[#F36C21] sm:text-sm"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                Sign in to SEAIT Portal
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                Sign up
+                        <div className="flex flex-col items-center justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-600 sm:flex-row dark:border-white/10 dark:text-zinc-400">
+                            <span>
+                                Don't have an account?{' '}
+                                <TextLink
+                                    href={register()}
+                                    tabIndex={5}
+                                    className="font-heading font-bold text-[#E47818]"
+                                >
+                                    Claim Alumni Record
+                                </TextLink>
+                            </span>
+                            <TextLink
+                                href="/alumni/registration-assistance"
+                                className="font-heading font-bold text-teal-700 dark:text-teal-300"
+                            >
+                                Need Registrar Claim Assistance?
                             </TextLink>
                         </div>
                     </>
@@ -112,6 +124,7 @@ export default function Login({ status, canResetPassword }: Props) {
 }
 
 Login.layout = {
-    title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    title: 'Sign in to SEAIT ATMS',
+    description:
+        'Access your graduate tracer workspace, coordinator dashboard, or employer partner portal',
 };
