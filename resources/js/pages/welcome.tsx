@@ -532,7 +532,7 @@ export default function Welcome({
     return (
         <>
             <Head title="SEAIT | Alumni Tracer Management System · South East Asian Institute of Technology, Inc." />
-            <div className="min-h-screen bg-[#F5F4EE] font-sans text-zinc-900 antialiased transition-colors duration-200 selection:bg-[#E47818] selection:text-white dark:bg-[#0E1406] dark:text-[#F5F4EE]">
+            <div className="min-h-screen overflow-x-clip bg-[#F5F4EE] font-sans text-zinc-900 antialiased transition-colors duration-200 selection:bg-[#E47818] selection:text-white dark:bg-[#0E1406] dark:text-[#F5F4EE]">
                 {/* Sticky Glass Navigation Header (seait.edu.ph Light & Dark glass pattern) */}
                 <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md transition-colors duration-200 dark:border-[#006d5b]/25 dark:bg-[#081110]/90">
                     <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3.5 py-3 sm:px-6 lg:px-8">
@@ -731,19 +731,19 @@ export default function Welcome({
                             <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#001c17]/90 to-transparent" />
                         </div>
 
-                        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-8 lg:grid-cols-12">
+                        <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:gap-12 sm:px-8 lg:grid-cols-12">
                             {/* Left 7 Columns: seait.edu.ph Editorial Hero Typography */}
-                            <div className="lg:col-span-7">
+                            <div className="min-w-0 lg:col-span-7">
                                 <div className="mb-5 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold tracking-wider text-orange-300 uppercase shadow-sm backdrop-blur-md sm:text-xs">
                                     <span className="size-2 animate-pulse rounded-full bg-orange-400" />
                                     Official Institutional Portal
                                 </div>
 
-                                <p className="font-heading text-xs font-bold tracking-[0.2em] text-[#6BA886] uppercase">
+                                <p className="font-heading text-[11px] font-bold tracking-[0.14em] text-[#6BA886] uppercase sm:text-xs sm:tracking-[0.2em]">
                                     Committed to The Total Development of The Student
                                 </p>
 
-                                <h1 className="mt-2 max-w-3xl font-heading text-3xl leading-[1.14] font-extrabold tracking-tight text-balance text-[#F5F4EE] sm:text-5xl lg:text-6xl">
+                                <h1 className="mt-2 max-w-3xl font-heading text-[28px] leading-[1.14] font-extrabold tracking-tight text-balance text-[#F5F4EE] sm:text-5xl lg:text-6xl">
                                     Alumni Tracer{' '}
                                     <br className="hidden sm:inline" />
                                     <span className="bg-gradient-to-r from-orange-400 via-[#E47818] to-amber-300 bg-clip-text text-transparent">
@@ -757,14 +757,14 @@ export default function Welcome({
                                     institutional excellence and CHED accreditation.
                                 </p>
 
-                                <div className="mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
+                                <div className="mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
                                     <Link
                                         href={
                                             isAuthenticated
                                                 ? '/dashboard?page=Employment+tracer'
                                                 : register()
                                         }
-                                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E47818] px-6 py-3.5 font-heading text-xs font-bold text-white shadow-xl shadow-orange-950/50 transition hover:bg-[#F36C21] sm:px-7 sm:py-4 sm:text-sm"
+                                        className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#E47818] px-6 py-3.5 font-heading text-xs font-bold text-white shadow-xl shadow-orange-950/50 transition hover:bg-[#F36C21] sm:px-7 sm:py-4 sm:text-sm"
                                     >
                                         <span>
                                             {isAuthenticated
@@ -775,14 +775,14 @@ export default function Welcome({
                                     </Link>
                                     <a
                                         href="#opportunities"
-                                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3.5 font-heading text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/15 sm:px-6 sm:py-4 sm:text-sm"
+                                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-3 font-heading text-xs font-semibold whitespace-nowrap sm:px-6 text-white backdrop-blur-md transition hover:bg-white/15 sm:px-6 sm:py-4 sm:text-sm"
                                     >
                                         <BriefcaseBusiness className="size-4 text-teal-300 sm:size-5" />
                                         <span>Explore Job Board</span>
                                     </a>
                                     <a
                                         href="#tracer-metrics"
-                                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-[#0A1006]/70 px-4 py-3.5 text-xs font-semibold text-orange-300 backdrop-blur-md transition hover:border-orange-400/50 sm:py-4"
+                                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-[#0A1006]/70 px-3 py-3 text-xs whitespace-nowrap sm:px-4 sm:py-3.5 font-semibold text-orange-300 backdrop-blur-md transition hover:border-orange-400/50 sm:py-4"
                                     >
                                         <BarChart3 className="size-4 text-orange-400" />
                                         <span>Live Outcomes</span>
@@ -797,7 +797,7 @@ export default function Welcome({
                             {/* Right 5 Columns: Prominent Tracer Study Participation Callout Card */}
                             <div
                                 id="tracer-study"
-                                className="lg:col-span-5"
+                                className="min-w-0 lg:col-span-5"
                             >
                                 <div className="rounded-3xl border border-zinc-200/80 bg-white/95 p-6 text-zinc-900 shadow-2xl backdrop-blur-md sm:p-7 dark:border-[#E47818]/40 dark:bg-[#15190B]/95 dark:text-[#F5F4EE]">
                                     <div className="flex items-start justify-between gap-3 border-b border-zinc-200 pb-4 dark:border-white/10">
@@ -1016,7 +1016,7 @@ export default function Welcome({
                             </div>
                         ) : (
                             /* Detailed Progress Breakdown Grid */
-                            <div className="grid gap-6 md:grid-cols-3">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                                 <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
                                     <div className="flex items-center justify-between">
                                         <span className="font-heading text-xs font-bold tracking-wider text-[#E47818] uppercase dark:text-orange-400">
@@ -1300,7 +1300,7 @@ export default function Welcome({
                             </div>
 
                             {/* 3-Step Claim Protocol Strip */}
-                            <div className="mb-10 grid gap-4 md:grid-cols-3">
+                            <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-3">
                                 {[
                                     {
                                         step: 'STEP 01',
@@ -1617,7 +1617,7 @@ export default function Welcome({
 
                             <div
                                 id="job-board"
-                                className="grid gap-5 md:grid-cols-2"
+                                className="grid grid-cols-1 gap-5 md:grid-cols-2"
                             >
                                 {publicJobs.length === 0 ? (
                                     <div className="col-span-full rounded-3xl border border-dashed border-zinc-300 bg-white/80 p-10 text-center dark:border-white/15 dark:bg-[#15190B]/60">
@@ -1946,7 +1946,7 @@ export default function Welcome({
                 {/* Institutional Footer (seait.edu.ph campus offices & directory pattern) */}
                 <footer className="border-t border-zinc-200/80 bg-[#0A1006] text-white dark:border-white/10">
                     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-8">
-                        <div className="grid gap-10 md:grid-cols-12">
+                        <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
                             <div className="md:col-span-5">
                                 <div className="flex items-center gap-3.5">
                                     <img
