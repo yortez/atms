@@ -470,7 +470,6 @@ export default function AlumniPortal({
             !canManageContent) ||
         [
             'Academic programs',
-            'Employment tracer',
             'Employers & jobs',
             'Recruitment analytics',
             'Users & roles',
@@ -538,9 +537,13 @@ export default function AlumniPortal({
             editOpen={dialogOpen}
             onCloseEdit={() => setDialogOpen(false)}
             userAvatar={user?.avatar ?? null}
+            onNavigate={(page) => navigateToPage(page)}
         />
     ) : activePage === 'Employment tracer' ? (
-        <EmploymentTracer />
+        <EmploymentTracer
+            createOpen={dialogOpen}
+            onCloseCreate={() => setDialogOpen(false)}
+        />
     ) : activePage === 'Career opportunities' ? (
         <PublicJobs />
     ) : activePage === 'My applications' ? (
@@ -651,7 +654,7 @@ export default function AlumniPortal({
                         onClick={(event) => {
                             if (!isCustomChildPage) {
                                 event.preventDefault();
-                                navigateToPage(firstPageForRole[role]);
+                                navigateToPage(navigation[role][0]?.label ?? 'Overview');
                                 setMobileNavOpen(false);
                                 setDialogOpen(false);
                                 setSearch('');

@@ -1,14 +1,32 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from '@inertiajs/react';
 import {
     ArrowRight,
+    Award,
+    Briefcase,
     BriefcaseBusiness,
     Building2,
     Calendar,
+    CheckCircle2,
     ClipboardList,
+    Download,
+    ExternalLink,
+    FileText,
+    GraduationCap,
+    Lock,
     MapPin,
     MessageSquareText,
+    Pencil,
+    Plus,
+    Settings,
+    ShieldCheck,
+    Sparkles,
+    Trash2,
+    TrendingUp,
+    UploadCloud,
     UserPlus,
     UsersRound,
+    X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ConfirmationDialog from '@/components/confirmation-dialog';
@@ -24,6 +42,7 @@ import type {
     AcademicDepartment,
     AcademicProgram,
     ActivityLogEntry,
+    AlumniDocumentItem,
     AlumniEvent,
     AlumniEventAttendee,
     Announcement,
@@ -614,10 +633,37 @@ function AlumniProfileDialog({
     profileId: number;
     onClose: () => void;
 }) {
-    const { data, loading, error } = useApiResource<ApiEnvelope<AlumniProfile>>(
+    const { data, loading, error, reload } = useApiResource<ApiEnvelope<AlumniProfile>>(
         `/api/alumni/${profileId}`,
     );
     const profile = data?.data;
+    const [isEditing, setIsEditing] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [editForm, setEditForm] = useState({
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        suffix: '',
+        email: '',
+        date_of_birth: '',
+        preferred_name: '',
+        profile_status: 'active' as 'active' | 'archived',
+    });
+
+    useEffect(() => {
+        if (profile) {
+            setEditForm({
+                first_name: profile.first_name ?? '',
+                middle_name: profile.middle_name ?? '',
+                last_name: profile.last_name ?? '',
+                suffix: profile.suffix ?? '',
+                email: profile.email ?? '',
+                date_of_birth: profile.date_of_birth ?? '',
+                preferred_name: profile.preferred_name ?? '',
+                profile_status: profile.profile_status ?? 'active',
+            });
+        }
+    }, [profile]);
 
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
@@ -626,6 +672,40 @@ function AlumniProfileDialog({
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
     }, [onClose]);
+
+    async function handleSaveEdit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setSaving(true);
+        try {
+            await apiRequest<ApiEnvelope<AlumniProfile>>(
+                `/api/alumni/${profileId}`,
+                {
+                    method: 'PATCH',
+                    body: {
+                        first_name: editForm.first_name,
+                        middle_name: editForm.middle_name || null,
+                        last_name: editForm.last_name,
+                        suffix: editForm.suffix || null,
+                        email: editForm.email,
+                        date_of_birth: editForm.date_of_birth,
+                        preferred_name: editForm.preferred_name || null,
+                        profile_status: editForm.profile_status,
+                    },
+                },
+            );
+            toast.success('Alumni record updated successfully.');
+            setIsEditing(false);
+            reload();
+        } catch (err) {
+            toast.error(
+                err instanceof ApiError
+                    ? err.message
+                    : 'Could not update alumni record.',
+            );
+        } finally {
+            setSaving(false);
+        }
+    }
 
     const detail = (label: string, value: string | null | undefined) => (
         <div className="min-w-0">
@@ -650,18 +730,37 @@ function AlumniProfileDialog({
                 onClick={(event) => event.stopPropagation()}
                 className="h-full w-full max-w-xl overflow-y-auto bg-white shadow-xl"
             >
-                <div className="sticky top-0 flex items-center justify-between border-b border-[#eff0ec] bg-white px-5 py-4">
-                    <h2 className="text-sm font-semibold text-[#29382e]">
-                        Alumni profile
-                    </h2>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        aria-label="Close profile"
-                        className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
-                    >
-                        ✕
-                    </button>
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#eff0ec] bg-white px-5 py-4">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-sm font-semibold text-[#29382e]">
+                            {isEditing ? 'Edit alumni record' : 'Alumni profile'}
+                        </h2>
+                        {profile?.profile_status && !isEditing && (
+                            <span className="rounded-full bg-[#f0f1ed] px-2 py-0.5 text-[10px] font-medium text-[#6d746a] capitalize">
+                                {profile.profile_status}
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {profile && !isEditing && (
+                            <button
+                                type="button"
+                                onClick={() => setIsEditing(true)}
+                                className="inline-flex items-center gap-1 rounded-lg border border-[#e4e7e0] bg-white px-2.5 py-1 text-xs font-medium text-[#29382e] hover:bg-[#f6f8f4] cursor-pointer"
+                            >
+                                <Pencil className="size-3" />
+                                Edit
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            aria-label="Close profile"
+                            className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0] cursor-pointer"
+                        >
+                            ✕
+                        </button>
+                    </div>
                 </div>
 
                 <div className="space-y-5 p-5">
@@ -669,6 +768,149 @@ function AlumniProfileDialog({
                         <LoadingState />
                     ) : error ? (
                         <ErrorState message={error} />
+                    ) : isEditing ? (
+                        <form onSubmit={handleSaveEdit} className="space-y-4">
+                            <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-3 text-xs text-amber-900">
+                                Editing official institutional record for <strong>{profile?.name}</strong>.
+                            </div>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        First name <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={editForm.first_name}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, first_name: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Middle name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editForm.middle_name}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, middle_name: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Last name <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={editForm.last_name}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, last_name: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Suffix
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Jr., III"
+                                        value={editForm.suffix}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, suffix: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Email <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={editForm.email}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, email: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Date of birth <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={editForm.date_of_birth}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, date_of_birth: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Preferred name / Nickname
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Alex"
+                                        value={editForm.preferred_name}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, preferred_name: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Profile status
+                                    </label>
+                                    <select
+                                        value={editForm.profile_status}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                profile_status: e.target.value as 'active' | 'archived',
+                                            })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-3 border-t border-[#eff0ec]">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(false)}
+                                    className="h-9 rounded-lg border border-[#e8eae4] px-4 text-xs font-medium text-[#687267] hover:bg-[#f6f8f4] cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white hover:bg-[#203e2c] disabled:opacity-60 cursor-pointer"
+                                >
+                                    {saving ? 'Saving…' : 'Save changes'}
+                                </button>
+                            </div>
+                        </form>
                     ) : profile ? (
                         <>
                             <section className="flex items-center gap-3">
@@ -1538,10 +1780,71 @@ export function AlumniDirectory({
     );
 }
 
+function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function AcademicRecords() {
     const { data, loading, error } =
         useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
     const profile = data?.data;
+
+    const documentsResource = useApiResource<ApiEnvelope<AlumniDocumentItem[]>>(
+        profile?.id ? `/api/alumni/${profile.id}/documents` : null,
+    );
+
+    const [uploadFile, setUploadFile] = useState<File | null>(null);
+    const [docType, setDocType] = useState<'supporting' | 'resume'>('supporting');
+    const [uploading, setUploading] = useState(false);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
+
+    async function handleUpload(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!profile || !uploadFile) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('document_type', docType);
+        formData.append('file', uploadFile);
+
+        try {
+            await apiRequest<ApiEnvelope<AlumniDocumentItem>>(
+                `/api/alumni/${profile.id}/documents`,
+                {
+                    method: 'POST',
+                    body: formData,
+                },
+            );
+            toast.success('Document uploaded successfully.');
+            setUploadFile(null);
+            documentsResource.reload();
+        } catch (err) {
+            toast.error(
+                err instanceof ApiError ? err.message : 'Could not upload document.',
+            );
+        } finally {
+            setUploading(false);
+        }
+    }
+
+    async function handleDeleteDocument(documentId: number) {
+        setDeletingId(documentId);
+        try {
+            await apiRequest(`/api/alumni-documents/${documentId}`, {
+                method: 'DELETE',
+            });
+            toast.success('Document removed.');
+            documentsResource.reload();
+        } catch (err) {
+            toast.error(
+                err instanceof ApiError ? err.message : 'Could not remove document.',
+            );
+        } finally {
+            setDeletingId(null);
+        }
+    }
 
     if (loading) {
         return <LoadingState />;
@@ -1559,48 +1862,309 @@ export function AcademicRecords() {
         );
     }
 
+    const records = profile.education_records ?? [];
+    const documents = documentsResource.data?.data ?? [];
+
     return (
-        <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
-                <h2 className="font-semibold text-[#2e3c31]">{profile.name}</h2>
-                <p className="mt-1 text-xs text-[#7a8278]">{profile.email}</p>
-                <p className="mt-5 border-t border-[#eff0ec] pt-4 text-xs text-[#737b71]">
-                    Alumni profile: {profile.profile_status}
-                </p>
-            </section>
-            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
-                <h2 className="mb-4 text-sm font-semibold tracking-tight text-[#29382e]">
-                    Academic history
-                </h2>
-                {profile.education_records?.length ? (
-                    <div className="space-y-3">
-                        {profile.education_records.map((record) => (
-                            <article
-                                key={record.id}
-                                className="rounded-xl bg-[#f8f9f6] p-4"
-                            >
-                                <p className="text-xs font-semibold text-[#3e4e41]">
-                                    {record.degree ?? 'Academic record'}
-                                </p>
-                                <p className="mt-1 text-xs text-[#778075]">
-                                    {record.program ?? 'Program not recorded'}
-                                </p>
-                                <p className="mt-3 text-[10px] text-[#8b9189]">
-                                    Student number {record.student_number}
-                                    {record.graduation_year
-                                        ? ` · Class of ${record.graduation_year}`
-                                        : ''}
-                                    {record.honors ? ` · ${record.honors}` : ''}
-                                </p>
-                            </article>
-                        ))}
+        <div className="space-y-6">
+            {/* Academic Hero Header */}
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001c17] via-[#052d26] to-[#0b382f] p-6 text-white shadow-lg sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[#E47818]/15 blur-3xl" />
+                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-2 ring-white/20 text-[#E47818]">
+                            <GraduationCap className="size-8" />
+                        </div>
+                        <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                                    Academic Credentials
+                                </h1>
+                                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-200 border border-emerald-500/30">
+                                    Official Archive
+                                </span>
+                            </div>
+                            <p className="mt-1 text-xs sm:text-sm text-emerald-100/80">
+                                South East Asian Institute of Technology, Inc. · CHED Conferred Degrees
+                            </p>
+                        </div>
                     </div>
-                ) : (
-                    <EmptyState>
-                        No academic records are linked to this profile.
-                    </EmptyState>
-                )}
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="rounded-full bg-white/10 px-3 py-1 font-medium text-white/90 border border-white/15">
+                            {records.length} {records.length === 1 ? 'Degree' : 'Degrees'} Conferred
+                        </span>
+                        <span className="rounded-full bg-amber-400/20 px-3 py-1 font-medium text-amber-200 border border-amber-400/30">
+                            CHED Accredited
+                        </span>
+                    </div>
+                </div>
             </section>
+
+            {/* Main Content Grid */}
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* Conferred Degrees Section */}
+                <div className="space-y-6">
+                    <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
+                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                            <div className="flex items-center gap-2.5">
+                                <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-[#001c17]">
+                                    <GraduationCap className="size-4.5" />
+                                </span>
+                                <div>
+                                    <h2 className="text-sm font-bold text-[#001c17]">
+                                        Conferred Degree Programs
+                                    </h2>
+                                    <p className="text-xs text-zinc-500">
+                                        Verified records archived in the SEAIT Registrar
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="text-xs font-semibold text-zinc-500">
+                                {records.length} {records.length === 1 ? 'Record' : 'Records'}
+                            </span>
+                        </div>
+
+                        <div className="mt-4 space-y-4">
+                            {records.length > 0 ? (
+                                records.map((record) => (
+                                    <article
+                                        key={record.id}
+                                        className="relative rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-5 transition hover:border-[#E47818]/40"
+                                    >
+                                        <div className="flex flex-wrap items-start justify-between gap-2">
+                                            <div>
+                                                <h3 className="text-base font-bold text-zinc-900">
+                                                    {record.program ?? 'Degree Program'}
+                                                </h3>
+                                                {record.degree && (
+                                                    <p className="text-xs font-semibold text-zinc-600">
+                                                        {record.degree}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-1.5">
+                                                {record.graduation_year && (
+                                                    <span className="rounded-full bg-zinc-200 px-2.5 py-0.5 text-[11px] font-bold text-zinc-800">
+                                                        Class of {record.graduation_year}
+                                                    </span>
+                                                )}
+                                                {record.honors && (
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-900 border border-amber-300">
+                                                        <Award className="size-3 text-amber-700" />
+                                                        {record.honors}
+                                                    </span>
+                                                )}
+                                                {record.gwa && (
+                                                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-900 border border-emerald-300">
+                                                        GWA {record.gwa}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 grid grid-cols-2 gap-2 text-xs border-t border-zinc-200/60 pt-3">
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
+                                                    Student Number
+                                                </span>
+                                                <span className="font-mono font-semibold text-zinc-800">
+                                                    {record.student_number}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
+                                                    Accreditation
+                                                </span>
+                                                <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                                                    <CheckCircle2 className="size-3" /> CHED Verified
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </article>
+                                ))
+                            ) : (
+                                <div className="rounded-2xl border border-dashed border-zinc-200 p-8 text-center text-xs text-zinc-500">
+                                    No academic credentials registered to this account.
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Official Document Request Notice */}
+                    <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
+                        <div className="flex items-start gap-3">
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-[#E47818]">
+                                <FileText className="size-4.5" />
+                            </span>
+                            <div>
+                                <h3 className="text-sm font-bold text-[#001c17]">
+                                    Request Official Transcript (TOR) & CAV
+                                </h3>
+                                <p className="mt-1 text-xs text-zinc-600 leading-relaxed">
+                                    Official physical transcripts bearing the SEAIT dry seal, Certificates of Graduation, and CHED/DFA authentication (CAV) require registrar clearance.
+                                </p>
+                                <Link
+                                    href="/alumni/registration-assistance"
+                                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#E47818] hover:underline"
+                                >
+                                    Submit Registrar Assistance Request <ArrowRight className="size-3" />
+                                </Link>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                {/* Supporting Documents & Uploads Section */}
+                <div className="space-y-6">
+                    <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
+                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                            <div className="flex items-center gap-2.5">
+                                <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-[#001c17]">
+                                    <UploadCloud className="size-4.5" />
+                                </span>
+                                <div>
+                                    <h2 className="text-sm font-bold text-[#001c17]">
+                                        Document Archive
+                                    </h2>
+                                    <p className="text-xs text-zinc-500">
+                                        Diplomas, board exam ratings, licenses & CVs
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+                                {documents.length} {documents.length === 1 ? 'File' : 'Files'}
+                            </span>
+                        </div>
+
+                        {/* Upload Form */}
+                        <form onSubmit={handleUpload} className="mt-4 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-4">
+                            <h3 className="text-xs font-bold text-zinc-800">
+                                Upload Academic Document or Credential
+                            </h3>
+                            <p className="mt-0.5 text-[11px] text-zinc-500">
+                                Supports PDF, DOC, or DOCX files up to 10MB.
+                            </p>
+
+                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-[11px] font-semibold text-zinc-700">
+                                        Document Category
+                                    </label>
+                                    <select
+                                        value={docType}
+                                        onChange={(e) => setDocType(e.target.value as 'supporting' | 'resume')}
+                                        className="mt-1 h-9 w-full rounded-xl border border-zinc-300 bg-white px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                    >
+                                        <option value="supporting">Supporting Academic Document (Diploma, Certificate)</option>
+                                        <option value="resume">Resume / Curriculum Vitae (CV)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[11px] font-semibold text-zinc-700">
+                                        Select File
+                                    </label>
+                                    <input
+                                        type="file"
+                                        required
+                                        accept=".pdf,.doc,.docx"
+                                        onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+                                        className="mt-1 block h-9 w-full text-xs text-zinc-600 file:mr-2 file:h-7 file:rounded-lg file:border-0 file:bg-[#001c17] file:px-2.5 file:text-xs file:font-semibold file:text-white hover:file:bg-[#0b382f] cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-3 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={uploading || !uploadFile}
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#c96611] disabled:opacity-50 cursor-pointer"
+                                >
+                                    <UploadCloud className="size-3.5" />
+                                    {uploading ? 'Uploading…' : 'Upload Document'}
+                                </button>
+                            </div>
+                        </form>
+
+                        {/* Uploaded Documents List */}
+                        <div className="mt-5 space-y-3">
+                            <h3 className="text-xs font-bold text-zinc-700">
+                                Uploaded Credentials & Records
+                            </h3>
+                            {documentsResource.loading ? (
+                                <p className="text-xs text-zinc-500 py-3">Loading documents…</p>
+                            ) : documents.length > 0 ? (
+                                documents.map((doc) => (
+                                    <div
+                                        key={doc.id}
+                                        className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white p-3 text-xs transition hover:border-zinc-300"
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600">
+                                                <FileText className="size-4" />
+                                            </span>
+                                            <div className="min-w-0">
+                                                <p className="font-semibold text-zinc-900 truncate">
+                                                    {doc.original_name}
+                                                </p>
+                                                <div className="flex items-center gap-2 text-[10px] text-zinc-400">
+                                                    <span className="capitalize font-medium text-zinc-600">
+                                                        {doc.document_type}
+                                                    </span>
+                                                    <span>·</span>
+                                                    <span>{formatBytes(doc.size_bytes)}</span>
+                                                    <span>·</span>
+                                                    <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                            <a
+                                                href={`/api/alumni-documents/${doc.id}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                                                title="Download file"
+                                            >
+                                                <Download className="size-3" />
+                                                Download
+                                            </a>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteDocument(doc.id)}
+                                                disabled={deletingId === doc.id}
+                                                className="rounded-lg p-1 text-zinc-400 hover:text-red-600 hover:bg-red-50 cursor-pointer disabled:opacity-50"
+                                                title="Delete file"
+                                            >
+                                                <Trash2 className="size-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-zinc-500 py-3 text-center rounded-xl border border-dashed border-zinc-200">
+                                    No documents uploaded yet. Upload a copy of your diploma or credentials above.
+                                </p>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* RA 10173 Accreditation Notice */}
+                    <div className="rounded-2xl border border-zinc-200/70 bg-zinc-50 p-4 text-xs text-zinc-600">
+                        <div className="flex items-start gap-2.5">
+                            <ShieldCheck className="size-4 shrink-0 text-[#001c17] mt-0.5" />
+                            <div>
+                                <p className="font-semibold text-zinc-900">
+                                    Official Credentials Safeguard
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-zinc-500 leading-relaxed">
+                                    All uploaded documents and academic records are stored in private encrypted storage adhering to the Data Privacy Act of 2012 (RA 10173) and CHED accreditation reporting guidelines.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
@@ -1609,20 +2173,39 @@ export function AlumniProfileSummary({
     editOpen,
     onCloseEdit,
     userAvatar,
+    onNavigate,
 }: {
     editOpen: boolean;
     onCloseEdit: () => void;
     userAvatar?: string | null;
+    onNavigate?: (page: string) => void;
 }) {
     const { data, loading, error, reload } =
         useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
     const profile = data?.data;
     const [preferredName, setPreferredName] = useState('');
     const [saving, setSaving] = useState(false);
+    const [isLocalEditOpen, setIsLocalEditOpen] = useState(false);
+
+    const isModalOpen = editOpen || isLocalEditOpen;
+
+    const handleCloseModal = () => {
+        setIsLocalEditOpen(false);
+        onCloseEdit();
+    };
 
     useEffect(() => {
         setPreferredName(profile?.preferred_name ?? '');
     }, [profile?.preferred_name]);
+
+    useEffect(() => {
+        if (!isModalOpen) return;
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') handleCloseModal();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isModalOpen]);
 
     async function savePreferredName(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -1636,12 +2219,12 @@ export function AlumniProfileSummary({
                 `/api/alumni/${profile.id}`,
                 {
                     method: 'PATCH',
-                    body: { preferred_name: preferredName || null },
+                    body: { preferred_name: preferredName.trim() || null },
                 },
             );
             reload();
-            onCloseEdit();
-            toast.success('Preferred name updated.');
+            handleCloseModal();
+            toast.success('Preferred display name updated successfully.');
         } catch (error) {
             toast.error(
                 error instanceof ApiError
@@ -1669,101 +2252,603 @@ export function AlumniProfileSummary({
         );
     }
 
+    const primaryEducation = profile.education_records?.[0];
+    const latestEmployment = profile.employment_records?.[0];
+    const fullName = profile.first_name
+        ? `${profile.first_name} ${profile.middle_name ? `${profile.middle_name} ` : ''}${profile.last_name}${profile.suffix ? ` ${profile.suffix}` : ''}`
+        : profile.name;
+
     return (
-        <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
-                <div className="flex items-center gap-4">
-                    <Avatar className="size-14 overflow-hidden rounded-2xl ring-2 ring-[#001c17]/10">
-                        <AvatarImage
-                            src={profile.avatar ?? userAvatar ?? undefined}
-                            alt={profile.name}
-                            className="object-cover"
-                        />
-                        <AvatarFallback className="rounded-2xl bg-[#001c17] text-sm font-bold text-white">
-                            {initials(profile.name)}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                        <h2 className="font-semibold text-[#2e3c31]">
-                            {profile.preferred_name ?? profile.name}
-                        </h2>
-                        <p className="mt-1 text-xs text-[#7a8278]">
-                            {profile.email}
-                        </p>
-                    </div>
-                </div>
-                <dl className="mt-6 space-y-3 border-t border-[#eff0ec] pt-5 text-xs">
-                    {[
-                        ['Profile status', profile.profile_status],
-                        ['Date of birth', profile.date_of_birth],
-                        [
-                            'Student number',
-                            profile.education_records?.[0]?.student_number ??
-                            'Not recorded',
-                        ],
-                        [
-                            'Program',
-                            profile.education_records?.[0]?.program ??
-                            'Not recorded',
-                        ],
-                        [
-                            'Graduation year',
-                            profile.education_records?.[0]?.graduation_year ??
-                            'Not recorded',
-                        ],
-                    ].map(([label, value]) => (
-                        <div key={label} className="flex justify-between gap-3">
-                            <dt className="text-[#848a81]">{label}</dt>
-                            <dd className="text-right font-medium text-[#4b574c]">
-                                {value}
-                            </dd>
+        <div className="space-y-6">
+            {/* Hero Header Card */}
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001c17] via-[#052d26] to-[#0b382f] p-6 text-white shadow-lg sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[#E47818]/15 blur-3xl" />
+                <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                        <div className="relative size-20 shrink-0">
+                            <Avatar className="size-20 overflow-hidden rounded-2xl ring-4 ring-white/20 shadow-md">
+                                <AvatarImage
+                                    src={profile.avatar ?? userAvatar ?? undefined}
+                                    alt={fullName}
+                                    className="object-cover"
+                                />
+                                <AvatarFallback className="rounded-2xl bg-[#001c17] text-xl font-bold text-white border border-white/20">
+                                    {initials(fullName)}
+                                </AvatarFallback>
+                            </Avatar>
+                            <span
+                                title="Verified Graduate"
+                                className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-[#E47818] text-white shadow-sm ring-2 ring-[#001c17]"
+                            >
+                                <CheckCircle2 className="size-3.5" />
+                            </span>
                         </div>
-                    ))}
-                </dl>
-            </section>
-            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
-                {editOpen ? (
-                    <form onSubmit={savePreferredName} className="space-y-3">
-                        <label className="block text-xs font-medium text-[#4d5a4f]">
-                            Preferred name
-                            <input
-                                value={preferredName}
-                                onChange={(event) =>
-                                    setPreferredName(event.target.value)
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                            />
-                        </label>
-                        <div className="flex justify-end gap-2">
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                                    {fullName}
+                                </h1>
+                                {profile.preferred_name && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 px-2.5 py-0.5 text-xs font-semibold text-amber-200 border border-amber-400/30">
+                                        <Sparkles className="size-3" />
+                                        Prefers: &quot;{profile.preferred_name}&quot;
+                                    </span>
+                                )}
+                            </div>
+                            <p className="mt-1 text-xs sm:text-sm text-emerald-100/80">
+                                {[
+                                    primaryEducation?.program,
+                                    primaryEducation?.graduation_year
+                                        ? `Batch ${primaryEducation.graduation_year}`
+                                        : null,
+                                    primaryEducation?.student_number
+                                        ? `SN: ${primaryEducation.student_number}`
+                                        : null,
+                                ]
+                                    .filter(Boolean)
+                                    .join(' · ') || 'Verified SEAIT Graduate'}
+                            </p>
+                            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 font-medium text-emerald-200 border border-emerald-500/30">
+                                    <ShieldCheck className="size-3" />
+                                    Verified Alumni
+                                </span>
+                                {profile.is_claimed && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5 font-medium text-white/90 border border-white/10">
+                                        Claimed{' '}
+                                        {profile.claimed_at
+                                            ? `· ${new Date(profile.claimed_at).toLocaleDateString()}`
+                                            : ''}
+                                    </span>
+                                )}
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-0.5 font-medium text-amber-200 border border-amber-500/30">
+                                    CHED GTS Tracer
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0">
+                        <button
+                            type="button"
+                            onClick={() => setIsLocalEditOpen(true)}
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#E47818] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#c96611] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/60 cursor-pointer"
+                        >
+                            <Pencil className="size-3.5" />
+                            Edit Profile
+                        </button>
+                        {onNavigate && (
                             <button
                                 type="button"
-                                onClick={onCloseEdit}
-                                className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
+                                onClick={() => onNavigate('Employment tracer')}
+                                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-xs transition hover:bg-white/20 focus:outline-hidden focus:ring-2 focus:ring-white/40 cursor-pointer"
                             >
-                                Cancel
+                                <Briefcase className="size-3.5" />
+                                Update Tracer Status
                             </button>
+                        )}
+                        <Link
+                            href="/settings/profile"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs font-medium text-white/90 backdrop-blur-xs transition hover:bg-white/20 focus:outline-hidden focus:ring-2 focus:ring-white/40"
+                            title="Account settings & photo"
+                        >
+                            <Settings className="size-3.5" />
+                            Account
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* Profile Content Grid */}
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* Academic Credentials Card */}
+                <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
+                    <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                        <div className="flex items-center gap-2.5">
+                            <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-[#001c17]">
+                                <GraduationCap className="size-4.5" />
+                            </span>
+                            <div>
+                                <h2 className="text-sm font-bold text-[#001c17]">
+                                    Academic Qualifications
+                                </h2>
+                                <p className="text-xs text-zinc-500">
+                                    Degrees conferred by South East Asian Institute of Technology, Inc.
+                                </p>
+                            </div>
+                        </div>
+                        {onNavigate && (
                             <button
-                                type="submit"
-                                disabled={saving}
-                                className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
+                                type="button"
+                                onClick={() => onNavigate('Academic records')}
+                                className="text-xs font-medium text-[#E47818] hover:text-[#c96611] inline-flex items-center gap-1 cursor-pointer"
                             >
-                                {saving ? 'Saving…' : 'Save changes'}
+                                View all records <ArrowRight className="size-3" />
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                        {profile.education_records && profile.education_records.length > 0 ? (
+                            profile.education_records.map((record) => (
+                                <div
+                                    key={record.id}
+                                    className="rounded-2xl border border-zinc-100 bg-zinc-50/70 p-4 transition hover:border-zinc-200"
+                                >
+                                    <div className="flex flex-wrap items-start justify-between gap-2">
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-zinc-900">
+                                                {record.program ?? 'Degree Program'}
+                                            </h3>
+                                            {record.degree && (
+                                                <p className="text-xs text-zinc-600 font-medium">
+                                                    {record.degree}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-1.5">
+                                            {record.graduation_year && (
+                                                <span className="rounded-full bg-zinc-200/70 px-2 py-0.5 text-[10px] font-semibold text-zinc-800">
+                                                    Class of {record.graduation_year}
+                                                </span>
+                                            )}
+                                            {record.honors && (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-900 border border-amber-200">
+                                                    <Award className="size-3" />
+                                                    {record.honors}
+                                                </span>
+                                            )}
+                                            {record.gwa && (
+                                                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-900 border border-emerald-200">
+                                                    GWA {record.gwa}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p className="mt-2 text-xs text-zinc-500 font-mono">
+                                        Student ID:{' '}
+                                        <span className="font-semibold text-zinc-700">
+                                            {record.student_number}
+                                        </span>
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="rounded-2xl border border-dashed border-zinc-200 p-6 text-center text-xs text-zinc-500">
+                                No academic records linked to this verified profile.
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* CHED GTS Tracer Career Status Card */}
+                <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
+                    <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                        <div className="flex items-center gap-2.5">
+                            <span className="flex size-9 items-center justify-center rounded-xl bg-amber-50 text-[#E47818]">
+                                <Briefcase className="size-4.5" />
+                            </span>
+                            <div>
+                                <h2 className="text-sm font-bold text-[#001c17]">
+                                    CHED Graduate Tracer Study
+                                </h2>
+                                <p className="text-xs text-zinc-500">
+                                    Current career outcome & curriculum alignment
+                                </p>
+                            </div>
+                        </div>
+                        {onNavigate && (
+                            <button
+                                type="button"
+                                onClick={() => onNavigate('Employment tracer')}
+                                className="text-xs font-medium text-[#E47818] hover:text-[#c96611] inline-flex items-center gap-1 cursor-pointer"
+                            >
+                                Report update <ArrowRight className="size-3" />
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="mt-4">
+                        {latestEmployment ? (
+                            <div className="rounded-2xl border border-zinc-100 bg-zinc-50/70 p-4">
+                                <div className="flex flex-wrap items-start justify-between gap-2">
+                                    <div>
+                                        <span className="inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-800 border border-emerald-200">
+                                            {latestEmployment.status ?? 'Employed'}
+                                        </span>
+                                        <h3 className="mt-1.5 text-sm font-bold text-zinc-900">
+                                            {latestEmployment.job_title ?? 'Professional Role'}
+                                        </h3>
+                                        <p className="text-xs text-zinc-600 font-medium">
+                                            {[latestEmployment.employer_name, latestEmployment.industry]
+                                                .filter(Boolean)
+                                                .join(' · ')}
+                                        </p>
+                                        {latestEmployment.work_location && (
+                                            <p className="mt-1 text-xs text-zinc-500 flex items-center gap-1">
+                                                <MapPin className="size-3" />{' '}
+                                                {latestEmployment.work_location}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        {latestEmployment.is_related_to_degree !== undefined && (
+                                            <span
+                                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                                                    latestEmployment.is_related_to_degree
+                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                        : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                                }`}
+                                            >
+                                                <CheckCircle2 className="size-3" />
+                                                {latestEmployment.is_related_to_degree
+                                                    ? 'Degree-aligned'
+                                                    : 'Non-aligned'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <p className="mt-3 text-[11px] text-zinc-400">
+                                    Reported on{' '}
+                                    {new Date(latestEmployment.reported_at).toLocaleDateString()}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="rounded-2xl border border-dashed border-amber-200/80 bg-amber-50/40 p-5 text-center">
+                                <p className="text-xs font-medium text-amber-900">
+                                    No employment update reported yet.
+                                </p>
+                                <p className="mt-1 text-[11px] text-amber-700/80">
+                                    Participating in the CHED Graduate Tracer Study helps SEAIT maintain institutional accreditation and curriculum excellence.
+                                </p>
+                                {onNavigate && (
+                                    <button
+                                        type="button"
+                                        onClick={() => onNavigate('Employment tracer')}
+                                        className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
+                                    >
+                                        <Briefcase className="size-3" />
+                                        Submit Employment Update
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* Verified Institutional Identity Details Card */}
+                <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
+                    <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                        <div className="flex items-center gap-2.5">
+                            <span className="flex size-9 items-center justify-center rounded-xl bg-zinc-100 text-zinc-800">
+                                <Lock className="size-4.5" />
+                            </span>
+                            <div>
+                                <h2 className="text-sm font-bold text-[#001c17]">
+                                    Registrar-Verified Credentials
+                                </h2>
+                                <p className="text-xs text-zinc-500">
+                                    Civil identity and institutional records
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setIsLocalEditOpen(true)}
+                            className="text-xs font-semibold text-[#E47818] hover:text-[#c96611] inline-flex items-center gap-1 cursor-pointer"
+                        >
+                            <Pencil className="size-3" /> Edit preferred name
+                        </button>
+                    </div>
+
+                    <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        {[
+                            ['Full Legal Name', fullName],
+                            [
+                                'Preferred Display Name',
+                                profile.preferred_name || '— (Using legal name)',
+                            ],
+                            ['Registered Email', profile.email],
+                            ['Date of Birth', profile.date_of_birth],
+                            [
+                                'Primary Student Number',
+                                primaryEducation?.student_number ?? 'Not recorded',
+                            ],
+                            ['Record Status', profile.profile_status],
+                        ].map(([label, val]) => (
+                            <div
+                                key={label}
+                                className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3"
+                            >
+                                <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+                                    {label}
+                                </dt>
+                                <dd className="mt-1 font-semibold text-zinc-800 break-words">
+                                    {val}
+                                </dd>
+                            </div>
+                        ))}
+                    </dl>
+
+                    <div className="mt-4 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-4 text-xs text-zinc-600">
+                        <div className="flex items-start gap-2.5">
+                            <ShieldCheck className="size-4 shrink-0 text-[#001c17] mt-0.5" />
+                            <div>
+                                <p className="font-semibold text-zinc-900">
+                                    Official Registrar Data Protection
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-zinc-500 leading-relaxed">
+                                    To ensure compliance with CHED Memo Orders and institutional graduation registries, legal names and birthdates are verified by the Registrar and cannot be directly overwritten.
+                                </p>
+                                <Link
+                                    href="/alumni/registration-assistance"
+                                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#E47818] hover:underline"
+                                >
+                                    Request Registrar Record Correction{' '}
+                                    <ArrowRight className="size-2.5" />
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Privacy & Account Management Card */}
+                <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center gap-2.5 pb-4 border-b border-zinc-100">
+                            <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-[#001c17]">
+                                <ShieldCheck className="size-4.5" />
+                            </span>
+                            <div>
+                                <h2 className="text-sm font-bold text-[#001c17]">
+                                    Privacy & Account Management
+                                </h2>
+                                <p className="text-xs text-zinc-500">
+                                    Data protection under RA 10173 and portal security
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 space-y-3 text-xs text-zinc-600">
+                            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
+                                <p className="font-semibold text-emerald-950 flex items-center gap-1.5">
+                                    <CheckCircle2 className="size-3.5 text-emerald-600" />
+                                    Data Privacy Act of 2012 (RA 10173) Compliant
+                                </p>
+                                <p className="mt-1 text-[11px] text-emerald-900/80 leading-relaxed">
+                                    Your tracer survey responses and career outcomes are securely processed, encrypted at rest, and aggregated for CHED institutional quality assurance.
+                                </p>
+                            </div>
+
+                            <div className="rounded-2xl border border-zinc-100 bg-zinc-50/70 p-4">
+                                <p className="font-semibold text-zinc-900">
+                                    Profile Photo & Credentials
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-zinc-500 leading-relaxed">
+                                    Your profile avatar, password, and two-factor authentication can be updated in your Account Settings.
+                                </p>
+                                <Link
+                                    href="/settings/profile"
+                                    className="mt-2.5 inline-flex items-center gap-1 text-xs font-semibold text-[#001c17] hover:text-[#0b382f] underline underline-offset-2"
+                                >
+                                    Go to Account & Security Settings{' '}
+                                    <ExternalLink className="size-3" />
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400">
+                        <span>SEAIT Alumni Tracer Management System</span>
+                        <span>CHED GTS Ready</span>
+                    </div>
+                </section>
+            </div>
+
+            {/* Edit Profile Modal Dialog */}
+            {isModalOpen && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={handleCloseModal}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Edit Alumni Profile"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-lg rounded-3xl border border-zinc-200 bg-white p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
+                            <div className="flex items-center gap-3">
+                                <span className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-[#E47818]">
+                                    <Pencil className="size-5" />
+                                </span>
+                                <div>
+                                    <h2 className="text-base font-bold text-zinc-900">
+                                        Edit Alumni Profile
+                                    </h2>
+                                    <p className="text-xs text-zinc-500">
+                                        Personalize your community display name
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleCloseModal}
+                                aria-label="Close dialog"
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 cursor-pointer"
+                            >
+                                <X className="size-4" />
                             </button>
                         </div>
-                    </form>
-                ) : (
-                    <>
-                        <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
-                            About your profile
-                        </h2>
-                        <p className="mt-3 text-xs leading-5 text-[#747c72]">
-                            Profile information is retrieved from your verified
-                            alumni record. Contact the alumni office if any
-                            other details need correction.
-                        </p>
-                    </>
-                )}
-            </section>
+
+                        <form onSubmit={savePreferredName} className="mt-5 space-y-5">
+                            {/* Preferred Name Field */}
+                            <div>
+                                <label className="block text-xs font-semibold text-zinc-800">
+                                    Preferred Display Name / Community Handle
+                                </label>
+                                <p className="mt-0.5 text-[11px] text-zinc-500">
+                                    Choose how your name appears on portal greetings, bulletins, and alumni events (e.g., your nickname). Leave blank to use your official legal name.
+                                </p>
+                                <input
+                                    type="text"
+                                    maxLength={100}
+                                    placeholder={`e.g. ${profile.first_name || 'Alex'}`}
+                                    value={preferredName}
+                                    onChange={(e) => setPreferredName(e.target.value)}
+                                    className="mt-2 h-10 w-full rounded-xl border border-zinc-300 px-3.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                                />
+                            </div>
+
+                            {/* Live Preview Box */}
+                            <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-3.5">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
+                                    Live ATMS Community Preview
+                                </p>
+                                <div className="mt-2 flex items-center gap-3">
+                                    <Avatar className="size-10 rounded-xl ring-2 ring-white shadow-xs">
+                                        <AvatarImage
+                                            src={profile.avatar ?? userAvatar ?? undefined}
+                                            alt={fullName}
+                                        />
+                                        <AvatarFallback className="rounded-xl bg-[#001c17] text-xs font-bold text-white">
+                                            {initials(fullName)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-zinc-900">
+                                            {preferredName.trim() ? (
+                                                <>
+                                                    {preferredName.trim()}{' '}
+                                                    <span className="font-normal text-zinc-500 text-[11px]">
+                                                        ({fullName})
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                fullName
+                                            )}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-500">
+                                            {primaryEducation?.program ?? 'SEAIT Alumni'} · Verified
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Registrar-Verified Identity Section (Locked) */}
+                            <div className="rounded-2xl border border-zinc-200/70 bg-zinc-50 p-4 text-xs">
+                                <div className="flex items-center gap-1.5 font-semibold text-zinc-800">
+                                    <Lock className="size-3.5 text-[#001c17]" />
+                                    Official Registrar-Verified Credentials (Locked)
+                                </div>
+                                <p className="mt-1 text-[11px] text-zinc-500">
+                                    Civil identity is locked to maintain accreditation integrity under CHED guidelines.
+                                </p>
+                                <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
+                                            Legal Name
+                                        </span>
+                                        <span className="font-semibold text-zinc-800">
+                                            {fullName}
+                                        </span>
+                                    </div>
+                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
+                                            Student ID
+                                        </span>
+                                        <span className="font-semibold text-zinc-800">
+                                            {primaryEducation?.student_number ?? 'Verified'}
+                                        </span>
+                                    </div>
+                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
+                                            Birthdate
+                                        </span>
+                                        <span className="font-semibold text-zinc-800">
+                                            {profile.date_of_birth}
+                                        </span>
+                                    </div>
+                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
+                                            Email
+                                        </span>
+                                        <span className="font-semibold text-zinc-800 truncate block">
+                                            {profile.email}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="mt-3 pt-2.5 border-t border-zinc-200/60 flex items-center justify-between">
+                                    <span className="text-[11px] text-zinc-500">
+                                        Need legal name or record correction?
+                                    </span>
+                                    <Link
+                                        href="/alumni/registration-assistance"
+                                        className="text-[11px] font-semibold text-[#E47818] hover:underline"
+                                    >
+                                        Registrar Assistance →
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Shortcut to Profile Settings */}
+                            <div className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white p-3 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Settings className="size-4 text-zinc-500" />
+                                    <span className="text-zinc-700">
+                                        Change avatar photo or password
+                                    </span>
+                                </div>
+                                <Link
+                                    href="/settings/profile"
+                                    className="font-semibold text-[#001c17] hover:underline inline-flex items-center gap-1 text-[11px]"
+                                >
+                                    Account Settings <ExternalLink className="size-3" />
+                                </Link>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-100">
+                                <button
+                                    type="button"
+                                    onClick={handleCloseModal}
+                                    className="h-9 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="h-9 rounded-xl bg-[#E47818] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] transition disabled:opacity-60 cursor-pointer"
+                                >
+                                    {saving ? 'Saving…' : 'Save changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -1776,6 +2861,7 @@ type EmploymentForm = {
     employment_type: string;
     work_location: string;
     started_on: string;
+    ended_on: string;
     is_related_to_degree: boolean;
 };
 
@@ -1787,10 +2873,45 @@ const emptyEmploymentForm: EmploymentForm = {
     employment_type: '',
     work_location: '',
     started_on: '',
+    ended_on: '',
     is_related_to_degree: true,
 };
 
-export function EmploymentTracer() {
+const standardEmploymentTypes = [
+    'Regular / Permanent',
+    'Probationary',
+    'Contractual / Project-Based',
+    'Part-Time',
+    'Self-Employed / Business Owner',
+    'Freelance / Consultant',
+    'Government / Plantilla',
+    'Internship / OJT',
+];
+
+const standardIndustries = [
+    'Information Technology & Software',
+    'Education, Training & Academia',
+    'Healthcare & Allied Medicine',
+    'Government & Civil Service',
+    'Banking, Finance & Insurance',
+    'Business Process Outsourcing (BPO)',
+    'Engineering, Construction & Architecture',
+    'Agriculture, Farming & Agribusiness',
+    'Hospitality, Tourism & Food Service',
+    'Media, Creative Arts & Entertainment',
+    'Manufacturing & Heavy Industry',
+    'Retail, Trade & Logistics',
+    'Non-Profit & Community Development',
+    'Other Industry',
+];
+
+export function EmploymentTracer({
+    createOpen,
+    onCloseCreate,
+}: {
+    createOpen?: boolean;
+    onCloseCreate?: () => void;
+} = {}) {
     const profileResource =
         useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
     const statusesResource = useApiResource<ApiEnvelope<EmploymentStatus[]>>(
@@ -1801,7 +2922,25 @@ export function EmploymentTracer() {
         profileId ? `/api/alumni/${profileId}/employment` : null,
     );
     const [form, setForm] = useState(emptyEmploymentForm);
+    const [isCurrentRole, setIsCurrentRole] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [localFormOpen, setLocalFormOpen] = useState(false);
+
+    const isModalOpen = Boolean(createOpen || localFormOpen);
+
+    const handleCloseModal = () => {
+        setLocalFormOpen(false);
+        onCloseCreate?.();
+    };
+
+    useEffect(() => {
+        if (!isModalOpen) return;
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') handleCloseModal();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isModalOpen]);
 
     async function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -1818,7 +2957,6 @@ export function EmploymentTracer() {
                 {
                     method: 'POST',
                     body: {
-                        ...form,
                         employment_status_id: Number(form.employment_status_id),
                         employer_name: form.employer_name || null,
                         job_title: form.job_title || null,
@@ -1826,13 +2964,17 @@ export function EmploymentTracer() {
                         employment_type: form.employment_type || null,
                         work_location: form.work_location || null,
                         started_on: form.started_on || null,
+                        ended_on: isCurrentRole ? null : (form.ended_on || null),
                         is_related_to_degree: form.is_related_to_degree,
                     },
                 },
             );
             setForm(emptyEmploymentForm);
+            setIsCurrentRole(true);
             historyResource.reload();
-            toast.success('Employment update saved.');
+            profileResource.reload();
+            handleCloseModal();
+            toast.success('CHED Graduate Tracer milestone submitted successfully.');
         } catch (error) {
             toast.error(
                 error instanceof ApiError
@@ -1865,146 +3007,487 @@ export function EmploymentTracer() {
     }
 
     const records = historyResource.data?.data ?? [];
+    const latestRecord = records[0];
+    const degreeRelatedCount = records.filter((r) => r.is_related_to_degree).length;
+    const degreeRelatedPercent =
+        records.length > 0
+            ? Math.round((degreeRelatedCount / records.length) * 100)
+            : null;
 
     return (
-        <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
-                <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
-                    Current employment status
-                </h2>
-                <form
-                    onSubmit={submit}
-                    className="mt-4 grid gap-4 sm:grid-cols-2"
-                >
-                    <label className="text-xs font-medium text-[#4d5a4f]">
-                        Employment status
-                        <select
-                            required
-                            value={form.employment_status_id}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    employment_status_id: event.target.value,
-                                })
-                            }
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs outline-none focus:border-[#819981]"
-                        >
-                            <option value="">Select a status</option>
-                            {statusesResource.data?.data.map((status) => (
-                                <option key={status.id} value={status.id}>
-                                    {status.label}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                    {(
-                        [
-                            ['employment_type', 'Employment type'],
-                            ['employer_name', 'Employer name'],
-                            ['job_title', 'Job position'],
-                            ['industry', 'Industry'],
-                            ['work_location', 'Work location'],
-                            ['started_on', 'Start date'],
-                        ] as const
-                    ).map(([name, label]) => (
-                        <label
-                            key={name}
-                            className="text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {label}
-                            <input
-                                type={name === 'started_on' ? 'date' : 'text'}
-                                value={form[name]}
-                                onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        [name]: event.target.value,
-                                    })
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs outline-none focus:border-[#819981]"
-                            />
-                        </label>
-                    ))}
-                    <label className="flex items-center gap-2.5 text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                        <input
-                            type="checkbox"
-                            checked={form.is_related_to_degree}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    is_related_to_degree: event.target.checked,
-                                })
-                            }
-                            className="size-4 rounded border-[#e3e7df] text-[#2b5139] focus:ring-[#819981]"
-                        />
-                        <span>This employment is related to my college degree / field of study</span>
-                    </label>
-                    <div className="flex items-end sm:justify-end">
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[#2b5139] px-4 text-xs font-semibold text-white hover:bg-[#234530] disabled:opacity-60 sm:w-auto"
-                        >
-                            {saving ? 'Saving…' : 'Save update'}
-                        </button>
+        <div className="space-y-6">
+            {/* Tracer Hero Header */}
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001c17] via-[#052d26] to-[#0b382f] p-6 text-white shadow-lg sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[#E47818]/15 blur-3xl" />
+                <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-2 ring-white/20 text-[#E47818]">
+                            <Briefcase className="size-8" />
+                        </div>
+                        <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                                    Graduate Tracer Study (GTS)
+                                </h1>
+                                <span className="rounded-full bg-amber-400/20 px-2.5 py-0.5 text-xs font-semibold text-amber-200 border border-amber-400/30">
+                                    CHED CMO Monitoring
+                                </span>
+                            </div>
+                            <p className="mt-1 text-xs sm:text-sm text-emerald-100/80">
+                                Report career milestones, industry alignment, and employment outcomes for institutional accreditation.
+                            </p>
+                        </div>
                     </div>
-                </form>
-                <p className="mt-4 rounded-xl bg-[#f7f8f5] px-3 py-2.5 text-[10px] leading-4 text-[#7b8379]">
-                    Each update is added to your employment history.
-                </p>
+
+                    <button
+                        type="button"
+                        onClick={() => setLocalFormOpen(true)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#E47818] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#c96611] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/60 cursor-pointer self-start lg:self-center"
+                    >
+                        <Plus className="size-4" />
+                        Report Career Milestone
+                    </button>
+                </div>
             </section>
-            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
-                <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
-                    Employment history
-                </h2>
+
+            {/* Quick Metrics Grid */}
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+                        <Briefcase className="size-3.5 text-[#E47818]" />
+                        Current Status
+                    </div>
+                    <p className="mt-2 text-base font-bold text-zinc-900 truncate">
+                        {latestRecord?.status.label ?? 'Not reported'}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-zinc-500">
+                        Active tracer state
+                    </p>
+                </div>
+
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+                        <Building2 className="size-3.5 text-emerald-600" />
+                        Current Employer
+                    </div>
+                    <p className="mt-2 text-base font-bold text-zinc-900 truncate">
+                        {latestRecord?.employer_name ?? '—'}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-zinc-500 truncate">
+                        {latestRecord?.job_title ?? 'Position not set'}
+                    </p>
+                </div>
+
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+                        <CheckCircle2 className="size-3.5 text-emerald-600" />
+                        Degree Alignment
+                    </div>
+                    <p className="mt-2 text-base font-bold text-zinc-900">
+                        {degreeRelatedPercent !== null
+                            ? `${degreeRelatedPercent}% Aligned`
+                            : 'Pending Report'}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-zinc-500">
+                        Curriculum relevance
+                    </p>
+                </div>
+
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+                        <TrendingUp className="size-3.5 text-[#E47818]" />
+                        Career History
+                    </div>
+                    <p className="mt-2 text-base font-bold text-zinc-900">
+                        {records.length} {records.length === 1 ? 'Milestone' : 'Milestones'}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-zinc-500">
+                        Reported updates
+                    </p>
+                </div>
+            </div>
+
+            {/* Employment History & Career Timeline */}
+            <section className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
+                <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                    <div className="flex items-center gap-2.5">
+                        <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-[#001c17]">
+                            <Briefcase className="size-4.5" />
+                        </span>
+                        <div>
+                            <h2 className="text-sm font-bold text-[#001c17]">
+                                Career Progression Timeline
+                            </h2>
+                            <p className="text-xs text-zinc-500">
+                                History of employment updates reported for the CHED Graduate Tracer Study
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setLocalFormOpen(true)}
+                        className="text-xs font-semibold text-[#E47818] hover:text-[#c96611] inline-flex items-center gap-1 cursor-pointer"
+                    >
+                        <Plus className="size-3" /> Add milestone
+                    </button>
+                </div>
+
                 {historyResource.loading ? (
-                    <p className="mt-4 text-xs text-[#7a8278]">
+                    <p className="py-8 text-center text-xs text-zinc-500">
                         Loading employment history…
                     </p>
                 ) : historyResource.error ? (
-                    <p role="alert" className="mt-4 text-xs text-[#8b4e43]">
+                    <p role="alert" className="py-6 text-xs text-red-600">
                         {historyResource.error}
                     </p>
-                ) : records.length ? (
-                    <div className="mt-5 space-y-4">
-                        {records.map((record) => (
-                            <article
-                                key={record.id}
-                                className="border-l-2 border-[#dfe7dc] pl-4"
-                            >
-                                <p className="flex items-center gap-2 text-[10px] font-medium text-[#8a9088]">
-                                    <span>
-                                        {record.started_on ??
-                                            'Start date not recorded'}
-                                        {record.ended_on
-                                            ? ` – ${record.ended_on}`
-                                            : ' – Present'}
-                                    </span>
-                                    {record.is_related_to_degree !== undefined && (
-                                        <span className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-semibold ${record.is_related_to_degree ? 'bg-[#edf2eb] text-[#33583b]' : 'bg-[#f5f5f3] text-[#788077]'}`}>
-                                            {record.is_related_to_degree ? 'Degree-Related' : 'Non-Degree Related'}
+                ) : records.length > 0 ? (
+                    <div className="mt-6 space-y-4">
+                        {records.map((record, index) => {
+                            const isCurrent = !record.ended_on && index === 0;
+                            return (
+                                <article
+                                    key={record.id}
+                                    className="relative rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-5 transition hover:border-[#E47818]/40"
+                                >
+                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                        <div className="flex items-start gap-3 min-w-0">
+                                            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#001c17] text-white">
+                                                <Building2 className="size-5" />
+                                            </span>
+                                            <div className="min-w-0">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <h3 className="text-sm font-bold text-zinc-900">
+                                                        {record.job_title ?? record.status.label}
+                                                    </h3>
+                                                    {isCurrent && (
+                                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                                                            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                            Current Position
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs font-semibold text-zinc-700 mt-0.5">
+                                                    {[record.employer_name, record.industry]
+                                                        .filter(Boolean)
+                                                        .join(' · ') || record.status.label}
+                                                </p>
+                                                {record.work_location && (
+                                                    <p className="text-[11px] text-zinc-500 mt-1 flex items-center gap-1">
+                                                        <MapPin className="size-3" />
+                                                        {record.work_location}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                            <span className="rounded-full bg-zinc-200/80 px-2.5 py-0.5 text-[10px] font-semibold text-zinc-800">
+                                                {record.status.label}
+                                            </span>
+                                            {record.is_related_to_degree !== undefined && (
+                                                <span
+                                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                                        record.is_related_to_degree
+                                                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                                            : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                                    }`}
+                                                >
+                                                    <CheckCircle2 className="size-3" />
+                                                    {record.is_related_to_degree
+                                                        ? 'Degree-Aligned'
+                                                        : 'Non-Aligned'}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-200/60 pt-3 text-[11px] text-zinc-500">
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="size-3.5 text-zinc-400" />
+                                            <span>
+                                                {record.started_on ?? 'Start date not recorded'}{' '}
+                                                — {record.ended_on ? record.ended_on : 'Present'}
+                                            </span>
+                                            {record.employment_type && (
+                                                <>
+                                                    <span>·</span>
+                                                    <span className="font-medium text-zinc-700">
+                                                        {record.employment_type}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
+                                        <span className="text-[10px] text-zinc-400">
+                                            Reported on {new Date(record.reported_at).toLocaleDateString()}
                                         </span>
-                                    )}
-                                </p>
-                                <h3 className="mt-1 text-xs font-semibold text-[#3d4a3f]">
-                                    {record.job_title ?? record.status.label}
-                                </h3>
-                                <p className="mt-1 text-[11px] text-[#7d857b]">
-                                    {[record.employer_name, record.industry]
-                                        .filter(Boolean)
-                                        .join(' · ') || record.status.label}
-                                </p>
-                            </article>
-                        ))}
+                                    </div>
+                                </article>
+                            );
+                        })}
                     </div>
                 ) : (
-                    <div className="mt-4">
-                        <EmptyState>
-                            No employment updates have been submitted.
-                        </EmptyState>
+                    <div className="mt-6 rounded-2xl border border-dashed border-zinc-200 p-8 text-center">
+                        <Briefcase className="size-8 mx-auto text-zinc-300" />
+                        <p className="mt-2 text-xs font-semibold text-zinc-700">
+                            No employment updates reported yet.
+                        </p>
+                        <p className="mt-1 text-[11px] text-zinc-500 max-w-md mx-auto">
+                            Sharing your career status helps SEAIT track alumni employability, benchmark curricula with CHED guidelines, and assist younger batches.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setLocalFormOpen(true)}
+                            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
+                        >
+                            <Plus className="size-3.5" />
+                            Submit First Career Update
+                        </button>
                     </div>
                 )}
             </section>
+
+            {/* Career Update Form Modal */}
+            {isModalOpen && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={handleCloseModal}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Report Career Milestone"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
+                            <div className="flex items-center gap-3">
+                                <span className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-[#E47818]">
+                                    <Briefcase className="size-5" />
+                                </span>
+                                <div>
+                                    <h2 className="text-base font-bold text-zinc-900">
+                                        Report Career Milestone
+                                    </h2>
+                                    <p className="text-xs text-zinc-500">
+                                        CHED Graduate Tracer Study Submission
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleCloseModal}
+                                aria-label="Close dialog"
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 cursor-pointer"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={submit} className="mt-5 space-y-4">
+                            {/* Employment Status */}
+                            <div>
+                                <label className="block text-xs font-semibold text-zinc-800">
+                                    Employment Status <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    required
+                                    value={form.employment_status_id}
+                                    onChange={(e) =>
+                                        setForm({ ...form, employment_status_id: e.target.value })
+                                    }
+                                    className="mt-1 h-10 w-full rounded-xl border border-zinc-300 bg-white px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                >
+                                    <option value="">Select current employment status</option>
+                                    {statusesResource.data?.data.map((status) => (
+                                        <option key={status.id} value={status.id}>
+                                            {status.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Job Title & Employer */}
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-zinc-800">
+                                        Job Position / Title
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Software Engineer, Teacher"
+                                        value={form.job_title}
+                                        onChange={(e) =>
+                                            setForm({ ...form, job_title: e.target.value })
+                                        }
+                                        className="mt-1 h-10 w-full rounded-xl border border-zinc-300 px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-zinc-800">
+                                        Employer / Company Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. SEAIT, Tech Solutions, DepEd"
+                                        value={form.employer_name}
+                                        onChange={(e) =>
+                                            setForm({ ...form, employer_name: e.target.value })
+                                        }
+                                        className="mt-1 h-10 w-full rounded-xl border border-zinc-300 px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Employment Type & Industry */}
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-zinc-800">
+                                        Employment Type
+                                    </label>
+                                    <select
+                                        value={form.employment_type}
+                                        onChange={(e) =>
+                                            setForm({ ...form, employment_type: e.target.value })
+                                        }
+                                        className="mt-1 h-10 w-full rounded-xl border border-zinc-300 bg-white px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                    >
+                                        <option value="">Select employment type</option>
+                                        {standardEmploymentTypes.map((type) => (
+                                            <option key={type} value={type}>
+                                                {type}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-zinc-800">
+                                        Industry Sector
+                                    </label>
+                                    <select
+                                        value={form.industry}
+                                        onChange={(e) =>
+                                            setForm({ ...form, industry: e.target.value })
+                                        }
+                                        className="mt-1 h-10 w-full rounded-xl border border-zinc-300 bg-white px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                    >
+                                        <option value="">Select industry category</option>
+                                        {standardIndustries.map((ind) => (
+                                            <option key={ind} value={ind}>
+                                                {ind}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Work Location */}
+                            <div>
+                                <label className="block text-xs font-semibold text-zinc-800">
+                                    Work Location (City, Province, or Country)
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Koronadal City, South Cotabato / Remote / Dubai"
+                                    value={form.work_location}
+                                    onChange={(e) =>
+                                        setForm({ ...form, work_location: e.target.value })
+                                    }
+                                    className="mt-1 h-10 w-full rounded-xl border border-zinc-300 px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                />
+                            </div>
+
+                            {/* Dates */}
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-zinc-800">
+                                        Start Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={form.started_on}
+                                        onChange={(e) =>
+                                            setForm({ ...form, started_on: e.target.value })
+                                        }
+                                        className="mt-1 h-10 w-full rounded-xl border border-zinc-300 px-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-zinc-800">
+                                        End Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        disabled={isCurrentRole}
+                                        value={isCurrentRole ? '' : form.ended_on}
+                                        onChange={(e) =>
+                                            setForm({ ...form, ended_on: e.target.value })
+                                        }
+                                        placeholder={isCurrentRole ? 'Present' : ''}
+                                        className="mt-1 h-10 w-full rounded-xl border border-zinc-300 px-3 text-xs text-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400 focus:border-[#E47818] focus:outline-hidden"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Current Role Toggle */}
+                            <label className="flex items-center gap-2 text-xs font-medium text-zinc-700 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={isCurrentRole}
+                                    onChange={(e) => {
+                                        setIsCurrentRole(e.target.checked);
+                                        if (e.target.checked) {
+                                            setForm({ ...form, ended_on: '' });
+                                        }
+                                    }}
+                                    className="size-4 rounded border-zinc-300 text-[#001c17] focus:ring-[#E47818]"
+                                />
+                                <span>I currently work in this position</span>
+                            </label>
+
+                            {/* Degree Alignment Checkbox */}
+                            <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-3.5">
+                                <label className="flex items-start gap-2.5 text-xs font-semibold text-emerald-950 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.is_related_to_degree}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                is_related_to_degree: e.target.checked,
+                                            })
+                                        }
+                                        className="mt-0.5 size-4 rounded border-emerald-300 text-emerald-700 focus:ring-emerald-500"
+                                    />
+                                    <div>
+                                        <span>This position is related to my college degree / field of study</span>
+                                        <p className="mt-0.5 text-[11px] font-normal text-emerald-800/80 leading-relaxed">
+                                            Tracking curriculum alignment directly supports SEAIT&#39;s Commission on Higher Education (CHED) institutional accreditation rating.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-100">
+                                <button
+                                    type="button"
+                                    onClick={handleCloseModal}
+                                    className="h-9 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="h-9 rounded-xl bg-[#E47818] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] transition disabled:opacity-60 cursor-pointer"
+                                >
+                                    {saving ? 'Saving…' : 'Submit Career Milestone'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

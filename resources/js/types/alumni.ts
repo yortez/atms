@@ -61,6 +61,16 @@ export type AlumniProfile = {
     employment_records?: EmploymentSummary[];
 };
 
+export type AlumniDocumentItem = {
+    id: number;
+    alumni_id: number;
+    document_type: 'resume' | 'supporting';
+    original_name: string;
+    mime_type: string;
+    size_bytes: number;
+    uploaded_at: string;
+};
+
 export type AcademicDepartment = {
     id: number;
     code: string;
