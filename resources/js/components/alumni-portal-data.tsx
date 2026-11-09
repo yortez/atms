@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ConfirmationDialog from '@/components/confirmation-dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useApiResource } from '@/hooks/use-api-resource';
 import {
     ApiError,
@@ -79,6 +80,102 @@ type OverviewProps = {
     role: WorkspaceRole;
     onNavigate: (page: string) => void;
 };
+
+function DemoQuickLoginToggleCard() {
+    const { data, loading, reload } = useApiResource<
+        ApiEnvelope<{ demo_quick_login_enabled: boolean }>
+    >('/api/admin/settings/demo-quick-login');
+    const [saving, setSaving] = useState(false);
+
+    const enabled = data?.data?.demo_quick_login_enabled ?? true;
+
+    async function toggleDemoLogin() {
+        const nextValue = !enabled;
+        setSaving(true);
+        try {
+            const response = await apiRequest<{
+                data: { demo_quick_login_enabled: boolean };
+                message?: string;
+            }>('/api/admin/settings/demo-quick-login', {
+                method: 'PATCH',
+                body: { enabled: nextValue },
+            });
+            reload();
+            toast.success(
+                response.message ??
+                    (nextValue
+                        ? 'Demo quick-fill login enabled.'
+                        : 'Demo quick-fill login disabled.'),
+            );
+        } catch (requestError) {
+            toast.error(
+                requestError instanceof ApiError
+                    ? requestError.message
+                    : 'Could not update demo quick-login setting.',
+            );
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div
+            data-test="admin-demo-quick-login-card"
+            className="flex flex-col justify-between gap-3 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4 sm:flex-row sm:items-center"
+        >
+            <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-xs font-bold tracking-wider text-[#29382e] uppercase">
+                        Quick-Fill Demo Accounts on Login Page
+                    </h3>
+                    <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            enabled
+                                ? 'bg-[#e3eee0] text-[#2b5139]'
+                                : 'bg-[#eff0ec] text-[#6d746a]'
+                        }`}
+                    >
+                        {loading ? 'Checking…' : enabled ? 'Shown' : 'Hidden'}
+                    </span>
+                </div>
+                <p className="mt-0.5 text-xs text-[#6b7669]">
+                    Show or hide the collapsible Quick-Fill Demo Accounts card on
+                    the public sign-in page (<code>/login</code>).
+                </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2.5">
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={enabled}
+                    disabled={loading || saving}
+                    onClick={toggleDemoLogin}
+                    data-test="toggle-demo-quick-login-button"
+                    className="inline-flex items-center gap-2.5 rounded-full border border-[#d6dfd3] bg-white px-3 py-1.5 text-xs font-semibold text-[#29382e] shadow-2xs transition hover:border-[#2b5139] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    <span
+                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                            enabled ? 'bg-[#2b5139]' : 'bg-[#cbd2c9]'
+                        }`}
+                    >
+                        <span
+                            className={`inline-block size-3.5 transform rounded-full bg-white shadow-xs transition-transform ${
+                                enabled ? 'translate-x-4' : 'translate-x-1'
+                            }`}
+                        />
+                    </span>
+                    <span>
+                        {saving
+                            ? 'Saving…'
+                            : enabled
+                              ? 'Shown on /login'
+                              : 'Hidden on /login'}
+                    </span>
+                </button>
+            </div>
+        </div>
+    );
+}
 
 export function LiveOverview({ role, onNavigate }: OverviewProps) {
     const statsResource = useApiResource<ApiEnvelope<DashboardStatistics>>(
@@ -531,11 +628,13 @@ function AlumniProfileDialog({
     }, [onClose]);
 
     const detail = (label: string, value: string | null | undefined) => (
-        <div>
+        <div className="min-w-0">
             <dt className="text-[10px] font-semibold tracking-wide text-[#8a9088] uppercase">
                 {label}
             </dt>
-            <dd className="mt-0.5 text-xs text-[#36443a]">{value || '—'}</dd>
+            <dd className="mt-0.5 text-xs break-words text-[#36443a]">
+                {value || '—'}
+            </dd>
         </div>
     );
 
@@ -573,9 +672,16 @@ function AlumniProfileDialog({
                     ) : profile ? (
                         <>
                             <section className="flex items-center gap-3">
-                                <span className="grid size-12 shrink-0 place-items-center rounded-full bg-[#e9eee5] text-sm font-bold text-[#45634a]">
-                                    {initials(profile.name)}
-                                </span>
+                                <Avatar className="size-12 shrink-0 overflow-hidden rounded-full ring-2 ring-[#001c17]/10">
+                                    <AvatarImage
+                                        src={profile.avatar ?? undefined}
+                                        alt={profile.name}
+                                        className="object-cover"
+                                    />
+                                    <AvatarFallback className="rounded-full bg-[#e9eee5] text-sm font-bold text-[#45634a]">
+                                        {initials(profile.name)}
+                                    </AvatarFallback>
+                                </Avatar>
                                 <div className="min-w-0">
                                     <p className="truncate text-base font-semibold text-[#29382e]">
                                         {profile.name}
@@ -604,7 +710,7 @@ function AlumniProfileDialog({
                                 <h3 className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[#495a4f] uppercase">
                                     Personal information
                                 </h3>
-                                <dl className="grid grid-cols-2 gap-3">
+                                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     {detail('First name', profile.first_name)}
                                     {detail('Middle name', profile.middle_name)}
                                     {detail('Last name', profile.last_name)}
@@ -1144,7 +1250,7 @@ export function AlumniDirectory({
                         className="w-full bg-transparent text-xs outline-none placeholder:text-[#9ca198]"
                     />
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full items-center gap-2 sm:w-auto">
                     <button
                         type="button"
                         onClick={() => {
@@ -1152,13 +1258,13 @@ export function AlumniDirectory({
                             setImportStats(null);
                             setImportFile(null);
                         }}
-                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-[#d2ddd0] bg-white px-3.5 text-xs font-semibold text-[#2c5339] shadow-xs transition hover:bg-[#edf2ea]"
+                        className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#d2ddd0] bg-white px-3.5 text-xs font-semibold text-[#2c5339] shadow-xs transition hover:bg-[#edf2ea] sm:flex-initial"
                     >
                         <span>Import CSV</span>
                     </button>
                     <a
                         href="/api/alumni/import-template"
-                        className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea]"
+                        className="inline-flex h-10 flex-1 items-center justify-center gap-1 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea] sm:flex-initial"
                         title="Download sample import template"
                     >
                         <span>Template</span>
@@ -1289,11 +1395,23 @@ export function AlumniDirectory({
                                             >
                                                 <td className="px-4 py-3.5 sm:px-5">
                                                     <div className="flex items-center gap-2.5">
-                                                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e9eee5] text-[10px] font-bold text-[#45634a]">
-                                                            {initials(
-                                                                alumnus.name,
-                                                            )}
-                                                        </span>
+                                                        <Avatar className="size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-[#001c17]/10">
+                                                            <AvatarImage
+                                                                src={
+                                                                    alumnus.avatar ??
+                                                                    undefined
+                                                                }
+                                                                alt={
+                                                                    alumnus.name
+                                                                }
+                                                                className="object-cover"
+                                                            />
+                                                            <AvatarFallback className="rounded-full bg-[#e9eee5] text-[10px] font-bold text-[#45634a]">
+                                                                {initials(
+                                                                    alumnus.name,
+                                                                )}
+                                                            </AvatarFallback>
+                                                        </Avatar>
                                                         <span>
                                                             <button
                                                                 type="button"
@@ -1382,12 +1500,12 @@ export function AlumniDirectory({
                             </tbody>
                         </table>
                     </div>
-                    <div className="flex items-center justify-between border-t border-[#eff0ec] px-4 py-3 text-[11px] text-[#838980] sm:px-5">
+                    <div className="flex flex-col gap-2.5 border-t border-[#eff0ec] px-4 py-3 text-[11px] text-[#838980] sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <span>
                             Showing {data?.data.length ?? 0} of{' '}
                             {data?.meta?.total ?? 0} alumni
                         </span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between gap-2 sm:justify-end">
                             <button
                                 type="button"
                                 disabled={!data?.links?.prev}
@@ -1490,9 +1608,11 @@ export function AcademicRecords() {
 export function AlumniProfileSummary({
     editOpen,
     onCloseEdit,
+    userAvatar,
 }: {
     editOpen: boolean;
     onCloseEdit: () => void;
+    userAvatar?: string | null;
 }) {
     const { data, loading, error, reload } =
         useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
@@ -1553,9 +1673,16 @@ export function AlumniProfileSummary({
         <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
             <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
                 <div className="flex items-center gap-4">
-                    <span className="grid size-14 place-items-center rounded-2xl bg-[#e9eee5] text-sm font-bold text-[#45634a]">
-                        {initials(profile.name)}
-                    </span>
+                    <Avatar className="size-14 overflow-hidden rounded-2xl ring-2 ring-[#001c17]/10">
+                        <AvatarImage
+                            src={profile.avatar ?? userAvatar ?? undefined}
+                            alt={profile.name}
+                            className="object-cover"
+                        />
+                        <AvatarFallback className="rounded-2xl bg-[#001c17] text-sm font-bold text-white">
+                            {initials(profile.name)}
+                        </AvatarFallback>
+                    </Avatar>
                     <div className="min-w-0">
                         <h2 className="font-semibold text-[#2e3c31]">
                             {profile.preferred_name ?? profile.name}
@@ -2264,8 +2391,8 @@ export function EmploymentReports() {
 
                 {/* Date Range & Quick Report Pills */}
                 <div className="mt-3 flex flex-wrap items-end justify-between gap-3 border-t border-[#f3f4f0] pt-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                        <label className="flex items-center gap-2 text-[11px] font-medium text-[#667166]">
+                    <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-3">
+                        <label className="flex items-center justify-between gap-2 text-[11px] font-medium text-[#667166] sm:justify-start">
                             <span>Date from</span>
                             <input
                                 type="date"
@@ -2274,7 +2401,7 @@ export function EmploymentReports() {
                                 className="h-8 rounded-lg border border-[#e3e7df] bg-white px-2.5 text-xs text-[#435044] outline-none focus:border-[#819981]"
                             />
                         </label>
-                        <label className="flex items-center gap-2 text-[11px] font-medium text-[#667166]">
+                        <label className="flex items-center justify-between gap-2 text-[11px] font-medium text-[#667166] sm:justify-start">
                             <span>Date to</span>
                             <input
                                 type="date"
@@ -2379,7 +2506,7 @@ export function EmploymentReports() {
                                     return (
                                         <div
                                             key={item.label}
-                                            className="grid grid-cols-[130px_1fr_68px] items-center gap-3 text-xs sm:grid-cols-[160px_1fr_80px]"
+                                            className="grid grid-cols-[100px_1fr_56px] items-center gap-2 text-xs sm:grid-cols-[160px_1fr_80px] sm:gap-3"
                                         >
                                             <span
                                                 className="truncate font-medium text-[#536055]"
@@ -2724,6 +2851,7 @@ type UserRoleAssignment = {
     id: number;
     name: string;
     email: string;
+    avatar?: string | null;
     roles: string[];
     assigned_program_ids?: number[];
     assigned_programs?: Array<{
@@ -3174,7 +3302,9 @@ export function AssignedRoles({
             )}
 
             {isSystemAdmin && (
-                <div className="mt-6 border-t border-[#eff0ec] pt-5">
+                <div className="mt-6 space-y-5 border-t border-[#eff0ec] pt-5">
+                    <DemoQuickLoginToggleCard />
+
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
@@ -3438,33 +3568,48 @@ export function AssignedRoles({
                                         className="rounded-2xl border border-[#e9ebe5] bg-[#f9faf7] p-4"
                                     >
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                            <div>
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <p className="text-sm font-semibold text-[#39463b]">
-                                                        {user.name}
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-[#001c17]/10">
+                                                    <AvatarImage
+                                                        src={
+                                                            user.avatar ??
+                                                            undefined
+                                                        }
+                                                        alt={user.name}
+                                                        className="object-cover"
+                                                    />
+                                                    <AvatarFallback className="rounded-full bg-[#e9eee5] text-[11px] font-bold text-[#45634a]">
+                                                        {initials(user.name)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <p className="text-sm font-semibold text-[#39463b]">
+                                                            {user.name}
+                                                        </p>
+                                                        {user.is_verified && (
+                                                            <span className="rounded-full bg-[#e6efe4] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                                                Verified
+                                                            </span>
+                                                        )}
+                                                        {user.alumni_profile_id && (
+                                                            <span className="rounded-full bg-[#eef2ec] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
+                                                                Claimed Alumni #
+                                                                {
+                                                                    user.alumni_profile_id
+                                                                }
+                                                            </span>
+                                                        )}
+                                                        {user.is_suspended && (
+                                                            <span className="rounded-full bg-[#f7e9e5] px-2.5 py-0.5 text-[10px] font-semibold text-[#8b4e43]">
+                                                                Suspended
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="mt-1 text-[11px] text-[#7a8278]">
+                                                        {user.email}
                                                     </p>
-                                                    {user.is_verified && (
-                                                        <span className="rounded-full bg-[#e6efe4] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
-                                                            Verified
-                                                        </span>
-                                                    )}
-                                                    {user.alumni_profile_id && (
-                                                        <span className="rounded-full bg-[#eef2ec] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
-                                                            Claimed Alumni #
-                                                            {
-                                                                user.alumni_profile_id
-                                                            }
-                                                        </span>
-                                                    )}
-                                                    {user.is_suspended && (
-                                                        <span className="rounded-full bg-[#f7e9e5] px-2.5 py-0.5 text-[10px] font-semibold text-[#8b4e43]">
-                                                            Suspended
-                                                        </span>
-                                                    )}
                                                 </div>
-                                                <p className="mt-1 text-[11px] text-[#7a8278]">
-                                                    {user.email}
-                                                </p>
                                             </div>
                                             <span className="text-[10px] font-medium tracking-[0.14em] text-[#6d7d6a] uppercase">
                                                 {currentRoles.length

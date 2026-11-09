@@ -8,6 +8,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Support\SystemSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +58,50 @@ class SystemAdminUserController extends Controller
                 'roles_catalog' => $rolesCatalog,
                 'permissions_catalog' => $permissionsCatalog,
                 'programs_catalog' => $programsCatalog,
+                'demo_quick_login_enabled' => SystemSettings::demoQuickLoginEnabled(),
             ],
+        ]);
+    }
+
+    /**
+     * Get the current demo quick-login setting.
+     */
+    public function demoQuickLogin(): JsonResponse
+    {
+        $this->authorizeSystemAdministrator();
+
+        return response()->json([
+            'data' => [
+                'demo_quick_login_enabled' => SystemSettings::demoQuickLoginEnabled(),
+            ],
+        ]);
+    }
+
+    /**
+     * Toggle the demo quick-login panel on the public login page.
+     */
+    public function updateDemoQuickLogin(Request $request, ActivityLogger $activityLogger): JsonResponse
+    {
+        $this->authorizeSystemAdministrator();
+
+        $validated = $request->validate([
+            'enabled' => ['required', 'boolean'],
+        ]);
+
+        $enabled = (bool) $validated['enabled'];
+        SystemSettings::setDemoQuickLoginEnabled($enabled);
+
+        $activityLogger->record('system.demo_quick_login_toggled', null, [
+            'enabled' => $enabled,
+        ]);
+
+        return response()->json([
+            'data' => [
+                'demo_quick_login_enabled' => $enabled,
+            ],
+            'message' => $enabled
+                ? 'Demo quick-fill login enabled on the sign-in portal.'
+                : 'Demo quick-fill login hidden on the sign-in portal.',
         ]);
     }
 
@@ -353,6 +397,7 @@ class SystemAdminUserController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'avatar' => $user->avatar,
             'roles' => $user->roles->pluck('name')->values()->all(),
             'assigned_program_ids' => $user->assignedPrograms->pluck('id')->map(fn ($id) => (int) $id)->values()->all(),
             'assigned_programs' => $user->assignedPrograms->map(fn (AcademicProgram $program): array => [

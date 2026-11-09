@@ -59,14 +59,15 @@ export default function Profile({
                     options={{
                         preserveScroll: true,
                     }}
+                    onSuccess={() => setAvatarPreview(null)}
                     className="space-y-6"
                 >
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-3">
                                 <Label htmlFor="avatar">Profile photo</Label>
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="size-16 overflow-hidden rounded-full">
+                                <div className="flex flex-wrap items-center gap-4">
+                                    <Avatar className="size-16 overflow-hidden rounded-full ring-2 ring-[#001c17]/10">
                                         <AvatarImage
                                             src={
                                                 avatarPreview ??
@@ -74,8 +75,9 @@ export default function Profile({
                                                 undefined
                                             }
                                             alt={auth.user.name}
+                                            className="object-cover"
                                         />
-                                        <AvatarFallback className="rounded-full bg-neutral-200 text-lg text-black">
+                                        <AvatarFallback className="rounded-full bg-[#001c17] text-lg font-bold text-white">
                                             {auth.user.name
                                                 .split(/\s+/)
                                                 .filter(Boolean)
@@ -91,7 +93,7 @@ export default function Profile({
                                             name="avatar"
                                             type="file"
                                             accept="image/jpeg,image/png,image/webp"
-                                            className="max-w-sm"
+                                            className="max-w-sm cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-[#001c17] file:px-3 file:py-1 file:text-xs file:font-semibold file:text-white hover:file:bg-[#0b382f]"
                                             onChange={(event) => {
                                                 const file =
                                                     event.currentTarget

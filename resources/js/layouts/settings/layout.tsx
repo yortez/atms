@@ -1,30 +1,31 @@
 import { Link } from '@inertiajs/react';
+import { Palette, ShieldCheck, UserRound } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
-import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import { cn, toUrl } from '@/lib/utils';
+import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import type { NavItem } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
+const sidebarNavItems: (NavItem & { description: string })[] = [
     {
-        title: 'Profile',
+        title: 'Profile & Password',
+        description: 'Name, email, avatar & password',
         href: edit(),
-        icon: null,
+        icon: UserRound,
     },
     {
-        title: 'Security',
+        title: 'Security & 2FA',
+        description: 'Two-factor auth & passkeys',
         href: editSecurity(),
-        icon: null,
+        icon: ShieldCheck,
     },
     {
         title: 'Appearance',
+        description: 'Light, dark, or system theme',
         href: editAppearance(),
-        icon: null,
+        icon: Palette,
     },
 ];
 
@@ -32,43 +33,63 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <div className="px-4 py-6">
-            <Heading
-                title="Settings"
-                description="Manage your profile and account settings"
-            />
-
-            <div className="flex flex-col lg:flex-row lg:space-x-12">
-                <aside className="w-full max-w-xl lg:w-48">
+        <div className="grid gap-5 lg:grid-cols-12">
+            <aside className="lg:col-span-3">
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-2xs">
+                    <div className="px-2.5 pt-1 pb-2 text-[10px] font-bold tracking-[0.14em] text-zinc-400 uppercase">
+                        Account Preferences
+                    </div>
                     <nav
-                        className="flex flex-col space-y-1 space-x-0"
+                        className="flex flex-col gap-1"
                         aria-label="Settings"
                     >
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${toUrl(item.href)}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentOrParentUrl(item.href),
-                                })}
-                            >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
+                        {sidebarNavItems.map((item, index) => {
+                            const active = isCurrentOrParentUrl(item.href);
+                            const Icon = item.icon;
+
+                            return (
+                                <Link
+                                    key={`${toUrl(item.href)}-${index}`}
+                                    href={item.href}
+                                    className={`flex items-start gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                                        active
+                                            ? 'bg-[#001c17] text-white shadow-2xs'
+                                            : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'
+                                    }`}
+                                >
+                                    {Icon && (
+                                        <Icon
+                                            className={`mt-0.5 size-4 shrink-0 ${
+                                                active
+                                                    ? 'text-[#E47818]'
+                                                    : 'text-zinc-500'
+                                            }`}
+                                        />
                                     )}
-                                    {item.title}
+                                    <span className="min-w-0">
+                                        <span className="block text-xs font-bold">
+                                            {item.title}
+                                        </span>
+                                        <span
+                                            className={`mt-0.5 block text-[11px] ${
+                                                active
+                                                    ? 'text-zinc-300'
+                                                    : 'text-zinc-500'
+                                            }`}
+                                        >
+                                            {item.description}
+                                        </span>
+                                    </span>
                                 </Link>
-                            </Button>
-                        ))}
+                            );
+                        })}
                     </nav>
-                </aside>
+                </div>
+            </aside>
 
-                <Separator className="my-6 lg:hidden" />
-
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">
+            <div className="lg:col-span-9">
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-2xs sm:p-7">
+                    <section className="max-w-2xl space-y-10">
                         {children}
                     </section>
                 </div>

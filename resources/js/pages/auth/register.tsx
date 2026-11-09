@@ -48,29 +48,41 @@ export default function Register({
             />
 
             {/* Role Registration Switcher */}
-            <div className="mb-4 grid grid-cols-2 gap-1.5 rounded-xl border border-zinc-200 bg-[#F5F4EE] p-1 dark:border-white/15 dark:bg-zinc-900">
+            <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-xl border border-zinc-200/80 bg-[#F5F4EE] p-1.5 dark:border-white/10 dark:bg-[#0A1006]">
                 <button
                     type="button"
                     onClick={() => setRegistrationType('alumni')}
-                    className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                    className={`flex h-10 items-center justify-center gap-2 rounded-lg px-3 font-heading text-xs font-bold transition ${
                         registrationType === 'alumni'
-                            ? 'bg-[#001c17] text-white shadow-xs dark:bg-[#E47818]'
-                            : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                            ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
+                            : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
                     }`}
                 >
-                    <GraduationCap className="size-3.5" />
+                    <GraduationCap
+                        className={`size-4 shrink-0 ${
+                            registrationType === 'alumni'
+                                ? 'text-[#E47818] dark:text-white'
+                                : 'text-zinc-500'
+                        }`}
+                    />
                     Alumni Claim
                 </button>
                 <button
                     type="button"
                     onClick={() => setRegistrationType('employer')}
-                    className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                    className={`flex h-10 items-center justify-center gap-2 rounded-lg px-3 font-heading text-xs font-bold transition ${
                         registrationType === 'employer'
-                            ? 'bg-[#001c17] text-white shadow-xs dark:bg-[#E47818]'
-                            : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                            ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
+                            : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
                     }`}
                 >
-                    <BriefcaseBusiness className="size-3.5" />
+                    <BriefcaseBusiness
+                        className={`size-4 shrink-0 ${
+                            registrationType === 'employer'
+                                ? 'text-[#E47818] dark:text-white'
+                                : 'text-zinc-500'
+                        }`}
+                    />
                     Employer Partner
                 </button>
             </div>
@@ -359,33 +371,38 @@ export default function Register({
 
                             <Button
                                 type="submit"
-                                className="mt-1 w-full bg-[#E47818] font-bold text-white shadow-sm hover:bg-[#F36C21]"
+                                className="mt-1 h-11 w-full rounded-xl bg-[#E47818] font-heading text-xs font-bold text-white shadow-md transition hover:bg-[#F36C21] sm:text-sm"
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
                                 {registrationType === 'employer'
-                                    ? 'Register employer account'
-                                    : 'Claim SEAIT alumni account'}
+                                    ? 'Register Employer Partner Account'
+                                    : 'Claim SEAIT Alumni Account'}
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
-                            <TextLink href={login()}>
-                                Log in
-                            </TextLink>
-                        </div>
-                        {registrationType === 'alumni' && (
-                            <p className="text-center text-sm text-muted-foreground">
-                                Can’t verify your alumni details?{' '}
+                        <div className="flex flex-col items-center justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-600 sm:flex-row dark:border-white/10 dark:text-zinc-400">
+                            <span>
+                                Already have an account?{' '}
                                 <Link
-                                    href={assistanceUrl}
-                                    className="font-semibold text-[#E47818] underline underline-offset-4"
+                                    href={login()}
+                                    className="font-heading font-bold text-[#E47818] underline-offset-4 hover:underline"
                                 >
-                                    Request Registrar assistance
+                                    Sign in
                                 </Link>
-                            </p>
-                        )}
+                            </span>
+                            {registrationType === 'alumni' && (
+                                <span>
+                                    Can’t verify your record?{' '}
+                                    <Link
+                                        href={assistanceUrl}
+                                        className="font-heading font-bold text-teal-700 underline-offset-4 hover:underline dark:text-teal-300"
+                                    >
+                                        Request Registrar assistance
+                                    </Link>
+                                </span>
+                            )}
+                        </div>
                     </>
                 )}
             </Form>

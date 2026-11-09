@@ -30,6 +30,7 @@ flowchart TD
     M15 --> M16["M16: Dedicated Alumni Events & RSVP Module"]
     M16 --> M17["M17: Claim Assistance Diagnostics & Resolution"]
     M17 --> M18["M18: SEAIT Public Portal, Live GTS Telemetry & Legal Compliance"]
+    M18 --> M19["M19: Portal Polish, Embedded Settings, Stress Test Seeder, Avatars & Demo Quick-Fill Login"]
 ```
 
 ---
@@ -219,6 +220,25 @@ flowchart TD
 * **Option A Shareable Direct Deep Links & Verbatim Legal Compliance Modals (`welcome.tsx`)**:
   * Supports shareable query-parameter deep links (`/?job=<id>`, `/?event=<id>`, `/?announcement=<id>`, `/?legal=terms`, `/?legal=privacy`) that auto-open the corresponding modal and provide a **Copy Share Link** button.
   * Extracted and embedded the verbatim **Terms & Conditions** (`Section 01`–`06` + `Terms Directory` + `Institutional Legal Desk`) and **Privacy Policy** (`Notice 01`–`06` under **RA 10173 Data Privacy Act of 2012** + `Privacy Notice Directory` + `Data Protection Officer` desk at `privacy@seait.edu.ph`) from `https://seait.edu.ph/` into the public page footer and interactive legal modal.
+
+### Milestone 19: Portal UI Polish, Embedded Account Settings, Stress Test Seeder, Avatars & Collapsible Demo Quick-Fill Login
+* **Light Mode Default & Public Portal Header/Footer Refinements (`welcome.tsx`, `use-appearance.tsx`, `app.blade.php`)**:
+  * Set Light Mode (`#F5F4EE` warm cream / `#FFFFFF` surfaces) as the default appearance across SSR and client-side initialization while preserving the header Light/Dark mode toggle.
+  * Removed the nested `backdrop-blur` rectangular artifact around the header navigation bar, equalized CTA button dimensions, fixed job board filter header wrapping, and added the official Facebook icon to the SEAIT footer link.
+* **Embedded Account Settings & Sidebar Role Switcher Removal (`alumni-portal.tsx`, `settings/layout.tsx`)**:
+  * Embedded `/settings/profile`, `/settings/security`, and `/settings/appearance` directly inside the bespoke SEAIT `AlumniPortal` workspace shell (`AccountSettingsShell`) instead of redirecting out to the generic starter-kit sidebar.
+  * Removed the sidebar `Workspace role` switcher so each account operates strictly within its assigned institutional workspace.
+* **High-Volume Stress Test Seeder (`database/seeders/StressTestSeeder.php`, `docs/stress-test-seeder.md`)**:
+  * Built an idempotent, chunked bulk-insert seeder generating **8,500+ relational rows in ~2.4 seconds** (`1,500` alumni profiles, `1,500` education records, `3,000` contact methods, `1,500` addresses, `600` claimed accounts, `1,350` employment tracer records, `45` employers, `120` job postings, `500` job applications with frozen JSON snapshots, `5` surveys with `1,100` responses, `24` announcements, `18` events with `585` RSVPs, `75` claim assistance requests, and `250+` audit logs), configurable via `STRESS_*` environment variables.
+* **Institutional Auth & Registration Portal Alignment (`auth-simple-layout.tsx`, `register.tsx`, `login.tsx`, `registration-assistance.tsx`)**:
+  * Redesigned the Authentication & Registration layout into a split institutional gateway featuring the official SEAIT header, Light/Dark mode switcher, left-column CHED GTS & RA 10173 verification overview card, and 2-step Alumni Claim / Employer Partner onboarding cards.
+* **End-to-End Account Avatar Support & Logout Menu Fix (`AlumniController.php`, `AlumniProfileResource.php`, `SystemAdminUserController.php`, `alumni-portal.tsx`, `alumni-portal-data.tsx`, `user-menu-content.tsx`)**:
+  * Linked `public/storage -> storage/app/public`, configured root-relative `/storage` URLs in `config/filesystems.php`, and exposed `user.avatar` across `/api/alumni`, `/api/alumni/{profile}`, `/api/me/alumni`, and `/api/admin/users`.
+  * Rendered `<Avatar>` with uploaded profile photos across the **Workspace Sidebar**, **Top-Right User Menu**, **Alumni Directory Table**, **Alumni Profile Slide-Over Drawer**, **My Profile Summary**, and **User Management**.
+  * Fixed the **Log out** confirmation modal unmounting bug in both the top-right dropdown (`onSelect={(e) => e.preventDefault()}`) and the bottom-left sidebar account menu.
+* **Collapsible Quick-Fill Demo Accounts & Admin Show/Hide Toggle (`SystemSettings.php`, `FortifyServiceProvider.php`, `SystemAdminUserController.php`, `login.tsx`, `alumni-portal-data.tsx`)**:
+  * Added a collapsible **Quick-Fill Demo Accounts** accordion on `/login` (collapsed by default) that populates role credentials (`admin`, `alumni_coord`, `cict_admin`, `employer_hr`, `alumni_grad`) with one click.
+  * Added a persistent **Shown / Hidden** toggle switch in **Governance -> User management** (`PATCH /api/admin/settings/demo-quick-login`) so System Administrators can show or hide the demo login panel on `/login` at any time.
 
 ---
 

@@ -16,8 +16,8 @@ import {
     ClipboardCheck,
     Cpu,
     ExternalLink,
+    Facebook,
     FileCheck2,
-    Globe,
     HardHat,
     Mail,
     MapPin,
@@ -547,16 +547,16 @@ export default function Welcome({
                                     className="size-full object-contain"
                                 />
                             </div>
-                            <div className="min-w-0 whitespace-nowrap">
+                            <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 sm:gap-2">
-                                    <span className="font-heading text-lg font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] sm:text-xl dark:text-white">
+                                    <span className="font-heading text-base font-extrabold tracking-tight text-zinc-900 transition-colors group-hover:text-[#E47818] sm:text-xl dark:text-white">
                                         SEAIT
                                     </span>
-                                    <span className="rounded-lg border border-orange-300/80 bg-orange-50/90 px-2 py-0.5 font-heading text-[10px] font-bold tracking-wider text-[#E47818] uppercase shadow-2xs dark:border-orange-500/30 dark:bg-orange-950/60 dark:text-orange-400">
+                                    <span className="rounded-lg border border-orange-300/80 bg-orange-50/90 px-1.5 py-0.5 font-heading text-[9px] font-bold tracking-wider text-[#E47818] uppercase shadow-2xs sm:px-2 sm:text-[10px] dark:border-orange-500/30 dark:bg-orange-950/60 dark:text-orange-400">
                                         ATMS
                                     </span>
                                 </div>
-                                <span className="block truncate text-[10px] font-medium text-zinc-500 sm:text-[11px] dark:text-zinc-400">
+                                <span className="hidden truncate text-[10px] font-medium text-zinc-500 sm:block sm:text-[11px] dark:text-zinc-400">
                                     Alumni Tracer Management System
                                 </span>
                             </div>
@@ -604,17 +604,17 @@ export default function Welcome({
                         </div>
 
                         <nav
-                            className={`absolute top-full right-0 left-0 z-40 flex origin-top flex-col gap-3.5 border-b border-zinc-200 bg-white/98 px-4 shadow-2xl backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:pointer-events-auto lg:visible lg:static lg:max-h-none lg:translate-y-0 lg:scale-y-100 lg:flex-row lg:items-center lg:gap-0.5 lg:overflow-visible lg:border-0 lg:bg-transparent lg:p-0 lg:opacity-100 lg:shadow-none xl:gap-1 dark:border-[#006d5b]/30 dark:bg-[#081110]/98 dark:lg:bg-transparent ${
+                            className={`max-lg:absolute max-lg:top-full max-lg:right-0 max-lg:left-0 max-lg:z-40 flex max-lg:origin-top flex-col gap-3.5 max-lg:border-b max-lg:border-zinc-200 max-lg:bg-white/98 max-lg:px-4 max-lg:shadow-2xl max-lg:backdrop-blur-md max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex-row lg:items-center lg:gap-0.5 lg:bg-transparent lg:backdrop-blur-none xl:gap-1 max-lg:dark:border-[#006d5b]/30 max-lg:dark:bg-[#081110]/98 ${
                                 menuOpen
-                                    ? 'pointer-events-auto visible max-h-[480px] translate-y-0 scale-y-100 py-4 opacity-100'
-                                    : 'pointer-events-none invisible max-h-0 -translate-y-3 scale-y-95 overflow-hidden border-b-0 py-0 opacity-0'
+                                    ? 'max-lg:pointer-events-auto max-lg:visible max-lg:max-h-[480px] max-lg:translate-y-0 max-lg:scale-y-100 max-lg:py-4 max-lg:opacity-100'
+                                    : 'max-lg:pointer-events-none max-lg:invisible max-lg:max-h-0 max-lg:-translate-y-3 max-lg:scale-y-95 max-lg:overflow-hidden max-lg:border-b-0 max-lg:py-0 max-lg:opacity-0'
                             }`}
                         >
                             <div
-                                className={`grid grid-cols-2 gap-1.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex lg:translate-y-0 lg:flex-row lg:items-center lg:gap-0.5 lg:opacity-100 xl:gap-1 ${
+                                className={`grid grid-cols-2 gap-1.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex lg:flex-row lg:items-center lg:gap-0.5 xl:gap-1 ${
                                     menuOpen
-                                        ? 'translate-y-0 opacity-100 delay-75'
-                                        : '-translate-y-2 opacity-0'
+                                        ? 'max-lg:translate-y-0 max-lg:opacity-100 max-lg:delay-75'
+                                        : 'max-lg:-translate-y-2 max-lg:opacity-0'
                                 }`}
                             >
                                 {[
@@ -638,10 +638,10 @@ export default function Welcome({
                             </div>
 
                             <div
-                                className={`flex flex-col gap-2 border-t border-zinc-200/80 pt-3.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:mt-0 lg:ml-2 lg:shrink-0 lg:translate-y-0 lg:flex-row lg:flex-nowrap lg:items-center lg:border-t-0 lg:border-l lg:border-zinc-200 lg:pt-0 lg:pl-3 lg:opacity-100 dark:border-white/10 dark:lg:border-white/15 ${
+                                className={`flex flex-col gap-2 border-t border-zinc-200/80 pt-3.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:mt-0 lg:ml-2 lg:shrink-0 lg:flex-row lg:flex-nowrap lg:items-center lg:border-t-0 lg:border-l lg:border-zinc-200 lg:pt-0 lg:pl-3 dark:border-white/10 dark:lg:border-white/15 ${
                                     menuOpen
-                                        ? 'translate-y-0 opacity-100 delay-100'
-                                        : '-translate-y-2 opacity-0'
+                                        ? 'max-lg:translate-y-0 max-lg:opacity-100 max-lg:delay-100'
+                                        : 'max-lg:-translate-y-2 max-lg:opacity-0'
                                 }`}
                             >
                                 <button
@@ -907,51 +907,51 @@ export default function Welcome({
 
                     {/* Floating Overlap Institutional Scale Bar (Distinct from outcome percentage cards below) */}
                     <section className="relative z-20 mx-auto -mt-10 max-w-6xl px-4 sm:px-8">
-                        <div className="grid grid-cols-2 gap-6 divide-y divide-zinc-200/80 rounded-3xl border border-zinc-200/80 bg-white p-6 text-center shadow-xl sm:p-8 lg:grid-cols-4 lg:divide-x lg:divide-y-0 dark:divide-white/10 dark:border-white/15 dark:bg-[#15190B] dark:shadow-2xl">
-                            <div className="pt-2 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-[#E47818] sm:text-4xl">
+                        <div className="grid grid-cols-2 gap-3 rounded-3xl border border-zinc-200/80 bg-white p-4 text-center shadow-xl sm:gap-6 sm:p-8 lg:grid-cols-4 lg:divide-x lg:divide-zinc-200/80 dark:border-white/15 dark:bg-[#15190B] dark:shadow-2xl lg:dark:divide-white/10">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-[#E47818] sm:text-4xl">
                                     {stats.graduates_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     Alumni Masterlist
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     {stats.claimed_graduates_count.toLocaleString()} claimed accounts
                                 </span>
                             </div>
 
-                            <div className="pt-4 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-teal-600 sm:text-4xl dark:text-teal-400">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-teal-600 sm:text-4xl dark:text-teal-400">
                                     {stats.programs_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     Academic Programs
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     Across {stats.departments_count.toLocaleString()} SEAIT academic units
                                 </span>
                             </div>
 
-                            <div className="pt-4 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-[#CD7A30] sm:text-4xl dark:text-amber-400">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-[#CD7A30] sm:text-4xl dark:text-amber-400">
                                     {stats.survey_responses_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     GTS Survey Responses
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     {stats.active_surveys_count} active tracer questionnaires
                                 </span>
                             </div>
 
-                            <div className="pt-4 lg:pt-0">
-                                <span className="block font-heading text-3xl font-bold tracking-tight text-emerald-600 sm:text-4xl dark:text-emerald-400">
+                            <div className="rounded-2xl bg-zinc-50/70 p-3 sm:p-4 lg:rounded-none lg:bg-transparent lg:p-0 dark:bg-white/5 lg:dark:bg-transparent">
+                                <span className="block font-heading text-2xl font-bold tracking-tight text-emerald-600 sm:text-4xl dark:text-emerald-400">
                                     {stats.open_jobs_count.toLocaleString()}
                                 </span>
-                                <span className="mt-1 block font-heading text-xs font-bold tracking-wider text-zinc-800 uppercase dark:text-[#F5F4EE]">
+                                <span className="mt-1 block font-heading text-[11px] font-bold tracking-wider text-zinc-800 uppercase sm:text-xs dark:text-[#F5F4EE]">
                                     Open Career Roles
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-zinc-500 dark:text-zinc-400">
+                                <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
                                     {stats.verified_employers_count} verified partner employers
                                 </span>
                             </div>
@@ -1567,14 +1567,14 @@ export default function Welcome({
                     >
                         <div className="mx-auto max-w-6xl px-4 sm:px-8">
                             <div className="mb-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-                                <div>
+                                <div className="min-w-0">
                                     <span className="text-xs font-bold tracking-wider text-[#E47818] uppercase">
                                         Industry Placement & Career Center
                                     </span>
                                     <h2 className="mt-1 font-heading text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl md:text-4xl dark:text-white">
                                         Verified SEAIT Alumni Job Board
                                     </h2>
-                                    <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-400">
+                                    <p className="mt-1.5 max-w-lg text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-400">
                                         Career opportunities from verified
                                         partner employers. Inspect any role or
                                         share its direct link with fellow
@@ -1582,9 +1582,9 @@ export default function Welcome({
                                     </p>
                                 </div>
 
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <label className="flex h-10 items-center gap-2 rounded-xl border border-zinc-300 bg-white px-3.5 text-xs text-zinc-900 dark:border-white/15 dark:bg-[#15190B] dark:text-white">
-                                        <Search className="size-3.5 text-[#E47818]" />
+                                <div className="flex shrink-0 flex-wrap items-center gap-2 sm:flex-nowrap">
+                                    <label className="flex h-10 w-full items-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 text-xs text-zinc-900 sm:w-auto dark:border-white/15 dark:bg-[#15190B] dark:text-white">
+                                        <Search className="size-3.5 shrink-0 text-[#E47818]" />
                                         <input
                                             type="search"
                                             value={jobSearch}
@@ -1592,7 +1592,7 @@ export default function Welcome({
                                                 setJobSearch(e.target.value)
                                             }
                                             placeholder="Search role, company, city…"
-                                            className="w-44 bg-transparent text-xs text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
+                                            className="w-full bg-transparent text-xs text-zinc-900 outline-none placeholder:text-zinc-400 sm:w-40 dark:text-white dark:placeholder:text-zinc-500"
                                         />
                                     </label>
                                     {['All', 'On-site', 'Hybrid', 'Remote'].map(
@@ -1603,7 +1603,7 @@ export default function Welcome({
                                                 onClick={() =>
                                                     setWorkplaceFilter(mode)
                                                 }
-                                                className={`h-10 rounded-xl px-3.5 font-heading text-xs font-bold transition ${workplaceFilter === mode
+                                                className={`h-10 shrink-0 rounded-xl px-3 font-heading text-xs font-bold whitespace-nowrap transition ${workplaceFilter === mode
                                                     ? 'bg-[#E47818] text-white shadow-sm'
                                                     : 'border border-zinc-300 bg-white text-zinc-700 hover:border-[#E47818] dark:border-white/15 dark:bg-[#15190B] dark:text-zinc-300 dark:hover:border-orange-400/50'
                                                     }`}
@@ -1639,10 +1639,10 @@ export default function Welcome({
                                         return (
                                             <article
                                                 key={job.id}
-                                                className="group flex flex-col justify-between gap-4 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-2xs transition hover:border-[#E47818]/40 dark:border-white/10 dark:bg-[#15190B]"
+                                                className="group flex flex-col justify-between gap-4 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-2xs transition hover:border-[#E47818]/40 sm:p-6 dark:border-white/10 dark:bg-[#15190B]"
                                             >
-                                                <div className="flex items-start justify-between gap-4">
-                                                    <div className="flex items-start gap-3.5">
+                                                <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap sm:gap-4">
+                                                    <div className="flex min-w-0 items-start gap-3.5">
                                                         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-orange-500/25 bg-orange-500/10 text-[#E47818] dark:border-orange-500/30 dark:text-orange-400">
                                                             <BriefcaseBusiness className="size-5" />
                                                         </span>
@@ -1915,24 +1915,24 @@ export default function Welcome({
                                         </h2>
                                     </div>
                                 </div>
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row lg:flex-col">
                                     <Link
                                         href={
                                             isAuthenticated
                                                 ? '/dashboard'
                                                 : register()
                                         }
-                                        className="inline-flex h-12 shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-6 font-heading text-xs font-bold text-white shadow-lg shadow-orange-950/40 transition hover:bg-[#F36C21] sm:text-sm"
+                                        className="inline-flex h-12 w-full shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-6 font-heading text-xs font-bold whitespace-nowrap text-white shadow-lg shadow-orange-950/40 transition hover:bg-[#F36C21] sm:w-56 sm:text-sm"
                                     >
                                         {isAuthenticated
                                             ? 'Open Alumni Portal'
                                             : 'Claim Alumni Record'}
-                                        <ArrowRight className="ml-2 size-4" />
+                                        <ArrowRight className="ml-2 size-4 shrink-0" />
                                     </Link>
                                     {!isAuthenticated && (
                                         <Link
                                             href="/register?type=employer"
-                                            className="inline-flex h-12 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 px-6 font-heading text-xs font-semibold text-white transition hover:bg-white/15 sm:text-sm"
+                                            className="inline-flex h-12 w-full shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 px-6 font-heading text-xs font-bold whitespace-nowrap text-white transition hover:bg-white/15 sm:w-56 sm:text-sm"
                                         >
                                             Employer Registration
                                         </Link>
@@ -1971,7 +1971,7 @@ export default function Welcome({
                                     accreditation.
                                 </p>
                                 <p className="mt-3 font-heading text-[11px] font-bold tracking-wider text-teal-400 uppercase">
-                                    “Educating Minds, Transforming Lives.”
+                                    “Committed to The Total Development of The Student.”
                                 </p>
                             </div>
 
@@ -2009,14 +2009,14 @@ export default function Welcome({
                                         </a>
                                     </li>
                                     <li className="flex items-center gap-2">
-                                        <Globe className="size-4 shrink-0 text-teal-400" />
                                         <a
                                             href="https://www.facebook.com/SEAITOfficial"
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="transition hover:text-orange-400"
+                                            className="inline-flex items-center gap-2 transition hover:text-orange-400"
                                         >
-                                            facebook.com/SEAITOfficial
+                                            <Facebook className="size-4 shrink-0 text-orange-400" />
+                                            <span>facebook.com/SEAITOfficial</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -2118,11 +2118,7 @@ export default function Welcome({
                                 >
                                     Privacy Policy
                                 </button>
-                                <span className="hidden sm:inline">·</span>
-                                <span className="hidden sm:inline">
-                                    Crossing Rubber, Tupi, South Cotabato,
-                                    Philippines 9505
-                                </span>
+
                             </div>
                         </div>
                     </div>

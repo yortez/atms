@@ -108,14 +108,14 @@ export default function RegistrationAssistance({
             <Head title="Alumni registration assistance" />
 
             {/* Mode Switcher */}
-            <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-lg border border-border bg-muted/40 p-1">
+            <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-xl border border-zinc-200/80 bg-[#F5F4EE] p-1.5 dark:border-white/10 dark:bg-[#0A1006]">
                 <button
                     type="button"
                     onClick={() => setActiveMode('submit')}
-                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${
                         activeMode === 'submit'
-                            ? 'bg-background text-foreground shadow-xs'
-                            : 'text-muted-foreground hover:text-foreground'
+                            ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
+                            : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
                     }`}
                 >
                     Submit Claim Request
@@ -123,10 +123,10 @@ export default function RegistrationAssistance({
                 <button
                     type="button"
                     onClick={() => setActiveMode('lookup')}
-                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${
                         activeMode === 'lookup'
-                            ? 'bg-background text-foreground shadow-xs'
-                            : 'text-muted-foreground hover:text-foreground'
+                            ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
+                            : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
                     }`}
                 >
                     Check Request Status
@@ -364,24 +364,37 @@ export default function RegistrationAssistance({
                                 />
                                 <InputError message={errors.message} />
                             </div>
-                            <Button type="submit" className="w-full">
+                            <Button
+                                type="submit"
+                                className="h-11 w-full rounded-xl bg-[#E47818] font-heading text-xs font-bold text-white shadow-md transition hover:bg-[#F36C21] sm:text-sm"
+                            >
                                 {processing && <Spinner />}
-                                Submit assistance request
+                                Submit Registrar Assistance Request
                             </Button>
                         </>
                     )}
                 </Form>
             )}
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-                <Link href={login()} className="underline underline-offset-4">
-                    Return to login
+            <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-600 sm:flex-row dark:border-white/10 dark:text-zinc-400">
+                <Link
+                    href={register()}
+                    className="font-heading font-bold text-[#E47818] underline-offset-4 hover:underline"
+                >
+                    ← Back to Alumni Claim Registration
                 </Link>
-            </p>
+                <Link
+                    href={login()}
+                    className="font-heading font-bold text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+                >
+                    Return to Sign In
+                </Link>
+            </div>
         </>
     );
 }
 
 RegistrationAssistance.layout = {
-    title: 'Alumni registration assistance',
-    description: 'Ask the alumni office to review your registration details',
+    title: 'Registrar Claim Assistance',
+    description:
+        'Request manual verification from the SEAIT Registrar or track an existing claim request',
 };
