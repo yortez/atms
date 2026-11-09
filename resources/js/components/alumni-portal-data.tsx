@@ -8,16 +8,24 @@ import {
     Building2,
     Calendar,
     CheckCircle2,
+    ChevronRight,
     ClipboardList,
+    Clock,
+    Coins,
     Download,
     ExternalLink,
+    Eye,
+    FileCheck,
     FileText,
+    Filter,
     GraduationCap,
+    Info,
     Lock,
     MapPin,
     MessageSquareText,
     Pencil,
     Plus,
+    Search,
     Settings,
     ShieldCheck,
     Sparkles,
@@ -122,9 +130,9 @@ function DemoQuickLoginToggleCard() {
             reload();
             toast.success(
                 response.message ??
-                    (nextValue
-                        ? 'Demo quick-fill login enabled.'
-                        : 'Demo quick-fill login disabled.'),
+                (nextValue
+                    ? 'Demo quick-fill login enabled.'
+                    : 'Demo quick-fill login disabled.'),
             );
         } catch (requestError) {
             toast.error(
@@ -148,11 +156,10 @@ function DemoQuickLoginToggleCard() {
                         Quick-Fill Demo Accounts on Login Page
                     </h3>
                     <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                            enabled
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${enabled
                                 ? 'bg-[#e3eee0] text-[#2b5139]'
                                 : 'bg-[#eff0ec] text-[#6d746a]'
-                        }`}
+                            }`}
                     >
                         {loading ? 'Checking…' : enabled ? 'Shown' : 'Hidden'}
                     </span>
@@ -173,22 +180,20 @@ function DemoQuickLoginToggleCard() {
                     className="inline-flex items-center gap-2.5 rounded-full border border-[#d6dfd3] bg-white px-3 py-1.5 text-xs font-semibold text-[#29382e] shadow-2xs transition hover:border-[#2b5139] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     <span
-                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
-                            enabled ? 'bg-[#2b5139]' : 'bg-[#cbd2c9]'
-                        }`}
+                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${enabled ? 'bg-[#2b5139]' : 'bg-[#cbd2c9]'
+                            }`}
                     >
                         <span
-                            className={`inline-block size-3.5 transform rounded-full bg-white shadow-xs transition-transform ${
-                                enabled ? 'translate-x-4' : 'translate-x-1'
-                            }`}
+                            className={`inline-block size-3.5 transform rounded-full bg-white shadow-xs transition-transform ${enabled ? 'translate-x-4' : 'translate-x-1'
+                                }`}
                         />
                     </span>
                     <span>
                         {saving
                             ? 'Saving…'
                             : enabled
-                              ? 'Shown on /login'
-                              : 'Hidden on /login'}
+                                ? 'Shown on /login'
+                                : 'Hidden on /login'}
                     </span>
                 </button>
             </div>
@@ -2494,11 +2499,10 @@ export function AlumniProfileSummary({
                                     <div>
                                         {latestEmployment.is_related_to_degree !== undefined && (
                                             <span
-                                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                                                    latestEmployment.is_related_to_degree
+                                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${latestEmployment.is_related_to_degree
                                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                                         : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
-                                                }`}
+                                                    }`}
                                             >
                                                 <CheckCircle2 className="size-3" />
                                                 {latestEmployment.is_related_to_degree
@@ -3186,11 +3190,10 @@ export function EmploymentTracer({
                                             </span>
                                             {record.is_related_to_degree !== undefined && (
                                                 <span
-                                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                                        record.is_related_to_degree
+                                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${record.is_related_to_degree
                                                             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                                                             : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <CheckCircle2 className="size-3" />
                                                     {record.is_related_to_degree
@@ -4075,8 +4078,8 @@ export function EmploymentReports() {
                                     type="button"
                                     onClick={() => setReportType(item.key)}
                                     className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs transition ${active
-                                            ? 'bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                            : 'text-[#626c61] hover:bg-[#f6f7f4]'
+                                        ? 'bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                        : 'text-[#626c61] hover:bg-[#f6f7f4]'
                                         }`}
                                 >
                                     <span className="truncate">
@@ -4122,10 +4125,10 @@ export function EmploymentReports() {
                                         <th
                                             key={col.key}
                                             className={`px-4 py-3 ${col.align === 'right'
-                                                    ? 'text-right'
-                                                    : col.align === 'center'
-                                                        ? 'text-center'
-                                                        : 'text-left'
+                                                ? 'text-right'
+                                                : col.align === 'center'
+                                                    ? 'text-center'
+                                                    : 'text-left'
                                                 }`}
                                         >
                                             {col.label}
@@ -4145,11 +4148,11 @@ export function EmploymentReports() {
                                                 <td
                                                     key={col.key}
                                                     className={`px-4 py-3 text-[#414e43] ${col.align === 'right'
-                                                            ? 'text-right font-medium'
-                                                            : col.align ===
-                                                                'center'
-                                                                ? 'text-center'
-                                                                : 'text-left'
+                                                        ? 'text-right font-medium'
+                                                        : col.align ===
+                                                            'center'
+                                                            ? 'text-center'
+                                                            : 'text-left'
                                                         }`}
                                                 >
                                                     {cellVal}
@@ -4769,8 +4772,8 @@ export function AssignedRoles({
                                                     }
                                                     title={perm.label}
                                                     className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-[#fafbf9] text-[#5c685d] hover:bg-[#eff2ed]'
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#dce2d9] bg-[#fafbf9] text-[#5c685d] hover:bg-[#eff2ed]'
                                                         }`}
                                                 >
                                                     {perm.label}
@@ -4837,8 +4840,8 @@ export function AssignedRoles({
                                     type="button"
                                     onClick={() => setRoleFilter(code)}
                                     className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${roleFilter === code
-                                            ? 'bg-[#2b5139] text-white'
-                                            : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                        ? 'bg-[#2b5139] text-white'
+                                        : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
                                         }`}
                                 >
                                     {label}
@@ -4984,8 +4987,8 @@ export function AssignedRoles({
                                                             )
                                                         }
                                                         className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
-                                                                ? 'bg-[#2b5139] text-white'
-                                                                : 'border border-[#dce2d9] bg-[#f9faf7] text-[#4d5a4f]'
+                                                            ? 'bg-[#2b5139] text-white'
+                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#4d5a4f]'
                                                             }`}
                                                     >
                                                         {prog.code} ·{' '}
@@ -5237,8 +5240,8 @@ export function AssignedRoles({
                                                                             );
                                                                         }}
                                                                         className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${active
-                                                                                ? 'bg-[#2b5139] text-white'
-                                                                                : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055] hover:bg-[#edf2eb]'
+                                                                            ? 'bg-[#2b5139] text-white'
+                                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055] hover:bg-[#edf2eb]'
                                                                             }`}
                                                                     >
                                                                         {
@@ -5679,22 +5682,20 @@ export function AcademicCatalog({
                             <button
                                 type="button"
                                 onClick={() => setViewMode('modular')}
-                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${
-                                    viewMode === 'modular'
+                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'modular'
                                         ? 'bg-white text-[#2b5139] shadow-2xs'
                                         : 'text-[#626c61] hover:text-[#29382e]'
-                                }`}
+                                    }`}
                             >
                                 Modular by Department
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setViewMode('grid')}
-                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${
-                                    viewMode === 'grid'
+                                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'grid'
                                         ? 'bg-white text-[#2b5139] shadow-2xs'
                                         : 'text-[#626c61] hover:text-[#29382e]'
-                                }`}
+                                    }`}
                             >
                                 All Programs Grid
                             </button>
@@ -5730,11 +5731,10 @@ export function AcademicCatalog({
                         <button
                             type="button"
                             onClick={() => setSelectedDepartmentFilter('all')}
-                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
-                                selectedDepartmentFilter === 'all'
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${selectedDepartmentFilter === 'all'
                                     ? 'bg-[#2b5139] text-white'
                                     : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                            }`}
+                                }`}
                         >
                             All Departments ({departmentsList.length})
                         </button>
@@ -5753,11 +5753,10 @@ export function AcademicCatalog({
                                             active ? 'all' : String(dept.id),
                                         )
                                     }
-                                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
-                                        active
+                                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${active
                                             ? 'bg-[#2b5139] text-white'
                                             : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                    }`}
+                                        }`}
                                 >
                                     {dept.code} ({count})
                                 </button>
@@ -5856,8 +5855,8 @@ export function AcademicCatalog({
                             {savingDepartment
                                 ? 'Saving…'
                                 : editingDepartmentId !== null
-                                  ? 'Save department'
-                                  : 'Create department'}
+                                    ? 'Save department'
+                                    : 'Create department'}
                         </button>
                     </div>
                 </form>
@@ -6036,8 +6035,8 @@ export function AcademicCatalog({
                             {creating
                                 ? 'Saving…'
                                 : editingProgramId !== null
-                                  ? 'Save changes'
-                                  : 'Add program'}
+                                    ? 'Save changes'
+                                    : 'Add program'}
                         </button>
                     </div>
                     {departmentsRes.error ? (
@@ -6192,7 +6191,7 @@ export function AcademicCatalog({
 
                                                     <div className="mt-3 pt-2">
                                                         {addingDegreeProgramId ===
-                                                        program.id ? (
+                                                            program.id ? (
                                                             <div className="flex gap-1.5">
                                                                 <input
                                                                     type="text"
@@ -6341,501 +6340,545 @@ export function AcademicCatalog({
     );
 }
 
-        type RawPagination<T> = {
-            data: T[];
-            current_page: number;
-            last_page: number;
-            total: number;
-        };
+type RawPagination<T> = {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    total: number;
+};
 
-        const QUESTION_TYPE_LABELS: Record<string, string> = {
-            text: 'Short Text',
-            short_text: 'Short Text',
-            textarea: 'Long Text',
-            long_text: 'Long Text',
-            radio: 'Multiple Choice',
-            multiple_choice: 'Multiple Choice',
-            choice: 'Multiple Choice',
-            multiselect: 'Checkbox (Multi-Select)',
-            checkbox: 'Checkbox (Multi-Select)',
-            select: 'Dropdown',
-            dropdown: 'Dropdown',
-            rating: 'Rating Scale (1–5)',
-            date: 'Date',
-            number: 'Number',
-            boolean: 'Yes / No',
-            yes_no: 'Yes / No',
-        };
+const QUESTION_TYPE_LABELS: Record<string, string> = {
+    text: 'Short Text',
+    short_text: 'Short Text',
+    textarea: 'Long Text',
+    long_text: 'Long Text',
+    radio: 'Multiple Choice',
+    multiple_choice: 'Multiple Choice',
+    choice: 'Multiple Choice',
+    multiselect: 'Checkbox (Multi-Select)',
+    checkbox: 'Checkbox (Multi-Select)',
+    select: 'Dropdown',
+    dropdown: 'Dropdown',
+    rating: 'Rating Scale (1–5)',
+    date: 'Date',
+    number: 'Number',
+    boolean: 'Yes / No',
+    yes_no: 'Yes / No',
+};
 
-        const BUILDER_QUESTION_TYPES = [
-            { value: 'text', label: 'Short Text' },
-            { value: 'textarea', label: 'Long Text' },
-            { value: 'radio', label: 'Multiple Choice (Single)' },
-            { value: 'multiselect', label: 'Checkbox (Multiple)' },
-            { value: 'select', label: 'Dropdown' },
-            { value: 'rating', label: 'Rating Scale (1–5)' },
-            { value: 'date', label: 'Date' },
-            { value: 'number', label: 'Number' },
-            { value: 'boolean', label: 'Yes / No' },
-        ] as const;
+const BUILDER_QUESTION_TYPES = [
+    { value: 'text', label: 'Short Text' },
+    { value: 'textarea', label: 'Long Text' },
+    { value: 'radio', label: 'Multiple Choice (Single)' },
+    { value: 'multiselect', label: 'Checkbox (Multiple)' },
+    { value: 'select', label: 'Dropdown' },
+    { value: 'rating', label: 'Rating Scale (1–5)' },
+    { value: 'date', label: 'Date' },
+    { value: 'number', label: 'Number' },
+    { value: 'boolean', label: 'Yes / No' },
+] as const;
 
-        function requiresQuestionOptions(type: string): boolean {
-            return [
-                'radio',
-                'multiple_choice',
-                'choice',
-                'multiselect',
-                'checkbox',
-                'select',
-                'dropdown',
-            ].includes(type);
+function requiresQuestionOptions(type: string): boolean {
+    return [
+        'radio',
+        'multiple_choice',
+        'choice',
+        'multiselect',
+        'checkbox',
+        'select',
+        'dropdown',
+    ].includes(type);
+}
+
+function SurveyResponseForm({
+    survey,
+    onSubmitted,
+}: {
+    survey: Survey;
+    onSubmitted: () => void;
+}) {
+    const [answers, setAnswers] = useState<Record<number, unknown>>({});
+    const [saving, setSaving] = useState(false);
+
+    function updateAnswer(id: number, value: unknown) {
+        setAnswers((current) => ({ ...current, [id]: value }));
+    }
+
+    async function submit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setSaving(true);
+        try {
+            await apiRequest<ApiEnvelope<{ id: number }>>(
+                `/api/surveys/${survey.id}/responses`,
+                { method: 'POST', body: { answers } },
+            );
+            onSubmitted();
+            toast.success('Survey response submitted.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Survey response could not be submitted.',
+            );
+        } finally {
+            setSaving(false);
         }
+    }
 
-        function SurveyResponseForm({
-            survey,
-            onSubmitted,
-        }: {
-            survey: Survey;
-            onSubmitted: () => void;
-        }) {
-            const [answers, setAnswers] = useState<Record<number, unknown>>({});
-            const [saving, setSaving] = useState(false);
+    return (
+        <form
+            onSubmit={submit}
+            className="mt-4 space-y-3.5 rounded-2xl bg-[#f3f6f2] p-4 sm:p-5"
+        >
+            {/* Respondent Header Card */}
+            <div className="rounded-xl border border-[#dce4d9] border-t-8 border-t-[#2b5139] bg-white p-4 shadow-2xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] font-semibold text-[#2b5139]">
+                        {survey.is_anonymous
+                            ? '🔒 Anonymous Form · Your name will not be shown in response summaries'
+                            : '📋 Institutional Tracer Form · 1 response per alumnus'}
+                    </span>
+                    <span className="text-[11px] font-medium text-[#b84a39]">
+                        * Indicates required question
+                    </span>
+                </div>
+            </div>
 
-            function updateAnswer(id: number, value: unknown) {
-                setAnswers((current) => ({ ...current, [id]: value }));
-            }
+            {survey.questions.map((question, qIndex) => {
+                const value = answers[question.id];
+                const qType = question.type;
 
-            async function submit(event: FormEvent<HTMLFormElement>) {
-                event.preventDefault();
-                setSaving(true);
-                try {
-                    await apiRequest<ApiEnvelope<{ id: number }>>(
-                        `/api/surveys/${survey.id}/responses`,
-                        { method: 'POST', body: { answers } },
-                    );
-                    onSubmitted();
-                    toast.success('Survey response submitted.');
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Survey response could not be submitted.',
-                    );
-                } finally {
-                    setSaving(false);
-                }
-            }
-
-            return (
-                <form
-                    onSubmit={submit}
-                    className="mt-4 space-y-3.5 rounded-2xl bg-[#f3f6f2] p-4 sm:p-5"
-                >
-                    {/* Respondent Header Card */}
-                    <div className="rounded-xl border border-[#dce4d9] border-t-8 border-t-[#2b5139] bg-white p-4 shadow-2xs">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-[11px] font-semibold text-[#2b5139]">
-                                {survey.is_anonymous
-                                    ? '🔒 Anonymous Form · Your name will not be shown in response summaries'
-                                    : '📋 Institutional Tracer Form · 1 response per alumnus'}
-                            </span>
-                            <span className="text-[11px] font-medium text-[#b84a39]">
-                                * Indicates required question
+                return (
+                    <div
+                        key={question.id}
+                        className="rounded-xl border border-[#dfe5dc] bg-white p-4 shadow-2xs sm:p-5"
+                    >
+                        <div className="mb-3 flex items-start justify-between gap-2">
+                            <p className="text-xs font-semibold text-[#233127] sm:text-sm">
+                                {qIndex + 1}. {question.prompt}
+                                {question.is_required && (
+                                    <span className="ml-1 text-[#c93b2b]">
+                                        *
+                                    </span>
+                                )}
+                            </p>
+                            <span className="shrink-0 rounded bg-[#f4f6f2] px-2 py-0.5 text-[10px] font-medium text-[#6f786e]">
+                                {QUESTION_TYPE_LABELS[qType] ?? qType}
                             </span>
                         </div>
-                    </div>
 
-                    {survey.questions.map((question, qIndex) => {
-                        const value = answers[question.id];
-                        const qType = question.type;
+                        {(qType === 'textarea' || qType === 'long_text') && (
+                            <textarea
+                                required={question.is_required}
+                                value={typeof value === 'string' ? value : ''}
+                                placeholder="Your answer"
+                                onChange={(event) =>
+                                    updateAnswer(
+                                        question.id,
+                                        event.target.value,
+                                    )
+                                }
+                                className="min-h-24 w-full border-b-2 border-[#dce2d9] bg-[#fafbf9] p-3 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139] focus:bg-white"
+                            />
+                        )}
 
-                        return (
-                            <div
-                                key={question.id}
-                                className="rounded-xl border border-[#dfe5dc] bg-white p-4 shadow-2xs sm:p-5"
-                            >
-                                <div className="mb-3 flex items-start justify-between gap-2">
-                                    <p className="text-xs font-semibold text-[#233127] sm:text-sm">
-                                        {qIndex + 1}. {question.prompt}
-                                        {question.is_required && (
-                                            <span className="ml-1 text-[#c93b2b]">
-                                                *
-                                            </span>
-                                        )}
-                                    </p>
-                                    <span className="shrink-0 rounded bg-[#f4f6f2] px-2 py-0.5 text-[10px] font-medium text-[#6f786e]">
-                                        {QUESTION_TYPE_LABELS[qType] ?? qType}
-                                    </span>
+                        {(qType === 'radio' ||
+                            qType === 'multiple_choice' ||
+                            qType === 'choice') && (
+                                <div className="space-y-2">
+                                    {(question.options ?? []).map((option) => (
+                                        <label
+                                            key={option}
+                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${value === option
+                                                ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
+                                                }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name={`question-${question.id}`}
+                                                required={question.is_required}
+                                                checked={value === option}
+                                                onChange={() =>
+                                                    updateAnswer(
+                                                        question.id,
+                                                        option,
+                                                    )
+                                                }
+                                                className="size-4 accent-[#2b5139]"
+                                            />
+                                            <span>{option}</span>
+                                        </label>
+                                    ))}
                                 </div>
+                            )}
 
-                                {(qType === 'textarea' || qType === 'long_text') && (
-                                    <textarea
-                                        required={question.is_required}
-                                        value={typeof value === 'string' ? value : ''}
-                                        placeholder="Your answer"
-                                        onChange={(event) =>
-                                            updateAnswer(
-                                                question.id,
-                                                event.target.value,
-                                            )
-                                        }
-                                        className="min-h-24 w-full border-b-2 border-[#dce2d9] bg-[#fafbf9] p-3 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139] focus:bg-white"
-                                    />
-                                )}
+                        {(qType === 'multiselect' || qType === 'checkbox') && (
+                            <div className="space-y-2">
+                                {(question.options ?? []).map((option) => {
+                                    const selected = Array.isArray(value)
+                                        ? (value as string[])
+                                        : [];
+                                    const isChecked = selected.includes(option);
+                                    return (
+                                        <label
+                                            key={option}
+                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${isChecked
+                                                ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                                : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
+                                                }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={isChecked}
+                                                onChange={(event) =>
+                                                    updateAnswer(
+                                                        question.id,
+                                                        event.target.checked
+                                                            ? [
+                                                                ...selected,
+                                                                option,
+                                                            ]
+                                                            : selected.filter(
+                                                                (item) =>
+                                                                    item !==
+                                                                    option,
+                                                            ),
+                                                    )
+                                                }
+                                                className="size-4 accent-[#2b5139]"
+                                            />
+                                            <span>{option}</span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        )}
 
-                                {(qType === 'radio' ||
-                                    qType === 'multiple_choice' ||
-                                    qType === 'choice') && (
-                                        <div className="space-y-2">
-                                            {(question.options ?? []).map((option) => (
+                        {(qType === 'select' || qType === 'dropdown') && (
+                            <select
+                                required={question.is_required}
+                                value={
+                                    value !== undefined && value !== null
+                                        ? String(value)
+                                        : ''
+                                }
+                                onChange={(event) =>
+                                    updateAnswer(
+                                        question.id,
+                                        event.target.value,
+                                    )
+                                }
+                                className="h-10 w-full max-w-sm rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
+                            >
+                                <option value="">Choose</option>
+                                {(question.options ?? []).map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+
+                        {qType === 'rating' && (
+                            <div className="py-2">
+                                <div className="flex items-center justify-between gap-2 sm:max-w-md">
+                                    <span className="text-[11px] text-[#7a8278]">
+                                        1 (Lowest)
+                                    </span>
+                                    <div className="flex items-center gap-3 sm:gap-5">
+                                        {[1, 2, 3, 4, 5].map((score) => {
+                                            const active =
+                                                Number(value) === score;
+                                            return (
                                                 <label
-                                                    key={option}
-                                                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${value === option
-                                                            ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                                            : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
-                                                        }`}
+                                                    key={score}
+                                                    className="flex cursor-pointer flex-col items-center gap-1.5"
                                                 >
+                                                    <span className="text-xs font-semibold text-[#4d5a4f]">
+                                                        {score}
+                                                    </span>
                                                     <input
                                                         type="radio"
                                                         name={`question-${question.id}`}
-                                                        required={question.is_required}
-                                                        checked={value === option}
+                                                        required={
+                                                            question.is_required
+                                                        }
+                                                        checked={active}
                                                         onChange={() =>
                                                             updateAnswer(
                                                                 question.id,
-                                                                option,
+                                                                score,
                                                             )
                                                         }
                                                         className="size-4 accent-[#2b5139]"
                                                     />
-                                                    <span>{option}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                {(qType === 'multiselect' || qType === 'checkbox') && (
-                                    <div className="space-y-2">
-                                        {(question.options ?? []).map((option) => {
-                                            const selected = Array.isArray(value)
-                                                ? (value as string[])
-                                                : [];
-                                            const isChecked = selected.includes(option);
-                                            return (
-                                                <label
-                                                    key={option}
-                                                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 text-xs transition ${isChecked
-                                                            ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                                            : 'border-[#e8ece5] bg-white text-[#3d4a3f] hover:bg-[#f9faf8]'
-                                                        }`}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isChecked}
-                                                        onChange={(event) =>
-                                                            updateAnswer(
-                                                                question.id,
-                                                                event.target.checked
-                                                                    ? [
-                                                                        ...selected,
-                                                                        option,
-                                                                    ]
-                                                                    : selected.filter(
-                                                                        (item) =>
-                                                                            item !==
-                                                                            option,
-                                                                    ),
-                                                            )
-                                                        }
-                                                        className="size-4 accent-[#2b5139]"
-                                                    />
-                                                    <span>{option}</span>
                                                 </label>
                                             );
                                         })}
                                     </div>
-                                )}
+                                    <span className="text-[11px] text-[#7a8278]">
+                                        5 (Highest)
+                                    </span>
+                                </div>
+                            </div>
+                        )}
 
-                                {(qType === 'select' || qType === 'dropdown') && (
-                                    <select
-                                        required={question.is_required}
-                                        value={
-                                            value !== undefined && value !== null
-                                                ? String(value)
-                                                : ''
-                                        }
-                                        onChange={(event) =>
-                                            updateAnswer(
-                                                question.id,
-                                                event.target.value,
-                                            )
-                                        }
-                                        className="h-10 w-full max-w-sm rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
+                        {(qType === 'boolean' || qType === 'yes_no') && (
+                            <div className="flex gap-3">
+                                {[
+                                    { label: 'Yes', val: true },
+                                    { label: 'No', val: false },
+                                ].map((item) => (
+                                    <label
+                                        key={item.label}
+                                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-4 py-2 text-xs transition ${value === item.val
+                                            ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
+                                            : 'border-[#e8ece5] bg-white text-[#3d4a3f]'
+                                            }`}
                                     >
-                                        <option value="">Choose</option>
-                                        {(question.options ?? []).map((option) => (
-                                            <option key={option} value={option}>
-                                                {option}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
-
-                                {qType === 'rating' && (
-                                    <div className="py-2">
-                                        <div className="flex items-center justify-between gap-2 sm:max-w-md">
-                                            <span className="text-[11px] text-[#7a8278]">
-                                                1 (Lowest)
-                                            </span>
-                                            <div className="flex items-center gap-3 sm:gap-5">
-                                                {[1, 2, 3, 4, 5].map((score) => {
-                                                    const active =
-                                                        Number(value) === score;
-                                                    return (
-                                                        <label
-                                                            key={score}
-                                                            className="flex cursor-pointer flex-col items-center gap-1.5"
-                                                        >
-                                                            <span className="text-xs font-semibold text-[#4d5a4f]">
-                                                                {score}
-                                                            </span>
-                                                            <input
-                                                                type="radio"
-                                                                name={`question-${question.id}`}
-                                                                required={
-                                                                    question.is_required
-                                                                }
-                                                                checked={active}
-                                                                onChange={() =>
-                                                                    updateAnswer(
-                                                                        question.id,
-                                                                        score,
-                                                                    )
-                                                                }
-                                                                className="size-4 accent-[#2b5139]"
-                                                            />
-                                                        </label>
-                                                    );
-                                                })}
-                                            </div>
-                                            <span className="text-[11px] text-[#7a8278]">
-                                                5 (Highest)
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {(qType === 'boolean' || qType === 'yes_no') && (
-                                    <div className="flex gap-3">
-                                        {[
-                                            { label: 'Yes', val: true },
-                                            { label: 'No', val: false },
-                                        ].map((item) => (
-                                            <label
-                                                key={item.label}
-                                                className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-4 py-2 text-xs transition ${value === item.val
-                                                        ? 'border-[#2b5139] bg-[#edf2eb] font-semibold text-[#2b5139]'
-                                                        : 'border-[#e8ece5] bg-white text-[#3d4a3f]'
-                                                    }`}
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    name={`question-${question.id}`}
-                                                    required={question.is_required}
-                                                    checked={value === item.val}
-                                                    onChange={() =>
-                                                        updateAnswer(
-                                                            question.id,
-                                                            item.val,
-                                                        )
-                                                    }
-                                                    className="size-4 accent-[#2b5139]"
-                                                />
-                                                <span>{item.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {qType === 'date' && (
-                                    <input
-                                        type="date"
-                                        required={question.is_required}
-                                        value={typeof value === 'string' ? value : ''}
-                                        onChange={(event) =>
-                                            updateAnswer(
-                                                question.id,
-                                                event.target.value,
-                                            )
-                                        }
-                                        className="h-10 w-full max-w-xs rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
-                                    />
-                                )}
-
-                                {(qType === 'text' ||
-                                    qType === 'short_text' ||
-                                    qType === 'number') && (
                                         <input
-                                            type={qType === 'number' ? 'number' : 'text'}
+                                            type="radio"
+                                            name={`question-${question.id}`}
                                             required={question.is_required}
-                                            placeholder="Your answer"
-                                            value={
-                                                typeof value === 'string' ||
-                                                    typeof value === 'number'
-                                                    ? value
-                                                    : ''
-                                            }
-                                            onChange={(event) =>
+                                            checked={value === item.val}
+                                            onChange={() =>
                                                 updateAnswer(
                                                     question.id,
-                                                    qType === 'number'
-                                                        ? event.target.value === ''
-                                                            ? ''
-                                                            : Number(event.target.value)
-                                                        : event.target.value,
+                                                    item.val,
                                                 )
                                             }
-                                            className="h-10 w-full max-w-md border-b-2 border-[#dce2d9] bg-transparent px-1 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139]"
+                                            className="size-4 accent-[#2b5139]"
                                         />
-                                    )}
+                                        <span>{item.label}</span>
+                                    </label>
+                                ))}
                             </div>
-                        );
-                    })}
+                        )}
 
-                    <div className="flex items-center justify-between pt-1">
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
-                        >
-                            {saving ? 'Submitting…' : 'Submit'}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setAnswers({})}
-                            className="text-xs font-semibold text-[#2b5139] hover:underline"
-                        >
-                            Clear form
-                        </button>
+                        {qType === 'date' && (
+                            <input
+                                type="date"
+                                required={question.is_required}
+                                value={typeof value === 'string' ? value : ''}
+                                onChange={(event) =>
+                                    updateAnswer(
+                                        question.id,
+                                        event.target.value,
+                                    )
+                                }
+                                className="h-10 w-full max-w-xs rounded-lg border border-[#dce2d9] bg-white px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
+                            />
+                        )}
+
+                        {(qType === 'text' ||
+                            qType === 'short_text' ||
+                            qType === 'number') && (
+                                <input
+                                    type={qType === 'number' ? 'number' : 'text'}
+                                    required={question.is_required}
+                                    placeholder="Your answer"
+                                    value={
+                                        typeof value === 'string' ||
+                                            typeof value === 'number'
+                                            ? value
+                                            : ''
+                                    }
+                                    onChange={(event) =>
+                                        updateAnswer(
+                                            question.id,
+                                            qType === 'number'
+                                                ? event.target.value === ''
+                                                    ? ''
+                                                    : Number(event.target.value)
+                                                : event.target.value,
+                                        )
+                                    }
+                                    className="h-10 w-full max-w-md border-b-2 border-[#dce2d9] bg-transparent px-1 text-xs text-[#29382e] transition outline-none focus:border-[#2b5139]"
+                                />
+                            )}
                     </div>
-                </form>
-            );
-        }
+                );
+            })}
 
-        type QuestionDraft = {
-            prompt: string;
-            type: string;
-            options: string;
-            optionsList: string[];
-            is_required: boolean;
-        };
+            <div className="flex items-center justify-between pt-1">
+                <button
+                    type="submit"
+                    disabled={saving}
+                    className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
+                >
+                    {saving ? 'Submitting…' : 'Submit'}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setAnswers({})}
+                    className="text-xs font-semibold text-[#2b5139] hover:underline"
+                >
+                    Clear form
+                </button>
+            </div>
+        </form>
+    );
+}
 
-        type SurveyAnalyticsPayload = {
-            survey_id: number;
-            title: string;
-            status: string;
-            is_anonymous: boolean;
-            total_responses: number;
-            questions: Array<{
-                id: number;
-                prompt: string;
-                type: string;
-                is_required: boolean;
-                answered_count: number;
-                response_rate: number;
-                distribution: Array<{
-                    label: string;
-                    count: number;
-                    percentage: number;
-                }>;
-                recent_answers: Array<{
-                    respondent: string;
-                    answer: string;
-                    submitted_at: string | null;
-                }>;
-            }>;
-        };
+type QuestionDraft = {
+    prompt: string;
+    type: string;
+    options: string;
+    optionsList: string[];
+    is_required: boolean;
+};
 
-        const COHORT_YEAR_OPTIONS = [
-            2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
-        ];
+type SurveyAnalyticsPayload = {
+    survey_id: number;
+    title: string;
+    status: string;
+    is_anonymous: boolean;
+    total_responses: number;
+    questions: Array<{
+        id: number;
+        prompt: string;
+        type: string;
+        is_required: boolean;
+        answered_count: number;
+        response_rate: number;
+        distribution: Array<{
+            label: string;
+            count: number;
+            percentage: number;
+        }>;
+        recent_answers: Array<{
+            respondent: string;
+            answer: string;
+            submitted_at: string | null;
+        }>;
+    }>;
+};
 
-        export function SurveyCenter({
-            role,
-            createOpen,
-            onCloseCreate,
-        }: {
-            role: WorkspaceRole;
-            createOpen: boolean;
-            onCloseCreate: () => void;
-        }) {
-            const canManage = role === 'Administrator' || role === 'Alumni coordinator';
-            const canViewAnalytics =
-                canManage || role === 'Department coordinator';
-            const canRespond = role === 'Alumni';
-            const { data, loading, error, reload } =
-                useApiResource<ApiEnvelope<RawPagination<Survey>>>('/api/surveys');
-            const departmentsRes = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
-                canManage ? '/api/departments' : null,
-            );
-            const programsRes = useApiResource<ApiEnvelope<AcademicProgram[]>>(
-                canManage ? '/api/programs' : null,
-            );
+const COHORT_YEAR_OPTIONS = [
+    2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018,
+];
 
-            const [builderTab, setBuilderTab] = useState<
-                'questions' | 'settings' | 'preview'
-            >('questions');
-            const [activeQuestionIdx, setActiveQuestionIdx] = useState<number>(0);
-            const [editingSurveyId, setEditingSurveyId] = useState<number | null>(null);
-            const [title, setTitle] = useState('');
-            const [description, setDescription] = useState('');
-            const [startsAt, setStartsAt] = useState('');
-            const [closesAt, setClosesAt] = useState('');
-            const [isAnonymous, setIsAnonymous] = useState(false);
-            const [targetSpecificCohorts, setTargetSpecificCohorts] = useState(false);
-            const [targetDepartmentIds, setTargetDepartmentIds] = useState<number[]>(
-                [],
-            );
-            const [targetProgramIds, setTargetProgramIds] = useState<number[]>([]);
-            const [targetGraduationYears, setTargetGraduationYears] = useState<
-                number[]
-            >([]);
-            const [customYearInput, setCustomYearInput] = useState('');
-            const [questions, setQuestions] = useState<QuestionDraft[]>([
-                {
-                    prompt: '',
-                    type: 'radio',
-                    options: 'Option 1, Option 2',
-                    optionsList: ['Option 1', 'Option 2'],
-                    is_required: true,
-                },
-            ]);
+export function SurveyCenter({
+    role,
+    createOpen,
+    onCloseCreate,
+}: {
+    role: WorkspaceRole;
+    createOpen: boolean;
+    onCloseCreate: () => void;
+}) {
+    const canManage = role === 'Administrator' || role === 'Alumni coordinator';
+    const canViewAnalytics =
+        canManage || role === 'Department coordinator';
+    const canRespond = role === 'Alumni';
+    const { data, loading, error, reload } =
+        useApiResource<ApiEnvelope<RawPagination<Survey>>>('/api/surveys');
+    const departmentsRes = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
+        canManage ? '/api/departments' : null,
+    );
+    const programsRes = useApiResource<ApiEnvelope<AcademicProgram[]>>(
+        canManage ? '/api/programs' : null,
+    );
 
-            const [creating, setCreating] = useState(false);
-            const [publishing, setPublishing] = useState<number | null>(null);
-            const [closing, setClosing] = useState<number | null>(null);
-            const [activeAnalyticsId, setActiveAnalyticsId] = useState<number | null>(
-                null,
-            );
-            const [analyticsData, setAnalyticsData] =
-                useState<SurveyAnalyticsPayload | null>(null);
-            const [analyticsLoading, setAnalyticsLoading] = useState(false);
+    const [builderTab, setBuilderTab] = useState<
+        'questions' | 'settings' | 'preview'
+    >('questions');
+    const [activeQuestionIdx, setActiveQuestionIdx] = useState<number>(0);
+    const [editingSurveyId, setEditingSurveyId] = useState<number | null>(null);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [startsAt, setStartsAt] = useState('');
+    const [closesAt, setClosesAt] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [targetSpecificCohorts, setTargetSpecificCohorts] = useState(false);
+    const [targetDepartmentIds, setTargetDepartmentIds] = useState<number[]>(
+        [],
+    );
+    const [targetProgramIds, setTargetProgramIds] = useState<number[]>([]);
+    const [targetGraduationYears, setTargetGraduationYears] = useState<
+        number[]
+    >([]);
+    const [customYearInput, setCustomYearInput] = useState('');
+    const [questions, setQuestions] = useState<QuestionDraft[]>([
+        {
+            prompt: '',
+            type: 'radio',
+            options: 'Option 1, Option 2',
+            optionsList: ['Option 1', 'Option 2'],
+            is_required: true,
+        },
+    ]);
 
-            function resetBuilder() {
-                setBuilderTab('questions');
-                setActiveQuestionIdx(0);
-                setEditingSurveyId(null);
-                setTitle('');
-                setDescription('');
-                setStartsAt('');
-                setClosesAt('');
-                setIsAnonymous(false);
-                setTargetSpecificCohorts(false);
-                setTargetDepartmentIds([]);
-                setTargetProgramIds([]);
-                setTargetGraduationYears([]);
-                setCustomYearInput('');
-                setQuestions([
+    const [creating, setCreating] = useState(false);
+    const [publishing, setPublishing] = useState<number | null>(null);
+    const [closing, setClosing] = useState<number | null>(null);
+    const [activeAnalyticsId, setActiveAnalyticsId] = useState<number | null>(
+        null,
+    );
+    const [analyticsData, setAnalyticsData] =
+        useState<SurveyAnalyticsPayload | null>(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+    function resetBuilder() {
+        setBuilderTab('questions');
+        setActiveQuestionIdx(0);
+        setEditingSurveyId(null);
+        setTitle('');
+        setDescription('');
+        setStartsAt('');
+        setClosesAt('');
+        setIsAnonymous(false);
+        setTargetSpecificCohorts(false);
+        setTargetDepartmentIds([]);
+        setTargetProgramIds([]);
+        setTargetGraduationYears([]);
+        setCustomYearInput('');
+        setQuestions([
+            {
+                prompt: '',
+                type: 'radio',
+                options: 'Option 1, Option 2',
+                optionsList: ['Option 1', 'Option 2'],
+                is_required: true,
+            },
+        ]);
+    }
+
+    function openEditSurvey(survey: Survey) {
+        setBuilderTab('questions');
+        setActiveQuestionIdx(0);
+        setEditingSurveyId(survey.id);
+        setTitle(survey.title);
+        setDescription(survey.description ?? '');
+        setStartsAt(survey.starts_at ? survey.starts_at.slice(0, 10) : '');
+        setClosesAt(survey.closes_at ? survey.closes_at.slice(0, 10) : '');
+        setIsAnonymous(Boolean(survey.is_anonymous));
+        const hasTargeting = Boolean(
+            survey.target_department_ids?.length ||
+            survey.target_program_ids?.length ||
+            survey.target_graduation_years?.length,
+        );
+        setTargetSpecificCohorts(hasTargeting);
+        setTargetDepartmentIds(survey.target_department_ids ?? []);
+        setTargetProgramIds(survey.target_program_ids ?? []);
+        setTargetGraduationYears(survey.target_graduation_years ?? []);
+        setQuestions(
+            survey.questions.length
+                ? survey.questions.map((q) => {
+                    const list =
+                        q.options && q.options.length
+                            ? [...q.options]
+                            : ['Option 1'];
+                    return {
+                        prompt: q.prompt,
+                        type: q.type,
+                        options: list.join(', '),
+                        optionsList: list,
+                        is_required: q.is_required,
+                    };
+                })
+                : [
                     {
                         prompt: '',
                         type: 'radio',
@@ -6843,1358 +6886,1314 @@ export function AcademicCatalog({
                         optionsList: ['Option 1', 'Option 2'],
                         is_required: true,
                     },
-                ]);
-            }
+                ],
+        );
+    }
 
-            function openEditSurvey(survey: Survey) {
-                setBuilderTab('questions');
-                setActiveQuestionIdx(0);
-                setEditingSurveyId(survey.id);
-                setTitle(survey.title);
-                setDescription(survey.description ?? '');
-                setStartsAt(survey.starts_at ? survey.starts_at.slice(0, 10) : '');
-                setClosesAt(survey.closes_at ? survey.closes_at.slice(0, 10) : '');
-                setIsAnonymous(Boolean(survey.is_anonymous));
-                const hasTargeting = Boolean(
-                    survey.target_department_ids?.length ||
-                    survey.target_program_ids?.length ||
-                    survey.target_graduation_years?.length,
-                );
-                setTargetSpecificCohorts(hasTargeting);
-                setTargetDepartmentIds(survey.target_department_ids ?? []);
-                setTargetProgramIds(survey.target_program_ids ?? []);
-                setTargetGraduationYears(survey.target_graduation_years ?? []);
-                setQuestions(
-                    survey.questions.length
-                        ? survey.questions.map((q) => {
-                            const list =
-                                q.options && q.options.length
-                                    ? [...q.options]
-                                    : ['Option 1'];
-                            return {
-                                prompt: q.prompt,
-                                type: q.type,
-                                options: list.join(', '),
-                                optionsList: list,
-                                is_required: q.is_required,
-                            };
-                        })
-                        : [
-                            {
-                                prompt: '',
-                                type: 'radio',
-                                options: 'Option 1, Option 2',
-                                optionsList: ['Option 1', 'Option 2'],
-                                is_required: true,
-                            },
-                        ],
-                );
-            }
-
-            function updateQuestion(index: number, patch: Partial<QuestionDraft>) {
-                setQuestions((current) =>
-                    current.map((item, idx) => {
-                        if (idx !== index) return item;
-                        const updated = { ...item, ...patch };
-                        if (
-                            patch.type &&
-                            requiresQuestionOptions(patch.type) &&
-                            updated.optionsList.length === 0
-                        ) {
-                            updated.optionsList = ['Option 1'];
-                            updated.options = 'Option 1';
-                        }
-                        return updated;
-                    }),
-                );
-            }
-
-            function updateQuestionOptionItem(
-                questionIndex: number,
-                optionIndex: number,
-                value: string,
-            ) {
-                setQuestions((current) =>
-                    current.map((item, idx) => {
-                        if (idx !== questionIndex) return item;
-                        const nextList = item.optionsList.map((opt, oIdx) =>
-                            oIdx === optionIndex ? value : opt,
-                        );
-                        return {
-                            ...item,
-                            optionsList: nextList,
-                            options: nextList.join(', '),
-                        };
-                    }),
-                );
-            }
-
-            function addQuestionOptionItem(questionIndex: number) {
-                setQuestions((current) =>
-                    current.map((item, idx) => {
-                        if (idx !== questionIndex) return item;
-                        const nextList = [
-                            ...item.optionsList,
-                            `Option ${item.optionsList.length + 1}`,
-                        ];
-                        return {
-                            ...item,
-                            optionsList: nextList,
-                            options: nextList.join(', '),
-                        };
-                    }),
-                );
-            }
-
-            function removeQuestionOptionItem(
-                questionIndex: number,
-                optionIndex: number,
-            ) {
-                setQuestions((current) =>
-                    current.map((item, idx) => {
-                        if (idx !== questionIndex || item.optionsList.length <= 1) {
-                            return item;
-                        }
-                        const nextList = item.optionsList.filter(
-                            (_, oIdx) => oIdx !== optionIndex,
-                        );
-                        return {
-                            ...item,
-                            optionsList: nextList,
-                            options: nextList.join(', '),
-                        };
-                    }),
-                );
-            }
-
-            function addQuestion() {
-                setQuestions((current) => {
-                    const next = [
-                        ...current,
-                        {
-                            prompt: '',
-                            type: 'radio',
-                            options: 'Option 1, Option 2',
-                            optionsList: ['Option 1', 'Option 2'],
-                            is_required: true,
-                        },
-                    ];
-                    setActiveQuestionIdx(next.length - 1);
-                    return next;
-                });
-            }
-
-            function duplicateQuestion(index: number) {
-                setQuestions((current) => {
-                    const copy = [...current];
-                    const source = current[index];
-                    const clone: QuestionDraft = {
-                        ...source,
-                        optionsList: [...source.optionsList],
-                    };
-                    copy.splice(index + 1, 0, clone);
-                    setActiveQuestionIdx(index + 1);
-                    return copy;
-                });
-            }
-
-            function removeQuestion(index: number) {
-                setQuestions((current) =>
-                    current.length > 1
-                        ? current.filter((_, idx) => idx !== index)
-                        : current,
-                );
-            }
-
-            function moveQuestion(index: number, direction: -1 | 1) {
-                const nextIndex = index + direction;
-                if (nextIndex < 0 || nextIndex >= questions.length) {
-                    return;
+    function updateQuestion(index: number, patch: Partial<QuestionDraft>) {
+        setQuestions((current) =>
+            current.map((item, idx) => {
+                if (idx !== index) return item;
+                const updated = { ...item, ...patch };
+                if (
+                    patch.type &&
+                    requiresQuestionOptions(patch.type) &&
+                    updated.optionsList.length === 0
+                ) {
+                    updated.optionsList = ['Option 1'];
+                    updated.options = 'Option 1';
                 }
-                setQuestions((current) => {
-                    const copy = [...current];
-                    const [item] = copy.splice(index, 1);
-                    copy.splice(nextIndex, 0, item);
-                    setActiveQuestionIdx(nextIndex);
-                    return copy;
-                });
-            }
+                return updated;
+            }),
+        );
+    }
 
-            function toggleId(list: number[], id: number): number[] {
-                return list.includes(id)
-                    ? list.filter((item) => item !== id)
-                    : [...list, id];
-            }
-
-            function addCustomBatchYear() {
-                const parsed = Number.parseInt(customYearInput.trim(), 10);
-                if (Number.isNaN(parsed) || parsed < 1950 || parsed > 2100) {
-                    toast.error('Enter a valid graduation year between 1950 and 2100.');
-                    return;
-                }
-                if (!targetGraduationYears.includes(parsed)) {
-                    setTargetGraduationYears((curr) =>
-                        [...curr, parsed].sort((a, b) => b - a),
-                    );
-                }
-                setCustomYearInput('');
-            }
-
-            async function saveSurvey(event: FormEvent<HTMLFormElement>) {
-                event.preventDefault();
-                setCreating(true);
-
-                const formattedQuestions = questions.map((q, index) => {
-                    const fromList = q.optionsList
-                        .map((opt) => opt.trim())
-                        .filter(Boolean);
-                    const fromString = q.options
-                        .split(',')
-                        .map((opt) => opt.trim())
-                        .filter(Boolean);
-                    const parsedOptions = fromList.length ? fromList : fromString;
-
-                    return {
-                        prompt: q.prompt,
-                        type: q.type,
-                        options: requiresQuestionOptions(q.type) ? parsedOptions : null,
-                        is_required: q.is_required,
-                        position: index,
-                    };
-                });
-
-                const payload = {
-                    title,
-                    description: description || null,
-                    starts_at: startsAt || null,
-                    closes_at: closesAt || null,
-                    is_anonymous: isAnonymous,
-                    target_department_ids: targetSpecificCohorts
-                        ? targetDepartmentIds
-                        : null,
-                    target_program_ids: targetSpecificCohorts ? targetProgramIds : null,
-                    target_graduation_years: targetSpecificCohorts
-                        ? targetGraduationYears
-                        : null,
-                    questions: formattedQuestions,
+    function updateQuestionOptionItem(
+        questionIndex: number,
+        optionIndex: number,
+        value: string,
+    ) {
+        setQuestions((current) =>
+            current.map((item, idx) => {
+                if (idx !== questionIndex) return item;
+                const nextList = item.optionsList.map((opt, oIdx) =>
+                    oIdx === optionIndex ? value : opt,
+                );
+                return {
+                    ...item,
+                    optionsList: nextList,
+                    options: nextList.join(', '),
                 };
+            }),
+        );
+    }
 
-                try {
-                    if (editingSurveyId !== null) {
-                        await apiRequest<ApiEnvelope<Survey>>(
-                            `/api/surveys/${editingSurveyId}`,
-                            {
-                                method: 'PATCH',
-                                body: payload,
-                            },
-                        );
-                        toast.success('Survey updated.');
-                    } else {
-                        await apiRequest<ApiEnvelope<Survey>>('/api/surveys', {
-                            method: 'POST',
-                            body: payload,
-                        });
-                        toast.success('Survey created as a draft.');
-                    }
-                    resetBuilder();
-                    onCloseCreate();
-                    reload();
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Survey could not be saved.',
-                    );
-                } finally {
-                    setCreating(false);
+    function addQuestionOptionItem(questionIndex: number) {
+        setQuestions((current) =>
+            current.map((item, idx) => {
+                if (idx !== questionIndex) return item;
+                const nextList = [
+                    ...item.optionsList,
+                    `Option ${item.optionsList.length + 1}`,
+                ];
+                return {
+                    ...item,
+                    optionsList: nextList,
+                    options: nextList.join(', '),
+                };
+            }),
+        );
+    }
+
+    function removeQuestionOptionItem(
+        questionIndex: number,
+        optionIndex: number,
+    ) {
+        setQuestions((current) =>
+            current.map((item, idx) => {
+                if (idx !== questionIndex || item.optionsList.length <= 1) {
+                    return item;
                 }
+                const nextList = item.optionsList.filter(
+                    (_, oIdx) => oIdx !== optionIndex,
+                );
+                return {
+                    ...item,
+                    optionsList: nextList,
+                    options: nextList.join(', '),
+                };
+            }),
+        );
+    }
+
+    function addQuestion() {
+        setQuestions((current) => {
+            const next = [
+                ...current,
+                {
+                    prompt: '',
+                    type: 'radio',
+                    options: 'Option 1, Option 2',
+                    optionsList: ['Option 1', 'Option 2'],
+                    is_required: true,
+                },
+            ];
+            setActiveQuestionIdx(next.length - 1);
+            return next;
+        });
+    }
+
+    function duplicateQuestion(index: number) {
+        setQuestions((current) => {
+            const copy = [...current];
+            const source = current[index];
+            const clone: QuestionDraft = {
+                ...source,
+                optionsList: [...source.optionsList],
+            };
+            copy.splice(index + 1, 0, clone);
+            setActiveQuestionIdx(index + 1);
+            return copy;
+        });
+    }
+
+    function removeQuestion(index: number) {
+        setQuestions((current) =>
+            current.length > 1
+                ? current.filter((_, idx) => idx !== index)
+                : current,
+        );
+    }
+
+    function moveQuestion(index: number, direction: -1 | 1) {
+        const nextIndex = index + direction;
+        if (nextIndex < 0 || nextIndex >= questions.length) {
+            return;
+        }
+        setQuestions((current) => {
+            const copy = [...current];
+            const [item] = copy.splice(index, 1);
+            copy.splice(nextIndex, 0, item);
+            setActiveQuestionIdx(nextIndex);
+            return copy;
+        });
+    }
+
+    function toggleId(list: number[], id: number): number[] {
+        return list.includes(id)
+            ? list.filter((item) => item !== id)
+            : [...list, id];
+    }
+
+    function addCustomBatchYear() {
+        const parsed = Number.parseInt(customYearInput.trim(), 10);
+        if (Number.isNaN(parsed) || parsed < 1950 || parsed > 2100) {
+            toast.error('Enter a valid graduation year between 1950 and 2100.');
+            return;
+        }
+        if (!targetGraduationYears.includes(parsed)) {
+            setTargetGraduationYears((curr) =>
+                [...curr, parsed].sort((a, b) => b - a),
+            );
+        }
+        setCustomYearInput('');
+    }
+
+    async function saveSurvey(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setCreating(true);
+
+        const formattedQuestions = questions.map((q, index) => {
+            const fromList = q.optionsList
+                .map((opt) => opt.trim())
+                .filter(Boolean);
+            const fromString = q.options
+                .split(',')
+                .map((opt) => opt.trim())
+                .filter(Boolean);
+            const parsedOptions = fromList.length ? fromList : fromString;
+
+            return {
+                prompt: q.prompt,
+                type: q.type,
+                options: requiresQuestionOptions(q.type) ? parsedOptions : null,
+                is_required: q.is_required,
+                position: index,
+            };
+        });
+
+        const payload = {
+            title,
+            description: description || null,
+            starts_at: startsAt || null,
+            closes_at: closesAt || null,
+            is_anonymous: isAnonymous,
+            target_department_ids: targetSpecificCohorts
+                ? targetDepartmentIds
+                : null,
+            target_program_ids: targetSpecificCohorts ? targetProgramIds : null,
+            target_graduation_years: targetSpecificCohorts
+                ? targetGraduationYears
+                : null,
+            questions: formattedQuestions,
+        };
+
+        try {
+            if (editingSurveyId !== null) {
+                await apiRequest<ApiEnvelope<Survey>>(
+                    `/api/surveys/${editingSurveyId}`,
+                    {
+                        method: 'PATCH',
+                        body: payload,
+                    },
+                );
+                toast.success('Survey updated.');
+            } else {
+                await apiRequest<ApiEnvelope<Survey>>('/api/surveys', {
+                    method: 'POST',
+                    body: payload,
+                });
+                toast.success('Survey created as a draft.');
             }
+            resetBuilder();
+            onCloseCreate();
+            reload();
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Survey could not be saved.',
+            );
+        } finally {
+            setCreating(false);
+        }
+    }
 
-            async function publishSurvey(id: number) {
-                setPublishing(id);
-                try {
-                    await apiRequest<ApiEnvelope<Survey>>(
-                        `/api/surveys/${id}/publish`,
-                        { method: 'POST' },
-                    );
-                    reload();
-                    toast.success('Survey published.');
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Survey could not be published.',
-                    );
-                } finally {
-                    setPublishing(null);
-                }
-            }
+    async function publishSurvey(id: number) {
+        setPublishing(id);
+        try {
+            await apiRequest<ApiEnvelope<Survey>>(
+                `/api/surveys/${id}/publish`,
+                { method: 'POST' },
+            );
+            reload();
+            toast.success('Survey published.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Survey could not be published.',
+            );
+        } finally {
+            setPublishing(null);
+        }
+    }
 
-            async function closeSurvey(id: number) {
-                setClosing(id);
-                try {
-                    await apiRequest<ApiEnvelope<Survey>>(`/api/surveys/${id}/close`, {
-                        method: 'POST',
-                    });
-                    reload();
-                    toast.success('Survey closed.');
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Survey could not be closed.',
-                    );
-                } finally {
-                    setClosing(null);
-                }
-            }
+    async function closeSurvey(id: number) {
+        setClosing(id);
+        try {
+            await apiRequest<ApiEnvelope<Survey>>(`/api/surveys/${id}/close`, {
+                method: 'POST',
+            });
+            reload();
+            toast.success('Survey closed.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Survey could not be closed.',
+            );
+        } finally {
+            setClosing(null);
+        }
+    }
 
-            async function toggleAnalytics(surveyId: number) {
-                if (activeAnalyticsId === surveyId) {
-                    setActiveAnalyticsId(null);
-                    setAnalyticsData(null);
-                    return;
-                }
-                setActiveAnalyticsId(surveyId);
-                setAnalyticsLoading(true);
-                try {
-                    const response = await apiRequest<
-                        ApiEnvelope<SurveyAnalyticsPayload>
-                    >(`/api/surveys/${surveyId}/analytics`);
-                    setAnalyticsData(response.data);
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Survey analytics could not be loaded.',
-                    );
-                    setActiveAnalyticsId(null);
-                } finally {
-                    setAnalyticsLoading(false);
-                }
-            }
+    async function toggleAnalytics(surveyId: number) {
+        if (activeAnalyticsId === surveyId) {
+            setActiveAnalyticsId(null);
+            setAnalyticsData(null);
+            return;
+        }
+        setActiveAnalyticsId(surveyId);
+        setAnalyticsLoading(true);
+        try {
+            const response = await apiRequest<
+                ApiEnvelope<SurveyAnalyticsPayload>
+            >(`/api/surveys/${surveyId}/analytics`);
+            setAnalyticsData(response.data);
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Survey analytics could not be loaded.',
+            );
+            setActiveAnalyticsId(null);
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    }
 
-            if (loading) {
-                return <LoadingState />;
-            }
+    if (loading) {
+        return <LoadingState />;
+    }
 
-            if (error) {
-                return <ErrorState message={error} />;
-            }
+    if (error) {
+        return <ErrorState message={error} />;
+    }
 
-            const surveys = data?.data.data ?? [];
-            const departments = departmentsRes.data?.data ?? [];
-            const programs = programsRes.data?.data ?? [];
-            const builderVisible = canManage && (createOpen || editingSurveyId !== null);
+    const surveys = data?.data.data ?? [];
+    const departments = departmentsRes.data?.data ?? [];
+    const programs = programsRes.data?.data ?? [];
+    const builderVisible = canManage && (createOpen || editingSurveyId !== null);
 
-            return (
-                <div className="space-y-4">
-                    {builderVisible ? (
-                        <form
-                            onSubmit={saveSurvey}
-                            className="mx-auto max-w-4xl space-y-4 rounded-2xl border border-[#dfe5dc] bg-[#f1f4ef] p-4 sm:p-6"
-                        >
-                            {/* Survey Builder Top Navigation Bar */}
-                            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e2e7df] bg-white px-4 py-2.5 shadow-2xs">
-                                <div className="flex items-center gap-2.5">
-                                    <span className="grid size-8 place-items-center rounded-lg bg-[#2b5139] text-xs font-bold text-white">
-                                        SB
-                                    </span>
-                                    <div>
-                                        <p className="text-xs font-bold text-[#29382e]">
-                                            {title.trim() || 'Untitled Tracer Survey'}
-                                        </p>
-                                        <p className="text-[10px] text-[#7a8278]">
-                                            {editingSurveyId !== null
-                                                ? 'Editing Draft Survey'
-                                                : 'Visual Survey Builder & Dynamic Question Engine'}{' '}
-                                            · {questions.length}{' '}
-                                            {questions.length === 1
-                                                ? 'Question'
-                                                : 'Questions'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-1 rounded-lg bg-[#f3f5f1] p-1">
-                                    {(
-                                        [
-                                            ['questions', 'Questions'],
-                                            ['settings', 'Settings & Cohorts'],
-                                            ['preview', 'Preview Form'],
-                                        ] as const
-                                    ).map(([tabKey, tabLabel]) => (
-                                        <button
-                                            key={tabKey}
-                                            type="button"
-                                            onClick={() => setBuilderTab(tabKey)}
-                                            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${builderTab === tabKey
-                                                    ? 'bg-white text-[#2b5139] shadow-2xs'
-                                                    : 'text-[#626c61] hover:text-[#29382e]'
-                                                }`}
-                                        >
-                                            {tabLabel}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            resetBuilder();
-                                            onCloseCreate();
-                                        }}
-                                        className="h-8 rounded-lg border border-[#e3e7df] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={creating}
-                                        className="h-8 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#21402c] disabled:opacity-60"
-                                    >
-                                        {creating
-                                            ? 'Saving…'
-                                            : editingSurveyId !== null
-                                                ? 'Save changes'
-                                                : 'Create survey'}
-                                    </button>
-                                </div>
+    return (
+        <div className="space-y-4">
+            {builderVisible ? (
+                <form
+                    onSubmit={saveSurvey}
+                    className="mx-auto max-w-4xl space-y-4 rounded-2xl border border-[#dfe5dc] bg-[#f1f4ef] p-4 sm:p-6"
+                >
+                    {/* Survey Builder Top Navigation Bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e2e7df] bg-white px-4 py-2.5 shadow-2xs">
+                        <div className="flex items-center gap-2.5">
+                            <span className="grid size-8 place-items-center rounded-lg bg-[#2b5139] text-xs font-bold text-white">
+                                SB
+                            </span>
+                            <div>
+                                <p className="text-xs font-bold text-[#29382e]">
+                                    {title.trim() || 'Untitled Tracer Survey'}
+                                </p>
+                                <p className="text-[10px] text-[#7a8278]">
+                                    {editingSurveyId !== null
+                                        ? 'Editing Draft Survey'
+                                        : 'Visual Survey Builder & Dynamic Question Engine'}{' '}
+                                    · {questions.length}{' '}
+                                    {questions.length === 1
+                                        ? 'Question'
+                                        : 'Questions'}
+                                </p>
                             </div>
+                        </div>
 
-                            {/* Google Forms Header Card (Always mounted for form validation) */}
-                            <div className="rounded-xl border border-[#dce3d9] border-t-8 border-t-[#2b5139] bg-white p-5 shadow-2xs">
-                                <label className="block text-[11px] font-semibold tracking-wider text-[#667367] uppercase">
-                                    Survey title
-                                    <input
-                                        required
-                                        value={title}
-                                        onChange={(event) =>
-                                            setTitle(event.target.value)
-                                        }
-                                        placeholder="Untitled Tracer Survey"
-                                        className="mt-1 w-full border-b-2 border-[#e3e7df] bg-transparent pb-2 text-lg font-bold text-[#233127] transition outline-none focus:border-[#2b5139]"
-                                    />
-                                </label>
-                                <label className="mt-3 block text-[11px] font-medium text-[#667367]">
-                                    Form description
-                                    <textarea
-                                        value={description}
-                                        onChange={(event) =>
-                                            setDescription(event.target.value)
-                                        }
-                                        rows={2}
-                                        placeholder="Form description (explain the purpose of this survey to alumni respondents)…"
-                                        className="mt-1 w-full border-b border-[#e5e9e2] bg-transparent pb-1.5 text-xs text-[#4d5a4f] transition outline-none focus:border-[#2b5139]"
-                                    />
-                                </label>
-                            </div>
+                        <div className="flex items-center gap-1 rounded-lg bg-[#f3f5f1] p-1">
+                            {(
+                                [
+                                    ['questions', 'Questions'],
+                                    ['settings', 'Settings & Cohorts'],
+                                    ['preview', 'Preview Form'],
+                                ] as const
+                            ).map(([tabKey, tabLabel]) => (
+                                <button
+                                    key={tabKey}
+                                    type="button"
+                                    onClick={() => setBuilderTab(tabKey)}
+                                    className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${builderTab === tabKey
+                                        ? 'bg-white text-[#2b5139] shadow-2xs'
+                                        : 'text-[#626c61] hover:text-[#29382e]'
+                                        }`}
+                                >
+                                    {tabLabel}
+                                </button>
+                            ))}
+                        </div>
 
-                            {/* Settings & Cohort Targeting Card */}
-                            <div
-                                className={`space-y-4 rounded-xl border border-[#dce3d9] bg-white p-5 shadow-2xs ${builderTab === 'preview' ? 'hidden' : ''
-                                    }`}
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    resetBuilder();
+                                    onCloseCreate();
+                                }}
+                                className="h-8 rounded-lg border border-[#e3e7df] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
                             >
-                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff1ed] pb-3">
-                                    <div>
-                                        <h3 className="text-xs font-bold tracking-wider text-[#2b5139] uppercase">
-                                            Schedule, Privacy & Cohort Targeting
-                                        </h3>
-                                        <p className="text-[11px] text-[#758074]">
-                                            Configure opening/closing dates, anonymous
-                                            mode, and target graduation batches or
-                                            programs.
-                                        </p>
-                                    </div>
-                                </div>
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={creating}
+                                className="h-8 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#21402c] disabled:opacity-60"
+                            >
+                                {creating
+                                    ? 'Saving…'
+                                    : editingSurveyId !== null
+                                        ? 'Save changes'
+                                        : 'Create survey'}
+                            </button>
+                        </div>
+                    </div>
 
-                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                    <label className="text-xs font-medium text-[#4d5a4f]">
-                                        Opens on (optional)
-                                        <input
-                                            type="date"
-                                            value={startsAt}
-                                            onChange={(event) =>
-                                                setStartsAt(event.target.value)
-                                            }
-                                            className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                                        />
-                                    </label>
-                                    <label className="text-xs font-medium text-[#4d5a4f]">
-                                        Closes on
-                                        <input
-                                            type="date"
-                                            value={closesAt}
-                                            onChange={(event) =>
-                                                setClosesAt(event.target.value)
-                                            }
-                                            className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                                        />
-                                    </label>
-                                    <div className="flex flex-col justify-end gap-2 sm:col-span-2">
-                                        <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#3b4a3e]">
-                                            <input
-                                                type="checkbox"
-                                                checked={isAnonymous}
-                                                onChange={(e) =>
-                                                    setIsAnonymous(e.target.checked)
-                                                }
-                                                className="size-4 accent-[#2b5139]"
-                                            />
-                                            <span>
-                                                Collect anonymous responses (mask
-                                                respondent names in summaries)
-                                            </span>
-                                        </label>
-                                        <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#2b5139]">
-                                            <input
-                                                type="checkbox"
-                                                checked={targetSpecificCohorts}
-                                                onChange={(e) =>
-                                                    setTargetSpecificCohorts(
-                                                        e.target.checked,
-                                                    )
-                                                }
-                                                className="size-4 accent-[#2b5139]"
-                                            />
-                                            <span>
-                                                Target specific departments, programs,
-                                                or graduating batches
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
+                    {/* Google Forms Header Card (Always mounted for form validation) */}
+                    <div className="rounded-xl border border-[#dce3d9] border-t-8 border-t-[#2b5139] bg-white p-5 shadow-2xs">
+                        <label className="block text-[11px] font-semibold tracking-wider text-[#667367] uppercase">
+                            Survey title
+                            <input
+                                required
+                                value={title}
+                                onChange={(event) =>
+                                    setTitle(event.target.value)
+                                }
+                                placeholder="Untitled Tracer Survey"
+                                className="mt-1 w-full border-b-2 border-[#e3e7df] bg-transparent pb-2 text-lg font-bold text-[#233127] transition outline-none focus:border-[#2b5139]"
+                            />
+                        </label>
+                        <label className="mt-3 block text-[11px] font-medium text-[#667367]">
+                            Form description
+                            <textarea
+                                value={description}
+                                onChange={(event) =>
+                                    setDescription(event.target.value)
+                                }
+                                rows={2}
+                                placeholder="Form description (explain the purpose of this survey to alumni respondents)…"
+                                className="mt-1 w-full border-b border-[#e5e9e2] bg-transparent pb-1.5 text-xs text-[#4d5a4f] transition outline-none focus:border-[#2b5139]"
+                            />
+                        </label>
+                    </div>
 
-                                {targetSpecificCohorts && (
-                                    <div className="grid gap-4 border-t border-[#e6eae3] pt-4 lg:grid-cols-3">
-                                        {/* Target Departments */}
-                                        <div>
-                                            <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
-                                                Target Departments (
-                                                {targetDepartmentIds.length || 'All'})
-                                            </p>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {departments.map((dept) => {
-                                                    const active =
-                                                        targetDepartmentIds.includes(
-                                                            dept.id,
-                                                        );
-                                                    return (
-                                                        <button
-                                                            key={dept.id}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setTargetDepartmentIds(
-                                                                    (curr) =>
-                                                                        toggleId(
-                                                                            curr,
-                                                                            dept.id,
-                                                                        ),
-                                                                )
-                                                            }
-                                                            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
-                                                                    ? 'bg-[#2b5139] text-white'
-                                                                    : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
-                                                                }`}
-                                                        >
-                                                            {dept.code} · {dept.name}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
+                    {/* Settings & Cohort Targeting Card */}
+                    <div
+                        className={`space-y-4 rounded-xl border border-[#dce3d9] bg-white p-5 shadow-2xs ${builderTab === 'preview' ? 'hidden' : ''
+                            }`}
+                    >
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff1ed] pb-3">
+                            <div>
+                                <h3 className="text-xs font-bold tracking-wider text-[#2b5139] uppercase">
+                                    Schedule, Privacy & Cohort Targeting
+                                </h3>
+                                <p className="text-[11px] text-[#758074]">
+                                    Configure opening/closing dates, anonymous
+                                    mode, and target graduation batches or
+                                    programs.
+                                </p>
+                            </div>
+                        </div>
 
-                                        {/* Target Academic Programs */}
-                                        <div>
-                                            <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
-                                                Target Academic Programs (
-                                                {targetProgramIds.length || 'All'})
-                                            </p>
-                                            <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
-                                                {programs.map((prog) => {
-                                                    const active =
-                                                        targetProgramIds.includes(
-                                                            prog.id,
-                                                        );
-                                                    return (
-                                                        <button
-                                                            key={prog.id}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setTargetProgramIds(
-                                                                    (curr) =>
-                                                                        toggleId(
-                                                                            curr,
-                                                                            prog.id,
-                                                                        ),
-                                                                )
-                                                            }
-                                                            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
-                                                                    ? 'bg-[#2b5139] text-white'
-                                                                    : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
-                                                                }`}
-                                                        >
-                                                            {prog.code}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Opens on (optional)
+                                <input
+                                    type="date"
+                                    value={startsAt}
+                                    onChange={(event) =>
+                                        setStartsAt(event.target.value)
+                                    }
+                                    className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                />
+                            </label>
+                            <label className="text-xs font-medium text-[#4d5a4f]">
+                                Closes on
+                                <input
+                                    type="date"
+                                    value={closesAt}
+                                    onChange={(event) =>
+                                        setClosesAt(event.target.value)
+                                    }
+                                    className="mt-1.5 h-9 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                />
+                            </label>
+                            <div className="flex flex-col justify-end gap-2 sm:col-span-2">
+                                <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#3b4a3e]">
+                                    <input
+                                        type="checkbox"
+                                        checked={isAnonymous}
+                                        onChange={(e) =>
+                                            setIsAnonymous(e.target.checked)
+                                        }
+                                        className="size-4 accent-[#2b5139]"
+                                    />
+                                    <span>
+                                        Collect anonymous responses (mask
+                                        respondent names in summaries)
+                                    </span>
+                                </label>
+                                <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#2b5139]">
+                                    <input
+                                        type="checkbox"
+                                        checked={targetSpecificCohorts}
+                                        onChange={(e) =>
+                                            setTargetSpecificCohorts(
+                                                e.target.checked,
+                                            )
+                                        }
+                                        className="size-4 accent-[#2b5139]"
+                                    />
+                                    <span>
+                                        Target specific departments, programs,
+                                        or graduating batches
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
 
-                                        {/* Target Graduation Years / Batches */}
-                                        <div>
-                                            <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
-                                                Target Graduation Batches (
-                                                {targetGraduationYears.length || 'All'})
-                                            </p>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {Array.from(
-                                                    new Set([
-                                                        ...COHORT_YEAR_OPTIONS,
-                                                        ...targetGraduationYears,
-                                                    ]),
-                                                )
-                                                    .sort((a, b) => b - a)
-                                                    .map((yr) => {
-                                                        const active =
-                                                            targetGraduationYears.includes(
-                                                                yr,
-                                                            );
-                                                        return (
-                                                            <button
-                                                                key={yr}
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    setTargetGraduationYears(
-                                                                        (curr) =>
-                                                                            toggleId(
-                                                                                curr,
-                                                                                yr,
-                                                                            ),
-                                                                    )
-                                                                }
-                                                                className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
-                                                                        ? 'bg-[#2b5139] text-white'
-                                                                        : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
-                                                                    }`}
-                                                            >
-                                                                {yr}
-                                                            </button>
-                                                        );
-                                                    })}
-                                            </div>
-                                            <div className="mt-2 flex gap-1.5">
-                                                <input
-                                                    type="number"
-                                                    min={1950}
-                                                    max={2100}
-                                                    value={customYearInput}
-                                                    onChange={(e) =>
-                                                        setCustomYearInput(
-                                                            e.target.value,
+                        {targetSpecificCohorts && (
+                            <div className="grid gap-4 border-t border-[#e6eae3] pt-4 lg:grid-cols-3">
+                                {/* Target Departments */}
+                                <div>
+                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                        Target Departments (
+                                        {targetDepartmentIds.length || 'All'})
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {departments.map((dept) => {
+                                            const active =
+                                                targetDepartmentIds.includes(
+                                                    dept.id,
+                                                );
+                                            return (
+                                                <button
+                                                    key={dept.id}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setTargetDepartmentIds(
+                                                            (curr) =>
+                                                                toggleId(
+                                                                    curr,
+                                                                    dept.id,
+                                                                ),
                                                         )
                                                     }
-                                                    placeholder="Add year (e.g. 2015)"
-                                                    className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2.5 text-xs"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={addCustomBatchYear}
-                                                    className="h-8 rounded-lg border border-[#dce2d9] bg-white px-3 text-[11px] font-semibold text-[#2b5139] hover:bg-[#edf2eb]"
+                                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
+                                                        }`}
                                                 >
-                                                    Add Batch
+                                                    {dept.code} · {dept.name}
                                                 </button>
-                                            </div>
-                                        </div>
+                                            );
+                                        })}
                                     </div>
-                                )}
-                            </div>
-
-                            {/* Google Forms Live Preview Mode */}
-                            {builderTab === 'preview' && (
-                                <div className="space-y-3 rounded-xl border border-[#dce3d9] bg-white p-5">
-                                    <div className="flex items-center justify-between border-b border-[#eff1ed] pb-3">
-                                        <span className="text-xs font-bold text-[#2b5139] uppercase">
-                                            Live Respondent Form Preview
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setBuilderTab('questions')}
-                                            className="text-xs font-semibold text-[#2b5139] hover:underline"
-                                        >
-                                            ← Back to editing questions
-                                        </button>
-                                    </div>
-                                    {questions.map((q, qIdx) => (
-                                        <div
-                                            key={qIdx}
-                                            className="rounded-xl border border-[#e3e7df] bg-[#fafbf9] p-4"
-                                        >
-                                            <p className="text-xs font-semibold text-[#233127]">
-                                                {qIdx + 1}.{' '}
-                                                {q.prompt || 'Untitled Question'}
-                                                {q.is_required && (
-                                                    <span className="ml-1 text-[#c93b2b]">
-                                                        *
-                                                    </span>
-                                                )}
-                                            </p>
-                                            <p className="mt-1 text-[11px] text-[#7a8278]">
-                                                Format:{' '}
-                                                {QUESTION_TYPE_LABELS[q.type] ?? q.type}
-                                                {requiresQuestionOptions(q.type)
-                                                    ? ` · Choices: ${q.optionsList.join(', ')}`
-                                                    : ''}
-                                            </p>
-                                        </div>
-                                    ))}
                                 </div>
-                            )}
 
-                            {/* Google Forms Question Cards Stream */}
-                            <div
-                                className={`space-y-3.5 ${builderTab === 'preview' ? 'hidden' : ''
-                                    }`}
-                            >
-                                {questions.map((question, index) => {
-                                    const isFocused = activeQuestionIdx === index;
-                                    const isChoice = requiresQuestionOptions(
-                                        question.type,
-                                    );
+                                {/* Target Academic Programs */}
+                                <div>
+                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                        Target Academic Programs (
+                                        {targetProgramIds.length || 'All'})
+                                    </p>
+                                    <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
+                                        {programs.map((prog) => {
+                                            const active =
+                                                targetProgramIds.includes(
+                                                    prog.id,
+                                                );
+                                            return (
+                                                <button
+                                                    key={prog.id}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setTargetProgramIds(
+                                                            (curr) =>
+                                                                toggleId(
+                                                                    curr,
+                                                                    prog.id,
+                                                                ),
+                                                        )
+                                                    }
+                                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
+                                                        }`}
+                                                >
+                                                    {prog.code}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
 
-                                    return (
-                                        <div
-                                            key={index}
-                                            onClick={() => setActiveQuestionIdx(index)}
-                                            className={`rounded-xl border bg-white p-5 shadow-2xs transition ${isFocused
-                                                    ? 'border-[#cad5c6] border-l-4 border-l-[#2b5139]'
-                                                    : 'border-[#e3e7df]'
-                                                }`}
-                                        >
-                                            <div className="grid gap-3 sm:grid-cols-[1fr_230px]">
-                                                <label className="text-xs font-medium text-[#4d5a4f]">
-                                                    {index === 0
-                                                        ? 'First question'
-                                                        : `Question #${index + 1}`}
-                                                    <input
-                                                        required
-                                                        value={question.prompt}
-                                                        onChange={(event) =>
-                                                            updateQuestion(index, {
-                                                                prompt: event.target
-                                                                    .value,
-                                                            })
-                                                        }
-                                                        placeholder="Question"
-                                                        className="mt-1.5 h-11 w-full rounded-t-lg border-b-2 border-[#d5ddd2] bg-[#f8faf7] px-3.5 text-sm font-medium text-[#233127] transition outline-none focus:border-[#2b5139] focus:bg-[#f1f5ef]"
-                                                    />
-                                                </label>
-
-                                                <label className="text-xs font-medium text-[#4d5a4f]">
-                                                    Question type
-                                                    <select
-                                                        value={question.type}
-                                                        onChange={(event) =>
-                                                            updateQuestion(index, {
-                                                                type: event.target
-                                                                    .value,
-                                                            })
-                                                        }
-                                                        className="mt-1.5 h-11 w-full rounded-lg border border-[#d5ddd2] bg-white px-3 text-xs font-semibold text-[#29382e] outline-none focus:border-[#2b5139]"
-                                                    >
-                                                        {BUILDER_QUESTION_TYPES.map(
-                                                            (typeOption) => (
-                                                                <option
-                                                                    key={
-                                                                        typeOption.value
-                                                                    }
-                                                                    value={
-                                                                        typeOption.value
-                                                                    }
-                                                                >
-                                                                    {typeOption.label}
-                                                                </option>
-                                                            ),
-                                                        )}
-                                                    </select>
-                                                </label>
-                                            </div>
-
-                                            {/* Google Forms Interactive Answer Area */}
-                                            <div className="mt-4">
-                                                {isChoice ? (
-                                                    <div className="space-y-2">
-                                                        {question.optionsList.map(
-                                                            (optVal, optIdx) => (
-                                                                <div
-                                                                    key={optIdx}
-                                                                    className="flex items-center gap-2.5"
-                                                                >
-                                                                    <span className="w-5 text-center text-xs font-bold text-[#838c81]">
-                                                                        {question.type ===
-                                                                            'radio'
-                                                                            ? '○'
-                                                                            : question.type ===
-                                                                                'multiselect'
-                                                                                ? '☐'
-                                                                                : `${optIdx + 1}.`}
-                                                                    </span>
-                                                                    <input
-                                                                        type="text"
-                                                                        required
-                                                                        value={optVal}
-                                                                        onChange={(e) =>
-                                                                            updateQuestionOptionItem(
-                                                                                index,
-                                                                                optIdx,
-                                                                                e.target
-                                                                                    .value,
-                                                                            )
-                                                                        }
-                                                                        placeholder={`Option ${optIdx + 1}`}
-                                                                        className="h-9 flex-1 border-b border-transparent bg-transparent px-1 text-xs text-[#29382e] transition outline-none hover:border-[#dce2d9] focus:border-b-2 focus:border-[#2b5139]"
-                                                                    />
-                                                                    {question
-                                                                        .optionsList
-                                                                        .length > 1 && (
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() =>
-                                                                                    removeQuestionOptionItem(
-                                                                                        index,
-                                                                                        optIdx,
-                                                                                    )
-                                                                                }
-                                                                                title="Remove option"
-                                                                                className="rounded p-1 text-xs text-[#8a9289] hover:bg-[#f2f4f0] hover:text-[#8b4e43]"
-                                                                            >
-                                                                                ✕
-                                                                            </button>
-                                                                        )}
-                                                                </div>
-                                                            ),
-                                                        )}
-
-                                                        <div className="flex flex-wrap items-center gap-3 pt-1">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    addQuestionOptionItem(
-                                                                        index,
-                                                                    )
-                                                                }
-                                                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2b5139] hover:underline"
-                                                            >
-                                                                <span>
-                                                                    {question.type ===
-                                                                        'radio'
-                                                                        ? '○'
-                                                                        : question.type ===
-                                                                            'multiselect'
-                                                                            ? '☐'
-                                                                            : '+'}
-                                                                </span>
-                                                                <span>Add option</span>
-                                                            </button>
-                                                        </div>
-
-                                                        <label className="mt-2 block text-[11px] font-medium text-[#7a8278]">
-                                                            Answer choices (comma
-                                                            separated quick-fill)
-                                                            <input
-                                                                value={question.options}
-                                                                onChange={(event) => {
-                                                                    const raw =
-                                                                        event.target
-                                                                            .value;
-                                                                    const split = raw
-                                                                        .split(',')
-                                                                        .map((s) =>
-                                                                            s.trim(),
-                                                                        )
-                                                                        .filter(
-                                                                            Boolean,
-                                                                        );
-                                                                    updateQuestion(
-                                                                        index,
-                                                                        {
-                                                                            options:
-                                                                                raw,
-                                                                            optionsList:
-                                                                                split.length
-                                                                                    ? split
-                                                                                    : [
-                                                                                        '',
-                                                                                    ],
-                                                                        },
-                                                                    );
-                                                                }}
-                                                                placeholder="e.g., Very Relevant, Moderately Relevant, Not Relevant"
-                                                                className="mt-1 h-8 w-full rounded-lg border border-[#e6eae3] bg-[#fafbf9] px-2.5 text-[11px] text-[#4d5a4f]"
-                                                            />
-                                                        </label>
-                                                    </div>
-                                                ) : question.type === 'text' ? (
-                                                    <div className="max-w-xs border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
-                                                        Short answer text
-                                                    </div>
-                                                ) : question.type === 'textarea' ? (
-                                                    <div className="max-w-lg border-b border-dotted border-[#b8c2b6] pb-4 text-xs text-[#8a9289]">
-                                                        Long answer paragraph text
-                                                    </div>
-                                                ) : question.type === 'rating' ? (
-                                                    <div className="flex items-center gap-4 py-1 text-xs text-[#687267]">
-                                                        <span>Linear scale:</span>
-                                                        {[1, 2, 3, 4, 5].map((n) => (
-                                                            <span
-                                                                key={n}
-                                                                className="inline-flex size-7 items-center justify-center rounded-full border border-[#d5ddd2] bg-[#fafbf9] font-semibold"
-                                                            >
-                                                                {n}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                ) : question.type === 'boolean' ? (
-                                                    <div className="flex gap-3 text-xs text-[#687267]">
-                                                        <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
-                                                            ○ Yes
-                                                        </span>
-                                                        <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
-                                                            ○ No
-                                                        </span>
-                                                    </div>
-                                                ) : question.type === 'date' ? (
-                                                    <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
-                                                        Month, day, year 📅
-                                                    </div>
-                                                ) : (
-                                                    <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
-                                                        Numeric value (0–9)
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Google Forms Bottom Card Action Toolbar */}
-                                            <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[#eff1ed] pt-3">
-                                                <span className="text-[11px] font-medium text-[#7a8278]">
-                                                    Question {index + 1} of{' '}
-                                                    {questions.length}
-                                                </span>
-                                                <div className="flex items-center gap-2">
+                                {/* Target Graduation Years / Batches */}
+                                <div>
+                                    <p className="mb-2 text-[11px] font-bold tracking-wider text-[#627063] uppercase">
+                                        Target Graduation Batches (
+                                        {targetGraduationYears.length || 'All'})
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {Array.from(
+                                            new Set([
+                                                ...COHORT_YEAR_OPTIONS,
+                                                ...targetGraduationYears,
+                                            ]),
+                                        )
+                                            .sort((a, b) => b - a)
+                                            .map((yr) => {
+                                                const active =
+                                                    targetGraduationYears.includes(
+                                                        yr,
+                                                    );
+                                                return (
                                                     <button
-                                                        type="button"
-                                                        disabled={index === 0}
-                                                        onClick={() =>
-                                                            moveQuestion(index, -1)
-                                                        }
-                                                        title="Move question up"
-                                                        className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
-                                                    >
-                                                        ↑
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        disabled={
-                                                            index ===
-                                                            questions.length - 1
-                                                        }
-                                                        onClick={() =>
-                                                            moveQuestion(index, 1)
-                                                        }
-                                                        title="Move question down"
-                                                        className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
-                                                    >
-                                                        ↓
-                                                    </button>
-                                                    <button
+                                                        key={yr}
                                                         type="button"
                                                         onClick={() =>
-                                                            duplicateQuestion(index)
+                                                            setTargetGraduationYears(
+                                                                (curr) =>
+                                                                    toggleId(
+                                                                        curr,
+                                                                        yr,
+                                                                    ),
+                                                            )
                                                         }
-                                                        className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4d5a4f] hover:bg-[#f4f6f2]"
+                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
+                                                            ? 'bg-[#2b5139] text-white'
+                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055]'
+                                                            }`}
                                                     >
-                                                        Duplicate
+                                                        {yr}
                                                     </button>
-                                                    {questions.length > 1 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                removeQuestion(index)
-                                                            }
-                                                            className="rounded-lg border border-[#ecd8d2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#fcf5f3]"
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    )}
-                                                    <div className="mx-1 h-4 w-px bg-[#e3e7df]" />
-                                                    <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#4d5a4f]">
-                                                        <span>Required</span>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={
-                                                                question.is_required
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateQuestion(index, {
-                                                                    is_required:
-                                                                        e.target
-                                                                            .checked,
-                                                                })
-                                                            }
-                                                            className="size-4 accent-[#2b5139]"
-                                                        />
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-
-                                {/* Google Forms Floating-Style Bottom Add Bar */}
-                                <div className="flex items-center justify-between rounded-xl border border-[#dce3d9] bg-white px-4 py-3 shadow-2xs">
-                                    <button
-                                        type="button"
-                                        onClick={addQuestion}
-                                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#edf2eb] px-4 text-xs font-bold text-[#2b5139] transition hover:bg-[#dfe8dc]"
-                                    >
-                                        ⊕ Add question
-                                    </button>
-                                    <div className="flex items-center gap-2">
+                                                );
+                                            })}
+                                    </div>
+                                    <div className="mt-2 flex gap-1.5">
+                                        <input
+                                            type="number"
+                                            min={1950}
+                                            max={2100}
+                                            value={customYearInput}
+                                            onChange={(e) =>
+                                                setCustomYearInput(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="Add year (e.g. 2015)"
+                                            className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2.5 text-xs"
+                                        />
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                resetBuilder();
-                                                onCloseCreate();
-                                            }}
-                                            className="h-9 rounded-lg border border-[#e3e7df] px-3 text-xs font-medium text-[#687267]"
+                                            onClick={addCustomBatchYear}
+                                            className="h-8 rounded-lg border border-[#dce2d9] bg-white px-3 text-[11px] font-semibold text-[#2b5139] hover:bg-[#edf2eb]"
                                         >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={creating}
-                                            className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
-                                        >
-                                            {creating
-                                                ? 'Saving…'
-                                                : editingSurveyId !== null
-                                                    ? 'Save changes'
-                                                    : 'Create survey'}
+                                            Add Batch
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        </form>
-                    ) : null}
+                        )}
+                    </div>
 
-                    {surveys.length ? (
-                        surveys.map((survey) => {
-                            const hasCohortRules = Boolean(
-                                survey.target_department_ids?.length ||
-                                survey.target_program_ids?.length ||
-                                survey.target_graduation_years?.length,
+                    {/* Google Forms Live Preview Mode */}
+                    {builderTab === 'preview' && (
+                        <div className="space-y-3 rounded-xl border border-[#dce3d9] bg-white p-5">
+                            <div className="flex items-center justify-between border-b border-[#eff1ed] pb-3">
+                                <span className="text-xs font-bold text-[#2b5139] uppercase">
+                                    Live Respondent Form Preview
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setBuilderTab('questions')}
+                                    className="text-xs font-semibold text-[#2b5139] hover:underline"
+                                >
+                                    ← Back to editing questions
+                                </button>
+                            </div>
+                            {questions.map((q, qIdx) => (
+                                <div
+                                    key={qIdx}
+                                    className="rounded-xl border border-[#e3e7df] bg-[#fafbf9] p-4"
+                                >
+                                    <p className="text-xs font-semibold text-[#233127]">
+                                        {qIdx + 1}.{' '}
+                                        {q.prompt || 'Untitled Question'}
+                                        {q.is_required && (
+                                            <span className="ml-1 text-[#c93b2b]">
+                                                *
+                                            </span>
+                                        )}
+                                    </p>
+                                    <p className="mt-1 text-[11px] text-[#7a8278]">
+                                        Format:{' '}
+                                        {QUESTION_TYPE_LABELS[q.type] ?? q.type}
+                                        {requiresQuestionOptions(q.type)
+                                            ? ` · Choices: ${q.optionsList.join(', ')}`
+                                            : ''}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Google Forms Question Cards Stream */}
+                    <div
+                        className={`space-y-3.5 ${builderTab === 'preview' ? 'hidden' : ''
+                            }`}
+                    >
+                        {questions.map((question, index) => {
+                            const isFocused = activeQuestionIdx === index;
+                            const isChoice = requiresQuestionOptions(
+                                question.type,
                             );
 
                             return (
-                                <article
-                                    key={survey.id}
-                                    className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                                <div
+                                    key={index}
+                                    onClick={() => setActiveQuestionIdx(index)}
+                                    className={`rounded-xl border bg-white p-5 shadow-2xs transition ${isFocused
+                                        ? 'border-[#cad5c6] border-l-4 border-l-[#2b5139]'
+                                        : 'border-[#e3e7df]'
+                                        }`}
                                 >
-                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <h2 className="text-sm font-semibold text-[#39463b]">
-                                                    {survey.title}
-                                                </h2>
-                                                <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                                    {survey.status}
-                                                </span>
-                                                {survey.is_anonymous && (
-                                                    <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-semibold text-[#2b5139]">
-                                                        Anonymous
-                                                    </span>
-                                                )}
-                                                {survey.responses_count !==
-                                                    undefined && (
-                                                        <span className="rounded-full bg-[#f4f5f2] px-2.5 py-1 text-[10px] font-semibold text-[#546055]">
-                                                            {survey.responses_count}{' '}
-                                                            {survey.responses_count === 1
-                                                                ? 'response'
-                                                                : 'responses'}
-                                                        </span>
-                                                    )}
-                                            </div>
-                                            {survey.description ? (
-                                                <p className="mt-1 text-xs leading-5 text-[#7a8278]">
-                                                    {survey.description}
-                                                </p>
-                                            ) : null}
+                                    <div className="grid gap-3 sm:grid-cols-[1fr_230px]">
+                                        <label className="text-xs font-medium text-[#4d5a4f]">
+                                            {index === 0
+                                                ? 'First question'
+                                                : `Question #${index + 1}`}
+                                            <input
+                                                required
+                                                value={question.prompt}
+                                                onChange={(event) =>
+                                                    updateQuestion(index, {
+                                                        prompt: event.target
+                                                            .value,
+                                                    })
+                                                }
+                                                placeholder="Question"
+                                                className="mt-1.5 h-11 w-full rounded-t-lg border-b-2 border-[#d5ddd2] bg-[#f8faf7] px-3.5 text-sm font-medium text-[#233127] transition outline-none focus:border-[#2b5139] focus:bg-[#f1f5ef]"
+                                            />
+                                        </label>
 
-                                            {/* Cohort & Schedule Badges */}
-                                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[#7c847a]">
-                                                <span className="rounded bg-[#f6f7f4] px-2 py-0.5 font-medium">
-                                                    {hasCohortRules
-                                                        ? [
-                                                            survey
-                                                                .target_department_ids
-                                                                ?.length
-                                                                ? `${survey.target_department_ids.length} dept(s)`
-                                                                : null,
-                                                            survey.target_program_ids
-                                                                ?.length
-                                                                ? `${survey.target_program_ids.length} program(s)`
-                                                                : null,
-                                                            survey
-                                                                .target_graduation_years
-                                                                ?.length
-                                                                ? `Batches: ${survey.target_graduation_years.join(', ')}`
-                                                                : null,
-                                                        ]
-                                                            .filter(Boolean)
-                                                            .join(' · ')
-                                                        : 'All alumni cohorts'}
-                                                </span>
-                                                {survey.starts_at && (
-                                                    <span>
-                                                        Opens{' '}
-                                                        {new Date(
-                                                            survey.starts_at,
-                                                        ).toLocaleDateString()}
-                                                    </span>
+                                        <label className="text-xs font-medium text-[#4d5a4f]">
+                                            Question type
+                                            <select
+                                                value={question.type}
+                                                onChange={(event) =>
+                                                    updateQuestion(index, {
+                                                        type: event.target
+                                                            .value,
+                                                    })
+                                                }
+                                                className="mt-1.5 h-11 w-full rounded-lg border border-[#d5ddd2] bg-white px-3 text-xs font-semibold text-[#29382e] outline-none focus:border-[#2b5139]"
+                                            >
+                                                {BUILDER_QUESTION_TYPES.map(
+                                                    (typeOption) => (
+                                                        <option
+                                                            key={
+                                                                typeOption.value
+                                                            }
+                                                            value={
+                                                                typeOption.value
+                                                            }
+                                                        >
+                                                            {typeOption.label}
+                                                        </option>
+                                                    ),
                                                 )}
-                                                {survey.closes_at && (
-                                                    <span>
-                                                        Closes{' '}
-                                                        {new Date(
-                                                            survey.closes_at,
-                                                        ).toLocaleDateString()}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
+                                            </select>
+                                        </label>
+                                    </div>
 
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            {canViewAnalytics && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        void toggleAnalytics(survey.id)
-                                                    }
-                                                    className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-2 text-[11px] font-semibold text-[#3f5242] hover:bg-[#eff2ed]"
-                                                >
-                                                    {activeAnalyticsId === survey.id
-                                                        ? 'Hide analytics'
-                                                        : 'Analytics'}
-                                                </button>
-                                            )}
-                                            {canManage &&
-                                                (survey.responses_count ?? 0) === 0 && (
+                                    {/* Google Forms Interactive Answer Area */}
+                                    <div className="mt-4">
+                                        {isChoice ? (
+                                            <div className="space-y-2">
+                                                {question.optionsList.map(
+                                                    (optVal, optIdx) => (
+                                                        <div
+                                                            key={optIdx}
+                                                            className="flex items-center gap-2.5"
+                                                        >
+                                                            <span className="w-5 text-center text-xs font-bold text-[#838c81]">
+                                                                {question.type ===
+                                                                    'radio'
+                                                                    ? '○'
+                                                                    : question.type ===
+                                                                        'multiselect'
+                                                                        ? '☐'
+                                                                        : `${optIdx + 1}.`}
+                                                            </span>
+                                                            <input
+                                                                type="text"
+                                                                required
+                                                                value={optVal}
+                                                                onChange={(e) =>
+                                                                    updateQuestionOptionItem(
+                                                                        index,
+                                                                        optIdx,
+                                                                        e.target
+                                                                            .value,
+                                                                    )
+                                                                }
+                                                                placeholder={`Option ${optIdx + 1}`}
+                                                                className="h-9 flex-1 border-b border-transparent bg-transparent px-1 text-xs text-[#29382e] transition outline-none hover:border-[#dce2d9] focus:border-b-2 focus:border-[#2b5139]"
+                                                            />
+                                                            {question
+                                                                .optionsList
+                                                                .length > 1 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            removeQuestionOptionItem(
+                                                                                index,
+                                                                                optIdx,
+                                                                            )
+                                                                        }
+                                                                        title="Remove option"
+                                                                        className="rounded p-1 text-xs text-[#8a9289] hover:bg-[#f2f4f0] hover:text-[#8b4e43]"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                )}
+                                                        </div>
+                                                    ),
+                                                )}
+
+                                                <div className="flex flex-wrap items-center gap-3 pt-1">
                                                     <button
                                                         type="button"
                                                         onClick={() =>
-                                                            openEditSurvey(survey)
+                                                            addQuestionOptionItem(
+                                                                index,
+                                                            )
                                                         }
-                                                        className="rounded-lg border border-[#e3e7df] bg-white px-3 py-2 text-[11px] font-semibold text-[#526054] hover:bg-[#f6f7f4]"
+                                                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2b5139] hover:underline"
                                                     >
-                                                        Edit
+                                                        <span>
+                                                            {question.type ===
+                                                                'radio'
+                                                                ? '○'
+                                                                : question.type ===
+                                                                    'multiselect'
+                                                                    ? '☐'
+                                                                    : '+'}
+                                                        </span>
+                                                        <span>Add option</span>
                                                     </button>
-                                                )}
-                                            {canManage && survey.status === 'draft' ? (
-                                                <button
-                                                    type="button"
-                                                    disabled={publishing === survey.id}
-                                                    onClick={() =>
-                                                        void publishSurvey(survey.id)
-                                                    }
-                                                    className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
-                                                >
-                                                    {publishing === survey.id
-                                                        ? 'Publishing…'
-                                                        : 'Publish'}
-                                                </button>
-                                            ) : null}
-                                            {canManage &&
-                                                survey.status === 'published' ? (
-                                                <button
-                                                    type="button"
-                                                    disabled={closing === survey.id}
-                                                    onClick={() =>
-                                                        void closeSurvey(survey.id)
-                                                    }
-                                                    className="rounded-lg border border-[#ecd8d2] bg-white px-3 py-2 text-[11px] font-semibold text-[#8b4e43] disabled:opacity-60"
-                                                >
-                                                    {closing === survey.id
-                                                        ? 'Closing…'
-                                                        : 'Close survey'}
-                                                </button>
-                                            ) : null}
-                                        </div>
+                                                </div>
+
+                                                <label className="mt-2 block text-[11px] font-medium text-[#7a8278]">
+                                                    Answer choices (comma
+                                                    separated quick-fill)
+                                                    <input
+                                                        value={question.options}
+                                                        onChange={(event) => {
+                                                            const raw =
+                                                                event.target
+                                                                    .value;
+                                                            const split = raw
+                                                                .split(',')
+                                                                .map((s) =>
+                                                                    s.trim(),
+                                                                )
+                                                                .filter(
+                                                                    Boolean,
+                                                                );
+                                                            updateQuestion(
+                                                                index,
+                                                                {
+                                                                    options:
+                                                                        raw,
+                                                                    optionsList:
+                                                                        split.length
+                                                                            ? split
+                                                                            : [
+                                                                                '',
+                                                                            ],
+                                                                },
+                                                            );
+                                                        }}
+                                                        placeholder="e.g., Very Relevant, Moderately Relevant, Not Relevant"
+                                                        className="mt-1 h-8 w-full rounded-lg border border-[#e6eae3] bg-[#fafbf9] px-2.5 text-[11px] text-[#4d5a4f]"
+                                                    />
+                                                </label>
+                                            </div>
+                                        ) : question.type === 'text' ? (
+                                            <div className="max-w-xs border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                Short answer text
+                                            </div>
+                                        ) : question.type === 'textarea' ? (
+                                            <div className="max-w-lg border-b border-dotted border-[#b8c2b6] pb-4 text-xs text-[#8a9289]">
+                                                Long answer paragraph text
+                                            </div>
+                                        ) : question.type === 'rating' ? (
+                                            <div className="flex items-center gap-4 py-1 text-xs text-[#687267]">
+                                                <span>Linear scale:</span>
+                                                {[1, 2, 3, 4, 5].map((n) => (
+                                                    <span
+                                                        key={n}
+                                                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#d5ddd2] bg-[#fafbf9] font-semibold"
+                                                    >
+                                                        {n}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : question.type === 'boolean' ? (
+                                            <div className="flex gap-3 text-xs text-[#687267]">
+                                                <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
+                                                    ○ Yes
+                                                </span>
+                                                <span className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-1">
+                                                    ○ No
+                                                </span>
+                                            </div>
+                                        ) : question.type === 'date' ? (
+                                            <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                Month, day, year 📅
+                                            </div>
+                                        ) : (
+                                            <div className="max-w-[180px] border-b border-dotted border-[#b8c2b6] pb-1.5 text-xs text-[#8a9289]">
+                                                Numeric value (0–9)
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {canManage ? (
-                                        <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
-                                            {survey.questions.map((question, qIdx) => (
-                                                <li
-                                                    key={question.id}
-                                                    className="text-[11px] text-[#6f786e]"
+                                    {/* Google Forms Bottom Card Action Toolbar */}
+                                    <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[#eff1ed] pt-3">
+                                        <span className="text-[11px] font-medium text-[#7a8278]">
+                                            Question {index + 1} of{' '}
+                                            {questions.length}
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                disabled={index === 0}
+                                                onClick={() =>
+                                                    moveQuestion(index, -1)
+                                                }
+                                                title="Move question up"
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
+                                            >
+                                                ↑
+                                            </button>
+                                            <button
+                                                type="button"
+                                                disabled={
+                                                    index ===
+                                                    questions.length - 1
+                                                }
+                                                onClick={() =>
+                                                    moveQuestion(index, 1)
+                                                }
+                                                title="Move question down"
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#536055] hover:bg-[#f4f6f2] disabled:opacity-40"
+                                            >
+                                                ↓
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    duplicateQuestion(index)
+                                                }
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4d5a4f] hover:bg-[#f4f6f2]"
+                                            >
+                                                Duplicate
+                                            </button>
+                                            {questions.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        removeQuestion(index)
+                                                    }
+                                                    className="rounded-lg border border-[#ecd8d2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#fcf5f3]"
                                                 >
-                                                    {qIdx + 1}. {question.prompt}{' '}
-                                                    <span className="text-[#969c94]">
-                                                        ·{' '}
-                                                        {QUESTION_TYPE_LABELS[
-                                                            question.type
-                                                        ] ?? question.type}
-                                                        {question.is_required
-                                                            ? ' (Required)'
-                                                            : ' (Optional)'}
-                                                    </span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : canRespond && survey.has_responded ? (
-                                        <p className="mt-3 border-t border-[#eff0ec] pt-3 text-xs font-medium text-[#587057]">
-                                            Your response has been submitted.
-                                        </p>
-                                    ) : canRespond ? (
-                                        <SurveyResponseForm
-                                            survey={survey}
-                                            onSubmitted={reload}
-                                        />
-                                    ) : (
-                                        <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
-                                            {survey.questions.map((question, qIdx) => (
-                                                <li
-                                                    key={question.id}
-                                                    className="text-[11px] text-[#6f786e]"
-                                                >
-                                                    {qIdx + 1}. {question.prompt}{' '}
-                                                    <span className="text-[#969c94]">
-                                                        ·{' '}
-                                                        {QUESTION_TYPE_LABELS[
-                                                            question.type
-                                                        ] ?? question.type}
-                                                    </span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
+                                                    Delete
+                                                </button>
+                                            )}
+                                            <div className="mx-1 h-4 w-px bg-[#e3e7df]" />
+                                            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[#4d5a4f]">
+                                                <span>Required</span>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={
+                                                        question.is_required
+                                                    }
+                                                    onChange={(e) =>
+                                                        updateQuestion(index, {
+                                                            is_required:
+                                                                e.target
+                                                                    .checked,
+                                                        })
+                                                    }
+                                                    className="size-4 accent-[#2b5139]"
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
 
-                                    {/* Inline Survey Analytics Breakdown */}
-                                    {activeAnalyticsId === survey.id && (
-                                        <div className="mt-4 rounded-xl border border-[#dfe6dc] bg-[#f8faf7] p-4">
-                                            {analyticsLoading ? (
-                                                <p className="text-xs text-[#6e776d]">
-                                                    Loading survey response analytics…
-                                                </p>
-                                            ) : analyticsData ? (
-                                                <div className="space-y-4">
-                                                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5eae2] pb-2.5">
-                                                        <h3 className="text-xs font-bold text-[#2b5139] uppercase">
-                                                            Response Analytics ·{' '}
-                                                            {
-                                                                analyticsData.total_responses
-                                                            }{' '}
-                                                            Total Submissions
-                                                        </h3>
-                                                        <span className="text-[11px] text-[#687267]">
-                                                            {analyticsData.is_anonymous
-                                                                ? 'Anonymous mode active'
-                                                                : 'Identifiable responses'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="grid gap-3 md:grid-cols-2">
-                                                        {analyticsData.questions.map(
-                                                            (q) => (
-                                                                <div
-                                                                    key={q.id}
-                                                                    className="rounded-xl border border-[#e6eae3] bg-white p-3.5"
-                                                                >
-                                                                    <div className="flex items-start justify-between gap-2">
-                                                                        <p className="text-xs font-semibold text-[#314034]">
-                                                                            {q.prompt}
-                                                                        </p>
-                                                                        <span className="shrink-0 text-[10px] font-medium text-[#69866c]">
-                                                                            {
-                                                                                q.answered_count
-                                                                            }{' '}
-                                                                            answered (
-                                                                            {
-                                                                                q.response_rate
-                                                                            }
-                                                                            %)
-                                                                        </span>
-                                                                    </div>
-                                                                    {q.distribution
-                                                                        .length > 0 ? (
-                                                                        <div className="mt-2.5 space-y-1.5">
-                                                                            {q.distribution.map(
-                                                                                (d) => (
-                                                                                    <div
-                                                                                        key={
+                        {/* Google Forms Floating-Style Bottom Add Bar */}
+                        <div className="flex items-center justify-between rounded-xl border border-[#dce3d9] bg-white px-4 py-3 shadow-2xs">
+                            <button
+                                type="button"
+                                onClick={addQuestion}
+                                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#edf2eb] px-4 text-xs font-bold text-[#2b5139] transition hover:bg-[#dfe8dc]"
+                            >
+                                ⊕ Add question
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        resetBuilder();
+                                        onCloseCreate();
+                                    }}
+                                    className="h-9 rounded-lg border border-[#e3e7df] px-3 text-xs font-medium text-[#687267]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={creating}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#21402c] disabled:opacity-60"
+                                >
+                                    {creating
+                                        ? 'Saving…'
+                                        : editingSurveyId !== null
+                                            ? 'Save changes'
+                                            : 'Create survey'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            ) : null}
+
+            {surveys.length ? (
+                surveys.map((survey) => {
+                    const hasCohortRules = Boolean(
+                        survey.target_department_ids?.length ||
+                        survey.target_program_ids?.length ||
+                        survey.target_graduation_years?.length,
+                    );
+
+                    return (
+                        <article
+                            key={survey.id}
+                            className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                        >
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <h2 className="text-sm font-semibold text-[#39463b]">
+                                            {survey.title}
+                                        </h2>
+                                        <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                                            {survey.status}
+                                        </span>
+                                        {survey.is_anonymous && (
+                                            <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-semibold text-[#2b5139]">
+                                                Anonymous
+                                            </span>
+                                        )}
+                                        {survey.responses_count !==
+                                            undefined && (
+                                                <span className="rounded-full bg-[#f4f5f2] px-2.5 py-1 text-[10px] font-semibold text-[#546055]">
+                                                    {survey.responses_count}{' '}
+                                                    {survey.responses_count === 1
+                                                        ? 'response'
+                                                        : 'responses'}
+                                                </span>
+                                            )}
+                                    </div>
+                                    {survey.description ? (
+                                        <p className="mt-1 text-xs leading-5 text-[#7a8278]">
+                                            {survey.description}
+                                        </p>
+                                    ) : null}
+
+                                    {/* Cohort & Schedule Badges */}
+                                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-[#7c847a]">
+                                        <span className="rounded bg-[#f6f7f4] px-2 py-0.5 font-medium">
+                                            {hasCohortRules
+                                                ? [
+                                                    survey
+                                                        .target_department_ids
+                                                        ?.length
+                                                        ? `${survey.target_department_ids.length} dept(s)`
+                                                        : null,
+                                                    survey.target_program_ids
+                                                        ?.length
+                                                        ? `${survey.target_program_ids.length} program(s)`
+                                                        : null,
+                                                    survey
+                                                        .target_graduation_years
+                                                        ?.length
+                                                        ? `Batches: ${survey.target_graduation_years.join(', ')}`
+                                                        : null,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' · ')
+                                                : 'All alumni cohorts'}
+                                        </span>
+                                        {survey.starts_at && (
+                                            <span>
+                                                Opens{' '}
+                                                {new Date(
+                                                    survey.starts_at,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                        {survey.closes_at && (
+                                            <span>
+                                                Closes{' '}
+                                                {new Date(
+                                                    survey.closes_at,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {canViewAnalytics && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                void toggleAnalytics(survey.id)
+                                            }
+                                            className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-3 py-2 text-[11px] font-semibold text-[#3f5242] hover:bg-[#eff2ed]"
+                                        >
+                                            {activeAnalyticsId === survey.id
+                                                ? 'Hide analytics'
+                                                : 'Analytics'}
+                                        </button>
+                                    )}
+                                    {canManage &&
+                                        (survey.responses_count ?? 0) === 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    openEditSurvey(survey)
+                                                }
+                                                className="rounded-lg border border-[#e3e7df] bg-white px-3 py-2 text-[11px] font-semibold text-[#526054] hover:bg-[#f6f7f4]"
+                                            >
+                                                Edit
+                                            </button>
+                                        )}
+                                    {canManage && survey.status === 'draft' ? (
+                                        <button
+                                            type="button"
+                                            disabled={publishing === survey.id}
+                                            onClick={() =>
+                                                void publishSurvey(survey.id)
+                                            }
+                                            className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                                        >
+                                            {publishing === survey.id
+                                                ? 'Publishing…'
+                                                : 'Publish'}
+                                        </button>
+                                    ) : null}
+                                    {canManage &&
+                                        survey.status === 'published' ? (
+                                        <button
+                                            type="button"
+                                            disabled={closing === survey.id}
+                                            onClick={() =>
+                                                void closeSurvey(survey.id)
+                                            }
+                                            className="rounded-lg border border-[#ecd8d2] bg-white px-3 py-2 text-[11px] font-semibold text-[#8b4e43] disabled:opacity-60"
+                                        >
+                                            {closing === survey.id
+                                                ? 'Closing…'
+                                                : 'Close survey'}
+                                        </button>
+                                    ) : null}
+                                </div>
+                            </div>
+
+                            {canManage ? (
+                                <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
+                                    {survey.questions.map((question, qIdx) => (
+                                        <li
+                                            key={question.id}
+                                            className="text-[11px] text-[#6f786e]"
+                                        >
+                                            {qIdx + 1}. {question.prompt}{' '}
+                                            <span className="text-[#969c94]">
+                                                ·{' '}
+                                                {QUESTION_TYPE_LABELS[
+                                                    question.type
+                                                ] ?? question.type}
+                                                {question.is_required
+                                                    ? ' (Required)'
+                                                    : ' (Optional)'}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : canRespond && survey.has_responded ? (
+                                <p className="mt-3 border-t border-[#eff0ec] pt-3 text-xs font-medium text-[#587057]">
+                                    Your response has been submitted.
+                                </p>
+                            ) : canRespond ? (
+                                <SurveyResponseForm
+                                    survey={survey}
+                                    onSubmitted={reload}
+                                />
+                            ) : (
+                                <ul className="mt-3 space-y-1 border-t border-[#eff0ec] pt-3">
+                                    {survey.questions.map((question, qIdx) => (
+                                        <li
+                                            key={question.id}
+                                            className="text-[11px] text-[#6f786e]"
+                                        >
+                                            {qIdx + 1}. {question.prompt}{' '}
+                                            <span className="text-[#969c94]">
+                                                ·{' '}
+                                                {QUESTION_TYPE_LABELS[
+                                                    question.type
+                                                ] ?? question.type}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {/* Inline Survey Analytics Breakdown */}
+                            {activeAnalyticsId === survey.id && (
+                                <div className="mt-4 rounded-xl border border-[#dfe6dc] bg-[#f8faf7] p-4">
+                                    {analyticsLoading ? (
+                                        <p className="text-xs text-[#6e776d]">
+                                            Loading survey response analytics…
+                                        </p>
+                                    ) : analyticsData ? (
+                                        <div className="space-y-4">
+                                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5eae2] pb-2.5">
+                                                <h3 className="text-xs font-bold text-[#2b5139] uppercase">
+                                                    Response Analytics ·{' '}
+                                                    {
+                                                        analyticsData.total_responses
+                                                    }{' '}
+                                                    Total Submissions
+                                                </h3>
+                                                <span className="text-[11px] text-[#687267]">
+                                                    {analyticsData.is_anonymous
+                                                        ? 'Anonymous mode active'
+                                                        : 'Identifiable responses'}
+                                                </span>
+                                            </div>
+                                            <div className="grid gap-3 md:grid-cols-2">
+                                                {analyticsData.questions.map(
+                                                    (q) => (
+                                                        <div
+                                                            key={q.id}
+                                                            className="rounded-xl border border-[#e6eae3] bg-white p-3.5"
+                                                        >
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <p className="text-xs font-semibold text-[#314034]">
+                                                                    {q.prompt}
+                                                                </p>
+                                                                <span className="shrink-0 text-[10px] font-medium text-[#69866c]">
+                                                                    {
+                                                                        q.answered_count
+                                                                    }{' '}
+                                                                    answered (
+                                                                    {
+                                                                        q.response_rate
+                                                                    }
+                                                                    %)
+                                                                </span>
+                                                            </div>
+                                                            {q.distribution
+                                                                .length > 0 ? (
+                                                                <div className="mt-2.5 space-y-1.5">
+                                                                    {q.distribution.map(
+                                                                        (d) => (
+                                                                            <div
+                                                                                key={
+                                                                                    d.label
+                                                                                }
+                                                                                className="text-[11px]"
+                                                                            >
+                                                                                <div className="flex justify-between text-[#556156]">
+                                                                                    <span className="truncate">
+                                                                                        {
                                                                                             d.label
                                                                                         }
-                                                                                        className="text-[11px]"
-                                                                                    >
-                                                                                        <div className="flex justify-between text-[#556156]">
-                                                                                            <span className="truncate">
-                                                                                                {
-                                                                                                    d.label
-                                                                                                }
-                                                                                            </span>
-                                                                                            <span className="font-semibold">
-                                                                                                {
-                                                                                                    d.count
-                                                                                                }{' '}
-                                                                                                (
-                                                                                                {
-                                                                                                    d.percentage
-                                                                                                }
-                                                                                                %)
-                                                                                            </span>
-                                                                                        </div>
-                                                                                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#eef1ec]">
-                                                                                            <div
-                                                                                                className="h-full rounded-full bg-[#4b7254]"
-                                                                                                style={{
-                                                                                                    width: `${Math.min(100, d.percentage)}%`,
-                                                                                                }}
-                                                                                            />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ),
-                                                                            )}
-                                                                        </div>
-                                                                    ) : (
-                                                                        <p className="mt-2 text-[11px] text-[#8a9289]">
-                                                                            No responses
-                                                                            recorded for
-                                                                            this
-                                                                            question
-                                                                            yet.
-                                                                        </p>
+                                                                                    </span>
+                                                                                    <span className="font-semibold">
+                                                                                        {
+                                                                                            d.count
+                                                                                        }{' '}
+                                                                                        (
+                                                                                        {
+                                                                                            d.percentage
+                                                                                        }
+                                                                                        %)
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#eef1ec]">
+                                                                                    <div
+                                                                                        className="h-full rounded-full bg-[#4b7254]"
+                                                                                        style={{
+                                                                                            width: `${Math.min(100, d.percentage)}%`,
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        ),
                                                                     )}
                                                                 </div>
-                                                            ),
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ) : null}
+                                                            ) : (
+                                                                <p className="mt-2 text-[11px] text-[#8a9289]">
+                                                                    No responses
+                                                                    recorded for
+                                                                    this
+                                                                    question
+                                                                    yet.
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
-                                </article>
-                            );
-                        })
-                    ) : (
-                        <EmptyState>
-                            {canManage
-                                ? 'No surveys have been created yet.'
-                                : 'There are no open surveys right now.'}
-                        </EmptyState>
-                    )}
-                </div>
-            );
-        }
+                                    ) : null}
+                                </div>
+                            )}
+                        </article>
+                    );
+                })
+            ) : (
+                <EmptyState>
+                    {canManage
+                        ? 'No surveys have been created yet.'
+                        : 'There are no open surveys right now.'}
+                </EmptyState>
+            )}
+        </div>
+    );
+}
 
 const ANNOUNCEMENT_CATEGORIES = [
     {
@@ -8317,8 +8316,8 @@ export function AnnouncementCenter({
         setEditingId(item.id);
         const hasCohort = Boolean(
             item.target_department_ids?.length ||
-                item.target_program_ids?.length ||
-                item.target_graduation_years?.length,
+            item.target_program_ids?.length ||
+            item.target_graduation_years?.length,
         );
         setShowCohortTargeting(hasCohort);
         setForm({
@@ -8372,9 +8371,9 @@ export function AnnouncementCenter({
             target_graduation_years: parsedYears.length ? parsedYears : null,
             ...(editingId === null
                 ? {
-                      publish_now: form.publish_now,
-                      notify_audience: form.notify_audience,
-                  }
+                    publish_now: form.publish_now,
+                    notify_audience: form.notify_audience,
+                }
                 : {}),
         };
 
@@ -8599,11 +8598,10 @@ export function AnnouncementCenter({
                                     key={key}
                                     type="button"
                                     onClick={() => setStatusFilter(key)}
-                                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
-                                        statusFilter === key
+                                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${statusFilter === key
                                             ? 'bg-[#2b5139] text-white'
                                             : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                    }`}
+                                        }`}
                                 >
                                     {label}
                                 </button>
@@ -8789,12 +8787,12 @@ export function AnnouncementCenter({
                                             ...form,
                                             audience_roles: event.target.checked
                                                 ? [
-                                                      ...form.audience_roles,
-                                                      value,
-                                                  ]
+                                                    ...form.audience_roles,
+                                                    value,
+                                                ]
                                                 : form.audience_roles.filter(
-                                                      (item) => item !== value,
-                                                  ),
+                                                    (item) => item !== value,
+                                                ),
                                         })
                                     }
                                     className="size-3.5 accent-[#2b5139]"
@@ -8840,23 +8838,22 @@ export function AnnouncementCenter({
                                                             target_department_ids:
                                                                 active
                                                                     ? form.target_department_ids.filter(
-                                                                          (
-                                                                              id,
-                                                                          ) =>
-                                                                              id !==
-                                                                              dept.id,
-                                                                      )
+                                                                        (
+                                                                            id,
+                                                                        ) =>
+                                                                            id !==
+                                                                            dept.id,
+                                                                    )
                                                                     : [
-                                                                          ...form.target_department_ids,
-                                                                          dept.id,
-                                                                      ],
+                                                                        ...form.target_department_ids,
+                                                                        dept.id,
+                                                                    ],
                                                         })
                                                     }
-                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                                                        active
+                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
                                                             ? 'bg-[#2b5139] text-white'
                                                             : 'border border-[#dce2d9] bg-white text-[#526053]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {dept.code} · {dept.name}
                                                 </button>
@@ -8887,23 +8884,22 @@ export function AnnouncementCenter({
                                                             target_program_ids:
                                                                 active
                                                                     ? form.target_program_ids.filter(
-                                                                          (
-                                                                              id,
-                                                                          ) =>
-                                                                              id !==
-                                                                              prog.id,
-                                                                      )
+                                                                        (
+                                                                            id,
+                                                                        ) =>
+                                                                            id !==
+                                                                            prog.id,
+                                                                    )
                                                                     : [
-                                                                          ...form.target_program_ids,
-                                                                          prog.id,
-                                                                      ],
+                                                                        ...form.target_program_ids,
+                                                                        prog.id,
+                                                                    ],
                                                         })
                                                     }
-                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                                                        active
+                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
                                                             ? 'bg-[#2b5139] text-white'
                                                             : 'border border-[#dce2d9] bg-white text-[#526053]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {prog.code}
                                                 </button>
@@ -8999,10 +8995,10 @@ export function AnnouncementCenter({
                                 {saving
                                     ? 'Saving…'
                                     : editingId !== null
-                                      ? 'Save changes'
-                                      : form.publish_now
-                                        ? 'Create & publish'
-                                        : 'Create announcement'}
+                                        ? 'Save changes'
+                                        : form.publish_now
+                                            ? 'Create & publish'
+                                            : 'Create announcement'}
                             </button>
                         </div>
                     </div>
@@ -9021,25 +9017,23 @@ export function AnnouncementCenter({
                             ) ?? ANNOUNCEMENT_CATEGORIES[0];
                         const hasCohort = Boolean(
                             announcement.target_department_ids?.length ||
-                                announcement.target_program_ids?.length ||
-                                announcement.target_graduation_years?.length,
+                            announcement.target_program_ids?.length ||
+                            announcement.target_graduation_years?.length,
                         );
 
                         return (
                             <article
                                 key={announcement.id}
-                                className={`flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-start sm:p-5 ${
-                                    announcement.is_pinned
+                                className={`flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-start sm:p-5 ${announcement.is_pinned
                                         ? 'border-[#cfe0cc] bg-[#fbfcfa]'
                                         : 'border-[#e9ebe5] bg-white'
-                                }`}
+                                    }`}
                             >
                                 <span
-                                    className={`grid size-10 shrink-0 place-items-center rounded-xl ${
-                                        announcement.is_pinned
+                                    className={`grid size-10 shrink-0 place-items-center rounded-xl ${announcement.is_pinned
                                             ? 'bg-[#2b5139] text-white'
                                             : 'bg-[#eef2eb] text-[#5e795f]'
-                                    }`}
+                                        }`}
                                 >
                                     <MessageSquareText className="size-4" />
                                 </span>
@@ -9061,7 +9055,7 @@ export function AnnouncementCenter({
                                         </span>
                                         {canManage &&
                                             announcement.is_public ===
-                                                false && (
+                                            false && (
                                                 <span className="rounded-full bg-[#f4f1ea] px-2.5 py-0.5 text-[10px] font-medium text-[#7c6a46]">
                                                     Internal only
                                                 </span>
@@ -9129,13 +9123,13 @@ export function AnnouncementCenter({
                                                 {announcement.audience_roles
                                                     ?.length
                                                     ? announcement.audience_roles
-                                                          .map(
-                                                              (r) =>
-                                                                  AUDIENCE_ROLE_LABELS[
-                                                                      r
-                                                                  ] ?? r,
-                                                          )
-                                                          .join(', ')
+                                                        .map(
+                                                            (r) =>
+                                                                AUDIENCE_ROLE_LABELS[
+                                                                r
+                                                                ] ?? r,
+                                                        )
+                                                        .join(', ')
                                                     : 'All roles'}
                                             </span>
                                         )}
@@ -9230,7 +9224,7 @@ export function AnnouncementCenter({
                                                 className="rounded-lg border border-[#e5dfd3] bg-[#faf8f4] px-2.5 py-1.5 text-[11px] font-semibold text-[#7a6338] disabled:opacity-60"
                                             >
                                                 {unpublishing ===
-                                                announcement.id
+                                                    announcement.id
                                                     ? 'Updating…'
                                                     : 'Unpublish'}
                                             </button>
@@ -9270,1535 +9264,4081 @@ export function AnnouncementCenter({
     );
 }
 
-        export function EmployerDirectory() {
-            const { data, loading, error, reload } =
-                useApiResource<ApiEnvelope<RawPagination<Employer>>>('/api/employers');
-            const [reviewing, setReviewing] = useState<number | null>(null);
+export function EmployerDirectory() {
+    const { data, loading, error, reload } =
+        useApiResource<ApiEnvelope<RawPagination<Employer>>>('/api/employers');
+    const [reviewing, setReviewing] = useState<number | null>(null);
 
-            async function reviewEmployer(
-                employerId: number,
-                verificationStatus: 'verified' | 'rejected',
-            ) {
-                setReviewing(employerId);
-                try {
-                    await apiRequest<ApiEnvelope<Employer>>(
-                        `/api/employers/${employerId}/verification`,
-                        {
-                            method: 'PATCH',
-                            body: { verification_status: verificationStatus },
-                        },
-                    );
-                    reload();
-                    toast.success(`Employer ${verificationStatus}.`);
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Employer review could not be saved.',
-                    );
-                } finally {
-                    setReviewing(null);
-                }
-            }
-
-            if (loading) {
-                return <LoadingState />;
-            }
-
-            if (error) {
-                return <ErrorState message={error} />;
-            }
-
-            const employers = data?.data.data ?? [];
-            return employers.length ? (
-                <div className="grid gap-3 md:grid-cols-2">
-                    {employers.map((employer) => (
-                        <article
-                            key={employer.id}
-                            className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <h2 className="text-sm font-semibold text-[#39463b]">
-                                        {employer.company_name}
-                                    </h2>
-                                    <p className="mt-1 text-xs text-[#7a8278]">
-                                        {employer.industry ?? 'Industry not listed'}
-                                    </p>
-                                </div>
-                                <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                    {employer.verification_status}
-                                </span>
-                            </div>
-                            <p className="mt-4 text-xs text-[#7a8278]">
-                                {employer.contact_email}
-                            </p>
-                            {employer.verification_status === 'pending' ? (
-                                <div className="mt-4 flex justify-end gap-2">
-                                    <button
-                                        type="button"
-                                        disabled={reviewing === employer.id}
-                                        onClick={() =>
-                                            void reviewEmployer(employer.id, 'rejected')
-                                        }
-                                        className="rounded-lg border border-[#e8eae4] px-3 py-2 text-[11px] font-semibold text-[#7e564e] disabled:opacity-60"
-                                    >
-                                        Reject
-                                    </button>
-                                    <button
-                                        type="button"
-                                        disabled={reviewing === employer.id}
-                                        onClick={() =>
-                                            void reviewEmployer(employer.id, 'verified')
-                                        }
-                                        className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
-                                    >
-                                        Verify
-                                    </button>
-                                </div>
-                            ) : null}
-                        </article>
-                    ))}
-                </div>
-            ) : (
-                <EmptyState>No employer records were found.</EmptyState>
+    async function reviewEmployer(
+        employerId: number,
+        verificationStatus: 'verified' | 'rejected',
+    ) {
+        setReviewing(employerId);
+        try {
+            await apiRequest<ApiEnvelope<Employer>>(
+                `/api/employers/${employerId}/verification`,
+                {
+                    method: 'PATCH',
+                    body: { verification_status: verificationStatus },
+                },
             );
+            reload();
+            toast.success(`Employer ${verificationStatus}.`);
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Employer review could not be saved.',
+            );
+        } finally {
+            setReviewing(null);
+        }
+    }
+
+    if (loading) {
+        return <LoadingState />;
+    }
+
+    if (error) {
+        return <ErrorState message={error} />;
+    }
+
+    const employers = data?.data.data ?? [];
+    return employers.length ? (
+        <div className="grid gap-3 md:grid-cols-2">
+            {employers.map((employer) => (
+                <article
+                    key={employer.id}
+                    className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
+                >
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <h2 className="text-sm font-semibold text-[#39463b]">
+                                {employer.company_name}
+                            </h2>
+                            <p className="mt-1 text-xs text-[#7a8278]">
+                                {employer.industry ?? 'Industry not listed'}
+                            </p>
+                        </div>
+                        <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                            {employer.verification_status}
+                        </span>
+                    </div>
+                    <p className="mt-4 text-xs text-[#7a8278]">
+                        {employer.contact_email}
+                    </p>
+                    {employer.verification_status === 'pending' ? (
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                disabled={reviewing === employer.id}
+                                onClick={() =>
+                                    void reviewEmployer(employer.id, 'rejected')
+                                }
+                                className="rounded-lg border border-[#e8eae4] px-3 py-2 text-[11px] font-semibold text-[#7e564e] disabled:opacity-60"
+                            >
+                                Reject
+                            </button>
+                            <button
+                                type="button"
+                                disabled={reviewing === employer.id}
+                                onClick={() =>
+                                    void reviewEmployer(employer.id, 'verified')
+                                }
+                                className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                            >
+                                Verify
+                            </button>
+                        </div>
+                    ) : null}
+                </article>
+            ))}
+        </div>
+    ) : (
+        <EmptyState>No employer records were found.</EmptyState>
+    );
+}
+
+type EmployerForm = {
+    company_name: string;
+    website: string;
+    description: string;
+    industry: string;
+    registration_number: string;
+    contact_email: string;
+    contact_phone: string;
+    address: string;
+};
+
+const emptyEmployerForm: EmployerForm = {
+    company_name: '',
+    website: '',
+    description: '',
+    industry: '',
+    registration_number: '',
+    contact_email: '',
+    contact_phone: '',
+    address: '',
+};
+
+export function CompanyProfileCenter({
+    editOpen,
+    onCloseEdit,
+}: {
+    editOpen: boolean;
+    onCloseEdit: () => void;
+}) {
+    const employers = useApiResource<ApiEnvelope<Employer[]>>(
+        '/api/employers/mine',
+    );
+    const employerId = employers.data?.data[0]?.id;
+    const profile = useApiResource<ApiEnvelope<Employer>>(
+        employerId ? `/api/employers/${employerId}` : null,
+    );
+    const employer = profile.data?.data;
+    const showForm = editOpen || !employerId;
+    const [form, setForm] = useState(emptyEmployerForm);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (employer) {
+            setForm({
+                company_name: employer.company_name,
+                website: employer.website ?? '',
+                description: employer.description ?? '',
+                industry: employer.industry ?? '',
+                registration_number: employer.registration_number ?? '',
+                contact_email: employer.contact_email,
+                contact_phone: employer.contact_phone ?? '',
+                address: employer.address ?? '',
+            });
+        }
+    }, [employer]);
+
+    async function saveCompany(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setSaving(true);
+        const body = Object.fromEntries(
+            Object.entries(form).map(([key, value]) => [key, value || null]),
+        );
+
+        try {
+            if (employerId) {
+                await apiRequest<ApiEnvelope<Employer>>(
+                    `/api/employers/${employerId}`,
+                    { method: 'PATCH', body },
+                );
+                profile.reload();
+                toast.success('Company profile updated.');
+            } else {
+                await apiRequest<ApiEnvelope<Employer>>('/api/employers', {
+                    method: 'POST',
+                    body,
+                });
+                employers.reload();
+                toast.success('Company submitted for verification.');
+            }
+            onCloseEdit();
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Company profile could not be saved.',
+            );
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    if (employers.loading || (employerId !== undefined && profile.loading)) {
+        return <LoadingState />;
+    }
+
+    if (employers.error) {
+        return <ErrorState message={employers.error} />;
+    }
+
+    if (profile.error) {
+        return <ErrorState message={profile.error} />;
+    }
+
+    return (
+        <div className="space-y-4">
+            {showForm ? (
+                <form
+                    onSubmit={saveCompany}
+                    className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
+                >
+                    {(
+                        [
+                            ['company_name', 'Company name', 'text'],
+                            ['contact_email', 'Contact email', 'email'],
+                            ['website', 'Website', 'url'],
+                            ['industry', 'Industry', 'text'],
+                            [
+                                'registration_number',
+                                'Registration number',
+                                'text',
+                            ],
+                            ['contact_phone', 'Contact phone', 'tel'],
+                        ] as const
+                    ).map(([name, label, type]) => (
+                        <label
+                            key={name}
+                            className="text-xs font-medium text-[#4d5a4f]"
+                        >
+                            {label}
+                            <input
+                                type={type}
+                                required={[
+                                    'company_name',
+                                    'contact_email',
+                                ].includes(name)}
+                                value={form[name]}
+                                onChange={(event) =>
+                                    setForm({
+                                        ...form,
+                                        [name]: event.target.value,
+                                    })
+                                }
+                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                            />
+                        </label>
+                    ))}
+                    <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                        Description
+                        <textarea
+                            value={form.description}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    description: event.target.value,
+                                })
+                            }
+                            className="mt-1.5 min-h-20 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                        />
+                    </label>
+                    <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                        Address
+                        <textarea
+                            value={form.address}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    address: event.target.value,
+                                })
+                            }
+                            className="mt-1.5 min-h-16 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                        />
+                    </label>
+                    <div className="flex items-center justify-end gap-2 sm:col-span-2">
+                        {employerId ? (
+                            <button
+                                type="button"
+                                onClick={onCloseEdit}
+                                className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
+                            >
+                                Cancel
+                            </button>
+                        ) : null}
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
+                        >
+                            {saving ? 'Saving…' : 'Save company profile'}
+                        </button>
+                    </div>
+                </form>
+            ) : employer ? (
+                <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <h2 className="text-lg font-semibold text-[#2e3c31]">
+                                {employer.company_name}
+                            </h2>
+                            <p className="mt-1 text-xs text-[#7a8278]">
+                                {employer.industry ?? 'Industry not listed'}
+                            </p>
+                        </div>
+                        <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
+                            {employer.verification_status}
+                        </span>
+                    </div>
+                    <p className="mt-4 text-xs leading-5 text-[#747c72]">
+                        {employer.description ??
+                            'Add a company description to introduce your organization to alumni.'}
+                    </p>
+                    <div className="mt-5 grid gap-2 border-t border-[#eff0ec] pt-4 text-xs text-[#737b71] sm:grid-cols-2">
+                        <span>{employer.contact_email}</span>
+                        <span>{employer.website ?? 'Website not listed'}</span>
+                    </div>
+                </section>
+            ) : null}
+        </div>
+    );
+}
+
+function formatSalary(min: number | null, max: number | null): string | null {
+    if (!min && !max) return null;
+    const fmt = (n: number) => `₱${n.toLocaleString()}`;
+    if (min && max) return `${fmt(min)} – ${fmt(max)} / mo`;
+    if (min) return `From ${fmt(min)} / mo`;
+    if (max) return `Up to ${fmt(max)} / mo`;
+    return null;
+}
+
+export function PublicJobs({
+    onNavigate,
+}: {
+    onNavigate?: (page: string) => void;
+} = {}) {
+    const jobs =
+        useApiResource<ApiEnvelope<RawPagination<JobPosting>>>('/api/jobs');
+    const applications = useApiResource<
+        ApiEnvelope<RawPagination<JobApplication>>
+    >('/api/applications/me');
+    const profileResource =
+        useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
+    const profile = profileResource.data?.data;
+    const documentsResource = useApiResource<
+        ApiEnvelope<AlumniDocumentItem[]>
+    >(profile?.id ? `/api/alumni/${profile.id}/documents` : null);
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [workplaceFilter, setWorkplaceFilter] = useState('all');
+    const [employmentTypeFilter, setEmploymentTypeFilter] = useState('all');
+    const [selectedJobForDetails, setSelectedJobForDetails] =
+        useState<JobPosting | null>(null);
+    const [selectedJobForApply, setSelectedJobForApply] =
+        useState<JobPosting | null>(null);
+
+    // Application Form State
+    const [resumeChoice, setResumeChoice] = useState<'archive' | 'upload'>('archive');
+    const [selectedResumeFile, setSelectedResumeFile] = useState<File | null>(null);
+    const [coverLetter, setCoverLetter] = useState('');
+    const [agreedToConsent, setAgreedToConsent] = useState(false);
+    const [applying, setApplying] = useState(false);
+
+    const archivedResumes = (documentsResource.data?.data ?? []).filter(
+        (d) => d.document_type === 'resume',
+    );
+    const latestArchivedResume = archivedResumes[0];
+
+    useEffect(() => {
+        if (latestArchivedResume) {
+            setResumeChoice('archive');
+        } else {
+            setResumeChoice('upload');
+        }
+    }, [latestArchivedResume]);
+
+    // Escape key handling for modals
+    useEffect(() => {
+        if (!selectedJobForDetails && !selectedJobForApply) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setSelectedJobForDetails(null);
+                setSelectedJobForApply(null);
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [selectedJobForDetails, selectedJobForApply]);
+
+    async function handleApplySubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!selectedJobForApply) return;
+        if (!agreedToConsent) {
+            toast.error(
+                'Please authorize the transmission of your verified credentials.',
+            );
+            return;
         }
 
-        type EmployerForm = {
-            company_name: string;
-            website: string;
-            description: string;
-            industry: string;
-            registration_number: string;
-            contact_email: string;
-            contact_phone: string;
-            address: string;
-        };
+        setApplying(true);
+        const formData = new FormData();
+        if (coverLetter.trim()) {
+            formData.append('cover_letter', coverLetter.trim());
+        }
+        if (resumeChoice === 'upload' && selectedResumeFile) {
+            formData.append('resume', selectedResumeFile);
+        }
 
-        const emptyEmployerForm: EmployerForm = {
-            company_name: '',
-            website: '',
-            description: '',
-            industry: '',
-            registration_number: '',
-            contact_email: '',
-            contact_phone: '',
-            address: '',
-        };
-
-        export function CompanyProfileCenter({
-            editOpen,
-            onCloseEdit,
-        }: {
-            editOpen: boolean;
-            onCloseEdit: () => void;
-        }) {
-            const employers = useApiResource<ApiEnvelope<Employer[]>>(
-                '/api/employers/mine',
+        try {
+            await apiRequest<ApiEnvelope<JobApplication>>(
+                `/api/jobs/${selectedJobForApply.id}/applications`,
+                {
+                    method: 'POST',
+                    body: formData,
+                },
             );
-            const employerId = employers.data?.data[0]?.id;
-            const profile = useApiResource<ApiEnvelope<Employer>>(
-                employerId ? `/api/employers/${employerId}` : null,
+            applications.reload();
+            toast.success(
+                `Application submitted to ${selectedJobForApply.employer?.company_name ?? 'employer'}!`,
             );
-            const employer = profile.data?.data;
-            const showForm = editOpen || !employerId;
-            const [form, setForm] = useState(emptyEmployerForm);
-            const [saving, setSaving] = useState(false);
+            setSelectedJobForApply(null);
+            setCoverLetter('');
+            setSelectedResumeFile(null);
+            setAgreedToConsent(false);
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Application could not be submitted.',
+            );
+        } finally {
+            setApplying(false);
+        }
+    }
 
-            useEffect(() => {
-                if (employer) {
-                    setForm({
-                        company_name: employer.company_name,
-                        website: employer.website ?? '',
-                        description: employer.description ?? '',
-                        industry: employer.industry ?? '',
-                        registration_number: employer.registration_number ?? '',
-                        contact_email: employer.contact_email,
-                        contact_phone: employer.contact_phone ?? '',
-                        address: employer.address ?? '',
-                    });
-                }
-            }, [employer]);
+    if (jobs.loading || applications.loading) {
+        return <LoadingState />;
+    }
 
-            async function saveCompany(event: FormEvent<HTMLFormElement>) {
-                event.preventDefault();
-                setSaving(true);
-                const body = Object.fromEntries(
-                    Object.entries(form).map(([key, value]) => [key, value || null]),
-                );
+    if (jobs.error) {
+        return <ErrorState message={jobs.error} />;
+    }
 
-                try {
-                    if (employerId) {
-                        await apiRequest<ApiEnvelope<Employer>>(
-                            `/api/employers/${employerId}`,
-                            { method: 'PATCH', body },
-                        );
-                        profile.reload();
-                        toast.success('Company profile updated.');
-                    } else {
-                        await apiRequest<ApiEnvelope<Employer>>('/api/employers', {
-                            method: 'POST',
-                            body,
-                        });
-                        employers.reload();
-                        toast.success('Company submitted for verification.');
-                    }
-                    onCloseEdit();
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Company profile could not be saved.',
-                    );
-                } finally {
-                    setSaving(false);
-                }
+    if (applications.error) {
+        return <ErrorState message={applications.error} />;
+    }
+
+    const postings = jobs.data?.data.data ?? [];
+    const submittedApplications = applications.data?.data.data ?? [];
+    const applicationByJobId = new Map(
+        submittedApplications.map((app) => [Number(app.job_posting_id), app]),
+    );
+
+    const filteredPostings = postings.filter((job) => {
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            const matchesTitle = job.title.toLowerCase().includes(q);
+            const matchesEmployer = job.employer?.company_name
+                .toLowerCase()
+                .includes(q);
+            const matchesLocation = job.location?.toLowerCase().includes(q);
+            const matchesDesc = job.description.toLowerCase().includes(q);
+            if (!matchesTitle && !matchesEmployer && !matchesLocation && !matchesDesc) {
+                return false;
             }
+        }
+        if (workplaceFilter !== 'all' && job.workplace_type !== workplaceFilter) {
+            return false;
+        }
+        if (
+            employmentTypeFilter !== 'all' &&
+            job.employment_type?.toLowerCase() !== employmentTypeFilter.toLowerCase()
+        ) {
+            return false;
+        }
+        return true;
+    });
 
-            if (employers.loading || (employerId !== undefined && profile.loading)) {
-                return <LoadingState />;
-            }
-
-            if (employers.error) {
-                return <ErrorState message={employers.error} />;
-            }
-
-            if (profile.error) {
-                return <ErrorState message={profile.error} />;
-            }
-
-            return (
-                <div className="space-y-4">
-                    {showForm ? (
-                        <form
-                            onSubmit={saveCompany}
-                            className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
+    return (
+        <div className="space-y-6">
+            {/* Opportunities Hero Header */}
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001c17] via-[#052d26] to-[#0b382f] p-6 text-white shadow-lg sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[#E47818]/15 blur-3xl" />
+                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-2 ring-white/20 text-[#E47818]">
+                            <BriefcaseBusiness className="size-8" />
+                        </div>
+                        <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                                    Career Opportunities
+                                </h1>
+                                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-200 border border-emerald-500/30">
+                                    Verified Partners
+                                </span>
+                            </div>
+                            <p className="mt-1 text-xs sm:text-sm text-emerald-100/80">
+                                Explore official roles shared by verified industry partners actively seeking SEAIT alumni.
+                            </p>
+                        </div>
+                    </div>
+                    {onNavigate && (
+                        <button
+                            type="button"
+                            onClick={() => onNavigate('My applications')}
+                            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-xs transition hover:bg-white/20 focus:outline-hidden focus:ring-2 focus:ring-white/40 cursor-pointer self-start sm:self-center"
                         >
-                            {(
-                                [
-                                    ['company_name', 'Company name', 'text'],
-                                    ['contact_email', 'Contact email', 'email'],
-                                    ['website', 'Website', 'url'],
-                                    ['industry', 'Industry', 'text'],
-                                    [
-                                        'registration_number',
-                                        'Registration number',
-                                        'text',
-                                    ],
-                                    ['contact_phone', 'Contact phone', 'tel'],
-                                ] as const
-                            ).map(([name, label, type]) => (
-                                <label
-                                    key={name}
-                                    className="text-xs font-medium text-[#4d5a4f]"
+                            <FileCheck className="size-4" />
+                            My Applications ({submittedApplications.length})
+                        </button>
+                    )}
+                </div>
+            </section>
+
+            {/* Filter & Search Toolbar */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+                    <input
+                        type="text"
+                        placeholder="Search by job title, company, or skills…"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50/50 pl-10 pr-4 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                    />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                    <select
+                        value={workplaceFilter}
+                        onChange={(e) => setWorkplaceFilter(e.target.value)}
+                        className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-xs text-zinc-700 focus:border-[#E47818] focus:outline-hidden"
+                    >
+                        <option value="all">All Workplace Types</option>
+                        <option value="onsite">On-site</option>
+                        <option value="hybrid">Hybrid</option>
+                        <option value="remote">Remote</option>
+                    </select>
+
+                    <select
+                        value={employmentTypeFilter}
+                        onChange={(e) => setEmploymentTypeFilter(e.target.value)}
+                        className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-xs text-zinc-700 focus:border-[#E47818] focus:outline-hidden"
+                    >
+                        <option value="all">All Employment Types</option>
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="contractual">Contractual</option>
+                        <option value="internship">Internship</option>
+                    </select>
+
+                    {(searchQuery || workplaceFilter !== 'all' || employmentTypeFilter !== 'all') && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSearchQuery('');
+                                setWorkplaceFilter('all');
+                                setEmploymentTypeFilter('all');
+                            }}
+                            className="text-xs font-semibold text-[#E47818] hover:underline px-2 cursor-pointer"
+                        >
+                            Reset
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Jobs Grid */}
+            {filteredPostings.length ? (
+                <div className="grid gap-5 lg:grid-cols-2">
+                    {filteredPostings.map((job) => {
+                        const application = applicationByJobId.get(job.id);
+                        const isApplied = Boolean(application);
+                        const salaryText = formatSalary(job.salary_min, job.salary_max);
+
+                        return (
+                            <article
+                                key={job.id}
+                                className="relative flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs transition hover:border-[#E47818]/40 hover:shadow-md"
+                            >
+                                <div>
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#001c17] text-base font-bold text-white shadow-xs">
+                                                {initials(job.employer?.company_name ?? 'Company')}
+                                            </span>
+                                            <div className="min-w-0">
+                                                <h2 className="text-base font-bold text-zinc-900 truncate">
+                                                    {job.title}
+                                                </h2>
+                                                <p className="mt-0.5 text-xs font-semibold text-zinc-600 flex items-center gap-1.5 truncate">
+                                                    <span>{job.employer?.company_name ?? 'Employer Partner'}</span>
+                                                    <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold text-zinc-700 capitalize shrink-0">
+                                            {job.employment_type ?? 'Full-time'}
+                                        </span>
+                                    </div>
+
+                                    {/* Metadata chips */}
+                                    <div className="mt-4 flex flex-wrap items-center gap-1.5 text-xs">
+                                        {job.location && (
+                                            <span className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-zinc-600">
+                                                <MapPin className="size-3" />
+                                                {job.location}
+                                            </span>
+                                        )}
+                                        {job.workplace_type && (
+                                            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-zinc-600 capitalize">
+                                                {job.workplace_type}
+                                            </span>
+                                        )}
+                                        {salaryText && (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-800 border border-emerald-200">
+                                                <Coins className="size-3 text-emerald-600" />
+                                                {salaryText}
+                                            </span>
+                                        )}
+                                        {job.closes_at && (
+                                            <span className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-zinc-500 text-[11px]">
+                                                <Clock className="size-3" />
+                                                Closes {new Date(job.closes_at).toLocaleDateString()}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Description snippet */}
+                                    <p className="mt-4 line-clamp-3 text-xs leading-relaxed text-zinc-600 whitespace-pre-line">
+                                        {job.description}
+                                    </p>
+                                </div>
+
+                                {/* Card Actions */}
+                                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-4">
+                                    {isApplied ? (
+                                        <div className="flex items-center justify-between w-full">
+                                            <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
+                                                <CheckCircle2 className="size-3.5 text-emerald-600" />
+                                                Application Submitted
+                                                <span className="text-[10px] text-emerald-600 font-normal">
+                                                    ({application?.status.replace('_', ' ')})
+                                                </span>
+                                            </span>
+                                            {onNavigate && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onNavigate('My applications')}
+                                                    className="text-xs font-semibold text-[#001c17] hover:underline cursor-pointer"
+                                                >
+                                                    View status →
+                                                </button>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedJobForDetails(job)}
+                                                className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-600 hover:text-zinc-900 cursor-pointer"
+                                            >
+                                                <Eye className="size-3.5" />
+                                                View Job Details
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedJobForApply(job)}
+                                                className="inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] transition cursor-pointer"
+                                            >
+                                                Apply with Verified Record
+                                                <ArrowRight className="size-3.5" />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </article>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="rounded-3xl border border-dashed border-zinc-200 p-12 text-center">
+                    <Briefcase className="size-10 mx-auto text-zinc-300" />
+                    <h3 className="mt-3 text-sm font-bold text-zinc-800">
+                        No job postings match your filter
+                    </h3>
+                    <p className="mt-1 text-xs text-zinc-500">
+                        Try adjusting your keywords or workplace filters.
+                    </p>
+                </div>
+            )}
+
+            {/* Job Details Modal */}
+            {selectedJobForDetails && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={() => setSelectedJobForDetails(null)}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Job Details"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-2xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="flex items-start justify-between pb-5 border-b border-zinc-100">
+                            <div className="flex items-center gap-4 min-w-0">
+                                <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#001c17] text-lg font-bold text-white shadow-sm">
+                                    {initials(selectedJobForDetails.employer?.company_name ?? 'Company')}
+                                </span>
+                                <div className="min-w-0">
+                                    <h2 className="text-lg font-bold text-zinc-900">
+                                        {selectedJobForDetails.title}
+                                    </h2>
+                                    <p className="text-xs font-semibold text-zinc-600 flex items-center gap-1.5 mt-0.5">
+                                        <span>{selectedJobForDetails.employer?.company_name}</span>
+                                        <CheckCircle2 className="size-3.5 text-emerald-600" />
+                                        {selectedJobForDetails.employer?.website && (
+                                            <a
+                                                href={selectedJobForDetails.employer.website}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="text-[#E47818] hover:underline inline-flex items-center gap-0.5 text-[11px]"
+                                            >
+                                                Visit Website <ExternalLink className="size-2.5" />
+                                            </a>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedJobForDetails(null)}
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 cursor-pointer"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <div className="mt-5 space-y-5 text-xs">
+                            <div className="flex flex-wrap items-center gap-2">
+                                {selectedJobForDetails.location && (
+                                    <span className="rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-700">
+                                        📍 {selectedJobForDetails.location}
+                                    </span>
+                                )}
+                                {selectedJobForDetails.employment_type && (
+                                    <span className="rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-700 capitalize">
+                                        💼 {selectedJobForDetails.employment_type}
+                                    </span>
+                                )}
+                                {selectedJobForDetails.workplace_type && (
+                                    <span className="rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-700 capitalize">
+                                        🏢 {selectedJobForDetails.workplace_type}
+                                    </span>
+                                )}
+                                {formatSalary(selectedJobForDetails.salary_min, selectedJobForDetails.salary_max) && (
+                                    <span className="rounded-full bg-emerald-50 px-3 py-1 font-bold text-emerald-800 border border-emerald-200">
+                                        💰 {formatSalary(selectedJobForDetails.salary_min, selectedJobForDetails.salary_max)}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                                    Position Overview & Requirements
+                                </h3>
+                                <div className="mt-2 text-xs leading-relaxed text-zinc-700 whitespace-pre-line rounded-2xl bg-zinc-50/70 p-4 border border-zinc-100">
+                                    {selectedJobForDetails.description}
+                                </div>
+                            </div>
+
+                            <div className="rounded-2xl border border-amber-200/80 bg-amber-50/40 p-4">
+                                <p className="font-semibold text-amber-950 flex items-center gap-1.5 text-xs">
+                                    <ShieldCheck className="size-4 text-[#E47818]" />
+                                    Verified SEAIT Recruitment Partner
+                                </p>
+                                <p className="mt-1 text-[11px] text-amber-800/80 leading-relaxed">
+                                    Applications through this portal transmit your verified alumni academic credentials and tracer records directly to the hiring coordinator.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex items-center justify-end gap-2.5 pt-4 border-t border-zinc-100">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedJobForDetails(null)}
+                                className="h-10 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                            >
+                                Close
+                            </button>
+                            {!applicationByJobId.has(selectedJobForDetails.id) && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const j = selectedJobForDetails;
+                                        setSelectedJobForDetails(null);
+                                        setSelectedJobForApply(j);
+                                    }}
+                                    className="h-10 rounded-xl bg-[#E47818] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
                                 >
-                                    {label}
-                                    <input
-                                        type={type}
-                                        required={[
-                                            'company_name',
-                                            'contact_email',
-                                        ].includes(name)}
-                                        value={form[name]}
-                                        onChange={(event) =>
-                                            setForm({
-                                                ...form,
-                                                [name]: event.target.value,
-                                            })
-                                        }
-                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                                    />
+                                    Apply with Verified Record
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Step-by-Step Job Application Modal */}
+            {selectedJobForApply && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={() => setSelectedJobForApply(null)}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Job Application Form"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
+                            <div className="flex items-center gap-3">
+                                <span className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-[#E47818]">
+                                    <Briefcase className="size-5" />
+                                </span>
+                                <div>
+                                    <h2 className="text-base font-bold text-zinc-900">
+                                        Apply for {selectedJobForApply.title}
+                                    </h2>
+                                    <p className="text-xs text-zinc-500">
+                                        {selectedJobForApply.employer?.company_name} · Official Alumni Application
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedJobForApply(null)}
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 cursor-pointer"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleApplySubmit} className="mt-5 space-y-5">
+                            {/* Section 1: Verified Credentials Snapshot Preview */}
+                            <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4 text-xs">
+                                <div className="flex items-center gap-1.5 font-bold text-emerald-950">
+                                    <ShieldCheck className="size-4 text-emerald-600" />
+                                    Verified SEAIT Credentials Snapshot (RA 10173)
+                                </div>
+                                <p className="mt-1 text-[11px] text-emerald-800/80 leading-relaxed">
+                                    To ensure trust with partner employers, ATMS captures an immutable snapshot of your registrar-verified credentials with this application:
+                                </p>
+                                <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                                    <div className="rounded-lg bg-white p-2 border border-emerald-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-bold">Applicant</span>
+                                        <span className="font-semibold text-zinc-900">{profile?.name ?? 'Verified Alumni'}</span>
+                                    </div>
+                                    <div className="rounded-lg bg-white p-2 border border-emerald-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-bold">Degree Program</span>
+                                        <span className="font-semibold text-zinc-900 truncate block">
+                                            {profile?.education_records?.[0]?.program ?? 'Degree Program'}
+                                        </span>
+                                    </div>
+                                    <div className="rounded-lg bg-white p-2 border border-emerald-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-bold">Class Year & Honors</span>
+                                        <span className="font-semibold text-zinc-900">
+                                            Class of {profile?.education_records?.[0]?.graduation_year ?? 'Alumni'}
+                                            {profile?.education_records?.[0]?.honors ? ` · ${profile.education_records[0].honors}` : ''}
+                                        </span>
+                                    </div>
+                                    <div className="rounded-lg bg-white p-2 border border-emerald-200/60">
+                                        <span className="text-zinc-400 block text-[9px] uppercase font-bold">Current Career Status</span>
+                                        <span className="font-semibold text-zinc-900 truncate block">
+                                            {profile?.employment_records?.[0]?.job_title ?? 'Active Job Seeker'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 2: Resume / CV Selection */}
+                            <div>
+                                <label className="block text-xs font-bold text-zinc-800">
+                                    Resume / Curriculum Vitae
                                 </label>
-                            ))}
-                            <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                                Description
-                                <textarea
-                                    value={form.description}
-                                    onChange={(event) =>
-                                        setForm({
-                                            ...form,
-                                            description: event.target.value,
-                                        })
-                                    }
-                                    className="mt-1.5 min-h-20 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                                />
-                            </label>
-                            <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                                Address
-                                <textarea
-                                    value={form.address}
-                                    onChange={(event) =>
-                                        setForm({
-                                            ...form,
-                                            address: event.target.value,
-                                        })
-                                    }
-                                    className="mt-1.5 min-h-16 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                                />
-                            </label>
-                            <div className="flex items-center justify-end gap-2 sm:col-span-2">
-                                {employerId ? (
+                                <p className="mt-0.5 text-[11px] text-zinc-500">
+                                    Select your verified archive resume or upload a tailored version for this role.
+                                </p>
+
+                                <div className="mt-2.5 space-y-2">
+                                    {latestArchivedResume ? (
+                                        <label className="flex items-center gap-3 rounded-xl border border-zinc-200 p-3 text-xs cursor-pointer hover:bg-zinc-50">
+                                            <input
+                                                type="radio"
+                                                name="resumeChoice"
+                                                value="archive"
+                                                checked={resumeChoice === 'archive'}
+                                                onChange={() => setResumeChoice('archive')}
+                                                className="size-4 text-[#001c17] focus:ring-[#E47818]"
+                                            />
+                                            <div className="min-w-0">
+                                                <span className="font-semibold text-zinc-900 block truncate">
+                                                    Use saved resume: {latestArchivedResume.original_name}
+                                                </span>
+                                                <span className="text-[10px] text-zinc-500">
+                                                    From your verified document archive
+                                                </span>
+                                            </div>
+                                        </label>
+                                    ) : null}
+
+                                    <label className="flex items-start gap-3 rounded-xl border border-zinc-200 p-3 text-xs cursor-pointer hover:bg-zinc-50">
+                                        <input
+                                            type="radio"
+                                            name="resumeChoice"
+                                            value="upload"
+                                            checked={resumeChoice === 'upload'}
+                                            onChange={() => setResumeChoice('upload')}
+                                            className="size-4 text-[#001c17] focus:ring-[#E47818] mt-0.5"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <span className="font-semibold text-zinc-900 block">
+                                                {latestArchivedResume ? 'Upload a new / tailored resume' : 'Upload your resume (.pdf, .doc, .docx)'}
+                                            </span>
+                                            {resumeChoice === 'upload' && (
+                                                <input
+                                                    type="file"
+                                                    required={!latestArchivedResume}
+                                                    accept=".pdf,.doc,.docx"
+                                                    onChange={(e) => setSelectedResumeFile(e.target.files?.[0] ?? null)}
+                                                    className="mt-2 block w-full text-xs text-zinc-600 file:mr-2 file:h-7 file:rounded-lg file:border-0 file:bg-[#001c17] file:px-2.5 file:text-xs file:font-semibold file:text-white hover:file:bg-[#0b382f] cursor-pointer"
+                                                />
+                                            )}
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Section 3: Cover Letter */}
+                            <div>
+                                <div className="flex items-center justify-between">
+                                    <label className="block text-xs font-bold text-zinc-800">
+                                        Cover Letter / Message to Hiring Team
+                                    </label>
+                                    <span className="text-[10px] text-zinc-400">
+                                        Optional · {coverLetter.length} / 10,000
+                                    </span>
+                                </div>
+                                <p className="mt-0.5 text-[11px] text-zinc-500">
+                                    Share why your background and SEAIT training make you a strong fit for this opportunity.
+                                </p>
+
+                                {/* Quick pitch templates */}
+                                <div className="mt-2 flex flex-wrap items-center gap-1.5">
                                     <button
                                         type="button"
-                                        onClick={onCloseEdit}
-                                        className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
+                                        onClick={() =>
+                                            setCoverLetter(
+                                                `Dear Hiring Team at ${selectedJobForApply.employer?.company_name},\n\nI am excited to submit my verified alumni application for the ${selectedJobForApply.title} position. As a graduate of South East Asian Institute of Technology, Inc., my coursework and practical training have prepared me to make an immediate impact on your team.\n\nThank you for reviewing my credentials, and I look forward to connecting with your team.`,
+                                            )
+                                        }
+                                        className="rounded-lg bg-zinc-100 px-2 py-1 text-[10px] font-semibold text-zinc-700 hover:bg-zinc-200 cursor-pointer"
                                     >
-                                        Cancel
+                                        + Insert SEAIT Graduate Intro
                                     </button>
-                                ) : null}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setCoverLetter(
+                                                (prev) =>
+                                                    prev +
+                                                    '\n\nMy technical capstone and academic honors demonstrate my commitment to excellence and high quality execution.',
+                                            )
+                                        }
+                                        className="rounded-lg bg-zinc-100 px-2 py-1 text-[10px] font-semibold text-zinc-700 hover:bg-zinc-200 cursor-pointer"
+                                    >
+                                        + Mention Academic Training
+                                    </button>
+                                </div>
+
+                                <textarea
+                                    rows={4}
+                                    value={coverLetter}
+                                    onChange={(e) => setCoverLetter(e.target.value)}
+                                    maxLength={10000}
+                                    placeholder="Write a message to introduce yourself..."
+                                    className="mt-2 w-full rounded-xl border border-zinc-300 p-3 text-xs text-zinc-800 focus:border-[#E47818] focus:outline-hidden"
+                                />
+                            </div>
+
+                            {/* Section 4: Data Privacy Consent */}
+                            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3.5">
+                                <label className="flex items-start gap-2.5 text-xs text-zinc-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        required
+                                        checked={agreedToConsent}
+                                        onChange={(e) => setAgreedToConsent(e.target.checked)}
+                                        className="mt-0.5 size-4 rounded border-zinc-300 text-[#001c17] focus:ring-[#E47818]"
+                                    />
+                                    <span className="leading-relaxed text-[11px]">
+                                        I authorize South East Asian Institute of Technology, Inc. to transmit my verified alumni profile snapshot, educational records, and resume to{' '}
+                                        <strong>{selectedJobForApply.employer?.company_name}</strong> in accordance with Republic Act No. 10173 (Data Privacy Act of 2012).
+                                    </span>
+                                </label>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-100">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedJobForApply(null)}
+                                    className="h-10 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
                                 <button
                                     type="submit"
-                                    disabled={saving}
-                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
+                                    disabled={applying || !agreedToConsent}
+                                    className="h-10 rounded-xl bg-[#E47818] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] transition disabled:opacity-50 cursor-pointer"
                                 >
-                                    {saving ? 'Saving…' : 'Save company profile'}
+                                    {applying ? 'Submitting Application…' : 'Submit Application'}
                                 </button>
                             </div>
                         </form>
-                    ) : employer ? (
-                        <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-[#2e3c31]">
-                                        {employer.company_name}
-                                    </h2>
-                                    <p className="mt-1 text-xs text-[#7a8278]">
-                                        {employer.industry ?? 'Industry not listed'}
-                                    </p>
-                                </div>
-                                <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                    {employer.verification_status}
-                                </span>
-                            </div>
-                            <p className="mt-4 text-xs leading-5 text-[#747c72]">
-                                {employer.description ??
-                                    'Add a company description to introduce your organization to alumni.'}
-                            </p>
-                            <div className="mt-5 grid gap-2 border-t border-[#eff0ec] pt-4 text-xs text-[#737b71] sm:grid-cols-2">
-                                <span>{employer.contact_email}</span>
-                                <span>{employer.website ?? 'Website not listed'}</span>
-                            </div>
-                        </section>
-                    ) : null}
+                    </div>
                 </div>
-            );
+            )}
+        </div>
+    );
+}
+
+type JobForm = {
+    employer_id: string;
+    title: string;
+    description: string;
+    location: string;
+    employment_type: string;
+    workplace_type: string;
+    salary_min: string;
+    salary_max: string;
+    closes_at: string;
+};
+
+const emptyJobForm: JobForm = {
+    employer_id: '',
+    title: '',
+    description: '',
+    location: '',
+    employment_type: 'full-time',
+    workplace_type: 'onsite',
+    salary_min: '',
+    salary_max: '',
+    closes_at: '',
+};
+
+export function EmployerJobs({
+    createOpen,
+    onCloseCreate,
+    onNavigate,
+}: {
+    createOpen: boolean;
+    onCloseCreate: () => void;
+    onNavigate: (page: string) => void;
+}) {
+    const employers = useApiResource<ApiEnvelope<Employer[]>>(
+        '/api/employers/mine',
+    );
+    const jobs =
+        useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
+            '/api/employer/jobs',
+        );
+    const [form, setForm] = useState(emptyJobForm);
+    const [creating, setCreating] = useState(false);
+    const [publishing, setPublishing] = useState<number | null>(null);
+    const [deleting, setDeleting] = useState<number | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<
+        'all' | 'published' | 'draft' | 'closing_soon'
+    >('all');
+    const [workplaceFilter, setWorkplaceFilter] = useState<string>('all');
+    const [selectedJobForPreview, setSelectedJobForPreview] =
+        useState<JobPosting | null>(null);
+    const [selectedJobForEdit, setSelectedJobForEdit] =
+        useState<JobPosting | null>(null);
+    const [editForm, setEditForm] = useState(emptyJobForm);
+    const [updating, setUpdating] = useState(false);
+    const [internalCreateOpen, setInternalCreateOpen] = useState(false);
+
+    const isModalCreateOpen = createOpen || internalCreateOpen;
+
+    useEffect(() => {
+        const firstEmployer = employers.data?.data[0];
+        if (firstEmployer && !form.employer_id) {
+            setForm((current) => ({
+                ...current,
+                employer_id: String(firstEmployer.id),
+            }));
         }
+    }, [employers.data, form.employer_id]);
 
-        export function PublicJobs() {
-            const jobs =
-                useApiResource<ApiEnvelope<RawPagination<JobPosting>>>('/api/jobs');
-            const applications = useApiResource<
-                ApiEnvelope<RawPagination<JobApplication>>
-            >('/api/applications/me');
-            const [coverLetters, setCoverLetters] = useState<Record<number, string>>(
-                {},
-            );
-            const [applying, setApplying] = useState<number | null>(null);
+    useEffect(() => {
+        if (selectedJobForEdit) {
+            setEditForm({
+                employer_id: String(selectedJobForEdit.employer_id),
+                title: selectedJobForEdit.title,
+                description: selectedJobForEdit.description,
+                location: selectedJobForEdit.location ?? '',
+                employment_type: selectedJobForEdit.employment_type ?? 'full-time',
+                workplace_type: selectedJobForEdit.workplace_type ?? 'onsite',
+                salary_min: selectedJobForEdit.salary_min
+                    ? String(selectedJobForEdit.salary_min)
+                    : '',
+                salary_max: selectedJobForEdit.salary_max
+                    ? String(selectedJobForEdit.salary_max)
+                    : '',
+                closes_at: selectedJobForEdit.closes_at
+                    ? selectedJobForEdit.closes_at.split('T')[0]
+                    : '',
+            });
+        }
+    }, [selectedJobForEdit]);
 
-            async function apply(jobId: number) {
-                setApplying(jobId);
-                try {
-                    await apiRequest<ApiEnvelope<JobApplication>>(
-                        `/api/jobs/${jobId}/applications`,
-                        {
-                            method: 'POST',
-                            body: {
-                                cover_letter: coverLetters[jobId] || null,
-                            },
-                        },
-                    );
-                    applications.reload();
-                    toast.success('Application submitted.');
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Application could not be submitted.',
-                    );
-                } finally {
-                    setApplying(null);
+    // Escape key handler for open modals
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                if (selectedJobForPreview) setSelectedJobForPreview(null);
+                if (selectedJobForEdit) setSelectedJobForEdit(null);
+                if (isModalCreateOpen) {
+                    setInternalCreateOpen(false);
+                    onCloseCreate();
                 }
             }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [selectedJobForPreview, selectedJobForEdit, isModalCreateOpen, onCloseCreate]);
 
-            if (jobs.loading || applications.loading) {
-                return <LoadingState />;
-            }
-
-            if (jobs.error) {
-                return <ErrorState message={jobs.error} />;
-            }
-
-            if (applications.error) {
-                return <ErrorState message={applications.error} />;
-            }
-
-            const appliedIds = new Set(
-                applications.data?.data.data.map((application) =>
-                    Number(application.job_posting_id),
-                ),
+    async function createJob(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setCreating(true);
+        try {
+            await apiRequest<ApiEnvelope<JobPosting>>('/api/employer/jobs', {
+                method: 'POST',
+                body: {
+                    ...form,
+                    employer_id: Number(form.employer_id),
+                    salary_min: form.salary_min
+                        ? Number(form.salary_min)
+                        : null,
+                    salary_max: form.salary_max
+                        ? Number(form.salary_max)
+                        : null,
+                    closes_at: form.closes_at || null,
+                },
+            });
+            setForm({
+                ...emptyJobForm,
+                employer_id: form.employer_id,
+            });
+            setInternalCreateOpen(false);
+            onCloseCreate();
+            jobs.reload();
+            toast.success('Job posting saved as a draft.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Job posting could not be created.',
             );
-            const postings = jobs.data?.data.data ?? [];
+        } finally {
+            setCreating(false);
+        }
+    }
 
-            return postings.length ? (
-                <div className="grid gap-4 lg:grid-cols-2">
-                    {postings.map((job) => (
-                        <article
-                            key={job.id}
-                            className="rounded-2xl border border-[#e9ebe5] bg-white p-5 transition hover:border-[#dce3d8] hover:shadow-sm"
+    async function updateJob(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!selectedJobForEdit) return;
+        setUpdating(true);
+        try {
+            await apiRequest<ApiEnvelope<JobPosting>>(
+                `/api/employer/jobs/${selectedJobForEdit.id}`,
+                {
+                    method: 'PATCH',
+                    body: {
+                        title: editForm.title,
+                        description: editForm.description,
+                        location: editForm.location || null,
+                        employment_type: editForm.employment_type || null,
+                        workplace_type: editForm.workplace_type || null,
+                        salary_min: editForm.salary_min
+                            ? Number(editForm.salary_min)
+                            : null,
+                        salary_max: editForm.salary_max
+                            ? Number(editForm.salary_max)
+                            : null,
+                        closes_at: editForm.closes_at || null,
+                    },
+                },
+            );
+            setSelectedJobForEdit(null);
+            jobs.reload();
+            toast.success('Job posting updated successfully.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Job posting could not be updated.',
+            );
+        } finally {
+            setUpdating(false);
+        }
+    }
+
+    async function publishJob(jobId: number) {
+        setPublishing(jobId);
+        try {
+            await apiRequest<ApiEnvelope<JobPosting>>(
+                `/api/employer/jobs/${jobId}/publish`,
+                { method: 'POST' },
+            );
+            jobs.reload();
+            if (selectedJobForPreview?.id === jobId) {
+                setSelectedJobForPreview((prev) =>
+                    prev ? { ...prev, status: 'published' } : null,
+                );
+            }
+            toast.success('Job posting published to SEAIT Alumni Job Board.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Job posting could not be published.',
+            );
+        } finally {
+            setPublishing(null);
+        }
+    }
+
+    async function deleteJob(jobId: number) {
+        if (
+            !window.confirm(
+                'Are you sure you want to delete this job posting draft?',
+            )
+        ) {
+            return;
+        }
+        setDeleting(jobId);
+        try {
+            await apiRequest(`/api/employer/jobs/${jobId}`, {
+                method: 'DELETE',
+            });
+            jobs.reload();
+            toast.success('Job posting deleted.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Job posting could not be deleted.',
+            );
+        } finally {
+            setDeleting(null);
+        }
+    }
+
+    function getRemainingDays(closesAt: string | null): {
+        text: string;
+        urgent: boolean;
+        expired: boolean;
+    } | null {
+        if (!closesAt) return null;
+        const target = new Date(closesAt).getTime();
+        const now = Date.now();
+        const diffDays = Math.ceil((target - now) / (1000 * 3600 * 24));
+        if (diffDays < 0) {
+            return { text: 'Expired', urgent: true, expired: true };
+        }
+        if (diffDays === 0) {
+            return { text: 'Closes today', urgent: true, expired: false };
+        }
+        if (diffDays === 1) {
+            return { text: 'Closes tomorrow', urgent: true, expired: false };
+        }
+        if (diffDays <= 7) {
+            return {
+                text: `Closes in ${diffDays} days`,
+                urgent: true,
+                expired: false,
+            };
+        }
+        return {
+            text: `Closes in ${diffDays} days`,
+            urgent: false,
+            expired: false,
+        };
+    }
+
+    if (employers.loading || jobs.loading) {
+        return <LoadingState />;
+    }
+
+    if (employers.error) {
+        return <ErrorState message={employers.error} />;
+    }
+
+    if (jobs.error) {
+        return <ErrorState message={jobs.error} />;
+    }
+
+    const companies = employers.data?.data ?? [];
+    const postings = jobs.data?.data.data ?? [];
+
+    // Pipeline KPI calculations
+    const totalPostings = postings.length;
+    const publishedPostings = postings.filter(
+        (j) => j.status === 'published',
+    ).length;
+    const draftPostings = postings.filter((j) => j.status === 'draft').length;
+    const totalApplicantsCount = postings.reduce(
+        (sum, j) => sum + (j.applications_count ?? 0),
+        0,
+    );
+    const closingSoonCount = postings.filter((j) => {
+        if (j.status !== 'published' || !j.closes_at) return false;
+        const d = Math.ceil(
+            (new Date(j.closes_at).getTime() - Date.now()) / (1000 * 3600 * 24),
+        );
+        return d >= 0 && d <= 14;
+    }).length;
+
+    // Filtered postings
+    const filteredPostings = postings.filter((job) => {
+        if (statusFilter === 'published' && job.status !== 'published')
+            return false;
+        if (statusFilter === 'draft' && job.status !== 'draft')
+            return false;
+        if (statusFilter === 'closing_soon') {
+            if (job.status !== 'published' || !job.closes_at) return false;
+            const d = Math.ceil(
+                (new Date(job.closes_at).getTime() - Date.now()) /
+                (1000 * 3600 * 24),
+            );
+            if (d < 0 || d > 14) return false;
+        }
+        if (
+            workplaceFilter !== 'all' &&
+            job.workplace_type?.toLowerCase() !== workplaceFilter.toLowerCase()
+        ) {
+            return false;
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            const matchesTitle = job.title.toLowerCase().includes(q);
+            const matchesLoc = job.location?.toLowerCase().includes(q) ?? false;
+            const matchesDesc = job.description.toLowerCase().includes(q);
+            const matchesType =
+                job.employment_type?.toLowerCase().includes(q) ?? false;
+            if (!matchesTitle && !matchesLoc && !matchesDesc && !matchesType) {
+                return false;
+            }
+        }
+        return true;
+    });
+
+    return (
+        <div className="space-y-6">
+            {/* Hero Recruitment Bar */}
+            <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#001c17] via-[#072c23] to-[#0e4437] p-6 text-white shadow-xl shadow-emerald-950/15 sm:p-7">
+                <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+                    <div className="max-w-2xl space-y-2">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300 backdrop-blur-md">
+                            <Sparkles className="size-3.5 text-[#E47818]" />
+                            SEAIT Employer Partner Job Management
+                        </div>
+                        <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+                            Career Opportunities & Job Postings
+                        </h1>
+                        <p className="text-xs leading-relaxed text-emerald-100/80">
+                            Create and manage job postings published to verified
+                            South East Asian Institute of Technology alumni. Review
+                            application pipelines, update salary ranges, and track
+                            talent acquisition.
+                        </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setInternalCreateOpen(true)}
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#E47818] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#c96611] transition-all cursor-pointer"
                         >
-                            <div className="flex items-start justify-between gap-3">
-                                <span className="grid size-11 place-items-center rounded-xl bg-[#e7eee6] text-base font-bold text-[#426147]">
-                                    {initials(job.employer?.company_name ?? 'Company')}
-                                </span>
-                                <span className="rounded-full bg-[#f3f5f0] px-2.5 py-1 text-[10px] font-medium text-[#687667]">
-                                    {job.employment_type ??
-                                        'Employment type not listed'}
-                                </span>
-                            </div>
-                            <h2 className="mt-4 font-semibold text-[#2e3c31]">
-                                {job.title}
-                            </h2>
-                            <p className="mt-1 text-sm text-[#687267]">
-                                {job.employer?.company_name ?? 'Employer'}
-                            </p>
-                            <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-[#778075]">
-                                <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1">
-                                    {job.location ?? 'Location not listed'}
-                                </span>
-                                {job.workplace_type ? (
-                                    <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1 capitalize">
-                                        {job.workplace_type}
-                                    </span>
-                                ) : null}
-                                {job.closes_at ? (
-                                    <span className="rounded-full border border-[#e9ebe5] px-2.5 py-1">
-                                        Closes{' '}
-                                        {new Date(job.closes_at).toLocaleDateString()}
-                                    </span>
-                                ) : null}
-                            </div>
-                            <p className="mt-4 line-clamp-4 text-xs leading-5 whitespace-pre-line text-[#737b71]">
-                                {job.description}
-                            </p>
-                            {appliedIds.has(job.id) ? (
-                                <p className="mt-5 rounded-xl bg-[#edf2eb] px-3 py-2.5 text-xs font-medium text-[#4c654f]">
-                                    Application submitted
-                                </p>
-                            ) : (
-                                <div className="mt-5 space-y-2 border-t border-[#eff0ec] pt-4">
-                                    <label className="block text-[11px] font-medium text-[#4d5a4f]">
-                                        Cover letter (optional)
-                                        <textarea
-                                            value={coverLetters[job.id] ?? ''}
-                                            onChange={(event) =>
-                                                setCoverLetters({
-                                                    ...coverLetters,
-                                                    [job.id]: event.target.value,
-                                                })
+                            <Plus className="size-4" /> Post New Opportunity
+                        </button>
+                    </div>
+                </div>
+
+                {/* Subtle decorative background glow */}
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-emerald-500/10 blur-3xl" />
+            </div>
+
+            {/* Warning if no registered companies */}
+            {!companies.length ? (
+                <section className="rounded-2xl border border-amber-200 bg-amber-50/50 p-6">
+                    <h2 className="text-sm font-semibold text-amber-900">
+                        Company profile required
+                    </h2>
+                    <p className="mt-1 text-xs text-amber-700">
+                        Register and verify your company before creating public
+                        job postings for SEAIT graduates.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => onNavigate('Company profile')}
+                        className="mt-4 rounded-xl bg-[#0b382f] px-4 py-2 text-xs font-semibold text-white cursor-pointer"
+                    >
+                        Set up company profile
+                    </button>
+                </section>
+            ) : null}
+
+            {/* Recruitment Pipeline Summary Cards */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+                            Total Roles
+                        </span>
+                        <div className="grid size-8 place-items-center rounded-xl bg-zinc-100 text-zinc-700">
+                            <Briefcase className="size-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 text-2xl font-bold tracking-tight text-zinc-900">
+                        {totalPostings}
+                    </div>
+                    <div className="mt-1 text-[11px] text-zinc-400">
+                        Postings in workspace
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/30 p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider">
+                            Live / Published
+                        </span>
+                        <div className="grid size-8 place-items-center rounded-xl bg-emerald-100 text-emerald-800">
+                            <CheckCircle2 className="size-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 text-2xl font-bold tracking-tight text-emerald-950">
+                        {publishedPostings}
+                    </div>
+                    <div className="mt-1 text-[11px] text-emerald-700">
+                        Active on alumni job board
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border border-blue-200/80 bg-blue-50/30 p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-blue-800 uppercase tracking-wider">
+                            Total Applicants
+                        </span>
+                        <div className="grid size-8 place-items-center rounded-xl bg-blue-100 text-blue-800">
+                            <UsersRound className="size-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 text-2xl font-bold tracking-tight text-blue-950">
+                        {totalApplicantsCount}
+                    </div>
+                    <div className="mt-1 text-[11px] text-blue-700">
+                        Verified alumni applications
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border border-amber-200/80 bg-amber-50/30 p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider">
+                            Drafts / Closing
+                        </span>
+                        <div className="grid size-8 place-items-center rounded-xl bg-amber-100 text-amber-800">
+                            <Clock className="size-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 text-2xl font-bold tracking-tight text-amber-950">
+                        {draftPostings}
+                        {closingSoonCount > 0 && (
+                            <span className="ml-2 text-xs font-semibold text-amber-700">
+                                ({closingSoonCount} soon)
+                            </span>
+                        )}
+                    </div>
+                    <div className="mt-1 text-[11px] text-amber-700">
+                        {draftPostings} drafts · {closingSoonCount} closing soon
+                    </div>
+                </div>
+            </div>
+
+            {/* Filter and Search Bar */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3.5 shadow-xs sm:flex-row sm:items-center sm:justify-between">
+                {/* Status Filter Tabs */}
+                <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto">
+                    {(
+                        [
+                            ['all', `All (${totalPostings})`],
+                            ['published', `Published (${publishedPostings})`],
+                            ['draft', `Drafts (${draftPostings})`],
+                            ['closing_soon', `Closing Soon (${closingSoonCount})`],
+                        ] as const
+                    ).map(([key, label]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => setStatusFilter(key)}
+                            className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${statusFilter === key
+                                    ? 'bg-[#0b382f] text-white shadow-xs'
+                                    : 'text-zinc-600 hover:bg-zinc-100'
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Search & Workplace controls */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative min-w-[180px] flex-1 sm:w-56">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-400" />
+                        <input
+                            type="text"
+                            placeholder="Search postings…"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="h-9 w-full rounded-xl border border-zinc-200 bg-zinc-50/50 pl-8 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#0b382f] focus:bg-white focus:outline-hidden"
+                        />
+                    </div>
+
+                    <select
+                        value={workplaceFilter}
+                        onChange={(e) => setWorkplaceFilter(e.target.value)}
+                        className="h-9 rounded-xl border border-zinc-200 bg-white px-2.5 text-xs font-medium text-zinc-700 focus:border-[#0b382f] focus:outline-hidden"
+                    >
+                        <option value="all">All Workplaces</option>
+                        <option value="onsite">On-site</option>
+                        <option value="hybrid">Hybrid</option>
+                        <option value="remote">Remote</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Job Postings Grid */}
+            {filteredPostings.length ? (
+                <div className="grid gap-4 lg:grid-cols-2">
+                    {filteredPostings.map((job) => {
+                        const employer = companies.find(
+                            (company) => company.id === job.employer_id,
+                        );
+                        const canPublish =
+                            employer?.verification_status === 'verified';
+                        const daysInfo = getRemainingDays(job.closes_at);
+                        const salaryText = formatSalary(
+                            job.salary_min,
+                            job.salary_max,
+                        );
+
+                        return (
+                            <article
+                                key={job.id}
+                                className="flex flex-col justify-between rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-xs transition-all hover:border-emerald-300 hover:shadow-md"
+                            >
+                                <div className="space-y-3">
+                                    {/* Header: Company & Status Badge */}
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800">
+                                                <Building2 className="size-3 text-[#E47818]" />
+                                                <span className="truncate">
+                                                    {job.employer?.company_name ??
+                                                        employer?.company_name ??
+                                                        'Institutional Partner'}
+                                                </span>
+                                                <span className="rounded-full bg-emerald-100 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800">
+                                                    Verified
+                                                </span>
+                                            </div>
+                                            <h2 className="mt-1 text-base font-bold text-zinc-900 line-clamp-1">
+                                                {job.title}
+                                            </h2>
+                                        </div>
+
+                                        <span
+                                            className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide capitalize ${job.status === 'published'
+                                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                                    : job.status === 'draft'
+                                                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                                        : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                                }`}
+                                        >
+                                            {job.status === 'published'
+                                                ? '● Live'
+                                                : job.status === 'draft'
+                                                    ? 'Draft'
+                                                    : 'Closed'}
+                                        </span>
+                                    </div>
+
+                                    {/* Metadata Pills Row */}
+                                    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                                        {job.employment_type && (
+                                            <span className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2 py-0.5 font-medium text-zinc-700 capitalize">
+                                                <Briefcase className="size-3 text-zinc-500" />
+                                                {job.employment_type}
+                                            </span>
+                                        )}
+                                        {job.workplace_type && (
+                                            <span className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2 py-0.5 font-medium text-zinc-700 capitalize">
+                                                <MapPin className="size-3 text-zinc-500" />
+                                                {job.workplace_type}
+                                            </span>
+                                        )}
+                                        {job.location && (
+                                            <span className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2 py-0.5 font-medium text-zinc-700">
+                                                {job.location}
+                                            </span>
+                                        )}
+                                        {salaryText && (
+                                            <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50/60 px-2 py-0.5 font-bold text-emerald-900">
+                                                <Coins className="size-3 text-emerald-600" />
+                                                {salaryText}
+                                            </span>
+                                        )}
+                                        {daysInfo && (
+                                            <span
+                                                className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 font-medium ${daysInfo.urgent
+                                                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                                        : 'bg-zinc-100 text-zinc-600'
+                                                    }`}
+                                            >
+                                                <Clock className="size-3" />
+                                                {daysInfo.text}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Description Excerpt */}
+                                    <p className="line-clamp-3 text-xs leading-relaxed text-zinc-600 whitespace-pre-line">
+                                        {job.description}
+                                    </p>
+                                </div>
+
+                                {/* Card Actions Footer */}
+                                <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 border-t border-zinc-100 pt-3">
+                                    {/* Applicant Count Pill */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (typeof window !== 'undefined') {
+                                                window.sessionStorage.setItem(
+                                                    'seait_employer_selected_job',
+                                                    String(job.id),
+                                                );
                                             }
-                                            maxLength={10000}
-                                            className="mt-1.5 min-h-20 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
-                                        />
-                                    </label>
-                                    <div className="flex justify-end">
+                                            onNavigate('Applicants');
+                                        }}
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50/70 px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-100 cursor-pointer"
+                                    >
+                                        <UsersRound className="size-3 text-emerald-700" />
+                                        <span>
+                                            {job.applications_count ?? 0} Alumni Applied
+                                        </span>
+                                    </button>
+
+                                    {/* Right Action Buttons */}
+                                    <div className="flex flex-wrap items-center gap-1.5">
                                         <button
                                             type="button"
-                                            disabled={applying === job.id}
-                                            onClick={() => void apply(job.id)}
-                                            className="rounded-lg bg-[#2b5139] px-4 py-2 text-[11px] font-semibold text-white disabled:opacity-60"
+                                            onClick={() =>
+                                                setSelectedJobForPreview(job)
+                                            }
+                                            className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
                                         >
-                                            {applying === job.id
-                                                ? 'Applying…'
-                                                : 'Apply now'}
+                                            <Eye className="size-3 text-zinc-500" />
+                                            Preview
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedJobForEdit(job)}
+                                            className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                                        >
+                                            <Pencil className="size-3 text-zinc-500" />
+                                            Edit
+                                        </button>
+
+                                        {job.status === 'draft' && (
+                                            <button
+                                                type="button"
+                                                disabled={
+                                                    !canPublish ||
+                                                    publishing === job.id
+                                                }
+                                                onClick={() =>
+                                                    void publishJob(job.id)
+                                                }
+                                                title={
+                                                    canPublish
+                                                        ? undefined
+                                                        : 'Company verification is required to publish jobs.'
+                                                }
+                                                className="inline-flex items-center gap-1 rounded-lg bg-[#0b382f] px-3 py-1.5 text-[11px] font-semibold text-white shadow-xs hover:bg-[#07241e] disabled:opacity-40 cursor-pointer"
+                                            >
+                                                {publishing === job.id
+                                                    ? 'Publishing…'
+                                                    : canPublish
+                                                        ? 'Publish Live'
+                                                        : 'Verification Required'}
+                                            </button>
+                                        )}
+
+                                        {job.status === 'draft' &&
+                                            (job.applications_count ?? 0) === 0 && (
+                                                <button
+                                                    type="button"
+                                                    disabled={deleting === job.id}
+                                                    onClick={() =>
+                                                        void deleteJob(job.id)
+                                                    }
+                                                    className="rounded-lg p-1.5 text-zinc-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+                                                    title="Delete Draft"
+                                                >
+                                                    <Trash2 className="size-3.5" />
+                                                </button>
+                                            )}
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (typeof window !== 'undefined') {
+                                                    window.sessionStorage.setItem(
+                                                        'seait_employer_selected_job',
+                                                        String(job.id),
+                                                    );
+                                                }
+                                                onNavigate('Applicants');
+                                            }}
+                                            className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-900 border border-emerald-200 hover:bg-emerald-100 cursor-pointer"
+                                        >
+                                            Review Applicants{' '}
+                                            <ArrowRight className="size-3" />
                                         </button>
                                     </div>
                                 </div>
-                            )}
-                        </article>
-                    ))}
+                            </article>
+                        );
+                    })}
                 </div>
             ) : (
                 <EmptyState>
-                    There are no published jobs available right now.
+                    {searchQuery ||
+                        statusFilter !== 'all' ||
+                        workplaceFilter !== 'all'
+                        ? 'No job postings match your active filter criteria.'
+                        : 'No job postings have been created yet. Click "+ Post New Opportunity" above to publish your first role.'}
                 </EmptyState>
-            );
-        }
+            )}
 
-        type JobForm = {
-            employer_id: string;
-            title: string;
-            description: string;
-            location: string;
-            employment_type: string;
-            workplace_type: string;
-            salary_min: string;
-            salary_max: string;
-            closes_at: string;
-        };
-
-        const emptyJobForm: JobForm = {
-            employer_id: '',
-            title: '',
-            description: '',
-            location: '',
-            employment_type: 'full-time',
-            workplace_type: 'onsite',
-            salary_min: '',
-            salary_max: '',
-            closes_at: '',
-        };
-
-        export function EmployerJobs({
-            createOpen,
-            onCloseCreate,
-            onNavigate,
-        }: {
-            createOpen: boolean;
-            onCloseCreate: () => void;
-            onNavigate: (page: string) => void;
-        }) {
-            const employers = useApiResource<ApiEnvelope<Employer[]>>(
-                '/api/employers/mine',
-            );
-            const jobs =
-                useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
-                    '/api/employer/jobs',
-                );
-            const [form, setForm] = useState(emptyJobForm);
-            const [creating, setCreating] = useState(false);
-            const [publishing, setPublishing] = useState<number | null>(null);
-
-            useEffect(() => {
-                const firstEmployer = employers.data?.data[0];
-                if (firstEmployer && !form.employer_id) {
-                    setForm((current) => ({
-                        ...current,
-                        employer_id: String(firstEmployer.id),
-                    }));
-                }
-            }, [employers.data, form.employer_id]);
-
-            async function createJob(event: FormEvent<HTMLFormElement>) {
-                event.preventDefault();
-                setCreating(true);
-                try {
-                    await apiRequest<ApiEnvelope<JobPosting>>('/api/employer/jobs', {
-                        method: 'POST',
-                        body: {
-                            ...form,
-                            employer_id: Number(form.employer_id),
-                            salary_min: form.salary_min
-                                ? Number(form.salary_min)
-                                : null,
-                            salary_max: form.salary_max
-                                ? Number(form.salary_max)
-                                : null,
-                            closes_at: form.closes_at || null,
-                        },
-                    });
-                    setForm({
-                        ...emptyJobForm,
-                        employer_id: form.employer_id,
-                    });
-                    onCloseCreate();
-                    jobs.reload();
-                    toast.success('Job posting saved as a draft.');
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Job posting could not be created.',
-                    );
-                } finally {
-                    setCreating(false);
-                }
-            }
-
-            async function publishJob(jobId: number) {
-                setPublishing(jobId);
-                try {
-                    await apiRequest<ApiEnvelope<JobPosting>>(
-                        `/api/employer/jobs/${jobId}/publish`,
-                        { method: 'POST' },
-                    );
-                    jobs.reload();
-                    toast.success('Job posting published.');
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Job posting could not be published.',
-                    );
-                } finally {
-                    setPublishing(null);
-                }
-            }
-
-            if (employers.loading || jobs.loading) {
-                return <LoadingState />;
-            }
-
-            if (employers.error) {
-                return <ErrorState message={employers.error} />;
-            }
-
-            if (jobs.error) {
-                return <ErrorState message={jobs.error} />;
-            }
-
-            const companies = employers.data?.data ?? [];
-            const postings = jobs.data?.data.data ?? [];
-            return (
-                <div className="space-y-4">
-                    {!companies.length ? (
-                        <section className="rounded-2xl border border-[#e9ebe5] bg-white p-6">
-                            <h2 className="text-sm font-semibold text-[#39463b]">
-                                Company profile required
-                            </h2>
-                            <p className="mt-2 text-xs text-[#7a8278]">
-                                Register your company before creating job postings.
-                            </p>
+            {/* Create Job Posting Modal */}
+            {isModalCreateOpen && companies.length && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+                    <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-7">
+                        <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                            <div>
+                                <h2 className="text-base font-bold text-zinc-900">
+                                    Post Career Opportunity
+                                </h2>
+                                <p className="text-xs text-zinc-500">
+                                    Create a job posting targeted to verified SEAIT
+                                    alumni.
+                                </p>
+                            </div>
                             <button
                                 type="button"
-                                onClick={() => onNavigate('Company profile')}
-                                className="mt-4 rounded-lg bg-[#2b5139] px-4 py-2 text-xs font-semibold text-white"
+                                onClick={() => {
+                                    setInternalCreateOpen(false);
+                                    onCloseCreate();
+                                }}
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 cursor-pointer"
                             >
-                                Set up company profile
+                                <X className="size-4" />
                             </button>
-                        </section>
-                    ) : null}
-                    {createOpen && companies.length ? (
-                        <form
-                            onSubmit={createJob}
-                            className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
-                        >
-                            <label className="text-xs font-medium text-[#4d5a4f]">
-                                Company
-                                <select
-                                    required
-                                    value={form.employer_id}
-                                    onChange={(event) =>
-                                        setForm({
-                                            ...form,
-                                            employer_id: event.target.value,
-                                        })
-                                    }
-                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                                >
-                                    {companies.map((company) => (
-                                        <option key={company.id} value={company.id}>
-                                            {company.company_name} ·{' '}
-                                            {company.verification_status}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label className="text-xs font-medium text-[#4d5a4f]">
-                                Job title
-                                <input
-                                    required
-                                    value={form.title}
-                                    onChange={(event) =>
-                                        setForm({ ...form, title: event.target.value })
-                                    }
-                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                                />
-                            </label>
-                            <label className="text-xs font-medium text-[#4d5a4f]">
-                                Employment type
-                                <select
-                                    value={form.employment_type}
-                                    onChange={(event) =>
-                                        setForm({
-                                            ...form,
-                                            employment_type: event.target.value,
-                                        })
-                                    }
-                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                                >
-                                    {[
-                                        ['full-time', 'Full-time'],
-                                        ['part-time', 'Part-time'],
-                                        ['contract', 'Contract'],
-                                        ['internship', 'Internship'],
-                                        ['temporary', 'Temporary'],
-                                    ].map(([value, label]) => (
-                                        <option key={value} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label className="text-xs font-medium text-[#4d5a4f]">
-                                Workplace
-                                <select
-                                    value={form.workplace_type}
-                                    onChange={(event) =>
-                                        setForm({
-                                            ...form,
-                                            workplace_type: event.target.value,
-                                        })
-                                    }
-                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                                >
-                                    {[
-                                        ['onsite', 'On-site'],
-                                        ['hybrid', 'Hybrid'],
-                                        ['remote', 'Remote'],
-                                    ].map(([value, label]) => (
-                                        <option key={value} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            {(
-                                [
-                                    ['location', 'Location', 'text'],
-                                    ['salary_min', 'Salary minimum', 'number'],
-                                    ['salary_max', 'Salary maximum', 'number'],
-                                    ['closes_at', 'Closing date', 'date'],
-                                ] as const
-                            ).map(([name, label, type]) => (
-                                <label
-                                    key={name}
-                                    className="text-xs font-medium text-[#4d5a4f]"
-                                >
-                                    {label}
-                                    <input
-                                        type={type}
-                                        min={type === 'number' ? '0' : undefined}
-                                        value={form[name]}
-                                        onChange={(event) =>
+                        </div>
+
+                        <form onSubmit={createJob} className="mt-5 space-y-4">
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Company
+                                    <select
+                                        required
+                                        value={form.employer_id}
+                                        onChange={(e) =>
                                             setForm({
                                                 ...form,
-                                                [name]: event.target.value,
+                                                employer_id: e.target.value,
                                             })
                                         }
-                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-xs"
+                                    >
+                                        {companies.map((company) => (
+                                            <option
+                                                key={company.id}
+                                                value={company.id}
+                                            >
+                                                {company.company_name} ·{' '}
+                                                {company.verification_status}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Job Title
+                                    <input
+                                        required
+                                        placeholder="e.g. Full-Stack Web Developer"
+                                        value={form.title}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                title: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs focus:border-[#0b382f]"
                                     />
                                 </label>
-                            ))}
-                            <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                                Description
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Employment Type
+                                    <select
+                                        value={form.employment_type}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                employment_type: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-xs"
+                                    >
+                                        <option value="full-time">Full-time</option>
+                                        <option value="part-time">Part-time</option>
+                                        <option value="contract">Contract</option>
+                                        <option value="internship">Internship</option>
+                                        <option value="temporary">Temporary</option>
+                                    </select>
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Workplace Setting
+                                    <select
+                                        value={form.workplace_type}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                workplace_type: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-xs"
+                                    >
+                                        <option value="onsite">On-site</option>
+                                        <option value="hybrid">Hybrid</option>
+                                        <option value="remote">Remote</option>
+                                    </select>
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Location
+                                    <input
+                                        placeholder="e.g. BGC, Taguig City"
+                                        value={form.location}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                location: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Application Deadline
+                                    <input
+                                        type="date"
+                                        value={form.closes_at}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                closes_at: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Salary Minimum (₱ / mo)
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="e.g. 45000"
+                                        value={form.salary_min}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                salary_min: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Salary Maximum (₱ / mo)
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="e.g. 65000"
+                                        value={form.salary_max}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                salary_max: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+                            </div>
+
+                            <label className="block text-xs font-semibold text-zinc-700">
+                                Job Description, Responsibilities & Qualifications
                                 <textarea
                                     required
+                                    rows={6}
+                                    placeholder="Outline responsibilities, required SEAIT academic background, and technical skills…"
                                     value={form.description}
-                                    onChange={(event) =>
+                                    onChange={(e) =>
                                         setForm({
                                             ...form,
-                                            description: event.target.value,
+                                            description: e.target.value,
                                         })
                                     }
-                                    className="mt-1.5 min-h-28 w-full rounded-lg border border-[#e3e7df] p-3 text-xs"
+                                    className="mt-1.5 w-full rounded-xl border border-zinc-200 p-3 text-xs leading-relaxed"
                                 />
                             </label>
-                            <div className="flex items-center justify-end gap-2 sm:col-span-2">
+
+                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100">
                                 <button
                                     type="button"
-                                    onClick={onCloseCreate}
-                                    className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
+                                    onClick={() => {
+                                        setInternalCreateOpen(false);
+                                        onCloseCreate();
+                                    }}
+                                    className="h-10 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={creating}
-                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
+                                    className="h-10 rounded-xl bg-[#0b382f] px-5 text-xs font-bold text-white shadow-xs hover:bg-[#07241e] disabled:opacity-60 cursor-pointer"
                                 >
-                                    {creating ? 'Saving…' : 'Save draft'}
+                                    {creating ? 'Saving…' : 'Save as Draft'}
                                 </button>
                             </div>
                         </form>
-                    ) : null}
-                    {postings.length ? (
-                        <div className="grid gap-3 lg:grid-cols-2">
-                            {postings.map((job) => {
-                                const employer = companies.find(
-                                    (company) => company.id === job.employer_id,
-                                );
-                                const canPublish =
-                                    employer?.verification_status === 'verified';
-                                return (
-                                    <article
-                                        key={job.id}
-                                        className="rounded-2xl border border-[#e9ebe5] bg-white p-5"
-                                    >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div>
-                                                <h2 className="text-sm font-semibold text-[#39463b]">
-                                                    {job.title}
-                                                </h2>
-                                                <p className="mt-1 text-xs text-[#7a8278]">
-                                                    {job.employer?.company_name ??
-                                                        employer?.company_name}
-                                                </p>
-                                            </div>
-                                            <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                                {job.status}
-                                            </span>
-                                        </div>
-                                        <p className="mt-3 line-clamp-3 text-xs leading-5 text-[#737b71]">
-                                            {job.description}
-                                        </p>
-                                        <p className="mt-3 text-[10px] text-[#858b82]">
-                                            {job.applications_count ?? 0} applications
-                                            {job.location ? ` · ${job.location}` : ''}
-                                        </p>
-                                        <div className="mt-4 flex flex-wrap justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => onNavigate('Applicants')}
-                                                className="rounded-lg border border-[#e8eae4] px-3 py-2 text-[11px] font-semibold text-[#526754]"
-                                            >
-                                                View applicants
-                                            </button>
-                                            {job.status === 'draft' ? (
-                                                <button
-                                                    type="button"
-                                                    disabled={
-                                                        !canPublish ||
-                                                        publishing === job.id
-                                                    }
-                                                    onClick={() =>
-                                                        void publishJob(job.id)
-                                                    }
-                                                    title={
-                                                        canPublish
-                                                            ? undefined
-                                                            : 'Company verification is required to publish jobs.'
-                                                    }
-                                                    className="rounded-lg bg-[#2b5139] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-40"
-                                                >
-                                                    {publishing === job.id
-                                                        ? 'Publishing…'
-                                                        : canPublish
-                                                            ? 'Publish'
-                                                            : 'Verification required'}
-                                                </button>
-                                            ) : null}
-                                        </div>
-                                    </article>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <EmptyState>No job postings have been created.</EmptyState>
-                    )}
+                    </div>
                 </div>
-            );
-        }
+            )}
 
-        export function AlumniApplications() {
-            const { data, loading, error } = useApiResource<
-                ApiEnvelope<RawPagination<JobApplication>>
-            >('/api/applications/me');
-
-            if (loading) {
-                return <LoadingState />;
-            }
-
-            if (error) {
-                return <ErrorState message={error} />;
-            }
-
-            const applications = data?.data.data ?? [];
-            return applications.length ? (
-                <div className="grid gap-3">
-                    {applications.map((application) => (
-                        <article
-                            key={application.id}
-                            className="flex flex-col gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-center sm:p-5"
-                        >
-                            <div className="min-w-0 flex-1">
-                                <h2 className="text-sm font-semibold text-[#39463b]">
-                                    {application.job_posting?.title ??
-                                        'Job posting no longer available'}
+            {/* Edit Job Posting Modal */}
+            {selectedJobForEdit && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+                    <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-7">
+                        <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                            <div>
+                                <h2 className="text-base font-bold text-zinc-900">
+                                    Edit Career Opportunity
                                 </h2>
-                                <p className="mt-1 text-xs text-[#7a8278]">
-                                    {application.job_posting?.employer?.company_name ??
-                                        'Employer'}
-                                    {application.job_posting?.location
-                                        ? ` · ${application.job_posting.location}`
-                                        : ''}
-                                </p>
-                                <p className="mt-2 text-[10px] text-[#858b82]">
-                                    Submitted{' '}
-                                    {new Date(
-                                        application.created_at,
-                                    ).toLocaleDateString()}
+                                <p className="text-xs text-zinc-500">
+                                    Update position details, compensation, and
+                                    application deadline.
                                 </p>
                             </div>
-                            <span className="rounded-full bg-[#f2f3ef] px-2.5 py-1 text-[10px] font-medium text-[#697367] capitalize">
-                                {application.status.replaceAll('_', ' ')}
-                            </span>
-                        </article>
-                    ))}
+                            <button
+                                type="button"
+                                onClick={() => setSelectedJobForEdit(null)}
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 cursor-pointer"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={updateJob} className="mt-5 space-y-4">
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <label className="text-xs font-semibold text-zinc-700 sm:col-span-2">
+                                    Job Title
+                                    <input
+                                        required
+                                        value={editForm.title}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                title: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs focus:border-[#0b382f]"
+                                    />
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Employment Type
+                                    <select
+                                        value={editForm.employment_type}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                employment_type: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-xs"
+                                    >
+                                        <option value="full-time">Full-time</option>
+                                        <option value="part-time">Part-time</option>
+                                        <option value="contract">Contract</option>
+                                        <option value="internship">Internship</option>
+                                        <option value="temporary">Temporary</option>
+                                    </select>
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Workplace Setting
+                                    <select
+                                        value={editForm.workplace_type}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                workplace_type: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-xs"
+                                    >
+                                        <option value="onsite">On-site</option>
+                                        <option value="hybrid">Hybrid</option>
+                                        <option value="remote">Remote</option>
+                                    </select>
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Location
+                                    <input
+                                        value={editForm.location}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                location: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Application Deadline
+                                    <input
+                                        type="date"
+                                        value={editForm.closes_at}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                closes_at: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Salary Minimum (₱ / mo)
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={editForm.salary_min}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                salary_min: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+
+                                <label className="text-xs font-semibold text-zinc-700">
+                                    Salary Maximum (₱ / mo)
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={editForm.salary_max}
+                                        onChange={(e) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                salary_max: e.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs"
+                                    />
+                                </label>
+                            </div>
+
+                            <label className="block text-xs font-semibold text-zinc-700">
+                                Job Description, Responsibilities & Qualifications
+                                <textarea
+                                    required
+                                    rows={6}
+                                    value={editForm.description}
+                                    onChange={(e) =>
+                                        setEditForm({
+                                            ...editForm,
+                                            description: e.target.value,
+                                        })
+                                    }
+                                    className="mt-1.5 w-full rounded-xl border border-zinc-200 p-3 text-xs leading-relaxed"
+                                />
+                            </label>
+
+                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedJobForEdit(null)}
+                                    className="h-10 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={updating}
+                                    className="h-10 rounded-xl bg-[#0b382f] px-5 text-xs font-bold text-white shadow-xs hover:bg-[#07241e] disabled:opacity-60 cursor-pointer"
+                                >
+                                    {updating ? 'Updating…' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Job Details & Public Preview Modal */}
+            {selectedJobForPreview && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+                    <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-7">
+                        <div className="flex items-start justify-between border-b border-zinc-100 pb-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
+                                    <Building2 className="size-3.5 text-[#E47818]" />
+                                    <span>
+                                        {selectedJobForPreview.employer
+                                            ?.company_name ??
+                                            'Institutional Partner'}
+                                    </span>
+                                    {selectedJobForPreview.employer
+                                        ?.industry && (
+                                            <span className="text-zinc-400">
+                                                ·{' '}
+                                                {
+                                                    selectedJobForPreview.employer
+                                                        .industry
+                                                }
+                                            </span>
+                                        )}
+                                </div>
+                                <h2 className="text-lg font-bold text-zinc-900">
+                                    {selectedJobForPreview.title}
+                                </h2>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedJobForPreview(null)}
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 cursor-pointer"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <div className="mt-5 space-y-5 text-xs">
+                            {/* Badges Grid */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                    className={`rounded-full px-3 py-1 text-xs font-bold capitalize ${selectedJobForPreview.status ===
+                                            'published'
+                                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                            : selectedJobForPreview.status ===
+                                                'draft'
+                                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                                : 'bg-zinc-100 text-zinc-600'
+                                        }`}
+                                >
+                                    {selectedJobForPreview.status === 'published'
+                                        ? '● Live on Alumni Job Board'
+                                        : selectedJobForPreview.status === 'draft'
+                                            ? 'Draft (Hidden from Public)'
+                                            : 'Closed'}
+                                </span>
+                                {selectedJobForPreview.employment_type && (
+                                    <span className="rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-700 capitalize">
+                                        💼{' '}
+                                        {selectedJobForPreview.employment_type}
+                                    </span>
+                                )}
+                                {selectedJobForPreview.workplace_type && (
+                                    <span className="rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-700 capitalize">
+                                        🏢 {selectedJobForPreview.workplace_type}
+                                    </span>
+                                )}
+                                {selectedJobForPreview.location && (
+                                    <span className="rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-700">
+                                        📍 {selectedJobForPreview.location}
+                                    </span>
+                                )}
+                                {formatSalary(
+                                    selectedJobForPreview.salary_min,
+                                    selectedJobForPreview.salary_max,
+                                ) && (
+                                        <span className="rounded-full bg-emerald-50 px-3 py-1 font-bold text-emerald-900 border border-emerald-200">
+                                            💰{' '}
+                                            {formatSalary(
+                                                selectedJobForPreview.salary_min,
+                                                selectedJobForPreview.salary_max,
+                                            )}
+                                        </span>
+                                    )}
+                            </div>
+
+                            {/* Application & Deadline Banner */}
+                            <div className="grid grid-cols-2 gap-3 rounded-2xl bg-zinc-50 p-4 border border-zinc-100">
+                                <div>
+                                    <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+                                        Application Volume
+                                    </span>
+                                    <p className="mt-1 text-sm font-bold text-zinc-900">
+                                        {selectedJobForPreview.applications_count ??
+                                            0}{' '}
+                                        Verified Candidates
+                                    </p>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+                                        Application Deadline
+                                    </span>
+                                    <p className="mt-1 text-sm font-bold text-zinc-900">
+                                        {selectedJobForPreview.closes_at
+                                            ? new Date(
+                                                selectedJobForPreview.closes_at,
+                                            ).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })
+                                            : 'Open until filled'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Detailed Description */}
+                            <div>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                                    Position Overview & Job Description
+                                </h3>
+                                <div className="mt-2 rounded-2xl border border-zinc-100 bg-zinc-50/70 p-4 leading-relaxed text-zinc-700 whitespace-pre-line text-xs">
+                                    {selectedJobForPreview.description}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex items-center justify-between border-t border-zinc-100 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const j = selectedJobForPreview;
+                                    setSelectedJobForPreview(null);
+                                    setSelectedJobForEdit(j);
+                                }}
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3.5 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                            >
+                                <Pencil className="size-3.5 text-zinc-500" />
+                                Edit Position
+                            </button>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedJobForPreview(null)}
+                                    className="h-9 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                                >
+                                    Close
+                                </button>
+                                {selectedJobForPreview.status === 'draft' && (
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            publishing ===
+                                            selectedJobForPreview.id
+                                        }
+                                        onClick={() =>
+                                            void publishJob(
+                                                selectedJobForPreview.id,
+                                            )
+                                        }
+                                        className="h-9 rounded-xl bg-[#0b382f] px-4 text-xs font-bold text-white shadow-xs hover:bg-[#07241e] cursor-pointer"
+                                    >
+                                        {publishing ===
+                                            selectedJobForPreview.id
+                                            ? 'Publishing…'
+                                            : 'Publish Live'}
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (typeof window !== 'undefined') {
+                                            window.sessionStorage.setItem(
+                                                'seait_employer_selected_job',
+                                                String(
+                                                    selectedJobForPreview.id,
+                                                ),
+                                            );
+                                        }
+                                        setSelectedJobForPreview(null);
+                                        onNavigate('Applicants');
+                                    }}
+                                    className="inline-flex items-center gap-1.5 h-9 rounded-xl bg-[#E47818] px-4 text-xs font-bold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
+                                >
+                                    View Applicants{' '}
+                                    <ArrowRight className="size-3.5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const applicationStatusBadges: Record<
+    string,
+    { label: string; className: string }
+> = {
+    submitted: {
+        label: 'Application Submitted',
+        className: 'bg-blue-50 text-blue-800 border-blue-200',
+    },
+    reviewing: {
+        label: 'Under Review',
+        className: 'bg-amber-50 text-amber-800 border-amber-200',
+    },
+    shortlisted: {
+        label: 'Shortlisted for Interview',
+        className: 'bg-purple-50 text-purple-800 border-purple-200',
+    },
+    hired: {
+        label: 'Offer / Hired',
+        className: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    },
+    rejected: {
+        label: 'Not Selected',
+        className: 'bg-zinc-100 text-zinc-600 border-zinc-200',
+    },
+};
+
+export function AlumniApplications({
+    onNavigate,
+}: {
+    onNavigate?: (page: string) => void;
+} = {}) {
+    const { data, loading, error } = useApiResource<
+        ApiEnvelope<RawPagination<JobApplication>>
+    >('/api/applications/me');
+
+    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'shortlisted' | 'closed'>('all');
+    const [viewingApp, setViewingApp] = useState<JobApplication | null>(null);
+
+    useEffect(() => {
+        if (!viewingApp) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setViewingApp(null);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [viewingApp]);
+
+    if (loading) {
+        return <LoadingState />;
+    }
+
+    if (error) {
+        return <ErrorState message={error} />;
+    }
+
+    const applications = data?.data.data ?? [];
+
+    const activeApplications = applications.filter(
+        (a) => ['submitted', 'reviewing'].includes(a.status),
+    );
+    const shortlistedApplications = applications.filter(
+        (a) => a.status === 'shortlisted',
+    );
+    const closedApplications = applications.filter(
+        (a) => ['hired', 'rejected'].includes(a.status),
+    );
+
+    const filteredApplications = applications.filter((app) => {
+        if (statusFilter === 'active') return ['submitted', 'reviewing'].includes(app.status);
+        if (statusFilter === 'shortlisted') return app.status === 'shortlisted';
+        if (statusFilter === 'closed') return ['hired', 'rejected'].includes(app.status);
+        return true;
+    });
+
+    return (
+        <div className="space-y-6">
+            {/* Hero Header */}
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001c17] via-[#052d26] to-[#0b382f] p-6 text-white shadow-lg sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[#E47818]/15 blur-3xl" />
+                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-2 ring-white/20 text-[#E47818]">
+                            <FileCheck className="size-8" />
+                        </div>
+                        <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                                    My Job Applications
+                                </h1>
+                                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-200 border border-emerald-500/30">
+                                    RA 10173 Protected
+                                </span>
+                            </div>
+                            <p className="mt-1 text-xs sm:text-sm text-emerald-100/80">
+                                Track application status, review hiring feedback, and access frozen verified credential snapshots.
+                            </p>
+                        </div>
+                    </div>
+                    {onNavigate && (
+                        <button
+                            type="button"
+                            onClick={() => onNavigate('Career opportunities')}
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#E47818] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#c96611] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/60 cursor-pointer self-start sm:self-center"
+                        >
+                            <Briefcase className="size-4" />
+                            Explore Job Board
+                        </button>
+                    )}
+                </div>
+            </section>
+
+            {/* Filter Tabs */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200/80 pb-3">
+                {[
+                    { id: 'all', label: 'All Applications', count: applications.length },
+                    { id: 'active', label: 'Under Review / Active', count: activeApplications.length },
+                    { id: 'shortlisted', label: 'Shortlisted', count: shortlistedApplications.length },
+                    { id: 'closed', label: 'Completed / Decision', count: closedApplications.length },
+                ].map((tab) => (
+                    <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setStatusFilter(tab.id as typeof statusFilter)}
+                        className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${statusFilter === tab.id
+                                ? 'bg-[#001c17] text-white shadow-2xs'
+                                : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'
+                            }`}
+                    >
+                        <span>{tab.label}</span>
+                        <span
+                            className={`rounded-full px-1.5 py-0.2 text-[10px] ${statusFilter === tab.id
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-zinc-100 text-zinc-600'
+                                }`}
+                        >
+                            {tab.count}
+                        </span>
+                    </button>
+                ))}
+            </div>
+
+            {/* Applications List */}
+            {filteredApplications.length ? (
+                <div className="grid gap-4">
+                    {filteredApplications.map((application) => {
+                        const statusMeta =
+                            applicationStatusBadges[application.status] ?? {
+                                label: application.status.replace('_', ' '),
+                                className: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+                            };
+
+                        return (
+                            <article
+                                key={application.id}
+                                className="flex flex-col gap-4 rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition hover:border-[#E47818]/40 sm:flex-row sm:items-center sm:justify-between"
+                            >
+                                <div className="flex items-start gap-3.5 min-w-0">
+                                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#001c17] text-base font-bold text-white shadow-xs">
+                                        {initials(
+                                            application.job_posting?.employer?.company_name ??
+                                            'Employer',
+                                        )}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <h2 className="text-sm sm:text-base font-bold text-zinc-900 truncate">
+                                            {application.job_posting?.title ??
+                                                'Position title archived'}
+                                        </h2>
+                                        <p className="mt-0.5 text-xs font-semibold text-zinc-600 flex items-center gap-1.5 truncate">
+                                            <span>
+                                                {application.job_posting?.employer
+                                                    ?.company_name ?? 'Employer Partner'}
+                                            </span>
+                                            {application.job_posting?.location && (
+                                                <>
+                                                    <span>·</span>
+                                                    <span className="font-normal text-zinc-500">
+                                                        {application.job_posting.location}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </p>
+                                        <p className="mt-2 text-[11px] text-zinc-400 flex items-center gap-1.5">
+                                            <Calendar className="size-3" />
+                                            Submitted on{' '}
+                                            {new Date(
+                                                application.created_at,
+                                            ).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-center shrink-0">
+                                    <span
+                                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusMeta.className}`}
+                                    >
+                                        {statusMeta.label}
+                                    </span>
+
+                                    {application.resume_snapshot_path && (
+                                        <a
+                                            href={`/api/applications/${application.id}/resume?inline=1`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                                            title="View transmitted resume snapshot"
+                                        >
+                                            <Eye className="size-3" />
+                                            Resume
+                                        </a>
+                                    )}
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewingApp(application)}
+                                        className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold text-zinc-800 hover:bg-zinc-100 cursor-pointer"
+                                    >
+                                        <Eye className="size-3" />
+                                        View Snapshot
+                                    </button>
+                                </div>
+                            </article>
+                        );
+                    })}
                 </div>
             ) : (
-                <EmptyState>
-                    You have not submitted any job applications yet.
-                </EmptyState>
+                <div className="rounded-3xl border border-dashed border-zinc-200 p-12 text-center">
+                    <FileCheck className="size-10 mx-auto text-zinc-300" />
+                    <h3 className="mt-3 text-sm font-bold text-zinc-800">
+                        No applications in this view
+                    </h3>
+                    <p className="mt-1 text-xs text-zinc-500">
+                        {statusFilter === 'all'
+                            ? 'You have not submitted any job applications yet.'
+                            : 'There are no applications matching this status filter.'}
+                    </p>
+                    {onNavigate && (
+                        <button
+                            type="button"
+                            onClick={() => onNavigate('Career opportunities')}
+                            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
+                        >
+                            Browse Career Opportunities
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Application Snapshot Modal */}
+            {viewingApp && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={() => setViewingApp(null)}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Application Snapshot"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
+                            <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#E47818]">
+                                    RA 10173 Application Snapshot
+                                </span>
+                                <h2 className="text-base font-bold text-zinc-900 mt-0.5">
+                                    {viewingApp.job_posting?.title ?? 'Position Application'}
+                                </h2>
+                                <p className="text-xs text-zinc-500">
+                                    {viewingApp.job_posting?.employer?.company_name} · Submitted{' '}
+                                    {new Date(viewingApp.created_at).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setViewingApp(null)}
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 cursor-pointer"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <div className="mt-5 space-y-4 text-xs">
+                            {/* Application Status Badge */}
+                            <div className="flex items-center justify-between rounded-2xl bg-zinc-50 p-3.5 border border-zinc-100">
+                                <span className="font-semibold text-zinc-700">Hiring Status</span>
+                                <span
+                                    className={`rounded-full border px-3 py-1 font-semibold ${applicationStatusBadges[viewingApp.status]?.className ??
+                                        'bg-zinc-100 text-zinc-700 border-zinc-200'
+                                        }`}
+                                >
+                                    {applicationStatusBadges[viewingApp.status]?.label ??
+                                        viewingApp.status}
+                                </span>
+                            </div>
+
+                            {/* Submitted Cover Letter */}
+                            {viewingApp.cover_letter ? (
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                                        Submitted Cover Letter / Note
+                                    </h3>
+                                    <div className="mt-1.5 rounded-2xl bg-zinc-50/70 p-4 border border-zinc-200/60 leading-relaxed text-zinc-700 whitespace-pre-line text-xs">
+                                        {viewingApp.cover_letter}
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {/* Frozen Profile Snapshot Details */}
+                            {viewingApp.profile_snapshot && (
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                                        Transmitted Verified Credentials Snapshot
+                                    </h3>
+                                    <div className="mt-1.5 rounded-2xl border border-emerald-200/80 bg-emerald-50/40 p-4 space-y-3">
+                                        <div>
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                                                Degree & Academic Qualifications
+                                            </span>
+                                            {Array.isArray(viewingApp.profile_snapshot.education) &&
+                                                viewingApp.profile_snapshot.education.length > 0 ? (
+                                                <div className="mt-1 space-y-1">
+                                                    {viewingApp.profile_snapshot.education.map(
+                                                        (edu: any, i: number) => (
+                                                            <p key={i} className="font-semibold text-zinc-900">
+                                                                {edu.program ?? edu.degree}
+                                                                {edu.graduation_year ? ` · Class of ${edu.graduation_year}` : ''}
+                                                                {edu.honors ? ` · ${edu.honors}` : ''}
+                                                                {edu.gwa ? ` · GWA ${edu.gwa}` : ''}
+                                                            </p>
+                                                        ),
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <p className="font-semibold text-zinc-900 mt-0.5">
+                                                    Verified Alumni Graduate
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {Array.isArray(viewingApp.profile_snapshot.employment) &&
+                                            viewingApp.profile_snapshot.employment.length > 0 && (
+                                                <div className="border-t border-emerald-200/60 pt-2">
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                                                        Transmitted Career Experience
+                                                    </span>
+                                                    <p className="font-semibold text-zinc-900 mt-0.5">
+                                                        {viewingApp.profile_snapshot.employment[0].job_title} at{' '}
+                                                        {viewingApp.profile_snapshot.employment[0].employer_name}
+                                                    </p>
+                                                </div>
+                                            )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Resume Snapshot View & Download */}
+                            {viewingApp.resume_snapshot_path && (
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-zinc-200/80 bg-white p-4">
+                                    <div className="flex items-center gap-2.5">
+                                        <FileText className="size-4 text-[#001c17]" />
+                                        <div>
+                                            <span className="block font-semibold text-zinc-800 text-xs">
+                                                Transmitted Resume Snapshot
+                                            </span>
+                                            <span className="block text-[10px] text-zinc-400">
+                                                {viewingApp.resume_snapshot_path.toLowerCase().endsWith('.docx')
+                                                    ? 'Microsoft Word (.docx)'
+                                                    : viewingApp.resume_snapshot_path.toLowerCase().endsWith('.doc')
+                                                    ? 'Word Document (.doc)'
+                                                    : 'PDF Document (.pdf)'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <a
+                                            href={`/api/applications/${viewingApp.id}/resume?inline=1`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+                                        >
+                                            <Eye className="size-3" /> View Online
+                                        </a>
+                                        <a
+                                            href={`/api/applications/${viewingApp.id}/resume?download=1`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1 rounded-xl bg-[#001c17] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#0b382f]"
+                                        >
+                                            <Download className="size-3" /> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 flex justify-end border-t border-zinc-100 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => setViewingApp(null)}
+                                className="h-10 rounded-xl bg-zinc-100 px-5 text-xs font-semibold text-zinc-700 hover:bg-zinc-200 cursor-pointer"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const employerStatusConfig: Record<
+    string,
+    { label: string; badgeClass: string; actionLabel: string }
+> = {
+    submitted: {
+        label: 'New / Submitted',
+        badgeClass: 'bg-blue-50 text-blue-800 border-blue-200',
+        actionLabel: 'Mark Under Review',
+    },
+    reviewing: {
+        label: 'Under Review',
+        badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
+        actionLabel: 'Shortlist for Interview',
+    },
+    shortlisted: {
+        label: 'Shortlisted for Interview',
+        badgeClass: 'bg-purple-50 text-purple-800 border-purple-200',
+        actionLabel: 'Extend Offer / Hire',
+    },
+    hired: {
+        label: 'Offer / Hired',
+        badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        actionLabel: 'Hired',
+    },
+    rejected: {
+        label: 'Not Selected',
+        badgeClass: 'bg-zinc-100 text-zinc-600 border-zinc-200',
+        actionLabel: 'Not Selected',
+    },
+};
+
+export function EmployerApplicants({
+    onNavigate,
+}: {
+    onNavigate?: (page: string) => void;
+} = {}) {
+    const jobs =
+        useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
+            '/api/employer/jobs',
+        );
+    const [selectedJobId, setSelectedJobId] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            return (
+                window.sessionStorage.getItem(
+                    'seait_employer_selected_job',
+                ) ?? ''
             );
         }
+        return '';
+    });
+    const [statusFilter, setStatusFilter] = useState<
+        'all' | 'submitted' | 'reviewing' | 'shortlisted' | 'hired' | 'rejected'
+    >('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [inspectingApp, setInspectingApp] =
+        useState<JobApplication | null>(null);
+    const [updating, setUpdating] = useState<number | null>(null);
 
-        export function EmployerApplicants() {
-            const jobs =
-                useApiResource<ApiEnvelope<RawPagination<JobPosting>>>(
-                    '/api/employer/jobs',
+    const postings = jobs.data?.data.data ?? [];
+    const activeJobId =
+        selectedJobId || (postings[0] ? String(postings[0].id) : '');
+    const currentJob =
+        postings.find((j) => String(j.id) === activeJobId) ?? postings[0];
+
+    const applications = useApiResource<
+        ApiEnvelope<RawPagination<JobApplication>>
+    >(activeJobId ? `/api/employer/jobs/${activeJobId}/applications` : null);
+
+    useEffect(() => {
+        if (!inspectingApp) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setInspectingApp(null);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [inspectingApp]);
+
+    const handleSelectJob = (id: string) => {
+        setSelectedJobId(id);
+        if (typeof window !== 'undefined') {
+            window.sessionStorage.setItem('seait_employer_selected_job', id);
+        }
+    };
+
+    async function updateStatus(applicationId: number, status: string) {
+        setUpdating(applicationId);
+        try {
+            await apiRequest<ApiEnvelope<JobApplication>>(
+                `/api/applications/${applicationId}/status`,
+                { method: 'PATCH', body: { status } },
+            );
+            applications.reload();
+            jobs.reload();
+            if (inspectingApp && inspectingApp.id === applicationId) {
+                setInspectingApp((prev) =>
+                    prev ? { ...prev, status } : null,
                 );
-            const [selectedJobId, setSelectedJobId] = useState('');
-            const postings = jobs.data?.data.data ?? [];
-            const selectedJob =
-                selectedJobId || (postings[0] ? String(postings[0].id) : '');
-            const applications = useApiResource<
-                ApiEnvelope<RawPagination<JobApplication>>
-            >(selectedJob ? `/api/employer/jobs/${selectedJob}/applications` : null);
-            const [updating, setUpdating] = useState<number | null>(null);
-
-            async function updateStatus(applicationId: number, status: string) {
-                setUpdating(applicationId);
-                try {
-                    await apiRequest<ApiEnvelope<JobApplication>>(
-                        `/api/applications/${applicationId}/status`,
-                        { method: 'PATCH', body: { status } },
-                    );
-                    applications.reload();
-                    toast.success('Application status updated.');
-                } catch (error) {
-                    toast.error(
-                        error instanceof ApiError
-                            ? error.message
-                            : 'Application status could not be updated.',
-                    );
-                } finally {
-                    setUpdating(null);
-                }
             }
+            toast.success(
+                `Candidate status updated to ${status.replace('_', ' ')}.`,
+            );
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Application status could not be updated.',
+            );
+        } finally {
+            setUpdating(null);
+        }
+    }
 
-            if (jobs.loading) {
-                return <LoadingState />;
+    if (jobs.loading) {
+        return <LoadingState />;
+    }
+
+    if (jobs.error) {
+        return <ErrorState message={jobs.error} />;
+    }
+
+    if (!postings.length) {
+        return (
+            <div className="rounded-3xl border border-dashed border-zinc-200 bg-white p-12 text-center">
+                <Briefcase className="size-12 mx-auto text-zinc-300" />
+                <h2 className="mt-3 text-base font-bold text-zinc-900">
+                    No job postings available
+                </h2>
+                <p className="mt-1 text-xs text-zinc-500 max-w-md mx-auto">
+                    Create and publish job postings to start receiving verified applications from SEAIT graduates.
+                </p>
+                {onNavigate && (
+                    <button
+                        type="button"
+                        onClick={() => onNavigate('Job postings')}
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-4 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
+                    >
+                        <Plus className="size-4" /> Create Job Posting
+                    </button>
+                )}
+            </div>
+        );
+    }
+
+    const allApplications = applications.data?.data.data ?? [];
+    const submittedCount = allApplications.filter(
+        (a) => a.status === 'submitted',
+    ).length;
+    const reviewingCount = allApplications.filter(
+        (a) => a.status === 'reviewing',
+    ).length;
+    const shortlistedCount = allApplications.filter(
+        (a) => a.status === 'shortlisted',
+    ).length;
+    const hiredCount = allApplications.filter(
+        (a) => a.status === 'hired',
+    ).length;
+    const rejectedCount = allApplications.filter(
+        (a) => a.status === 'rejected',
+    ).length;
+
+    const filteredApplicants = allApplications.filter((app) => {
+        if (statusFilter !== 'all' && app.status !== statusFilter) {
+            return false;
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            const name = (app.alumni_profile?.name ?? '').toLowerCase();
+            const email = (app.alumni_profile?.email ?? '').toLowerCase();
+            const snapshotStr = JSON.stringify(
+                app.profile_snapshot ?? {},
+            ).toLowerCase();
+            if (
+                !name.includes(q) &&
+                !email.includes(q) &&
+                !snapshotStr.includes(q)
+            ) {
+                return false;
             }
+        }
+        return true;
+    });
 
-            if (jobs.error) {
-                return <ErrorState message={jobs.error} />;
-            }
+    return (
+        <div className="space-y-6">
+            {/* Header Banner */}
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#001c17] via-[#052d26] to-[#0b382f] p-6 text-white shadow-lg sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[#E47818]/15 blur-3xl" />
+                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-2 ring-white/20 text-[#E47818]">
+                            <UsersRound className="size-8" />
+                        </div>
+                        <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                                    Applicant Tracking System
+                                </h1>
+                                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-200 border border-emerald-500/30">
+                                    Verified Alumni Pipeline
+                                </span>
+                            </div>
+                            <p className="mt-1 text-xs sm:text-sm text-emerald-100/80">
+                                Inspect verified academic credentials, evaluate frozen RA 10173 profiles, and manage candidate progression.
+                            </p>
+                        </div>
+                    </div>
+                    {onNavigate && (
+                        <button
+                            type="button"
+                            onClick={() => onNavigate('Job postings')}
+                            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-xs transition hover:bg-white/20 focus:outline-hidden focus:ring-2 focus:ring-white/40 cursor-pointer self-start sm:self-center"
+                        >
+                            <Briefcase className="size-4" />
+                            Job Postings ({postings.length})
+                        </button>
+                    )}
+                </div>
+            </section>
 
-            if (!postings.length) {
-                return (
-                    <EmptyState>No job postings are available to review.</EmptyState>
-                );
-            }
-
-            return (
-                <div className="space-y-4">
-                    <label className="block text-xs font-medium text-[#4d5a4f]">
-                        Job posting
+            {/* Job Selector Bar & Active Job Card */}
+            <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="w-full sm:max-w-md">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                            Select Job Position to Review
+                        </label>
                         <select
-                            value={selectedJob}
-                            onChange={(event) => setSelectedJobId(event.target.value)}
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs sm:max-w-md"
+                            value={activeJobId}
+                            onChange={(e) => handleSelectJob(e.target.value)}
+                            className="mt-1.5 h-11 w-full rounded-xl border border-zinc-300 bg-white px-3.5 text-xs font-semibold text-zinc-900 focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
                         >
                             {postings.map((job) => (
                                 <option key={job.id} value={job.id}>
-                                    {job.title}
+                                    {job.title} — {job.applications_count ?? 0} applicants ({job.status})
                                 </option>
                             ))}
                         </select>
-                    </label>
-                    {applications.loading ? (
-                        <LoadingState />
-                    ) : applications.error ? (
-                        <ErrorState message={applications.error} />
-                    ) : applications.data?.data.data.length ? (
-                        <div className="grid gap-3">
-                            {applications.data.data.data.map((application) => (
-                                <article
-                                    key={application.id}
-                                    className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
-                                >
-                                    <div className="flex flex-col justify-between gap-3 sm:flex-row">
-                                        <div>
-                                            <h2 className="text-sm font-semibold text-[#39463b]">
-                                                {application.alumni_profile?.name ??
-                                                    'Alumni applicant'}
-                                            </h2>
-                                            <p className="mt-1 text-xs text-[#7a8278]">
-                                                {application.alumni_profile?.email}
-                                            </p>
-                                            {application.cover_letter ? (
-                                                <p className="mt-3 text-xs leading-5 whitespace-pre-line text-[#737b71]">
-                                                    {application.cover_letter}
-                                                </p>
-                                            ) : null}
-                                            {application.profile_snapshot?.education?.length ? (
-                                                <div className="mt-3 space-y-1 rounded-xl bg-[#fafbf9] p-2.5 text-[11px] text-[#556153]">
-                                                    <p className="font-semibold text-[#344436]">Academic Qualifications (Snapshot):</p>
-                                                    {application.profile_snapshot.education.map((edu: any, i: number) => (
-                                                        <p key={i}>
-                                                            • {edu.program ?? 'Degree'} ({edu.graduation_year ?? 'N/A'})
-                                                            {edu.honors ? ` — ${edu.honors}` : ''}
-                                                            {edu.gwa ? ` (GWA: ${edu.gwa})` : ''}
-                                                        </p>
-                                                    ))}
-                                                </div>
-                                            ) : null}
-                                            {application.resume_snapshot_path ? (
-                                                <a
-                                                    href={`/api/applications/${application.id}/resume`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#d2ddd0] bg-[#f8faf7] px-3 py-1.5 text-xs font-semibold text-[#2c5339] hover:bg-[#edf2ea]"
-                                                >
-                                                    Download Resume Snapshot
-                                                </a>
-                                            ) : null}
-                                        </div>
-                                        <label className="text-[11px] font-medium text-[#4d5a4f]">
-                                            Application status
-                                            <select
-                                                value={application.status}
-                                                disabled={updating === application.id}
-                                                onChange={(event) =>
-                                                    void updateStatus(
-                                                        application.id,
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                className="mt-1.5 h-9 rounded-lg border border-[#e3e7df] bg-white px-2 text-xs"
-                                            >
-                                                {[
-                                                    'submitted',
-                                                    'reviewing',
-                                                    'shortlisted',
-                                                    'rejected',
-                                                    'hired',
-                                                ].map((status) => (
-                                                    <option key={status} value={status}>
-                                                        {status.replaceAll('_', ' ')}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </label>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                    ) : (
-                        <EmptyState>
-                            No applicants have applied to this posting.
-                        </EmptyState>
-                    )}
-                </div>
-            );
-        }
-
-        export function RegistrationAssistanceQueue() {
-            const [statusFilter, setStatusFilter] = useState<'pending' | 'reviewed' | 'needs_more_information' | 'rejected' | 'all'>('pending');
-            const [search, setSearch] = useState('');
-            const resource = useApiResource<PaginatedApiResponse<RegistrationAssistanceRequest>>(
-                `/api/registration-assistance?status=${statusFilter}`,
-            );
-            const programsResource = useApiResource<ApiEnvelope<AcademicProgram[]>>('/api/programs');
-            const programs = programsResource.data?.data ?? [];
-
-            const [selectedRequest, setSelectedRequest] = useState<RegistrationAssistanceRequest | null>(null);
-            const [reviewStatus, setReviewStatus] = useState<'reviewed' | 'needs_more_information' | 'rejected'>('reviewed');
-            const [resolutionAction, setResolutionAction] = useState<'sync_record' | 'create_record' | 'provision_account' | 'manual_review'>('sync_record');
-            const [overrideProgramId, setOverrideProgramId] = useState<string>('');
-            const [overrideGradYear, setOverrideGradYear] = useState<string>('');
-            const [provisionPassword, setProvisionPassword] = useState<string>('AlumniClaim2026!');
-            const [reviewNote, setReviewNote] = useState('');
-            const [submitting, setSubmitting] = useState(false);
-
-            function openReviewModal(
-                request: RegistrationAssistanceRequest,
-                defaultStatus: 'reviewed' | 'needs_more_information' | 'rejected',
-            ) {
-                setSelectedRequest(request);
-                setReviewStatus(defaultStatus);
-                const recommended = request.registrar_match?.recommended_action ?? 'sync_record';
-                setResolutionAction(recommended);
-                setOverrideProgramId(request.academic_program_id ? String(request.academic_program_id) : '');
-                setOverrideGradYear(
-                    request.graduation_year
-                        ? String(request.graduation_year)
-                        : request.registrar_match?.profile?.graduation_year
-                          ? String(request.registrar_match.profile.graduation_year)
-                          : '',
-                );
-                setProvisionPassword('AlumniClaim2026!');
-                if (defaultStatus === 'reviewed') {
-                    setReviewNote(
-                        request.review_note ||
-                            (recommended === 'create_record'
-                                ? 'Created official alumni profile from verified claim request. You may now complete registration.'
-                                : recommended === 'sync_record'
-                                  ? 'Synchronized official registrar record with verified claim details. You may now complete registration.'
-                                  : 'Verified with official registrar records. Account approved.'),
-                    );
-                } else {
-                    setReviewNote(request.review_note || '');
-                }
-            }
-
-            async function handleReviewSubmit(e: FormEvent<HTMLFormElement>) {
-                e.preventDefault();
-                if (!selectedRequest) return;
-
-                setSubmitting(true);
-                try {
-                    await apiRequest(`/api/registration-assistance/${selectedRequest.id}`, {
-                        method: 'PATCH',
-                        body: {
-                            status: reviewStatus,
-                            resolution_action: reviewStatus === 'reviewed' ? resolutionAction : 'manual_review',
-                            academic_program_id: overrideProgramId ? Number(overrideProgramId) : null,
-                            graduation_year: overrideGradYear ? Number(overrideGradYear) : null,
-                            temporary_password:
-                                reviewStatus === 'reviewed' && resolutionAction === 'provision_account'
-                                    ? provisionPassword || undefined
-                                    : undefined,
-                            review_note: reviewNote || null,
-                        },
-                    });
-                    toast.success('Registration claim assistance request updated.');
-                    setSelectedRequest(null);
-                    setReviewNote('');
-                    resource.reload();
-                } catch (err) {
-                    toast.error(err instanceof ApiError ? err.message : 'Failed to update request.');
-                } finally {
-                    setSubmitting(false);
-                }
-            }
-
-            const rawPayload = resource.data?.data as
-                | RegistrationAssistanceRequest[]
-                | { data?: RegistrationAssistanceRequest[] }
-                | undefined;
-            const allItems: RegistrationAssistanceRequest[] = Array.isArray(rawPayload)
-                ? rawPayload
-                : Array.isArray(rawPayload?.data)
-                  ? rawPayload.data
-                  : [];
-            const items = allItems.filter((item) => {
-                if (!search.trim()) return true;
-                const q = search.trim().toLowerCase();
-                return (
-                    item.name.toLowerCase().includes(q) ||
-                    item.student_number.toLowerCase().includes(q) ||
-                    item.email.toLowerCase().includes(q)
-                );
-            });
-
-            function getMatchBadge(match?: RegistrationAssistanceRequest['registrar_match']) {
-                if (!match) return null;
-                switch (match.match_status) {
-                    case 'not_found':
-                        return {
-                            label: 'No Registrar Record Found',
-                            className: 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]',
-                        };
-                    case 'already_claimed':
-                        return {
-                            label: 'Account Already Claimed',
-                            className: 'bg-[#eff6ff] text-[#1e40af] border-[#bfdbfe]',
-                        };
-                    case 'dob_mismatch':
-                        return {
-                            label: 'Birthdate Mismatch',
-                            className: 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]',
-                        };
-                    case 'name_mismatch':
-                        return {
-                            label: 'Name Discrepancy',
-                            className: 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]',
-                        };
-                    case 'multiple_mismatches':
-                        return {
-                            label: 'Name & Birthdate Mismatch',
-                            className: 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]',
-                        };
-                    case 'ready_to_claim':
-                        return {
-                            label: 'Exact Match · Ready to Claim',
-                            className: 'bg-[#edf7ee] text-[#1f5130] border-[#bbf7d0]',
-                        };
-                    default:
-                        return null;
-                }
-            }
-
-            function getStatusPill(status: RegistrationAssistanceRequest['status']) {
-                switch (status) {
-                    case 'pending':
-                        return { label: 'Pending Review', className: 'bg-[#fffbeb] text-[#92400e]' };
-                    case 'reviewed':
-                        return { label: 'Approved & Resolved', className: 'bg-[#edf7ee] text-[#1f5130]' };
-                    case 'needs_more_information':
-                        return { label: 'Needs More Info', className: 'bg-[#eff6ff] text-[#1e40af]' };
-                    case 'rejected':
-                        return { label: 'Rejected', className: 'bg-[#fef2f2] text-[#991b1b]' };
-                }
-            }
-
-            return (
-                <div className="space-y-4">
-                    {/* Filter & Search Toolbar */}
-                    <div className="flex flex-col justify-between gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-center">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                            {(
-                                [
-                                    { value: 'pending', label: 'Pending' },
-                                    { value: 'needs_more_information', label: 'Needs Info' },
-                                    { value: 'reviewed', label: 'Resolved' },
-                                    { value: 'rejected', label: 'Rejected' },
-                                    { value: 'all', label: 'All History' },
-                                ] as const
-                            ).map((tab) => (
-                                <button
-                                    key={tab.value}
-                                    type="button"
-                                    onClick={() => setStatusFilter(tab.value)}
-                                    className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
-                                        statusFilter === tab.value
-                                            ? 'bg-[#2b5139] text-white shadow-xs'
-                                            : 'bg-[#f4f6f2] text-[#526051] hover:bg-[#e9ede6]'
-                                    }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="w-full sm:w-64">
-                            <input
-                                type="search"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search name, student #, email…"
-                                className="h-9 w-full rounded-xl border border-[#dfe5dc] bg-[#fafbf9] px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
-                            />
-                        </div>
                     </div>
 
-                    {resource.loading ? (
-                        <LoadingState />
-                    ) : resource.error ? (
-                        <ErrorState message={resource.error} />
-                    ) : !items.length ? (
-                        <EmptyState>
-                            {`No ${statusFilter === 'all' ? '' : `${statusFilter.replace(/_/g, ' ')} `}registration assistance requests found.`}
-                        </EmptyState>
-                    ) : (
-                        <div className="grid gap-3">
-                            {items.map((request) => {
-                                const matchBadge = getMatchBadge(request.registrar_match);
-                                const statusPill = getStatusPill(request.status);
-                                const officialProfile = request.registrar_match?.profile;
-
-                                return (
-                                    <article
-                                        key={request.id}
-                                        className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
-                                    >
-                                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-                                            <div className="flex-1 space-y-2.5">
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <span className="rounded bg-[#f4f6f2] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#526051]">
-                                                        #{request.id}
-                                                    </span>
-                                                    <h3 className="text-sm font-semibold text-[#29382e]">
-                                                        {request.name}
-                                                    </h3>
-                                                    <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#305338]">
-                                                        {request.student_number}
-                                                    </span>
-                                                    {request.program && (
-                                                        <span className="rounded bg-[#f0f4ee] px-2 py-0.5 text-[10px] font-medium text-[#465a49]">
-                                                            {request.program.code}
-                                                        </span>
-                                                    )}
-                                                    {request.graduation_year && (
-                                                        <span className="rounded bg-[#f0f4ee] px-2 py-0.5 text-[10px] font-medium text-[#465a49]">
-                                                            Batch {request.graduation_year}
-                                                        </span>
-                                                    )}
-                                                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${statusPill.className}`}>
-                                                        {statusPill.label}
-                                                    </span>
-                                                    {matchBadge && (
-                                                        <span
-                                                            className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${matchBadge.className}`}
-                                                        >
-                                                            {matchBadge.label}
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#70796e]">
-                                                    <p>
-                                                        Email: <span className="font-medium text-[#3b473d]">{request.email}</span>
-                                                    </p>
-                                                    <p>
-                                                        Submitted DOB: <span className="font-medium text-[#3b473d]">{String(request.date_of_birth ?? '').slice(0, 10)}</span>
-                                                    </p>
-                                                    <p>
-                                                        Requested: <span className="text-[#3b473d]">{new Date(request.created_at).toLocaleDateString()}</span>
-                                                    </p>
-                                                </div>
-
-                                                {/* Registrar Diagnostic & Side-by-Side Comparison */}
-                                                {request.registrar_match && (
-                                                    <div className="rounded-xl border border-[#e5ebe2] bg-[#f9fbf8] p-3 text-xs">
-                                                        <p className="font-medium text-[#2c3d30]">
-                                                            Registrar Diagnostic: <span className="font-normal text-[#4f5d50]">{request.registrar_match.summary}</span>
-                                                        </p>
-                                                        {officialProfile && (
-                                                            <div className="mt-2 grid gap-2 border-t border-[#e5ebe2] pt-2 sm:grid-cols-2">
-                                                                <div>
-                                                                    <p className="text-[10px] font-semibold tracking-wider text-[#6e7b6e] uppercase">
-                                                                        Submitted Claim Details
-                                                                    </p>
-                                                                    <p className="mt-0.5 text-[#29382e]">
-                                                                        Name: <span className="font-medium">{request.name}</span>
-                                                                    </p>
-                                                                    <p className="text-[#29382e]">
-                                                                        Birthdate: <span className="font-medium">{String(request.date_of_birth ?? '').slice(0, 10)}</span>
-                                                                    </p>
-                                                                    <p className="text-[#29382e]">
-                                                                        Email: <span className="font-medium">{request.email}</span>
-                                                                    </p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-[10px] font-semibold tracking-wider text-[#6e7b6e] uppercase">
-                                                                        Official Registrar Record (#{officialProfile.id})
-                                                                    </p>
-                                                                    <p className="mt-0.5 text-[#29382e]">
-                                                                        Name:{' '}
-                                                                        <span
-                                                                            className={`font-medium ${
-                                                                                officialProfile.name.toLowerCase() !== request.name.toLowerCase()
-                                                                                    ? 'text-[#b45309] underline'
-                                                                                    : ''
-                                                                            }`}
-                                                                        >
-                                                                            {officialProfile.name}
-                                                                        </span>
-                                                                    </p>
-                                                                    <p className="text-[#29382e]">
-                                                                        Birthdate:{' '}
-                                                                        <span
-                                                                            className={`font-medium ${
-                                                                                String(officialProfile.date_of_birth ?? '').slice(0, 10) !== String(request.date_of_birth ?? '').slice(0, 10)
-                                                                                    ? 'text-[#b45309] underline'
-                                                                                    : ''
-                                                                            }`}
-                                                                        >
-                                                                            {officialProfile.date_of_birth ?? 'Not set in registrar record'}
-                                                                        </span>
-                                                                    </p>
-                                                                    <p className="text-[#29382e]">
-                                                                        Program/Batch:{' '}
-                                                                        <span className="font-medium">
-                                                                            {officialProfile.program_code ?? 'Unassigned'}{' '}
-                                                                            {officialProfile.graduation_year ? `(${officialProfile.graduation_year})` : ''}
-                                                                        </span>
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                {request.message && (
-                                                    <p className="rounded-xl bg-[#fafbf9] p-3 text-xs leading-5 text-[#526051]">
-                                                        <span className="font-semibold text-[#3b473d]">Applicant note:</span> "{request.message}"
-                                                    </p>
-                                                )}
-
-                                                {request.reviewed_at && (
-                                                    <div className="rounded-xl border border-[#e3eae0] bg-[#f4f7f3] px-3 py-2 text-xs text-[#435245]">
-                                                        <p className="font-semibold text-[#29382e]">
-                                                            Reviewed {new Date(request.reviewed_at).toLocaleString()}
-                                                            {request.reviewed_by ? ` by ${request.reviewed_by.name}` : ''}
-                                                            {request.resolution_action ? ` · Action: ${request.resolution_action.replace(/_/g, ' ')}` : ''}
-                                                        </p>
-                                                        {request.review_note && <p className="mt-0.5 text-[#526051]">{request.review_note}</p>}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex shrink-0 items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openReviewModal(request, 'reviewed')}
-                                                    className="rounded-xl bg-[#2b5139] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#22442e]"
-                                                >
-                                                    {request.status === 'reviewed' ? 'Update resolution' : 'Resolve & approve'}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openReviewModal(request, 'needs_more_information')}
-                                                    className="rounded-xl border border-[#d2ddd0] bg-white px-3 py-1.5 text-xs font-medium text-[#435245] hover:bg-[#f4f6f2]"
-                                                >
-                                                    Review / Ask info
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </article>
-                                );
-                            })}
+                    {currentJob && (
+                        <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+                            <span
+                                className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${currentJob.status === 'published'
+                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                        : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                    }`}
+                            >
+                                Status: {currentJob.status}
+                            </span>
+                            {currentJob.workplace_type && (
+                                <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700 capitalize">
+                                    {currentJob.workplace_type}
+                                </span>
+                            )}
+                            {currentJob.location && (
+                                <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+                                    📍 {currentJob.location}
+                                </span>
+                            )}
                         </div>
                     )}
+                </div>
+            </div>
 
-                    {selectedRequest && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-xl">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h3 className="text-sm font-semibold text-[#29382e]">
-                                            Resolve Registration Claim #{selectedRequest.id}
-                                        </h3>
-                                        <p className="mt-0.5 text-xs text-[#70796e]">
-                                            {selectedRequest.name} ({selectedRequest.student_number})
-                                        </p>
+            {/* Pipeline Stat Cards */}
+            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-5">
+                {[
+                    {
+                        label: 'Total Applicants',
+                        count: allApplications.length,
+                        color: 'text-zinc-900',
+                        border: 'border-zinc-200/80',
+                    },
+                    {
+                        label: 'New / Awaiting Review',
+                        count: submittedCount,
+                        color: 'text-blue-700',
+                        border: 'border-blue-200/80 bg-blue-50/30',
+                    },
+                    {
+                        label: 'Under Review',
+                        count: reviewingCount,
+                        color: 'text-amber-700',
+                        border: 'border-amber-200/80 bg-amber-50/30',
+                    },
+                    {
+                        label: 'Shortlisted / Interview',
+                        count: shortlistedCount,
+                        color: 'text-purple-700',
+                        border: 'border-purple-200/80 bg-purple-50/30',
+                    },
+                    {
+                        label: 'Hired / Placed',
+                        count: hiredCount,
+                        color: 'text-emerald-700',
+                        border: 'border-emerald-200/80 bg-emerald-50/30',
+                    },
+                ].map((stat, i) => (
+                    <div
+                        key={i}
+                        className={`rounded-2xl border p-4 shadow-2xs ${stat.border}`}
+                    >
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                            {stat.label}
+                        </span>
+                        <p className={`mt-1.5 text-xl font-bold ${stat.color}`}>
+                            {stat.count}
+                        </p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Candidate Filter & Search Toolbar */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+                    <input
+                        type="text"
+                        placeholder="Search candidates by name, email, or degree program…"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50/50 pl-10 pr-4 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                    />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                        { id: 'all', label: 'All', count: allApplications.length },
+                        { id: 'submitted', label: 'New', count: submittedCount },
+                        { id: 'reviewing', label: 'Reviewing', count: reviewingCount },
+                        { id: 'shortlisted', label: 'Shortlisted', count: shortlistedCount },
+                        { id: 'hired', label: 'Hired', count: hiredCount },
+                        { id: 'rejected', label: 'Rejected', count: rejectedCount },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() =>
+                                setStatusFilter(tab.id as typeof statusFilter)
+                            }
+                            className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${statusFilter === tab.id
+                                    ? 'bg-[#001c17] text-white shadow-2xs'
+                                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                                }`}
+                        >
+                            <span>{tab.label}</span>
+                            <span className="text-[10px] opacity-75">
+                                ({tab.count})
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Applicants List */}
+            {applications.loading ? (
+                <LoadingState />
+            ) : applications.error ? (
+                <ErrorState message={applications.error} />
+            ) : filteredApplicants.length ? (
+                <div className="grid gap-4">
+                    {filteredApplicants.map((application) => {
+                        const statusMeta =
+                            employerStatusConfig[application.status] ?? {
+                                label: application.status.replace('_', ' '),
+                                badgeClass:
+                                    'bg-zinc-100 text-zinc-700 border-zinc-200',
+                                actionLabel: 'Update',
+                            };
+
+                        const applicantName =
+                            application.alumni_profile?.name ??
+                            'Verified SEAIT Alumni';
+                        const snapshotEdu =
+                            application.profile_snapshot?.education?.[0];
+                        const snapshotExp =
+                            application.profile_snapshot?.employment?.[0];
+
+                        return (
+                            <article
+                                key={application.id}
+                                className="relative rounded-3xl border border-zinc-200/80 bg-white p-5 sm:p-6 shadow-xs transition hover:border-[#E47818]/40 hover:shadow-md"
+                            >
+                                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                    {/* Candidate Info */}
+                                    <div className="flex items-start gap-4 min-w-0">
+                                        <Avatar className="size-14 overflow-hidden rounded-2xl ring-2 ring-[#001c17]/10 shrink-0">
+                                            <AvatarFallback className="rounded-2xl bg-[#001c17] text-base font-bold text-white">
+                                                {initials(applicantName)}
+                                            </AvatarFallback>
+                                        </Avatar>
+
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h2 className="text-base font-bold text-zinc-900">
+                                                    {applicantName}
+                                                </h2>
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-800 border border-emerald-200">
+                                                    <CheckCircle2 className="size-3 text-emerald-600" />
+                                                    Verified Alumni
+                                                </span>
+                                            </div>
+
+                                            <p className="mt-0.5 text-xs text-zinc-500">
+                                                {application.alumni_profile?.email}
+                                            </p>
+
+                                            {/* Academic Credentials Snapshot */}
+                                            {snapshotEdu && (
+                                                <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
+                                                    <span className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1 font-semibold text-zinc-800">
+                                                        <GraduationCap className="size-3.5 text-[#001c17]" />
+                                                        {snapshotEdu.program ??
+                                                            snapshotEdu.degree}
+                                                    </span>
+                                                    {snapshotEdu.graduation_year && (
+                                                        <span className="rounded-lg bg-zinc-100 px-2 py-1 font-medium text-zinc-600 text-[11px]">
+                                                            Batch {snapshotEdu.graduation_year}
+                                                        </span>
+                                                    )}
+                                                    {snapshotEdu.honors && (
+                                                        <span className="inline-flex items-center gap-1 rounded-lg bg-amber-100 px-2 py-1 font-bold text-amber-900 border border-amber-200 text-[11px]">
+                                                            <Award className="size-3 text-amber-700" />
+                                                            {snapshotEdu.honors}
+                                                        </span>
+                                                    )}
+                                                    {snapshotEdu.gwa && (
+                                                        <span className="rounded-lg bg-emerald-100 px-2 py-1 font-bold text-emerald-900 border border-emerald-200 text-[11px]">
+                                                            GWA {snapshotEdu.gwa}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Work experience snapshot */}
+                                            {snapshotExp && (
+                                                <p className="mt-2 text-xs text-zinc-600 flex items-center gap-1.5">
+                                                    <Briefcase className="size-3.5 text-zinc-400" />
+                                                    <span>
+                                                        {snapshotExp.job_title} at{' '}
+                                                        <span className="font-semibold text-zinc-800">
+                                                            {snapshotExp.employer_name}
+                                                        </span>
+                                                    </span>
+                                                </p>
+                                            )}
+
+                                            {/* Cover Letter preview */}
+                                            {application.cover_letter && (
+                                                <div className="mt-3 rounded-2xl border border-zinc-100 bg-zinc-50/70 p-3 text-xs text-zinc-600 line-clamp-2 leading-relaxed">
+                                                    &ldquo;{application.cover_letter}&rdquo;
+                                                </div>
+                                            )}
+
+                                            <p className="mt-3 text-[11px] text-zinc-400 flex items-center gap-1">
+                                                <Calendar className="size-3" />
+                                                Applied on{' '}
+                                                {new Date(
+                                                    application.created_at,
+                                                ).toLocaleDateString()}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedRequest(null)}
-                                        className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
-                                    >
-                                        ✕
-                                    </button>
+
+                                    {/* Status Badge & Actions */}
+                                    <div className="flex flex-col items-start lg:items-end gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-zinc-100">
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusMeta.badgeClass}`}
+                                            >
+                                                {statusMeta.label}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <a
+                                                href={`/api/applications/${application.id}/resume?inline=1`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition"
+                                                title="View candidate resume / dossier"
+                                            >
+                                                <Eye className="size-3.5 text-zinc-500" />
+                                                View Resume
+                                            </a>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setInspectingApp(application)}
+                                                className="inline-flex items-center gap-1 rounded-xl bg-[#001c17] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#0b382f] transition cursor-pointer"
+                                            >
+                                                <Eye className="size-3.5" />
+                                                Review Dossier
+                                            </button>
+                                        </div>
+
+                                        {/* Quick 1-click status advancement */}
+                                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                            {application.status === 'submitted' && (
+                                                <button
+                                                    type="button"
+                                                    disabled={updating === application.id}
+                                                    onClick={() => updateStatus(application.id, 'reviewing')}
+                                                    className="rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-800 hover:bg-blue-100 border border-blue-200 cursor-pointer disabled:opacity-50"
+                                                >
+                                                    Start Review →
+                                                </button>
+                                            )}
+                                            {application.status === 'reviewing' && (
+                                                <button
+                                                    type="button"
+                                                    disabled={updating === application.id}
+                                                    onClick={() => updateStatus(application.id, 'shortlisted')}
+                                                    className="rounded-lg bg-purple-50 px-2.5 py-1 text-[11px] font-semibold text-purple-800 hover:bg-purple-100 border border-purple-200 cursor-pointer disabled:opacity-50"
+                                                >
+                                                    Shortlist for Interview →
+                                                </button>
+                                            )}
+                                            {application.status === 'shortlisted' && (
+                                                <button
+                                                    type="button"
+                                                    disabled={updating === application.id}
+                                                    onClick={() => updateStatus(application.id, 'hired')}
+                                                    className="rounded-lg bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 border border-emerald-200 cursor-pointer disabled:opacity-50"
+                                                >
+                                                    Mark as Hired / Offer →
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
+                            </article>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="rounded-3xl border border-dashed border-zinc-200 p-12 text-center bg-white">
+                    <UsersRound className="size-10 mx-auto text-zinc-300" />
+                    <h3 className="mt-3 text-sm font-bold text-zinc-800">
+                        No candidates match this filter
+                    </h3>
+                    <p className="mt-1 text-xs text-zinc-500">
+                        {allApplications.length === 0
+                            ? 'No candidates have submitted applications for this job posting yet.'
+                            : 'No applicants found matching your current filter criteria.'}
+                    </p>
+                    {statusFilter !== 'all' && (
+                        <button
+                            type="button"
+                            onClick={() => setStatusFilter('all')}
+                            className="mt-3 text-xs font-semibold text-[#E47818] hover:underline cursor-pointer"
+                        >
+                            Clear filter to see all {allApplications.length} candidates
+                        </button>
+                    )}
+                </div>
+            )}
 
-                                {selectedRequest.registrar_match && (
-                                    <div className="mt-3 rounded-xl border border-[#e5ebe2] bg-[#f9fbf8] p-3 text-xs text-[#3b473d]">
-                                        <p className="font-semibold text-[#29382e]">Diagnostic Summary</p>
-                                        <p className="mt-0.5">{selectedRequest.registrar_match.summary}</p>
+            {/* Candidate Evaluation Dossier Modal */}
+            {inspectingApp && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={() => setInspectingApp(null)}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Candidate Evaluation Dossier"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-2xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
+                            <div className="flex items-center gap-3.5 min-w-0">
+                                <Avatar className="size-14 overflow-hidden rounded-2xl ring-2 ring-[#001c17]/10 shrink-0">
+                                    <AvatarFallback className="rounded-2xl bg-[#001c17] text-lg font-bold text-white">
+                                        {initials(
+                                            inspectingApp.alumni_profile?.name ?? 'Candidate',
+                                        )}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <h2 className="text-lg font-bold text-zinc-900">
+                                            {inspectingApp.alumni_profile?.name ?? 'Applicant'}
+                                        </h2>
+                                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                                            Verified Graduate
+                                        </span>
                                     </div>
-                                )}
+                                    <p className="text-xs text-zinc-500 mt-0.5">
+                                        {inspectingApp.alumni_profile?.email} · Applied on{' '}
+                                        {new Date(inspectingApp.created_at).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setInspectingApp(null)}
+                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 cursor-pointer"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
 
-                                <form onSubmit={handleReviewSubmit} className="mt-4 space-y-3">
-                                    <label className="block text-xs font-medium text-[#4d5a4f]">
-                                        Decision outcome
-                                        <select
-                                            value={reviewStatus}
-                                            onChange={(e) => setReviewStatus(e.target.value as any)}
-                                            className="mt-1 h-9 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                        <div className="mt-5 space-y-5 text-xs">
+                            {/* Current Stage Card */}
+                            <div className="flex items-center justify-between rounded-2xl border border-zinc-200/80 bg-zinc-50 p-4">
+                                <div>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                        Current Recruitment Stage
+                                    </span>
+                                    <p className="mt-0.5 text-sm font-bold text-zinc-900 capitalize">
+                                        {inspectingApp.status.replace('_', ' ')}
+                                    </p>
+                                </div>
+                                <span
+                                    className={`rounded-full border px-3 py-1 font-semibold ${employerStatusConfig[inspectingApp.status]?.badgeClass ??
+                                        'bg-zinc-100 text-zinc-700'
+                                        }`}
+                                >
+                                    {employerStatusConfig[inspectingApp.status]?.label ??
+                                        inspectingApp.status}
+                                </span>
+                            </div>
+
+                            {/* Cover Letter */}
+                            {inspectingApp.cover_letter ? (
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                                        Cover Letter / Applicant Pitch
+                                    </h3>
+                                    <div className="mt-1.5 rounded-2xl border border-zinc-200/60 bg-zinc-50/70 p-4 leading-relaxed text-zinc-700 whitespace-pre-line text-xs">
+                                        {inspectingApp.cover_letter}
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {/* Verified Educational Credentials */}
+                            {inspectingApp.profile_snapshot?.education?.length ? (
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                                        Registrar-Verified Academic Records (RA 10173)
+                                    </h3>
+                                    <div className="mt-1.5 space-y-2">
+                                        {inspectingApp.profile_snapshot.education.map(
+                                            (edu: any, i: number) => (
+                                                <div
+                                                    key={i}
+                                                    className="rounded-2xl border border-emerald-200/80 bg-emerald-50/40 p-4"
+                                                >
+                                                    <div className="flex flex-wrap items-start justify-between gap-2">
+                                                        <div>
+                                                            <p className="font-bold text-zinc-900 text-sm">
+                                                                {edu.program ?? edu.degree}
+                                                            </p>
+                                                            <p className="text-xs text-zinc-600 mt-0.5">
+                                                                Student ID: {edu.student_number ?? 'Verified'}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex flex-wrap items-center gap-1.5">
+                                                            {edu.graduation_year && (
+                                                                <span className="rounded-full bg-zinc-200 px-2.5 py-0.5 text-[10px] font-bold text-zinc-800">
+                                                                    Class of {edu.graduation_year}
+                                                                </span>
+                                                            )}
+                                                            {edu.honors && (
+                                                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
+                                                                    <Award className="size-3 text-amber-700" />
+                                                                    {edu.honors}
+                                                                </span>
+                                                            )}
+                                                            {edu.gwa && (
+                                                                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-900 border border-emerald-300">
+                                                                    GWA {edu.gwa}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {/* Verified Career Experience */}
+                            {inspectingApp.profile_snapshot?.employment?.length ? (
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                                        Reported Career Milestones
+                                    </h3>
+                                    <div className="mt-1.5 space-y-2">
+                                        {inspectingApp.profile_snapshot.employment.map(
+                                            (exp: any, i: number) => (
+                                                <div
+                                                    key={i}
+                                                    className="rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-3.5"
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="font-bold text-zinc-900">
+                                                            {exp.job_title}
+                                                        </p>
+                                                        {exp.is_related_to_degree && (
+                                                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                                                                Degree-aligned
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-zinc-600 mt-0.5">
+                                                        {exp.employer_name}{' '}
+                                                        {exp.industry ? `· ${exp.industry}` : ''}
+                                                    </p>
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {/* Resume Snapshot Download & View */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-zinc-200/80 bg-white p-4">
+                                <div className="flex items-center gap-2.5">
+                                    <FileText className="size-4 text-[#001c17]" />
+                                    <div>
+                                        <span className="block font-semibold text-zinc-800 text-xs">
+                                            {inspectingApp.resume_snapshot_path
+                                                ? inspectingApp.resume_snapshot_path.toLowerCase().endsWith('.docx')
+                                                    ? 'Transmitted Word Resume (.docx)'
+                                                    : inspectingApp.resume_snapshot_path.toLowerCase().endsWith('.doc')
+                                                    ? 'Transmitted Word Document (.doc)'
+                                                    : 'Transmitted Candidate Resume (PDF)'
+                                                : 'Verified Academic & Career Dossier'}
+                                        </span>
+                                        <span className="block text-[10px] text-zinc-400">
+                                            {inspectingApp.resume_snapshot_path
+                                                ? inspectingApp.resume_snapshot_path.toLowerCase().endsWith('.docx')
+                                                    ? 'Submitted as Microsoft Word document'
+                                                    : 'Verified PDF credential document'
+                                                : 'Generated from RA 10173 verified registrar records'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <a
+                                        href={`/api/applications/${inspectingApp.id}/resume?inline=1`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+                                        title="View verified PDF resume in browser"
+                                    >
+                                        <Eye className="size-3.5 text-zinc-500" />
+                                        View Online (PDF)
+                                    </a>
+                                    <a
+                                        href={`/api/applications/${inspectingApp.id}/resume?download=1`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#001c17] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0b382f]"
+                                        title="Download candidate resume"
+                                    >
+                                        <Download className="size-3.5" />
+                                        {inspectingApp.resume_snapshot_path?.toLowerCase().endsWith('.docx')
+                                            ? 'Download (.docx)'
+                                            : 'Download (.pdf)'}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Stage Progression Actions */}
+                            <div className="border-t border-zinc-100 pt-4">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-2.5">
+                                    Update Candidate Stage
+                                </span>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {[
+                                        { id: 'submitted', label: 'Reset to New', color: 'border-zinc-200 hover:bg-zinc-50 text-zinc-700' },
+                                        { id: 'reviewing', label: 'Under Review', color: 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100' },
+                                        { id: 'shortlisted', label: 'Shortlist for Interview', color: 'bg-purple-50 text-purple-900 border-purple-300 hover:bg-purple-100' },
+                                        { id: 'hired', label: 'Offer / Hired', color: 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100' },
+                                        { id: 'rejected', label: 'Not Selected', color: 'bg-rose-50 text-rose-900 border-rose-300 hover:bg-rose-100' },
+                                    ].map((btn) => (
+                                        <button
+                                            key={btn.id}
+                                            type="button"
+                                            disabled={updating === inspectingApp.id || inspectingApp.status === btn.id}
+                                            onClick={() => updateStatus(inspectingApp.id, btn.id)}
+                                            className={`rounded-xl border px-3.5 py-2 text-xs font-semibold transition cursor-pointer disabled:opacity-40 ${btn.color} ${inspectingApp.status === btn.id ? 'ring-2 ring-offset-1 ring-[#001c17]' : ''
+                                                }`}
                                         >
-                                            <option value="reviewed">Approve & resolve claim (Reviewed)</option>
-                                            <option value="needs_more_information">Request more information from applicant</option>
-                                            <option value="rejected">Reject claim</option>
+                                            {updating === inspectingApp.id ? 'Updating…' : btn.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end border-t border-zinc-100 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => setInspectingApp(null)}
+                                className="h-10 rounded-xl bg-zinc-100 px-5 text-xs font-semibold text-zinc-700 hover:bg-zinc-200 cursor-pointer"
+                            >
+                                Close Dossier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export function RegistrationAssistanceQueue() {
+    const [statusFilter, setStatusFilter] = useState<'pending' | 'reviewed' | 'needs_more_information' | 'rejected' | 'all'>('pending');
+    const [search, setSearch] = useState('');
+    const resource = useApiResource<PaginatedApiResponse<RegistrationAssistanceRequest>>(
+        `/api/registration-assistance?status=${statusFilter}`,
+    );
+    const programsResource = useApiResource<ApiEnvelope<AcademicProgram[]>>('/api/programs');
+    const programs = programsResource.data?.data ?? [];
+
+    const [selectedRequest, setSelectedRequest] = useState<RegistrationAssistanceRequest | null>(null);
+    const [reviewStatus, setReviewStatus] = useState<'reviewed' | 'needs_more_information' | 'rejected'>('reviewed');
+    const [resolutionAction, setResolutionAction] = useState<'sync_record' | 'create_record' | 'provision_account' | 'manual_review'>('sync_record');
+    const [overrideProgramId, setOverrideProgramId] = useState<string>('');
+    const [overrideGradYear, setOverrideGradYear] = useState<string>('');
+    const [provisionPassword, setProvisionPassword] = useState<string>('AlumniClaim2026!');
+    const [reviewNote, setReviewNote] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    function openReviewModal(
+        request: RegistrationAssistanceRequest,
+        defaultStatus: 'reviewed' | 'needs_more_information' | 'rejected',
+    ) {
+        setSelectedRequest(request);
+        setReviewStatus(defaultStatus);
+        const recommended = request.registrar_match?.recommended_action ?? 'sync_record';
+        setResolutionAction(recommended);
+        setOverrideProgramId(request.academic_program_id ? String(request.academic_program_id) : '');
+        setOverrideGradYear(
+            request.graduation_year
+                ? String(request.graduation_year)
+                : request.registrar_match?.profile?.graduation_year
+                    ? String(request.registrar_match.profile.graduation_year)
+                    : '',
+        );
+        setProvisionPassword('AlumniClaim2026!');
+        if (defaultStatus === 'reviewed') {
+            setReviewNote(
+                request.review_note ||
+                (recommended === 'create_record'
+                    ? 'Created official alumni profile from verified claim request. You may now complete registration.'
+                    : recommended === 'sync_record'
+                        ? 'Synchronized official registrar record with verified claim details. You may now complete registration.'
+                        : 'Verified with official registrar records. Account approved.'),
+            );
+        } else {
+            setReviewNote(request.review_note || '');
+        }
+    }
+
+    async function handleReviewSubmit(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        if (!selectedRequest) return;
+
+        setSubmitting(true);
+        try {
+            await apiRequest(`/api/registration-assistance/${selectedRequest.id}`, {
+                method: 'PATCH',
+                body: {
+                    status: reviewStatus,
+                    resolution_action: reviewStatus === 'reviewed' ? resolutionAction : 'manual_review',
+                    academic_program_id: overrideProgramId ? Number(overrideProgramId) : null,
+                    graduation_year: overrideGradYear ? Number(overrideGradYear) : null,
+                    temporary_password:
+                        reviewStatus === 'reviewed' && resolutionAction === 'provision_account'
+                            ? provisionPassword || undefined
+                            : undefined,
+                    review_note: reviewNote || null,
+                },
+            });
+            toast.success('Registration claim assistance request updated.');
+            setSelectedRequest(null);
+            setReviewNote('');
+            resource.reload();
+        } catch (err) {
+            toast.error(err instanceof ApiError ? err.message : 'Failed to update request.');
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    const rawPayload = resource.data?.data as
+        | RegistrationAssistanceRequest[]
+        | { data?: RegistrationAssistanceRequest[] }
+        | undefined;
+    const allItems: RegistrationAssistanceRequest[] = Array.isArray(rawPayload)
+        ? rawPayload
+        : Array.isArray(rawPayload?.data)
+            ? rawPayload.data
+            : [];
+    const items = allItems.filter((item) => {
+        if (!search.trim()) return true;
+        const q = search.trim().toLowerCase();
+        return (
+            item.name.toLowerCase().includes(q) ||
+            item.student_number.toLowerCase().includes(q) ||
+            item.email.toLowerCase().includes(q)
+        );
+    });
+
+    function getMatchBadge(match?: RegistrationAssistanceRequest['registrar_match']) {
+        if (!match) return null;
+        switch (match.match_status) {
+            case 'not_found':
+                return {
+                    label: 'No Registrar Record Found',
+                    className: 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]',
+                };
+            case 'already_claimed':
+                return {
+                    label: 'Account Already Claimed',
+                    className: 'bg-[#eff6ff] text-[#1e40af] border-[#bfdbfe]',
+                };
+            case 'dob_mismatch':
+                return {
+                    label: 'Birthdate Mismatch',
+                    className: 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]',
+                };
+            case 'name_mismatch':
+                return {
+                    label: 'Name Discrepancy',
+                    className: 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]',
+                };
+            case 'multiple_mismatches':
+                return {
+                    label: 'Name & Birthdate Mismatch',
+                    className: 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]',
+                };
+            case 'ready_to_claim':
+                return {
+                    label: 'Exact Match · Ready to Claim',
+                    className: 'bg-[#edf7ee] text-[#1f5130] border-[#bbf7d0]',
+                };
+            default:
+                return null;
+        }
+    }
+
+    function getStatusPill(status: RegistrationAssistanceRequest['status']) {
+        switch (status) {
+            case 'pending':
+                return { label: 'Pending Review', className: 'bg-[#fffbeb] text-[#92400e]' };
+            case 'reviewed':
+                return { label: 'Approved & Resolved', className: 'bg-[#edf7ee] text-[#1f5130]' };
+            case 'needs_more_information':
+                return { label: 'Needs More Info', className: 'bg-[#eff6ff] text-[#1e40af]' };
+            case 'rejected':
+                return { label: 'Rejected', className: 'bg-[#fef2f2] text-[#991b1b]' };
+        }
+    }
+
+    return (
+        <div className="space-y-4">
+            {/* Filter & Search Toolbar */}
+            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-center">
+                <div className="flex flex-wrap items-center gap-1.5">
+                    {(
+                        [
+                            { value: 'pending', label: 'Pending' },
+                            { value: 'needs_more_information', label: 'Needs Info' },
+                            { value: 'reviewed', label: 'Resolved' },
+                            { value: 'rejected', label: 'Rejected' },
+                            { value: 'all', label: 'All History' },
+                        ] as const
+                    ).map((tab) => (
+                        <button
+                            key={tab.value}
+                            type="button"
+                            onClick={() => setStatusFilter(tab.value)}
+                            className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${statusFilter === tab.value
+                                    ? 'bg-[#2b5139] text-white shadow-xs'
+                                    : 'bg-[#f4f6f2] text-[#526051] hover:bg-[#e9ede6]'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+                <div className="w-full sm:w-64">
+                    <input
+                        type="search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search name, student #, email…"
+                        className="h-9 w-full rounded-xl border border-[#dfe5dc] bg-[#fafbf9] px-3 text-xs text-[#29382e] outline-none focus:border-[#2b5139]"
+                    />
+                </div>
+            </div>
+
+            {resource.loading ? (
+                <LoadingState />
+            ) : resource.error ? (
+                <ErrorState message={resource.error} />
+            ) : !items.length ? (
+                <EmptyState>
+                    {`No ${statusFilter === 'all' ? '' : `${statusFilter.replace(/_/g, ' ')} `}registration assistance requests found.`}
+                </EmptyState>
+            ) : (
+                <div className="grid gap-3">
+                    {items.map((request) => {
+                        const matchBadge = getMatchBadge(request.registrar_match);
+                        const statusPill = getStatusPill(request.status);
+                        const officialProfile = request.registrar_match?.profile;
+
+                        return (
+                            <article
+                                key={request.id}
+                                className="rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:p-5"
+                            >
+                                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                                    <div className="flex-1 space-y-2.5">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="rounded bg-[#f4f6f2] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#526051]">
+                                                #{request.id}
+                                            </span>
+                                            <h3 className="text-sm font-semibold text-[#29382e]">
+                                                {request.name}
+                                            </h3>
+                                            <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#305338]">
+                                                {request.student_number}
+                                            </span>
+                                            {request.program && (
+                                                <span className="rounded bg-[#f0f4ee] px-2 py-0.5 text-[10px] font-medium text-[#465a49]">
+                                                    {request.program.code}
+                                                </span>
+                                            )}
+                                            {request.graduation_year && (
+                                                <span className="rounded bg-[#f0f4ee] px-2 py-0.5 text-[10px] font-medium text-[#465a49]">
+                                                    Batch {request.graduation_year}
+                                                </span>
+                                            )}
+                                            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${statusPill.className}`}>
+                                                {statusPill.label}
+                                            </span>
+                                            {matchBadge && (
+                                                <span
+                                                    className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${matchBadge.className}`}
+                                                >
+                                                    {matchBadge.label}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#70796e]">
+                                            <p>
+                                                Email: <span className="font-medium text-[#3b473d]">{request.email}</span>
+                                            </p>
+                                            <p>
+                                                Submitted DOB: <span className="font-medium text-[#3b473d]">{String(request.date_of_birth ?? '').slice(0, 10)}</span>
+                                            </p>
+                                            <p>
+                                                Requested: <span className="text-[#3b473d]">{new Date(request.created_at).toLocaleDateString()}</span>
+                                            </p>
+                                        </div>
+
+                                        {/* Registrar Diagnostic & Side-by-Side Comparison */}
+                                        {request.registrar_match && (
+                                            <div className="rounded-xl border border-[#e5ebe2] bg-[#f9fbf8] p-3 text-xs">
+                                                <p className="font-medium text-[#2c3d30]">
+                                                    Registrar Diagnostic: <span className="font-normal text-[#4f5d50]">{request.registrar_match.summary}</span>
+                                                </p>
+                                                {officialProfile && (
+                                                    <div className="mt-2 grid gap-2 border-t border-[#e5ebe2] pt-2 sm:grid-cols-2">
+                                                        <div>
+                                                            <p className="text-[10px] font-semibold tracking-wider text-[#6e7b6e] uppercase">
+                                                                Submitted Claim Details
+                                                            </p>
+                                                            <p className="mt-0.5 text-[#29382e]">
+                                                                Name: <span className="font-medium">{request.name}</span>
+                                                            </p>
+                                                            <p className="text-[#29382e]">
+                                                                Birthdate: <span className="font-medium">{String(request.date_of_birth ?? '').slice(0, 10)}</span>
+                                                            </p>
+                                                            <p className="text-[#29382e]">
+                                                                Email: <span className="font-medium">{request.email}</span>
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-semibold tracking-wider text-[#6e7b6e] uppercase">
+                                                                Official Registrar Record (#{officialProfile.id})
+                                                            </p>
+                                                            <p className="mt-0.5 text-[#29382e]">
+                                                                Name:{' '}
+                                                                <span
+                                                                    className={`font-medium ${officialProfile.name.toLowerCase() !== request.name.toLowerCase()
+                                                                            ? 'text-[#b45309] underline'
+                                                                            : ''
+                                                                        }`}
+                                                                >
+                                                                    {officialProfile.name}
+                                                                </span>
+                                                            </p>
+                                                            <p className="text-[#29382e]">
+                                                                Birthdate:{' '}
+                                                                <span
+                                                                    className={`font-medium ${String(officialProfile.date_of_birth ?? '').slice(0, 10) !== String(request.date_of_birth ?? '').slice(0, 10)
+                                                                            ? 'text-[#b45309] underline'
+                                                                            : ''
+                                                                        }`}
+                                                                >
+                                                                    {officialProfile.date_of_birth ?? 'Not set in registrar record'}
+                                                                </span>
+                                                            </p>
+                                                            <p className="text-[#29382e]">
+                                                                Program/Batch:{' '}
+                                                                <span className="font-medium">
+                                                                    {officialProfile.program_code ?? 'Unassigned'}{' '}
+                                                                    {officialProfile.graduation_year ? `(${officialProfile.graduation_year})` : ''}
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {request.message && (
+                                            <p className="rounded-xl bg-[#fafbf9] p-3 text-xs leading-5 text-[#526051]">
+                                                <span className="font-semibold text-[#3b473d]">Applicant note:</span> "{request.message}"
+                                            </p>
+                                        )}
+
+                                        {request.reviewed_at && (
+                                            <div className="rounded-xl border border-[#e3eae0] bg-[#f4f7f3] px-3 py-2 text-xs text-[#435245]">
+                                                <p className="font-semibold text-[#29382e]">
+                                                    Reviewed {new Date(request.reviewed_at).toLocaleString()}
+                                                    {request.reviewed_by ? ` by ${request.reviewed_by.name}` : ''}
+                                                    {request.resolution_action ? ` · Action: ${request.resolution_action.replace(/_/g, ' ')}` : ''}
+                                                </p>
+                                                {request.review_note && <p className="mt-0.5 text-[#526051]">{request.review_note}</p>}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => openReviewModal(request, 'reviewed')}
+                                            className="rounded-xl bg-[#2b5139] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#22442e]"
+                                        >
+                                            {request.status === 'reviewed' ? 'Update resolution' : 'Resolve & approve'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => openReviewModal(request, 'needs_more_information')}
+                                            className="rounded-xl border border-[#d2ddd0] bg-white px-3 py-1.5 text-xs font-medium text-[#435245] hover:bg-[#f4f6f2]"
+                                        >
+                                            Review / Ask info
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        );
+                    })}
+                </div>
+            )}
+
+            {selectedRequest && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-xl">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-sm font-semibold text-[#29382e]">
+                                    Resolve Registration Claim #{selectedRequest.id}
+                                </h3>
+                                <p className="mt-0.5 text-xs text-[#70796e]">
+                                    {selectedRequest.name} ({selectedRequest.student_number})
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedRequest(null)}
+                                className="rounded-lg p-1 text-[#838c81] hover:bg-[#f2f4f0]"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {selectedRequest.registrar_match && (
+                            <div className="mt-3 rounded-xl border border-[#e5ebe2] bg-[#f9fbf8] p-3 text-xs text-[#3b473d]">
+                                <p className="font-semibold text-[#29382e]">Diagnostic Summary</p>
+                                <p className="mt-0.5">{selectedRequest.registrar_match.summary}</p>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleReviewSubmit} className="mt-4 space-y-3">
+                            <label className="block text-xs font-medium text-[#4d5a4f]">
+                                Decision outcome
+                                <select
+                                    value={reviewStatus}
+                                    onChange={(e) => setReviewStatus(e.target.value as any)}
+                                    className="mt-1 h-9 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                >
+                                    <option value="reviewed">Approve & resolve claim (Reviewed)</option>
+                                    <option value="needs_more_information">Request more information from applicant</option>
+                                    <option value="rejected">Reject claim</option>
+                                </select>
+                            </label>
+
+                            {reviewStatus === 'reviewed' && (
+                                <div className="space-y-3 rounded-xl border border-[#dfe7dc] bg-[#f8faf7] p-3.5">
+                                    <label className="block text-xs font-semibold text-[#29382e]">
+                                        Registrar Record Resolution Action
+                                        <select
+                                            value={resolutionAction}
+                                            onChange={(e) => setResolutionAction(e.target.value as any)}
+                                            className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-3 text-xs font-normal"
+                                        >
+                                            <option value="sync_record">
+                                                Sync Official Record with Submitted Details (Unblocks self-registration)
+                                            </option>
+                                            <option value="create_record">
+                                                Create Official Alumni Record (If missing from registrar list)
+                                            </option>
+                                            <option value="provision_account">
+                                                Sync/Create Record & Provision User Account Immediately
+                                            </option>
+                                            <option value="manual_review">
+                                                Mark Reviewed Only (Do not modify alumni profile)
+                                            </option>
                                         </select>
                                     </label>
 
-                                    {reviewStatus === 'reviewed' && (
-                                        <div className="space-y-3 rounded-xl border border-[#dfe7dc] bg-[#f8faf7] p-3.5">
-                                            <label className="block text-xs font-semibold text-[#29382e]">
-                                                Registrar Record Resolution Action
+                                    {resolutionAction !== 'manual_review' && (
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            <label className="block text-xs font-medium text-[#4d5a4f]">
+                                                Academic Program
                                                 <select
-                                                    value={resolutionAction}
-                                                    onChange={(e) => setResolutionAction(e.target.value as any)}
-                                                    className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-3 text-xs font-normal"
+                                                    value={overrideProgramId}
+                                                    onChange={(e) => setOverrideProgramId(e.target.value)}
+                                                    className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-2.5 text-xs"
                                                 >
-                                                    <option value="sync_record">
-                                                        Sync Official Record with Submitted Details (Unblocks self-registration)
-                                                    </option>
-                                                    <option value="create_record">
-                                                        Create Official Alumni Record (If missing from registrar list)
-                                                    </option>
-                                                    <option value="provision_account">
-                                                        Sync/Create Record & Provision User Account Immediately
-                                                    </option>
-                                                    <option value="manual_review">
-                                                        Mark Reviewed Only (Do not modify alumni profile)
-                                                    </option>
+                                                    <option value="">Keep existing / unassigned</option>
+                                                    {programs.map((prog) => (
+                                                        <option key={prog.id} value={prog.id}>
+                                                            {prog.code} — {prog.name}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </label>
-
-                                            {resolutionAction !== 'manual_review' && (
-                                                <div className="grid gap-3 sm:grid-cols-2">
-                                                    <label className="block text-xs font-medium text-[#4d5a4f]">
-                                                        Academic Program
-                                                        <select
-                                                            value={overrideProgramId}
-                                                            onChange={(e) => setOverrideProgramId(e.target.value)}
-                                                            className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-2.5 text-xs"
-                                                        >
-                                                            <option value="">Keep existing / unassigned</option>
-                                                            {programs.map((prog) => (
-                                                                <option key={prog.id} value={prog.id}>
-                                                                    {prog.code} — {prog.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </label>
-                                                    <label className="block text-xs font-medium text-[#4d5a4f]">
-                                                        Graduation Year
-                                                        <input
-                                                            type="number"
-                                                            min={1950}
-                                                            max={2100}
-                                                            value={overrideGradYear}
-                                                            onChange={(e) => setOverrideGradYear(e.target.value)}
-                                                            placeholder="e.g. 2024"
-                                                            className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-2.5 text-xs"
-                                                        />
-                                                    </label>
-                                                </div>
-                                            )}
-
-                                            {resolutionAction === 'provision_account' && (
-                                                <label className="block text-xs font-medium text-[#4d5a4f]">
-                                                    Temporary Account Password (include in review note so applicant can sign in)
-                                                    <input
-                                                        type="text"
-                                                        value={provisionPassword}
-                                                        onChange={(e) => setProvisionPassword(e.target.value)}
-                                                        className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-2.5 font-mono text-xs"
-                                                    />
-                                                </label>
-                                            )}
+                                            <label className="block text-xs font-medium text-[#4d5a4f]">
+                                                Graduation Year
+                                                <input
+                                                    type="number"
+                                                    min={1950}
+                                                    max={2100}
+                                                    value={overrideGradYear}
+                                                    onChange={(e) => setOverrideGradYear(e.target.value)}
+                                                    placeholder="e.g. 2024"
+                                                    className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-2.5 text-xs"
+                                                />
+                                            </label>
                                         </div>
                                     )}
 
-                                    <label className="block text-xs font-medium text-[#4d5a4f]">
-                                        Review note (visible to applicant via Reference Status Checker)
-                                        <textarea
-                                            rows={3}
-                                            value={reviewNote}
-                                            onChange={(e) => setReviewNote(e.target.value)}
-                                            placeholder="Enter review explanation or next steps for the applicant..."
-                                            className="mt-1 w-full rounded-lg border border-[#e3e7df] p-2.5 text-xs outline-none focus:border-[#819981]"
-                                        />
-                                    </label>
+                                    {resolutionAction === 'provision_account' && (
+                                        <label className="block text-xs font-medium text-[#4d5a4f]">
+                                            Temporary Account Password (include in review note so applicant can sign in)
+                                            <input
+                                                type="text"
+                                                value={provisionPassword}
+                                                onChange={(e) => setProvisionPassword(e.target.value)}
+                                                className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-2.5 font-mono text-xs"
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+                            )}
 
-                                    <div className="flex items-center justify-end gap-2 pt-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setSelectedRequest(null)}
-                                            className="rounded-xl border border-[#e2e7df] px-3 py-1.5 text-xs text-[#5c685b] hover:bg-[#f4f6f2]"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={submitting}
-                                            className="rounded-xl bg-[#2b5139] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#22442e] disabled:opacity-50"
-                                        >
-                                            {submitting ? 'Submitting…' : 'Confirm decision'}
-                                        </button>
-                                    </div>
-                                </form>
+                            <label className="block text-xs font-medium text-[#4d5a4f]">
+                                Review note (visible to applicant via Reference Status Checker)
+                                <textarea
+                                    rows={3}
+                                    value={reviewNote}
+                                    onChange={(e) => setReviewNote(e.target.value)}
+                                    placeholder="Enter review explanation or next steps for the applicant..."
+                                    className="mt-1 w-full rounded-lg border border-[#e3e7df] p-2.5 text-xs outline-none focus:border-[#819981]"
+                                />
+                            </label>
+
+                            <div className="flex items-center justify-end gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedRequest(null)}
+                                    className="rounded-xl border border-[#e2e7df] px-3 py-1.5 text-xs text-[#5c685b] hover:bg-[#f4f6f2]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="rounded-xl bg-[#2b5139] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#22442e] disabled:opacity-50"
+                                >
+                                    {submitting ? 'Submitting…' : 'Confirm decision'}
+                                </button>
                             </div>
-                        </div>
-                    )}
+                        </form>
+                    </div>
                 </div>
-            );
-        }
+            )}
+        </div>
+    );
+}
 
 const EVENT_TYPE_OPTIONS = [
     {
@@ -10948,8 +13488,8 @@ export function EventCenter({
         setEditingId(eventItem.id);
         const hasCohort = Boolean(
             eventItem.target_department_ids?.length ||
-                eventItem.target_program_ids?.length ||
-                eventItem.target_graduation_years?.length,
+            eventItem.target_program_ids?.length ||
+            eventItem.target_graduation_years?.length,
         );
         setShowCohortTargeting(hasCohort);
         setForm({
@@ -11016,9 +13556,9 @@ export function EventCenter({
             target_graduation_years: parsedYears.length ? parsedYears : null,
             ...(editingId === null
                 ? {
-                      publish_now: form.publish_now,
-                      notify_audience: form.notify_audience,
-                  }
+                    publish_now: form.publish_now,
+                    notify_audience: form.notify_audience,
+                }
                 : {}),
         };
 
@@ -11147,8 +13687,8 @@ export function EventCenter({
                 status === 'going'
                     ? 'You are registered as Going!'
                     : status === 'interested'
-                      ? 'Marked as Interested.'
-                      : 'Your RSVP has been cancelled.',
+                        ? 'Marked as Interested.'
+                        : 'Your RSVP has been cancelled.',
             );
         } catch (err) {
             toast.error(
@@ -11304,9 +13844,9 @@ export function EventCenter({
                                 ['my_rsvp', 'My RSVPs'],
                                 ...(canManage
                                     ? ([
-                                          ['draft', 'Drafts'],
-                                          ['past', 'Past'],
-                                      ] as const)
+                                        ['draft', 'Drafts'],
+                                        ['past', 'Past'],
+                                    ] as const)
                                     : ([['past', 'Past']] as const)),
                             ] as const
                         ).map(([key, label]) => (
@@ -11314,11 +13854,10 @@ export function EventCenter({
                                 key={key}
                                 type="button"
                                 onClick={() => setViewFilter(key)}
-                                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
-                                    viewFilter === key
+                                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${viewFilter === key
                                         ? 'bg-[#2b5139] text-white'
                                         : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                }`}
+                                    }`}
                             >
                                 {label}
                             </button>
@@ -11566,12 +14105,12 @@ export function EventCenter({
                                             ...form,
                                             audience_roles: e.target.checked
                                                 ? [
-                                                      ...form.audience_roles,
-                                                      value,
-                                                  ]
+                                                    ...form.audience_roles,
+                                                    value,
+                                                ]
                                                 : form.audience_roles.filter(
-                                                      (item) => item !== value,
-                                                  ),
+                                                    (item) => item !== value,
+                                                ),
                                         })
                                     }
                                     className="size-3.5 accent-[#2b5139]"
@@ -11616,23 +14155,22 @@ export function EventCenter({
                                                             target_department_ids:
                                                                 active
                                                                     ? form.target_department_ids.filter(
-                                                                          (
-                                                                              id,
-                                                                          ) =>
-                                                                              id !==
-                                                                              dept.id,
-                                                                      )
+                                                                        (
+                                                                            id,
+                                                                        ) =>
+                                                                            id !==
+                                                                            dept.id,
+                                                                    )
                                                                     : [
-                                                                          ...form.target_department_ids,
-                                                                          dept.id,
-                                                                      ],
+                                                                        ...form.target_department_ids,
+                                                                        dept.id,
+                                                                    ],
                                                         })
                                                     }
-                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                                                        active
+                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
                                                             ? 'bg-[#2b5139] text-white'
                                                             : 'border border-[#dce2d9] bg-white text-[#526053]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {dept.code} · {dept.name}
                                                 </button>
@@ -11663,23 +14201,22 @@ export function EventCenter({
                                                             target_program_ids:
                                                                 active
                                                                     ? form.target_program_ids.filter(
-                                                                          (
-                                                                              id,
-                                                                          ) =>
-                                                                              id !==
-                                                                              prog.id,
-                                                                      )
+                                                                        (
+                                                                            id,
+                                                                        ) =>
+                                                                            id !==
+                                                                            prog.id,
+                                                                    )
                                                                     : [
-                                                                          ...form.target_program_ids,
-                                                                          prog.id,
-                                                                      ],
+                                                                        ...form.target_program_ids,
+                                                                        prog.id,
+                                                                    ],
                                                         })
                                                     }
-                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-                                                        active
+                                                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
                                                             ? 'bg-[#2b5139] text-white'
                                                             : 'border border-[#dce2d9] bg-white text-[#526053]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {prog.code}
                                                 </button>
@@ -11775,10 +14312,10 @@ export function EventCenter({
                                 {saving
                                     ? 'Saving…'
                                     : editingId !== null
-                                      ? 'Save changes'
-                                      : form.publish_now
-                                        ? 'Create & publish'
-                                        : 'Create event'}
+                                        ? 'Save changes'
+                                        : form.publish_now
+                                            ? 'Create & publish'
+                                            : 'Create event'}
                             </button>
                         </div>
                     </div>
@@ -11807,8 +14344,8 @@ export function EventCenter({
                             )?.label ?? 'In-person';
                         const hasCohort = Boolean(
                             eventItem.target_department_ids?.length ||
-                                eventItem.target_program_ids?.length ||
-                                eventItem.target_graduation_years?.length,
+                            eventItem.target_program_ids?.length ||
+                            eventItem.target_graduation_years?.length,
                         );
                         const goingCount = eventItem.going_count ?? 0;
                         const interestedCount = eventItem.interested_count ?? 0;
@@ -11818,20 +14355,18 @@ export function EventCenter({
                         return (
                             <article
                                 key={eventItem.id}
-                                className={`rounded-2xl border p-4 sm:p-5 ${
-                                    eventItem.is_featured
+                                className={`rounded-2xl border p-4 sm:p-5 ${eventItem.is_featured
                                         ? 'border-[#cfe0cc] bg-[#fbfcfa]'
                                         : 'border-[#e9ebe5] bg-white'
-                                }`}
+                                    }`}
                             >
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                                     {/* Calendar Badge */}
                                     <div
-                                        className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-2xl border text-center ${
-                                            eventItem.is_featured
+                                        className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-2xl border text-center ${eventItem.is_featured
                                                 ? 'border-[#2b5139] bg-[#2b5139] text-white'
                                                 : 'border-[#dfe5dc] bg-[#f4f7f3] text-[#2b5139]'
-                                        }`}
+                                            }`}
                                     >
                                         <span className="text-[10px] font-bold tracking-wider uppercase">
                                             {monthShort}
@@ -11991,11 +14526,10 @@ export function EventCenter({
                                                                 : 'going',
                                                         )
                                                     }
-                                                    className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition ${
-                                                        myRsvp === 'going'
+                                                    className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition ${myRsvp === 'going'
                                                             ? 'bg-[#2b5139] text-white'
                                                             : 'border border-[#cfe0cc] bg-[#edf2eb] text-[#2b5139] hover:bg-[#dfe8dc]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {myRsvp === 'going'
                                                         ? '✓ Going'
@@ -12016,11 +14550,10 @@ export function EventCenter({
                                                                 : 'interested',
                                                         )
                                                     }
-                                                    className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
-                                                        myRsvp === 'interested'
+                                                    className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${myRsvp === 'interested'
                                                             ? 'bg-[#2c5270] text-white'
                                                             : 'border border-[#e3e7df] bg-white text-[#526054] hover:bg-[#f6f7f4]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {myRsvp === 'interested'
                                                         ? '★ Interested'
@@ -12041,7 +14574,7 @@ export function EventCenter({
                                                     className="rounded-lg border border-[#e3e7df] bg-[#fafbf9] px-2.5 py-1.5 text-[11px] font-semibold text-[#3f5242] hover:bg-[#eff2ed]"
                                                 >
                                                     {activeAttendeesEventId ===
-                                                    eventItem.id
+                                                        eventItem.id
                                                         ? 'Hide attendees'
                                                         : `Attendees (${goingCount + interestedCount})`}
                                                 </button>
@@ -12075,7 +14608,7 @@ export function EventCenter({
                                                 </button>
 
                                                 {eventItem.status !==
-                                                'published' ? (
+                                                    'published' ? (
                                                     <button
                                                         type="button"
                                                         disabled={
@@ -12090,7 +14623,7 @@ export function EventCenter({
                                                         className="rounded-lg bg-[#2b5139] px-3 py-1.5 text-[11px] font-semibold text-white disabled:opacity-60"
                                                     >
                                                         {publishingId ===
-                                                        eventItem.id
+                                                            eventItem.id
                                                             ? 'Publishing…'
                                                             : 'Publish'}
                                                     </button>
@@ -12173,12 +14706,11 @@ export function EventCenter({
                                                                     </p>
                                                                 </div>
                                                                 <span
-                                                                    className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${
-                                                                        attendee.status ===
-                                                                        'going'
+                                                                    className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${attendee.status ===
+                                                                            'going'
                                                                             ? 'bg-[#edf2eb] text-[#2b5139]'
                                                                             : 'bg-[#e8eff4] text-[#2c5270]'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     {
                                                                         attendee.status

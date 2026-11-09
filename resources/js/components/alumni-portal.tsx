@@ -545,11 +545,11 @@ export default function AlumniPortal({
             onCloseCreate={() => setDialogOpen(false)}
         />
     ) : activePage === 'Career opportunities' ? (
-        <PublicJobs />
+        <PublicJobs onNavigate={(page) => navigateToPage(page)} />
     ) : activePage === 'My applications' ? (
-        <AlumniApplications />
+        <AlumniApplications onNavigate={(page) => navigateToPage(page)} />
     ) : activePage === 'Applicants' ? (
-        <EmployerApplicants />
+        <EmployerApplicants onNavigate={(page) => navigateToPage(page)} />
     ) : activePage === 'Job postings' ? (
         <EmployerJobs
             createOpen={dialogOpen}

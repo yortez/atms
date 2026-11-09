@@ -25,6 +25,15 @@ class EmployerController extends Controller
 
     public function mine(Request $request): JsonResponse
     {
+        if ($request->user()->can('viewAny', Employer::class)) {
+            return response()->json([
+                'data' => Employer::query()
+                    ->select(['id', 'company_name', 'industry', 'website', 'verification_status'])
+                    ->orderBy('company_name')
+                    ->get(),
+            ]);
+        }
+
         abort_unless($request->user()->hasRole('employer'), 403);
 
         return response()->json([

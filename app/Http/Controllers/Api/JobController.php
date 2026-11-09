@@ -46,11 +46,22 @@ class JobController extends Controller
 
     public function employerIndex(Request $request): JsonResponse
     {
+        if ($this->isStaff($request)) {
+            $query = JobPosting::query()->with('employer:id,company_name,industry,website')->withCount('applications')->latest();
+            if ($request->filled('employer_id')) {
+                $query->where('employer_id', (int) $request->input('employer_id'));
+            }
+
+            return response()->json([
+                'data' => $query->paginate(50),
+            ]);
+        }
+
         $employers = $this->memberEmployers($request);
 
         return response()->json([
             'data' => JobPosting::query()->whereIn('employer_id', $employers->pluck('id'))
-                ->with('employer:id,company_name')->withCount('applications')->latest()->paginate(25),
+                ->with('employer:id,company_name,industry,website')->withCount('applications')->latest()->paginate(50),
         ]);
     }
 
@@ -203,7 +214,7 @@ class JobController extends Controller
         ]);
     }
 
-    public function downloadResume(Request $request, JobApplication $application): StreamedResponse
+    public function downloadResume(Request $request, JobApplication $application): mixed
     {
         abort_unless(
             $this->isMember($request, $application->jobPosting->employer)
@@ -213,23 +224,70 @@ class JobController extends Controller
             'Unauthorized to download this resume snapshot.'
         );
 
-        abort_unless(
-            $application->resume_snapshot_path && Storage::disk('local')->exists($application->resume_snapshot_path),
-            404,
-            'Resume snapshot not found.'
-        );
+        $path = $application->resume_snapshot_path;
+        $fileExists = $path && Storage::disk('local')->exists($path);
 
-        return Storage::disk('local')->download(
-            $application->resume_snapshot_path,
-            "Application_Resume_{$application->id}.pdf"
-        );
+        $applicantName = Str::slug($application->alumniProfile?->name ?? 'Candidate', '_');
+
+        // Case 1: If requested format is explicitly PDF, or if no raw uploaded file exists
+        if ($request->query('format') === 'pdf' || ! $fileExists) {
+            $pdfContent = \App\Services\ResumePdfService::generate($application);
+            $filename = "Verified_Resume_{$applicantName}_{$application->id}.pdf";
+            $disposition = $request->boolean('download') ? 'attachment' : 'inline';
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "{$disposition}; filename=\"{$filename}\"",
+            ]);
+        }
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION) ?: 'pdf');
+        $mimeType = match ($extension) {
+            'pdf' => 'application/pdf',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'doc' => 'application/msword',
+            default => Storage::disk('local')->mimeType($path) ?: 'application/octet-stream',
+        };
+
+        $filename = "Resume_{$applicantName}_{$application->id}.{$extension}";
+
+        // Case 2: The file is a PDF
+        if ($extension === 'pdf') {
+            if ($request->boolean('download')) {
+                return Storage::disk('local')->download($path, $filename, [
+                    'Content-Type' => 'application/pdf',
+                ]);
+            }
+
+            return response()->file(Storage::disk('local')->path($path), [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "inline; filename=\"{$filename}\"",
+            ]);
+        }
+
+        // Case 3: The file is a DOCX or DOC file
+        // If inline view or preview is requested, serve the verified PDF preview since browsers cannot render DOCX natively
+        if ($request->boolean('inline') || $request->query('preview') === '1') {
+            $pdfContent = \App\Services\ResumePdfService::generate($application);
+            $previewFilename = "Preview_Resume_{$applicantName}_{$application->id}.pdf";
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "inline; filename=\"{$previewFilename}\"",
+            ]);
+        }
+
+        // Otherwise download the Word document with its correct .docx / .doc extension and MIME type!
+        return Storage::disk('local')->download($path, $filename, [
+            'Content-Type' => $mimeType,
+        ]);
     }
 
     public function reviewApplication(Request $request, JobApplication $application): JsonResponse
     {
         $this->authorizeJob($request, $application->jobPosting);
         $data = $request->validate([
-            'status' => ['required', Rule::in(['reviewing', 'shortlisted', 'rejected', 'hired'])],
+            'status' => ['required', Rule::in(['submitted', 'reviewing', 'shortlisted', 'rejected', 'hired'])],
         ]);
         $application->forceFill([
             ...$data,
