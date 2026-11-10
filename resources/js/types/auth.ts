@@ -8,6 +8,8 @@ export type User = {
     created_at: string;
     updated_at: string;
     alumni_profile_id?: number | null;
+    is_profile_complete?: boolean;
+    missing_profile_fields?: string[];
     roles?: string[];
     [key: string]: unknown;
 };

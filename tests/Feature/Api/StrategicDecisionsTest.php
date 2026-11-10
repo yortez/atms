@@ -210,6 +210,11 @@ test('job application stores a frozen profile snapshot and submitted resume', fu
         'last_name' => 'Day',
         'email' => 'charlie@example.com',
         'date_of_birth' => '1996-08-08',
+        'gender' => 'Male',
+        'civil_status' => 'Single',
+        'contact_number' => '+63 912 345 6789',
+        'current_address' => 'Bacolod City, Negros Occidental',
+        'permanent_address' => 'Bacolod City, Negros Occidental',
     ]);
 
     AlumniEducationRecord::create([
@@ -278,6 +283,11 @@ test('employment tracer records degree relevance flag (Option B)', function () {
         'last_name' => 'Vance',
         'email' => 'devon@example.com',
         'date_of_birth' => '1994-11-20',
+        'gender' => 'Male',
+        'civil_status' => 'Single',
+        'contact_number' => '+63 912 345 6789',
+        'current_address' => 'Surallah, South Cotabato',
+        'permanent_address' => 'Surallah, South Cotabato',
     ]);
 
     $user = User::factory()->create(['alumni_profile_id' => $profile->id]);

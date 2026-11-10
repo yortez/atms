@@ -109,6 +109,11 @@ test('alumni can report employment and the previous current period is retained',
         'name' => 'Tracer Alumni',
         'email' => 'tracer@example.com',
         'date_of_birth' => '1990-01-01',
+        'gender' => 'Male',
+        'civil_status' => 'Single',
+        'contact_number' => '+63 912 345 6789',
+        'current_address' => 'Bacolod City, Negros Occidental',
+        'permanent_address' => 'Bacolod City, Negros Occidental',
     ]);
     $user->alumniProfile()->associate($profile);
     $user->save();
@@ -139,6 +144,11 @@ test('employment periods reject an end date earlier than the start date', functi
         'name' => 'Tracer Alumni',
         'email' => 'tracer@example.com',
         'date_of_birth' => '1990-01-01',
+        'gender' => 'Male',
+        'civil_status' => 'Single',
+        'contact_number' => '+63 912 345 6789',
+        'current_address' => 'Bacolod City, Negros Occidental',
+        'permanent_address' => 'Bacolod City, Negros Occidental',
     ]);
     $user->alumniProfile()->associate($profile);
     $user->save();

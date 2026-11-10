@@ -134,6 +134,12 @@ class JobController extends Controller
             'employmentRecords.status',
         ])->findOrFail($user->alumni_profile_id);
 
+        abort_unless(
+            $profile->isComplete(),
+            403,
+            'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before applying for jobs.',
+        );
+
         $profileSnapshot = [
             'alumni_id' => $profile->id,
             'name' => $profile->name,
@@ -142,6 +148,11 @@ class JobController extends Controller
             'last_name' => $profile->last_name,
             'email' => $user->email,
             'date_of_birth' => $profile->date_of_birth->toDateString(),
+            'gender' => $profile->gender,
+            'civil_status' => $profile->civil_status,
+            'contact_number' => $profile->contact_number,
+            'current_address' => $profile->current_address,
+            'permanent_address' => $profile->permanent_address,
             'applied_at' => now()->toISOString(),
             'education' => $profile->educationRecords->map(fn ($record) => [
                 'student_number' => $record->student_number,

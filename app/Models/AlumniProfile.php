@@ -19,6 +19,11 @@ use Illuminate\Support\Carbon;
  * @property string|null $last_name
  * @property string|null $suffix
  * @property string|null $preferred_name
+ * @property string|null $gender
+ * @property string|null $civil_status
+ * @property string|null $contact_number
+ * @property string|null $current_address
+ * @property string|null $permanent_address
  * @property string $profile_status
  * @property int|null $merged_into_alumni_id
  */
@@ -31,6 +36,11 @@ use Illuminate\Support\Carbon;
     'last_name',
     'suffix',
     'preferred_name',
+    'gender',
+    'civil_status',
+    'contact_number',
+    'current_address',
+    'permanent_address',
     'profile_status',
     'merged_into_alumni_id',
     'created_by_user_id',
@@ -108,6 +118,40 @@ class AlumniProfile extends Model
     public function mergedProfiles(): HasMany
     {
         return $this->hasMany(self::class, 'merged_into_alumni_id');
+    }
+
+    public function isComplete(): bool
+    {
+        return filled($this->gender)
+            && filled($this->civil_status)
+            && filled($this->contact_number)
+            && filled($this->current_address)
+            && filled($this->permanent_address);
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function missingProfileFields(): array
+    {
+        $missing = [];
+        if (blank($this->gender)) {
+            $missing[] = 'gender';
+        }
+        if (blank($this->civil_status)) {
+            $missing[] = 'civil_status';
+        }
+        if (blank($this->contact_number)) {
+            $missing[] = 'contact_number';
+        }
+        if (blank($this->current_address)) {
+            $missing[] = 'current_address';
+        }
+        if (blank($this->permanent_address)) {
+            $missing[] = 'permanent_address';
+        }
+
+        return $missing;
     }
 
     protected function casts(): array

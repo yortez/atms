@@ -119,6 +119,11 @@ class AlumniController extends Controller
             'last_name' => ['required', 'string', 'max:100'],
             'suffix' => ['nullable', 'string', 'max:30'],
             'preferred_name' => ['nullable', 'string', 'max:100'],
+            'gender' => ['nullable', 'string', 'max:50'],
+            'civil_status' => ['nullable', 'string', 'max:50'],
+            'contact_number' => ['nullable', 'string', 'max:64'],
+            'current_address' => ['nullable', 'string', 'max:500'],
+            'permanent_address' => ['nullable', 'string', 'max:500'],
         ]);
 
         $profile = AlumniProfile::create([
@@ -126,6 +131,9 @@ class AlumniController extends Controller
             'email' => mb_strtolower(trim($data['email'])),
             'created_by_user_id' => $request->user()->id,
         ]);
+
+        $this->syncContactAndAddresses($profile, $data);
+
         $activityLogger->record('alumni.profile_created', $profile);
 
         return (new AlumniProfileResource($profile))->response()->setStatusCode(201);
@@ -137,7 +145,14 @@ class AlumniController extends Controller
 
         $isSelf = $request->user()->alumni_profile_id === $profile->id;
         $rules = $isSelf
-            ? ['preferred_name' => ['nullable', 'string', 'max:100']]
+            ? [
+                'preferred_name' => ['nullable', 'string', 'max:100'],
+                'gender' => ['sometimes', 'nullable', 'string', 'max:50'],
+                'civil_status' => ['sometimes', 'nullable', 'string', 'max:50'],
+                'contact_number' => ['sometimes', 'nullable', 'string', 'max:64'],
+                'current_address' => ['sometimes', 'nullable', 'string', 'max:500'],
+                'permanent_address' => ['sometimes', 'nullable', 'string', 'max:500'],
+            ]
             : [
                 'name' => ['sometimes', 'required', 'string', 'max:255'],
                 'email' => ['sometimes', 'required', 'email', 'max:255'],
@@ -147,6 +162,11 @@ class AlumniController extends Controller
                 'last_name' => ['sometimes', 'required', 'string', 'max:100'],
                 'suffix' => ['nullable', 'string', 'max:30'],
                 'preferred_name' => ['nullable', 'string', 'max:100'],
+                'gender' => ['sometimes', 'nullable', 'string', 'max:50'],
+                'civil_status' => ['sometimes', 'nullable', 'string', 'max:50'],
+                'contact_number' => ['sometimes', 'nullable', 'string', 'max:64'],
+                'current_address' => ['sometimes', 'nullable', 'string', 'max:500'],
+                'permanent_address' => ['sometimes', 'nullable', 'string', 'max:500'],
                 'profile_status' => ['sometimes', Rule::in(['active', 'archived'])],
             ];
         $data = $request->validate($rules);
@@ -156,9 +176,34 @@ class AlumniController extends Controller
         }
 
         $profile->fill($data)->save();
+        $this->syncContactAndAddresses($profile, $data);
         $activityLogger->record('alumni.profile_updated', $profile, ['changed_fields' => array_keys($data)]);
 
         return new AlumniProfileResource($profile->refresh());
+    }
+
+    private function syncContactAndAddresses(AlumniProfile $profile, array $data): void
+    {
+        if (array_key_exists('contact_number', $data) && filled($data['contact_number'])) {
+            $profile->contactMethods()->updateOrCreate(
+                ['type' => 'phone', 'is_primary' => true],
+                ['value' => $data['contact_number']],
+            );
+        }
+
+        if (array_key_exists('current_address', $data) && filled($data['current_address'])) {
+            $profile->addresses()->updateOrCreate(
+                ['address_type' => 'current', 'is_primary' => true],
+                ['line_1' => $data['current_address'], 'country_code' => 'PH'],
+            );
+        }
+
+        if (array_key_exists('permanent_address', $data) && filled($data['permanent_address'])) {
+            $profile->addresses()->updateOrCreate(
+                ['address_type' => 'permanent'],
+                ['line_1' => $data['permanent_address'], 'country_code' => 'PH', 'is_primary' => false],
+            );
+        }
     }
 
     public function storeEducationRecord(Request $request, AlumniProfile $profile, ActivityLogger $activityLogger): JsonResponse

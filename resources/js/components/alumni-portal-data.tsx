@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from '@inertiajs/react';
 import {
+    AlertCircle,
     ArrowRight,
     Award,
     Briefcase,
@@ -652,6 +653,11 @@ function AlumniProfileDialog({
         email: '',
         date_of_birth: '',
         preferred_name: '',
+        gender: '',
+        civil_status: '',
+        contact_number: '',
+        current_address: '',
+        permanent_address: '',
         profile_status: 'active' as 'active' | 'archived',
     });
 
@@ -665,6 +671,11 @@ function AlumniProfileDialog({
                 email: profile.email ?? '',
                 date_of_birth: profile.date_of_birth ?? '',
                 preferred_name: profile.preferred_name ?? '',
+                gender: profile.gender ?? '',
+                civil_status: profile.civil_status ?? '',
+                contact_number: profile.contact_number ?? '',
+                current_address: profile.current_address ?? '',
+                permanent_address: profile.permanent_address ?? '',
                 profile_status: profile.profile_status ?? 'active',
             });
         }
@@ -694,6 +705,11 @@ function AlumniProfileDialog({
                         email: editForm.email,
                         date_of_birth: editForm.date_of_birth,
                         preferred_name: editForm.preferred_name || null,
+                        gender: editForm.gender || null,
+                        civil_status: editForm.civil_status || null,
+                        contact_number: editForm.contact_number || null,
+                        current_address: editForm.current_address || null,
+                        permanent_address: editForm.permanent_address || null,
                         profile_status: editForm.profile_status,
                     },
                 },
@@ -880,6 +896,60 @@ function AlumniProfileDialog({
                                         className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
                                     />
                                 </div>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Gender
+                                    </label>
+                                    <select
+                                        value={editForm.gender}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, gender: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    >
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                        <option value="Prefer not to say">Prefer not to say</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Civil status
+                                    </label>
+                                    <select
+                                        value={editForm.civil_status}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, civil_status: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    >
+                                        <option value="">Select Civil Status</option>
+                                        <option value="Single">Single</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Widowed">Widowed</option>
+                                        <option value="Separated">Separated</option>
+                                        <option value="Divorced">Divorced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                        Contact number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        placeholder="e.g. +63 912 345 6789"
+                                        value={editForm.contact_number}
+                                        onChange={(e) =>
+                                            setEditForm({ ...editForm, contact_number: e.target.value })
+                                        }
+                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                    />
+                                </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[#495a4f]">
                                         Profile status
@@ -898,6 +968,35 @@ function AlumniProfileDialog({
                                         <option value="archived">Archived</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-[#495a4f]">
+                                    Current address
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Street, Barangay, City/Municipality, Province"
+                                    value={editForm.current_address}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, current_address: e.target.value })
+                                    }
+                                    className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-[#495a4f]">
+                                    Permanent address
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Street, Barangay, City/Municipality, Province"
+                                    value={editForm.permanent_address}
+                                    onChange={(e) =>
+                                        setEditForm({ ...editForm, permanent_address: e.target.value })
+                                    }
+                                    className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                />
+                            </div>
                             </div>
                             <div className="flex justify-end gap-2 pt-3 border-t border-[#eff0ec]">
                                 <button
@@ -964,6 +1063,11 @@ function AlumniProfileDialog({
                                     {detail('Suffix', profile.suffix)}
                                     {detail('Email', profile.email)}
                                     {detail('Birthdate', profile.date_of_birth)}
+                                    {detail('Gender', profile.gender)}
+                                    {detail('Civil status', profile.civil_status)}
+                                    {detail('Contact number', profile.contact_number)}
+                                    {detail('Current address', profile.current_address)}
+                                    {detail('Permanent address', profile.permanent_address)}
                                 </dl>
                             </section>
 
@@ -1127,6 +1231,11 @@ export function AlumniDirectory({
                     name: fullName,
                     email: form.email,
                     date_of_birth: form.date_of_birth,
+                    gender: form.sex || null,
+                    civil_status: form.civil_status || null,
+                    contact_number: form.contact_number || null,
+                    current_address: form.current_address || null,
+                    permanent_address: form.permanent_address || null,
                 },
             });
             setForm({
@@ -2174,6 +2283,273 @@ export function AcademicRecords() {
     );
 }
 
+export function AlumniProfileCompletionModal({
+    isOpen,
+    onClose,
+    profile,
+    onSuccess,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    profile?: AlumniProfile | null;
+    onSuccess?: () => void;
+}) {
+    const [preferredName, setPreferredName] = useState('');
+    const [gender, setGender] = useState('');
+    const [civilStatus, setCivilStatus] = useState('');
+    const [contactNumber, setContactNumber] = useState('');
+    const [currentAddress, setCurrentAddress] = useState('');
+    const [permanentAddress, setPermanentAddress] = useState('');
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (profile) {
+            setPreferredName(profile.preferred_name ?? '');
+            setGender(profile.gender ?? '');
+            setCivilStatus(profile.civil_status ?? '');
+            setContactNumber(profile.contact_number ?? '');
+            setCurrentAddress(profile.current_address ?? '');
+            setPermanentAddress(profile.permanent_address ?? '');
+        }
+    }, [profile, isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
+
+    const copyAddress = () => {
+        setPermanentAddress(currentAddress);
+        toast.info('Permanent address set to match current address.');
+    };
+
+    async function handleSave(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!profile?.id) {
+            toast.error('No linked alumni profile found.');
+            return;
+        }
+
+        if (!gender.trim() || !civilStatus.trim() || !contactNumber.trim() || !currentAddress.trim() || !permanentAddress.trim()) {
+            toast.error('All profile completion fields (gender, civil status, contact number, current address, and permanent address) are required.');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            await apiRequest<ApiEnvelope<AlumniProfile>>(`/api/alumni/${profile.id}`, {
+                method: 'PATCH',
+                body: {
+                    preferred_name: preferredName.trim() || null,
+                    gender: gender.trim(),
+                    civil_status: civilStatus.trim(),
+                    contact_number: contactNumber.trim(),
+                    current_address: currentAddress.trim(),
+                    permanent_address: permanentAddress.trim(),
+                },
+            });
+
+            toast.success('Alumni profile updated successfully! All alumni services are now unlocked.');
+            onSuccess?.();
+            onClose();
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Profile could not be updated.',
+            );
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
+            onClick={onClose}
+        >
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Complete Alumni Profile"
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-xl rounded-3xl border border-zinc-200 bg-white p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto"
+            >
+                <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
+                    <div className="flex items-center gap-3">
+                        <span className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-[#E47818]">
+                            <Pencil className="size-5" />
+                        </span>
+                        <div>
+                            <h2 className="text-base font-bold text-zinc-900">
+                                Complete Alumni Profile
+                            </h2>
+                            <p className="text-xs text-zinc-500">
+                                Required information to participate in surveys, apply for jobs, and access portal features
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Close dialog"
+                        className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 cursor-pointer"
+                    >
+                        <X className="size-4" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSave} className="mt-5 space-y-4">
+                    <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-3.5 text-xs text-amber-950">
+                        <p className="font-semibold flex items-center gap-1.5">
+                            <ShieldCheck className="size-4 text-[#E47818]" />
+                            Institutional Profile Completion
+                        </p>
+                        <p className="mt-1 text-[11px] text-amber-900/80 leading-relaxed">
+                            To ensure CHED GTS accuracy and maintain verified employer job applications, alumni must complete their gender, civil status, contact number, current address, and permanent address.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Gender */}
+                        <div>
+                            <label className="block text-xs font-semibold text-zinc-800">
+                                Gender <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                required
+                                value={gender}
+                                onChange={(e) => setGender(e.target.value)}
+                                className="mt-1.5 h-10 w-full rounded-xl border border-zinc-300 px-3 text-xs text-zinc-900 bg-white focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                            >
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                                <option value="Prefer not to say">Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        {/* Civil Status */}
+                        <div>
+                            <label className="block text-xs font-semibold text-zinc-800">
+                                Civil Status <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                required
+                                value={civilStatus}
+                                onChange={(e) => setCivilStatus(e.target.value)}
+                                className="mt-1.5 h-10 w-full rounded-xl border border-zinc-300 px-3 text-xs text-zinc-900 bg-white focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                            >
+                                <option value="">Select Civil Status</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Widowed">Widowed</option>
+                                <option value="Separated">Separated</option>
+                                <option value="Divorced">Divorced</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Contact Number */}
+                    <div>
+                        <label className="block text-xs font-semibold text-zinc-800">
+                            Contact Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="tel"
+                            required
+                            placeholder="e.g. +63 912 345 6789 or 09123456789"
+                            value={contactNumber}
+                            onChange={(e) => setContactNumber(e.target.value)}
+                            className="mt-1.5 h-10 w-full rounded-xl border border-zinc-300 px-3.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                        />
+                    </div>
+
+                    {/* Current Address */}
+                    <div>
+                        <label className="block text-xs font-semibold text-zinc-800">
+                            Current Address <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            required
+                            rows={2}
+                            placeholder="Street, Barangay, City/Municipality, Province"
+                            value={currentAddress}
+                            onChange={(e) => setCurrentAddress(e.target.value)}
+                            className="mt-1.5 w-full rounded-xl border border-zinc-300 p-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                        />
+                    </div>
+
+                    {/* Permanent Address */}
+                    <div>
+                        <div className="flex items-center justify-between">
+                            <label className="block text-xs font-semibold text-zinc-800">
+                                Permanent Address <span className="text-red-500">*</span>
+                            </label>
+                            {currentAddress.trim() && (
+                                <button
+                                    type="button"
+                                    onClick={copyAddress}
+                                    className="text-[11px] font-semibold text-[#E47818] hover:underline cursor-pointer"
+                                >
+                                    Same as Current Address
+                                </button>
+                            )}
+                        </div>
+                        <textarea
+                            required
+                            rows={2}
+                            placeholder="Street, Barangay, City/Municipality, Province"
+                            value={permanentAddress}
+                            onChange={(e) => setPermanentAddress(e.target.value)}
+                            className="mt-1.5 w-full rounded-xl border border-zinc-300 p-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                        />
+                    </div>
+
+                    {/* Preferred Display Name */}
+                    <div>
+                        <label className="block text-xs font-semibold text-zinc-800">
+                            Preferred Display Name / Community Handle (Optional)
+                        </label>
+                        <input
+                            type="text"
+                            maxLength={100}
+                            placeholder={`e.g. ${profile?.first_name || 'Nickname'}`}
+                            value={preferredName}
+                            onChange={(e) => setPreferredName(e.target.value)}
+                            className="mt-1.5 h-10 w-full rounded-xl border border-zinc-300 px-3.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-100">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="h-9 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="h-9 rounded-xl bg-[#E47818] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] transition disabled:opacity-60 cursor-pointer"
+                        >
+                            {saving ? 'Saving…' : 'Save Profile Information'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 export function AlumniProfileSummary({
     editOpen,
     onCloseEdit,
@@ -2324,6 +2700,17 @@ export function AlumniProfileSummary({
                                         {profile.claimed_at
                                             ? `· ${new Date(profile.claimed_at).toLocaleDateString()}`
                                             : ''}
+                                    </span>
+                                )}
+                                {profile.is_complete ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 font-medium text-emerald-200 border border-emerald-500/30">
+                                        <CheckCircle2 className="size-3" />
+                                        Profile Complete
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/30 px-2.5 py-0.5 font-semibold text-amber-200 border border-amber-400/40">
+                                        <AlertCircle className="size-3" />
+                                        Profile Incomplete
                                     </span>
                                 )}
                                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-0.5 font-medium text-amber-200 border border-amber-500/30">
@@ -2575,10 +2962,34 @@ export function AlumniProfileSummary({
                             ['Registered Email', profile.email],
                             ['Date of Birth', profile.date_of_birth],
                             [
+                                'Gender',
+                                profile.gender || 'Not specified (Required)',
+                            ],
+                            [
+                                'Civil Status',
+                                profile.civil_status || 'Not specified (Required)',
+                            ],
+                            [
+                                'Contact Number',
+                                profile.contact_number || 'Not specified (Required)',
+                            ],
+                            [
+                                'Current Address',
+                                profile.current_address || 'Not specified (Required)',
+                            ],
+                            [
+                                'Permanent Address',
+                                profile.permanent_address || 'Not specified (Required)',
+                            ],
+                            [
                                 'Primary Student Number',
                                 primaryEducation?.student_number ?? 'Not recorded',
                             ],
                             ['Record Status', profile.profile_status],
+                            [
+                                'Profile Completion',
+                                profile.is_complete ? 'Complete (All Services Unlocked)' : 'Incomplete (Interaction Restricted)',
+                            ],
                         ].map(([label, val]) => (
                             <div
                                 key={label}
@@ -2669,190 +3080,13 @@ export function AlumniProfileSummary({
                 </section>
             </div>
 
-            {/* Edit Profile Modal Dialog */}
-            {isModalOpen && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
-                    onClick={handleCloseModal}
-                >
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Edit Alumni Profile"
-                        onClick={(e) => e.stopPropagation()}
-                        className="relative w-full max-w-lg rounded-3xl border border-zinc-200 bg-white p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto"
-                    >
-                        <div className="flex items-start justify-between pb-4 border-b border-zinc-100">
-                            <div className="flex items-center gap-3">
-                                <span className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-[#E47818]">
-                                    <Pencil className="size-5" />
-                                </span>
-                                <div>
-                                    <h2 className="text-base font-bold text-zinc-900">
-                                        Edit Alumni Profile
-                                    </h2>
-                                    <p className="text-xs text-zinc-500">
-                                        Personalize your community display name
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={handleCloseModal}
-                                aria-label="Close dialog"
-                                className="rounded-xl p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 cursor-pointer"
-                            >
-                                <X className="size-4" />
-                            </button>
-                        </div>
-
-                        <form onSubmit={savePreferredName} className="mt-5 space-y-5">
-                            {/* Preferred Name Field */}
-                            <div>
-                                <label className="block text-xs font-semibold text-zinc-800">
-                                    Preferred Display Name / Community Handle
-                                </label>
-                                <p className="mt-0.5 text-[11px] text-zinc-500">
-                                    Choose how your name appears on portal greetings, bulletins, and alumni events (e.g., your nickname). Leave blank to use your official legal name.
-                                </p>
-                                <input
-                                    type="text"
-                                    maxLength={100}
-                                    placeholder={`e.g. ${profile.first_name || 'Alex'}`}
-                                    value={preferredName}
-                                    onChange={(e) => setPreferredName(e.target.value)}
-                                    className="mt-2 h-10 w-full rounded-xl border border-zinc-300 px-3.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-[#E47818] focus:outline-hidden focus:ring-2 focus:ring-[#E47818]/20"
-                                />
-                            </div>
-
-                            {/* Live Preview Box */}
-                            <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-3.5">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
-                                    Live ATMS Community Preview
-                                </p>
-                                <div className="mt-2 flex items-center gap-3">
-                                    <Avatar className="size-10 rounded-xl ring-2 ring-white shadow-xs">
-                                        <AvatarImage
-                                            src={profile.avatar ?? userAvatar ?? undefined}
-                                            alt={fullName}
-                                        />
-                                        <AvatarFallback className="rounded-xl bg-[#001c17] text-xs font-bold text-white">
-                                            {initials(fullName)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="min-w-0">
-                                        <p className="text-xs font-bold text-zinc-900">
-                                            {preferredName.trim() ? (
-                                                <>
-                                                    {preferredName.trim()}{' '}
-                                                    <span className="font-normal text-zinc-500 text-[11px]">
-                                                        ({fullName})
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                fullName
-                                            )}
-                                        </p>
-                                        <p className="text-[10px] text-zinc-500">
-                                            {primaryEducation?.program ?? 'SEAIT Alumni'} · Verified
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Registrar-Verified Identity Section (Locked) */}
-                            <div className="rounded-2xl border border-zinc-200/70 bg-zinc-50 p-4 text-xs">
-                                <div className="flex items-center gap-1.5 font-semibold text-zinc-800">
-                                    <Lock className="size-3.5 text-[#001c17]" />
-                                    Official Registrar-Verified Credentials (Locked)
-                                </div>
-                                <p className="mt-1 text-[11px] text-zinc-500">
-                                    Civil identity is locked to maintain accreditation integrity under CHED guidelines.
-                                </p>
-                                <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
-                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
-                                            Legal Name
-                                        </span>
-                                        <span className="font-semibold text-zinc-800">
-                                            {fullName}
-                                        </span>
-                                    </div>
-                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
-                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
-                                            Student ID
-                                        </span>
-                                        <span className="font-semibold text-zinc-800">
-                                            {primaryEducation?.student_number ?? 'Verified'}
-                                        </span>
-                                    </div>
-                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
-                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
-                                            Birthdate
-                                        </span>
-                                        <span className="font-semibold text-zinc-800">
-                                            {profile.date_of_birth}
-                                        </span>
-                                    </div>
-                                    <div className="rounded-lg bg-white p-2 border border-zinc-200/60">
-                                        <span className="text-zinc-400 block text-[9px] uppercase font-semibold">
-                                            Email
-                                        </span>
-                                        <span className="font-semibold text-zinc-800 truncate block">
-                                            {profile.email}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="mt-3 pt-2.5 border-t border-zinc-200/60 flex items-center justify-between">
-                                    <span className="text-[11px] text-zinc-500">
-                                        Need legal name or record correction?
-                                    </span>
-                                    <Link
-                                        href="/alumni/registration-assistance"
-                                        className="text-[11px] font-semibold text-[#E47818] hover:underline"
-                                    >
-                                        Registrar Assistance →
-                                    </Link>
-                                </div>
-                            </div>
-
-                            {/* Shortcut to Profile Settings */}
-                            <div className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white p-3 text-xs">
-                                <div className="flex items-center gap-2">
-                                    <Settings className="size-4 text-zinc-500" />
-                                    <span className="text-zinc-700">
-                                        Change avatar photo or password
-                                    </span>
-                                </div>
-                                <Link
-                                    href="/settings/profile"
-                                    className="font-semibold text-[#001c17] hover:underline inline-flex items-center gap-1 text-[11px]"
-                                >
-                                    Account Settings <ExternalLink className="size-3" />
-                                </Link>
-                            </div>
-
-                            {/* Modal Footer */}
-                            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-100">
-                                <button
-                                    type="button"
-                                    onClick={handleCloseModal}
-                                    className="h-9 rounded-xl border border-zinc-200 px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={saving}
-                                    className="h-9 rounded-xl bg-[#E47818] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] transition disabled:opacity-60 cursor-pointer"
-                                >
-                                    {saving ? 'Saving…' : 'Save changes'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            {/* Complete / Edit Profile Modal Dialog */}
+            <AlumniProfileCompletionModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                profile={profile}
+                onSuccess={reload}
+            />
         </div>
     );
 }
@@ -2918,6 +3152,9 @@ export function EmploymentTracer({
 } = {}) {
     const profileResource =
         useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
+    const alumniProfile = profileResource.data?.data;
+    const isProfileComplete = Boolean(alumniProfile?.is_complete);
+    const [profileModalOpen, setProfileModalOpen] = useState(false);
     const statusesResource = useApiResource<ApiEnvelope<EmploymentStatus[]>>(
         '/api/employment-statuses',
     );
@@ -2951,6 +3188,15 @@ export function EmploymentTracer({
 
         if (!profileId) {
             toast.error('An alumni profile is required to report employment.');
+            return;
+        }
+
+        if (!isProfileComplete) {
+            toast.error(
+                'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before reporting employment tracer updates.',
+            );
+            handleCloseModal();
+            setProfileModalOpen(true);
             return;
         }
 
@@ -3491,6 +3737,13 @@ export function EmploymentTracer({
                     </div>
                 </div>
             )}
+            {/* Complete Profile Modal Dialog */}
+            <AlumniProfileCompletionModal
+                isOpen={profileModalOpen}
+                onClose={() => setProfileModalOpen(false)}
+                profile={alumniProfile}
+                onSuccess={() => profileResource.reload()}
+            />
         </div>
     );
 }
@@ -6772,6 +7025,12 @@ export function SurveyCenter({
     const canViewAnalytics =
         canManage || role === 'Department coordinator';
     const canRespond = role === 'Alumni';
+    const meRes = useApiResource<ApiEnvelope<AlumniProfile>>(
+        canRespond ? '/api/me/alumni' : null,
+    );
+    const alumniProfile = meRes.data?.data;
+    const isProfileComplete = Boolean(alumniProfile?.is_complete);
+    const [profileModalOpen, setProfileModalOpen] = useState(false);
     const { data, loading, error, reload } =
         useApiResource<ApiEnvelope<RawPagination<Survey>>>('/api/surveys');
     const departmentsRes = useApiResource<ApiEnvelope<AcademicDepartment[]>>(
@@ -8051,6 +8310,24 @@ export function SurveyCenter({
                                         </li>
                                     ))}
                                 </ul>
+                            ) : canRespond && !isProfileComplete ? (
+                                <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-xs">
+                                    <div className="flex items-center gap-2 font-bold text-amber-950">
+                                        <Lock className="size-4 text-[#E47818]" />
+                                        Profile Completion Required to Participate
+                                    </div>
+                                    <p className="mt-1 text-[11px] text-amber-900/80 leading-relaxed">
+                                        Please complete your alumni profile (gender, civil status, contact number, current address, and permanent address) before answering surveys.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfileModalOpen(true)}
+                                        className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
+                                    >
+                                        <Pencil className="size-3" />
+                                        Complete Profile to Answer Survey
+                                    </button>
+                                </div>
                             ) : canRespond && survey.has_responded ? (
                                 <p className="mt-3 border-t border-[#eff0ec] pt-3 text-xs font-medium text-[#587057]">
                                     Your response has been submitted.
@@ -8191,6 +8468,13 @@ export function SurveyCenter({
                         : 'There are no open surveys right now.'}
                 </EmptyState>
             )}
+
+            <AlumniProfileCompletionModal
+                isOpen={profileModalOpen}
+                onClose={() => setProfileModalOpen(false)}
+                profile={alumniProfile}
+                onSuccess={() => meRes.reload()}
+            />
         </div>
     );
 }
@@ -9601,6 +9885,8 @@ export function PublicJobs({
     const profileResource =
         useApiResource<ApiEnvelope<AlumniProfile>>('/api/me/alumni');
     const profile = profileResource.data?.data;
+    const isProfileComplete = Boolean(profile?.is_complete);
+    const [profileModalOpen, setProfileModalOpen] = useState(false);
     const documentsResource = useApiResource<
         ApiEnvelope<AlumniDocumentItem[]>
     >(profile?.id ? `/api/alumni/${profile.id}/documents` : null);
@@ -9646,9 +9932,28 @@ export function PublicJobs({
         return () => window.removeEventListener('keydown', onKey);
     }, [selectedJobForDetails, selectedJobForApply]);
 
+    function startApply(job: JobPosting) {
+        if (!isProfileComplete) {
+            toast.error(
+                'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before applying for jobs.',
+            );
+            setProfileModalOpen(true);
+            return;
+        }
+        setSelectedJobForApply(job);
+    }
+
     async function handleApplySubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!selectedJobForApply) return;
+        if (!isProfileComplete) {
+            toast.error(
+                'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before applying for jobs.',
+            );
+            setSelectedJobForApply(null);
+            setProfileModalOpen(true);
+            return;
+        }
         if (!agreedToConsent) {
             toast.error(
                 'Please authorize the transmission of your verified credentials.',
@@ -9926,7 +10231,7 @@ export function PublicJobs({
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => setSelectedJobForApply(job)}
+                                                onClick={() => startApply(job)}
                                                 className="inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] transition cursor-pointer"
                                             >
                                                 Apply with Verified Record
@@ -10056,7 +10361,7 @@ export function PublicJobs({
                                     onClick={() => {
                                         const j = selectedJobForDetails;
                                         setSelectedJobForDetails(null);
-                                        setSelectedJobForApply(j);
+                                        startApply(j);
                                     }}
                                     className="h-10 rounded-xl bg-[#E47818] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[#c96611] cursor-pointer"
                                 >
@@ -10289,6 +10594,13 @@ export function PublicJobs({
                     </div>
                 </div>
             )}
+            {/* Complete Profile Modal Dialog */}
+            <AlumniProfileCompletionModal
+                isOpen={profileModalOpen}
+                onClose={() => setProfileModalOpen(false)}
+                profile={profile}
+                onSuccess={() => profileResource.reload()}
+            />
         </div>
     );
 }
@@ -13390,6 +13702,12 @@ export function EventCenter({
 }) {
     const canManage =
         role === 'Administrator' || role === 'Alumni coordinator';
+    const meRes = useApiResource<ApiEnvelope<AlumniProfile>>(
+        role === 'Alumni' ? '/api/me/alumni' : null,
+    );
+    const alumniProfile = meRes.data?.data;
+    const isProfileComplete = Boolean(alumniProfile?.is_complete);
+    const [profileModalOpen, setProfileModalOpen] = useState(false);
     const { data, loading, error, reload } = useApiResource<
         ApiEnvelope<RawPagination<AlumniEvent>>
     >(canManage ? '/api/events/manage' : '/api/events');
@@ -13673,6 +13991,13 @@ export function EventCenter({
         eventId: number,
         status: 'going' | 'interested' | 'cancelled',
     ) {
+        if (role === 'Alumni' && !isProfileComplete) {
+            toast.error(
+                'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before participating in events.',
+            );
+            setProfileModalOpen(true);
+            return;
+        }
         setRsvpUpdatingId(eventId);
         try {
             await apiRequest<ApiEnvelope<AlumniEvent>>(
@@ -14739,6 +15064,13 @@ export function EventCenter({
                         : 'No upcoming events are scheduled for your cohort right now.'}
                 </EmptyState>
             )}
+
+            <AlumniProfileCompletionModal
+                isOpen={profileModalOpen}
+                onClose={() => setProfileModalOpen(false)}
+                profile={alumniProfile}
+                onSuccess={() => meRes.reload()}
+            />
         </div>
     );
 }

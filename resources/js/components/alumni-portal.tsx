@@ -1,6 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Activity,
+    AlertCircle,
     ArrowDownRight,
     Bell,
     BriefcaseBusiness,
@@ -13,9 +14,11 @@ import {
     FileSpreadsheet,
     GraduationCap,
     LayoutDashboard,
+    Lock,
     LogOut,
     Menu,
     MessageSquareText,
+    Pencil,
     Plus,
     Search,
     Settings2,
@@ -64,7 +67,11 @@ import {
     RegistrationAssistanceQueue,
     SurveyCenter,
     UnreadNotificationIndicator,
+    AlumniProfileCompletionModal,
 } from '@/components/alumni-portal-data';
+import { useApiResource } from '@/hooks/use-api-resource';
+import { type ApiEnvelope } from '@/lib/api';
+import type { AlumniProfile } from '@/types/alumni';
 import type { Auth } from '@/types/auth';
 
 type Role =
@@ -403,6 +410,23 @@ export default function AlumniPortal({
     const [notificationRefreshKey, setNotificationRefreshKey] = useState(0);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [search, setSearch] = useState('');
+    const [profileCompletionModalOpen, setProfileCompletionModalOpen] =
+        useState(false);
+
+    const alumniProfileRes = useApiResource<ApiEnvelope<AlumniProfile>>(
+        role === 'Alumni' ? '/api/me/alumni' : null,
+    );
+    const alumniProfile = alumniProfileRes.data?.data ?? null;
+    const isProfileComplete =
+        role !== 'Alumni'
+            ? true
+            : (alumniProfile?.is_complete ?? user.is_profile_complete ?? false);
+    const missingProfileFields =
+        role !== 'Alumni'
+            ? []
+            : (alumniProfile?.missing_fields ??
+              user.missing_profile_fields ??
+              []);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && role) {
@@ -703,6 +727,15 @@ export default function AlumniPortal({
                             index > 0 ? navItems[index - 1]?.section : undefined;
                         const showSectionHeader =
                             section && section !== prevSection;
+                        const isGatedInteraction =
+                            role === 'Alumni' &&
+                            !isProfileComplete &&
+                            [
+                                'Surveys',
+                                'Career opportunities',
+                                'Employment tracer',
+                                'Events',
+                            ].includes(label);
 
                         return (
                             <div key={label}>
@@ -734,6 +767,11 @@ export default function AlumniPortal({
                                         }`}
                                     />
                                     <span className="truncate">{label}</span>
+                                    {isGatedInteraction && (
+                                        <span className="ml-auto inline-flex items-center gap-1 rounded-md border border-amber-300/80 bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold text-amber-900">
+                                            <Lock className="size-2.5" /> Required
+                                        </span>
+                                    )}
                                 </button>
                             </div>
                         );
@@ -1023,6 +1061,54 @@ export default function AlumniPortal({
                         </div>
                     )}
 
+                    {role === 'Alumni' && !isProfileComplete && !isCustomChildPage && (
+                        <div className="mb-6 rounded-2xl border border-amber-300/80 bg-linear-to-r from-amber-50 via-orange-50 to-amber-50 p-4 sm:p-5 shadow-xs">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex items-start gap-3.5">
+                                    <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber-500 text-white shadow-xs">
+                                        <AlertCircle className="size-5" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h2 className="font-heading text-sm font-bold text-zinc-900 sm:text-base">
+                                                Profile Completion Required
+                                            </h2>
+                                            <span className="rounded-full border border-amber-300 bg-amber-100/80 px-2 py-0.5 text-[10px] font-bold text-amber-900 uppercase">
+                                                Action Required
+                                            </span>
+                                        </div>
+                                        <p className="mt-1 text-xs text-zinc-600 sm:text-sm">
+                                            To answer surveys, apply for career opportunities, submit tracer updates, or RSVP to events, please complete your profile information.
+                                        </p>
+                                        {missingProfileFields.length > 0 && (
+                                            <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px] text-amber-950">
+                                                <span className="font-semibold text-zinc-700">Missing fields:</span>
+                                                {missingProfileFields.map((field) => (
+                                                    <span
+                                                        key={field}
+                                                        className="rounded border border-amber-200 bg-white/80 px-1.5 py-0.5 font-medium text-amber-900 shadow-2xs"
+                                                    >
+                                                        {field}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="shrink-0">
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfileCompletionModalOpen(true)}
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#001c17] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#002e26] sm:w-auto"
+                                    >
+                                        <Pencil className="size-3.5 text-[#E47818]" />
+                                        Complete Profile Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {isCustomChildPage ? children : content}
 
                     <footer className="mt-8 flex flex-col justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-500 sm:flex-row">
@@ -1066,6 +1152,18 @@ export default function AlumniPortal({
                     />
                 </DialogContent>
             </Dialog>
+
+            {role === 'Alumni' && (
+                <AlumniProfileCompletionModal
+                    isOpen={profileCompletionModalOpen}
+                    onClose={() => setProfileCompletionModalOpen(false)}
+                    profile={alumniProfile}
+                    onSuccess={() => {
+                        void alumniProfileRes.reload();
+                        router.reload({ only: ['auth'] });
+                    }}
+                />
+            )}
         </div>
     );
 }

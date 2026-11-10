@@ -96,6 +96,11 @@ test('survey builder supports all 9 question types, cohort targeting, multi-degr
         'last_name' => 'Multi',
         'email' => 'maria.multi@example.com',
         'date_of_birth' => '1998-04-10',
+        'gender' => 'Female',
+        'civil_status' => 'Single',
+        'contact_number' => '+63 912 345 6789',
+        'current_address' => 'Koronadal City, South Cotabato',
+        'permanent_address' => 'Koronadal City, South Cotabato',
     ]);
     AlumniEducationRecord::create([
         'alumni_profile_id' => $multiDegreeProfile->id,

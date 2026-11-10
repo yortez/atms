@@ -464,6 +464,13 @@ class StressTestSeeder extends Seeder
                 $birthMonth = ($idx % 12) + 1;
                 $birthDay = ($idx % 28) + 1;
 
+                $genders = ['Male', 'Female'];
+                $civilStatuses = ['Single', 'Married'];
+                $cities = ['Koronadal City', 'General Santos City', 'Tacurong City', 'Surallah'];
+                $gender = $genders[$idx % count($genders)];
+                $civilStatus = $civilStatuses[$idx % count($civilStatuses)];
+                $city = $cities[$idx % count($cities)];
+
                 $profileRows[] = [
                     'name' => $fullName,
                     'first_name' => $firstName,
@@ -471,6 +478,11 @@ class StressTestSeeder extends Seeder
                     'last_name' => $lastName,
                     'suffix' => $idx % 25 === 0 ? 'Jr.' : null,
                     'preferred_name' => $firstName,
+                    'gender' => $gender,
+                    'civil_status' => $civilStatus,
+                    'contact_number' => sprintf('+63 9%02d %03d %04d', ($idx % 90) + 10, ($idx * 37) % 1000, ($idx * 73) % 10000),
+                    'current_address' => "Poblacion, {$city}, South Cotabato, Philippines",
+                    'permanent_address' => "Poblacion, {$city}, South Cotabato, Philippines",
                     'email' => "alumni.grad{$idx}@seait.example.edu.ph",
                     'date_of_birth' => sprintf('%04d-%02d-%02d', $birthYear, $birthMonth, $birthDay),
                     'profile_status' => 'active',

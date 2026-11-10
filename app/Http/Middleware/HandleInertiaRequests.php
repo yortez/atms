@@ -42,6 +42,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user()
                     ? [
                         ...$request->user()->toArray(),
+                        'is_profile_complete' => $request->user()->hasCompletedAlumniProfile(),
+                        'missing_profile_fields' => $request->user()->hasRole('alumni')
+                            ? ($request->user()->alumniProfile?->missingProfileFields() ?? ['gender', 'civil_status', 'contact_number', 'current_address', 'permanent_address'])
+                            : [],
                         'roles' => $request->user()->roles()->orderBy('name')->pluck('name')->all(),
                         'assigned_programs' => $request->user()
                             ->assignedPrograms()

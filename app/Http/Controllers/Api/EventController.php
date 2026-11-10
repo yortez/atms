@@ -236,6 +236,14 @@ class EventController extends Controller
 
         $user = $request->user();
 
+        if ($user->hasRole('alumni')) {
+            abort_unless(
+                $user->hasCompletedAlumniProfile(),
+                403,
+                'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before participating in events.',
+            );
+        }
+
         if ($data['status'] === 'going') {
             if ($event->registration_deadline && $event->registration_deadline->isPast()) {
                 abort(422, 'The registration deadline for this event has passed.');

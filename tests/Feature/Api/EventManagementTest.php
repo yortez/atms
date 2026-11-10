@@ -14,6 +14,20 @@ use Laravel\Sanctum\Sanctum;
 function createEventRoleUser(string $roleName, ?int $alumniProfileId = null): User
 {
     $role = Role::firstOrCreate(['name' => $roleName], ['label' => ucfirst($roleName)]);
+    if ($roleName === 'alumni' && $alumniProfileId === null) {
+        $profile = AlumniProfile::create([
+            'name' => 'Event Alumnus ' . uniqid(),
+            'email' => 'alumnus.' . uniqid() . '@example.test',
+            'date_of_birth' => '1995-05-05',
+            'gender' => 'Female',
+            'civil_status' => 'Single',
+            'contact_number' => '+63 912 345 6789',
+            'current_address' => 'Surallah, South Cotabato',
+            'permanent_address' => 'Surallah, South Cotabato',
+        ]);
+        $alumniProfileId = $profile->id;
+    }
+
     $user = User::factory()->create([
         'email_verified_at' => now(),
         'alumni_profile_id' => $alumniProfileId,

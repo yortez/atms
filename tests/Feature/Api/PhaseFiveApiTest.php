@@ -43,6 +43,11 @@ function phaseFiveProfile(User $user, string $name): AlumniProfile
         'name' => $name,
         'email' => strtolower(str_replace(' ', '', $name)).'@example.test',
         'date_of_birth' => '1990-01-01',
+        'gender' => 'Male',
+        'civil_status' => 'Single',
+        'contact_number' => '+63 912 345 6789',
+        'current_address' => 'Bacolod City, Negros Occidental',
+        'permanent_address' => 'Bacolod City, Negros Occidental',
     ]);
     $user->alumniProfile()->associate($profile);
     $user->save();

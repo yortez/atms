@@ -295,6 +295,12 @@ class SurveyController extends Controller
         $user = $request->user();
         abort_unless($user->hasRole('alumni') && $user->alumni_profile_id, 403);
         $profileId = (int) $user->alumni_profile_id;
+        $profile = $user->alumniProfile;
+        abort_unless(
+            $profile && $profile->isComplete(),
+            403,
+            'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before answering surveys.',
+        );
 
         abort_unless(
             $survey->status === 'published'

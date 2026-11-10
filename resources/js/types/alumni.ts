@@ -54,6 +54,13 @@ export type AlumniProfile = {
     email: string;
     date_of_birth: string;
     profile_status: 'active' | 'archived';
+    gender?: string | null;
+    civil_status?: string | null;
+    contact_number?: string | null;
+    current_address?: string | null;
+    permanent_address?: string | null;
+    is_complete?: boolean;
+    missing_fields?: string[];
     avatar?: string | null;
     is_claimed?: boolean;
     claimed_at?: string | null;

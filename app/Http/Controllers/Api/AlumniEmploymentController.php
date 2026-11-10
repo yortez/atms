@@ -38,6 +38,14 @@ class AlumniEmploymentController extends Controller
     ): JsonResponse {
         $this->authorize('update', $profile);
 
+        if ($request->user()->alumni_profile_id === $profile->id) {
+            abort_unless(
+                $profile->isComplete(),
+                403,
+                'Please complete your profile (gender, civil status, contact number, current address, and permanent address) before reporting employment tracer updates.',
+            );
+        }
+
         $data = $request->validate([
             'employment_status_id' => [
                 'required',

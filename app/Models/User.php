@@ -96,6 +96,21 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             : null);
     }
 
+    public function hasCompletedAlumniProfile(): bool
+    {
+        if (! $this->hasRole('alumni')) {
+            return true;
+        }
+
+        if (! $this->alumni_profile_id) {
+            return false;
+        }
+
+        $profile = $this->alumniProfile()->first();
+
+        return $profile !== null && $profile->isComplete();
+    }
+
     public function hasPermission(string $permission): bool
     {
         return $this->roles()
