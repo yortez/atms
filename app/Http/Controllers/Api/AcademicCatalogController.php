@@ -10,7 +10,10 @@ use App\Models\ProgramDegree;
 use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use RuntimeException;
+use Throwable;
 
 class AcademicCatalogController extends Controller
 {
@@ -45,14 +48,31 @@ class AcademicCatalogController extends Controller
             'code' => ['required', 'string', 'max:32', 'unique:departments,code'],
             'name' => ['required', 'string', 'max:160'],
             'description' => ['nullable', 'string', 'max:10000'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $department = Department::create([
-            'code' => strtoupper(trim($data['code'])),
-            'name' => trim($data['name']),
-            'description' => $data['description'] ?? null,
-            'is_active' => true,
-        ]);
+        $logoFile = $request->file('logo');
+        $newLogoPath = $logoFile?->storePublicly('department-logos', 'public');
+        if ($logoFile !== null && ! is_string($newLogoPath)) {
+            throw new RuntimeException('The department logo could not be uploaded.');
+        }
+
+        try {
+            $department = Department::create([
+                'code' => strtoupper(trim($data['code'])),
+                'name' => trim($data['name']),
+                'description' => $data['description'] ?? null,
+                'logo_path' => is_string($newLogoPath) ? $newLogoPath : null,
+                'is_active' => true,
+            ]);
+        } catch (Throwable $exception) {
+            if (is_string($newLogoPath) && ! Storage::disk('public')->delete($newLogoPath)) {
+                report(new RuntimeException('The newly uploaded department logo could not be removed after creation failed.'));
+            }
+
+            throw $exception;
+        }
+
         $activityLogger->record('academic.department_created', $department);
 
         return response()->json([
@@ -78,7 +98,20 @@ class AcademicCatalogController extends Controller
             'name' => ['sometimes', 'required', 'string', 'max:160'],
             'description' => ['nullable', 'string', 'max:10000'],
             'is_active' => ['sometimes', 'boolean'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'remove_logo' => ['sometimes', 'boolean'],
         ]);
+
+        $removeLogo = $request->boolean('remove_logo');
+        unset($data['logo'], $data['remove_logo']);
+
+        $logoFile = $request->file('logo');
+        $newLogoPath = $logoFile?->storePublicly('department-logos', 'public');
+        if ($logoFile !== null && ! is_string($newLogoPath)) {
+            throw new RuntimeException('The department logo could not be uploaded.');
+        }
+
+        $oldLogoPath = $department->logo_path;
 
         if (isset($data['code'])) {
             $data['code'] = strtoupper(trim($data['code']));
@@ -87,7 +120,32 @@ class AcademicCatalogController extends Controller
             $data['name'] = trim($data['name']);
         }
 
-        $department->fill($data)->save();
+        try {
+            $department->fill($data);
+
+            if (is_string($newLogoPath)) {
+                $department->logo_path = $newLogoPath;
+            } elseif ($removeLogo) {
+                $department->logo_path = null;
+            }
+
+            $department->save();
+        } catch (Throwable $exception) {
+            if (is_string($newLogoPath) && ! Storage::disk('public')->delete($newLogoPath)) {
+                report(new RuntimeException('The newly uploaded department logo could not be removed after update failed.'));
+            }
+
+            throw $exception;
+        }
+
+        if (
+            (is_string($newLogoPath) || $removeLogo)
+            && is_string($oldLogoPath)
+            && ! Storage::disk('public')->delete($oldLogoPath)
+        ) {
+            report(new RuntimeException('The previous department logo could not be removed after replacement.'));
+        }
+
         $activityLogger->record('academic.department_updated', $department);
 
         return response()->json([

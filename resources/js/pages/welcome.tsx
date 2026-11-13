@@ -73,6 +73,7 @@ type PublicDepartment = {
     code: string;
     name: string;
     description?: string | null;
+    logo?: string | null;
     programs: Array<{
         id: number;
         code: string;
@@ -1345,10 +1346,18 @@ export default function Welcome({
                                         >
                                             <div>
                                                 <div className="mb-4 flex items-center gap-4">
-                                                    <CollegeEmblem
-                                                        code={dept.code}
-                                                        name={dept.name}
-                                                    />
+                                                    {dept.logo ? (
+                                                        <img
+                                                            src={dept.logo}
+                                                            alt={`${dept.name} logo`}
+                                                            className="size-14 shrink-0 rounded-2xl border border-zinc-200/80 bg-white object-cover shadow-md dark:border-white/10"
+                                                        />
+                                                    ) : (
+                                                        <CollegeEmblem
+                                                            code={dept.code}
+                                                            name={dept.name}
+                                                        />
+                                                    )}
                                                     <div className="min-w-0">
                                                         <span className="block font-heading text-[10px] font-bold tracking-wider text-[#E47818] uppercase">
                                                             {dept.code} · Academic Division

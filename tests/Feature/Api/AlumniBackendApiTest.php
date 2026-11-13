@@ -318,3 +318,73 @@ test('administrators can create and update departments, academic programs, and d
     ])->assertCreated()
         ->assertJsonPath('data.degree.title', 'Master of Science in Structural Engineering');
 });
+
+test('administrators can upload, replace, and remove a department logo', function () {
+    Storage::fake('public');
+
+    $admin = User::factory()->create();
+    assignRole($admin, 'system-administrator');
+    Sanctum::actingAs($admin, ['api']);
+
+    $makePng = fn (string $name): UploadedFile => function_exists('imagecreatetruecolor')
+        ? UploadedFile::fake()->image($name)
+        : UploadedFile::fake()->createWithContent(
+            $name,
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true) ?: '',
+        );
+
+    // 1. Reject non-image uploads
+    $this->post('/api/departments', [
+        'code' => 'ccs',
+        'name' => 'College of Computing Studies',
+        'logo' => UploadedFile::fake()->create('logo.pdf', 100, 'application/pdf'),
+    ], ['Accept' => 'application/json'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('logo');
+
+    // 2. Create department with logo
+    $createRes = $this->post('/api/departments', [
+        'code' => 'ccs',
+        'name' => 'College of Computing Studies',
+        'logo' => $makePng('ccs-logo.png'),
+    ], ['Accept' => 'application/json'])->assertCreated();
+
+    $department = Department::query()->findOrFail($createRes->json('data.id'));
+    $firstLogoPath = $department->logo_path;
+
+    expect($firstLogoPath)->not->toBeNull()
+        ->and($firstLogoPath)->toStartWith('department-logos/')
+        ->and($createRes->json('data.logo'))->toBe(Storage::disk('public')->url($firstLogoPath))
+        ->and($createRes->json('data.logo_path'))->toBeNull();
+    Storage::disk('public')->assertExists($firstLogoPath);
+
+    // 3. Replace department logo via POST + _method=PATCH
+    $updateRes = $this->post("/api/departments/{$department->id}", [
+        '_method' => 'PATCH',
+        'name' => 'College of Computing & Information Studies',
+        'logo' => $makePng('ccs-logo-v2.png'),
+    ], ['Accept' => 'application/json'])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'College of Computing & Information Studies');
+
+    $department->refresh();
+    $secondLogoPath = $department->logo_path;
+
+    expect($secondLogoPath)->not->toBeNull()
+        ->and($secondLogoPath)->not->toBe($firstLogoPath)
+        ->and($updateRes->json('data.logo'))->toBe(Storage::disk('public')->url($secondLogoPath));
+    Storage::disk('public')->assertMissing($firstLogoPath);
+    Storage::disk('public')->assertExists($secondLogoPath);
+
+    // 4. Remove department logo
+    $removeRes = $this->post("/api/departments/{$department->id}", [
+        '_method' => 'PATCH',
+        'remove_logo' => '1',
+    ], ['Accept' => 'application/json'])
+        ->assertOk();
+
+    $department->refresh();
+    expect($department->logo_path)->toBeNull()
+        ->and($removeRes->json('data.logo'))->toBeNull();
+    Storage::disk('public')->assertMissing($secondLogoPath);
+});

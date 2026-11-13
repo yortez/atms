@@ -83,6 +83,7 @@ export type AcademicDepartment = {
     code: string;
     name: string;
     description: string | null;
+    logo?: string | null;
     programs_count?: number;
     programs?: AcademicProgram[];
 };

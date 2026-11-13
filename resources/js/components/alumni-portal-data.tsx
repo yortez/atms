@@ -5626,6 +5626,13 @@ export function AcademicCatalog({
         name: '',
         description: '',
     });
+    const [departmentLogoFile, setDepartmentLogoFile] = useState<File | null>(
+        null,
+    );
+    const [departmentLogoPreview, setDepartmentLogoPreview] = useState<
+        string | null
+    >(null);
+    const [removeDepartmentLogo, setRemoveDepartmentLogo] = useState(false);
     const [savingDepartment, setSavingDepartment] = useState(false);
 
     // Program Form State (Create / Edit)
@@ -5662,19 +5669,33 @@ export function AcademicCatalog({
         departmentsRes.reload();
     }
 
+    function clearDepartmentLogoPreview(previewUrl: string | null) {
+        if (previewUrl?.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
+    }
+
     function openCreateDepartment() {
+        clearDepartmentLogoPreview(departmentLogoPreview);
         setEditingDepartmentId(null);
         setDepartmentForm({ code: '', name: '', description: '' });
+        setDepartmentLogoFile(null);
+        setDepartmentLogoPreview(null);
+        setRemoveDepartmentLogo(false);
         setDepartmentFormOpen(true);
     }
 
     function openEditDepartment(dept: AcademicDepartment) {
+        clearDepartmentLogoPreview(departmentLogoPreview);
         setEditingDepartmentId(dept.id);
         setDepartmentForm({
             code: dept.code,
             name: dept.name,
             description: dept.description ?? '',
         });
+        setDepartmentLogoFile(null);
+        setDepartmentLogoPreview(dept.logo ?? null);
+        setRemoveDepartmentLogo(false);
         setDepartmentFormOpen(true);
     }
 
@@ -5715,16 +5736,24 @@ export function AcademicCatalog({
         event.preventDefault();
         setSavingDepartment(true);
         try {
+            const formData = new FormData();
+            formData.append('code', departmentForm.code);
+            formData.append('name', departmentForm.name);
+            formData.append('description', departmentForm.description);
+
+            if (departmentLogoFile) {
+                formData.append('logo', departmentLogoFile);
+            } else if (removeDepartmentLogo) {
+                formData.append('remove_logo', '1');
+            }
+
             if (editingDepartmentId !== null) {
+                formData.append('_method', 'PATCH');
                 await apiRequest<ApiEnvelope<AcademicDepartment>>(
                     `/api/departments/${editingDepartmentId}`,
                     {
-                        method: 'PATCH',
-                        body: {
-                            code: departmentForm.code,
-                            name: departmentForm.name,
-                            description: departmentForm.description || null,
-                        },
+                        method: 'POST',
+                        body: formData,
                     },
                 );
                 toast.success('Department updated.');
@@ -5733,16 +5762,16 @@ export function AcademicCatalog({
                     '/api/departments',
                     {
                         method: 'POST',
-                        body: {
-                            code: departmentForm.code,
-                            name: departmentForm.name,
-                            description: departmentForm.description || null,
-                        },
+                        body: formData,
                     },
                 );
                 toast.success('Department created.');
             }
+            clearDepartmentLogoPreview(departmentLogoPreview);
             setDepartmentForm({ code: '', name: '', description: '' });
+            setDepartmentLogoFile(null);
+            setDepartmentLogoPreview(null);
+            setRemoveDepartmentLogo(false);
             setEditingDepartmentId(null);
             setDepartmentFormOpen(false);
             reloadAll();
@@ -6087,12 +6116,80 @@ export function AcademicCatalog({
                                 className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
                             />
                         </label>
+                        <div className="sm:col-span-3">
+                            <span className="block text-xs font-medium text-[#4d5a4f]">
+                                Department logo (optional)
+                            </span>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-3 rounded-xl border border-[#dce2d9] bg-white p-3">
+                                {departmentLogoPreview ? (
+                                    <img
+                                        src={departmentLogoPreview}
+                                        alt="Department logo preview"
+                                        className="size-12 shrink-0 rounded-xl border border-[#dce2d9] object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#cfd8cc] bg-[#f8faf7] text-[10px] font-bold tracking-wide text-[#5e6a5f] uppercase">
+                                        {departmentForm.code.trim().slice(0, 5) ||
+                                            'LOGO'}
+                                    </div>
+                                )}
+                                <div className="min-w-0 flex-1 space-y-1">
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        onChange={(e) => {
+                                            const file =
+                                                e.target.files?.[0] ?? null;
+                                            clearDepartmentLogoPreview(
+                                                departmentLogoPreview,
+                                            );
+                                            setDepartmentLogoFile(file);
+                                            if (file) {
+                                                setDepartmentLogoPreview(
+                                                    URL.createObjectURL(file),
+                                                );
+                                                setRemoveDepartmentLogo(false);
+                                            } else {
+                                                setDepartmentLogoPreview(null);
+                                            }
+                                        }}
+                                        className="block w-full text-xs text-[#4d5a4f] file:mr-3 file:rounded-lg file:border-0 file:bg-[#edf2eb] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#2b5139] hover:file:bg-[#e1ebe0]"
+                                    />
+                                    <p className="text-[11px] text-[#737c72]">
+                                        PNG, JPG, or WEBP up to 5MB. Displayed
+                                        in the catalog and public portal.
+                                    </p>
+                                </div>
+                                {departmentLogoPreview && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            clearDepartmentLogoPreview(
+                                                departmentLogoPreview,
+                                            );
+                                            setDepartmentLogoFile(null);
+                                            setDepartmentLogoPreview(null);
+                                            setRemoveDepartmentLogo(true);
+                                        }}
+                                        className="rounded-lg border border-[#e3d3cf] bg-[#fdf6f5] px-2.5 py-1.5 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#f9ebe8]"
+                                    >
+                                        Remove logo
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-2">
                         <button
                             type="button"
                             onClick={() => {
+                                clearDepartmentLogoPreview(
+                                    departmentLogoPreview,
+                                );
+                                setDepartmentLogoFile(null);
+                                setDepartmentLogoPreview(null);
+                                setRemoveDepartmentLogo(false);
                                 setDepartmentFormOpen(false);
                                 setEditingDepartmentId(null);
                             }}
@@ -6329,26 +6426,36 @@ export function AcademicCatalog({
                                     className="rounded-2xl border border-[#e4e9e1] bg-white p-5"
                                 >
                                     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#eff1ed] pb-3.5">
-                                        <div>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className="rounded-lg bg-[#2b5139] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white uppercase">
-                                                    {dept.code}
-                                                </span>
-                                                <h2 className="text-sm font-semibold text-[#29382e]">
-                                                    {dept.name}
-                                                </h2>
-                                                <span className="rounded-full bg-[#f2f4f0] px-2.5 py-0.5 text-[10px] font-semibold text-[#5b675c]">
-                                                    {deptPrograms.length}{' '}
-                                                    {deptPrograms.length === 1
-                                                        ? 'program'
-                                                        : 'programs'}
-                                                </span>
-                                            </div>
-                                            {dept.description && (
-                                                <p className="mt-1 text-xs text-[#737c72]">
-                                                    {dept.description}
-                                                </p>
+                                        <div className="flex items-start gap-3">
+                                            {dept.logo && (
+                                                <img
+                                                    src={dept.logo}
+                                                    alt={`${dept.name} logo`}
+                                                    className="size-11 shrink-0 rounded-xl border border-[#e3e7df] bg-white object-cover"
+                                                />
                                             )}
+                                            <div>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="rounded-lg bg-[#2b5139] px-2.5 py-1 text-[11px] font-bold tracking-wide text-white uppercase">
+                                                        {dept.code}
+                                                    </span>
+                                                    <h2 className="text-sm font-semibold text-[#29382e]">
+                                                        {dept.name}
+                                                    </h2>
+                                                    <span className="rounded-full bg-[#f2f4f0] px-2.5 py-0.5 text-[10px] font-semibold text-[#5b675c]">
+                                                        {deptPrograms.length}{' '}
+                                                        {deptPrograms.length ===
+                                                        1
+                                                            ? 'program'
+                                                            : 'programs'}
+                                                    </span>
+                                                </div>
+                                                {dept.description && (
+                                                    <p className="mt-1 text-xs text-[#737c72]">
+                                                        {dept.description}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="flex items-center gap-2">

@@ -95,12 +95,13 @@ class PublicPortalController extends Controller
             ->where('is_active', true)
             ->with(['programs' => fn ($query) => $query->where('is_active', true)->select('id', 'department_id', 'code', 'name')->orderBy('name')])
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'description'])
+            ->get(['id', 'code', 'name', 'description', 'logo_path'])
             ->map(fn (Department $dept) => [
                 'id' => $dept->id,
                 'code' => $dept->code,
                 'name' => $dept->name,
                 'description' => $dept->description,
+                'logo' => $dept->logo,
                 'programs' => $dept->programs->map(fn (AcademicProgram $prog) => [
                     'id' => $prog->id,
                     'code' => $prog->code,
