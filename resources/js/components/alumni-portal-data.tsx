@@ -1061,6 +1061,7 @@ function AlumniProfileDialog({
                                     {detail('Middle name', profile.middle_name)}
                                     {detail('Last name', profile.last_name)}
                                     {detail('Suffix', profile.suffix)}
+                                    {detail('Username', profile.username)}
                                     {detail('Email', profile.email)}
                                     {detail('Birthdate', profile.date_of_birth)}
                                     {detail('Gender', profile.gender)}
@@ -1236,6 +1237,12 @@ export function AlumniDirectory({
                     contact_number: form.contact_number || null,
                     current_address: form.current_address || null,
                     permanent_address: form.permanent_address || null,
+                    student_number: form.student_number || null,
+                    graduation_year: form.batch_year
+                        ? Number(form.batch_year)
+                        : null,
+                    honors: form.latin_honors || null,
+                    gwa: form.gwa ? Number(form.gwa) : null,
                 },
             });
             setForm({

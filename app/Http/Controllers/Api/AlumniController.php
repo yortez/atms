@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AlumniProfileResource;
 use App\Models\AlumniProfile;
 use App\Services\ActivityLogger;
+use App\Services\AlumniCredentialService;
 use App\Services\AlumniImportService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AlumniController extends Controller
@@ -25,7 +28,7 @@ class AlumniController extends Controller
                 'educationRecords.programDegree.program',
                 'educationRecords.programDegree.degree',
                 'employmentRecords.status',
-                'user:id,alumni_profile_id,avatar_path,created_at',
+                'user:id,alumni_profile_id,username,avatar_path,created_at',
             ]);
 
         if ($request->filled('claim_status')) {
@@ -77,7 +80,7 @@ class AlumniController extends Controller
             'educationRecords.programDegree.program',
             'educationRecords.programDegree.degree',
             'employmentRecords.status',
-            'user:id,alumni_profile_id,avatar_path,created_at',
+            'user:id,alumni_profile_id,username,avatar_path,created_at',
         ]));
     }
 
@@ -102,13 +105,22 @@ class AlumniController extends Controller
             'educationRecords.programDegree.program',
             'educationRecords.programDegree.degree',
             'employmentRecords.status',
-            'user:id,alumni_profile_id,avatar_path,created_at',
+            'user:id,alumni_profile_id,username,avatar_path,created_at',
         ]));
     }
 
-    public function store(Request $request, ActivityLogger $activityLogger): JsonResponse
-    {
+    public function store(
+        Request $request,
+        ActivityLogger $activityLogger,
+        AlumniCredentialService $credentialService,
+    ): JsonResponse {
         $this->authorize('create', AlumniProfile::class);
+
+        if ($request->filled('student_number') && is_string($request->input('student_number'))) {
+            $request->merge([
+                'student_number' => Str::upper(trim((string) $request->input('student_number'))),
+            ]);
+        }
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -124,19 +136,54 @@ class AlumniController extends Controller
             'contact_number' => ['nullable', 'string', 'max:64'],
             'current_address' => ['nullable', 'string', 'max:500'],
             'permanent_address' => ['nullable', 'string', 'max:500'],
+            'student_number' => ['nullable', 'string', 'max:64', 'unique:alumni_education_records,student_number'],
+            'program_degree_id' => ['nullable', 'integer', 'exists:program_degrees,id'],
+            'graduation_year' => ['nullable', 'integer', 'between:1900,2100'],
+            'honors' => ['nullable', 'string', 'max:120'],
+            'gwa' => ['nullable', 'numeric', 'between:1,5'],
         ]);
 
-        $profile = AlumniProfile::create([
-            ...$data,
-            'email' => mb_strtolower(trim($data['email'])),
-            'created_by_user_id' => $request->user()->id,
-        ]);
+        $profile = DB::transaction(function () use ($data, $request, $credentialService): AlumniProfile {
+            $profileData = collect($data)->except([
+                'student_number',
+                'program_degree_id',
+                'graduation_year',
+                'honors',
+                'gwa',
+            ])->all();
 
-        $this->syncContactAndAddresses($profile, $data);
+            $profile = AlumniProfile::create([
+                ...$profileData,
+                'email' => mb_strtolower(trim($data['email'])),
+                'created_by_user_id' => $request->user()->id,
+            ]);
+
+            $this->syncContactAndAddresses($profile, $data);
+
+            if (filled($data['student_number'] ?? null)) {
+                $studentNumber = Str::upper(trim((string) $data['student_number']));
+                $profile->educationRecords()->create([
+                    'student_number' => $studentNumber,
+                    'program_degree_id' => $data['program_degree_id'] ?? null,
+                    'graduation_year' => $data['graduation_year'] ?? null,
+                    'honors' => $data['honors'] ?? null,
+                    'gwa' => $data['gwa'] ?? null,
+                ]);
+
+                $credentialService->provisionForProfile($profile, $studentNumber);
+            }
+
+            return $profile;
+        });
 
         $activityLogger->record('alumni.profile_created', $profile);
 
-        return (new AlumniProfileResource($profile))->response()->setStatusCode(201);
+        return (new AlumniProfileResource($profile->load([
+            'educationRecords.programDegree.program',
+            'educationRecords.programDegree.degree',
+            'employmentRecords.status',
+            'user:id,alumni_profile_id,username,avatar_path,created_at',
+        ])))->response()->setStatusCode(201);
     }
 
     public function update(Request $request, AlumniProfile $profile, ActivityLogger $activityLogger): AlumniProfileResource
@@ -206,9 +253,19 @@ class AlumniController extends Controller
         }
     }
 
-    public function storeEducationRecord(Request $request, AlumniProfile $profile, ActivityLogger $activityLogger): JsonResponse
-    {
+    public function storeEducationRecord(
+        Request $request,
+        AlumniProfile $profile,
+        ActivityLogger $activityLogger,
+        AlumniCredentialService $credentialService,
+    ): JsonResponse {
         $this->authorize('create', AlumniProfile::class);
+
+        if ($request->filled('student_number') && is_string($request->input('student_number'))) {
+            $request->merge([
+                'student_number' => Str::upper(trim((string) $request->input('student_number'))),
+            ]);
+        }
 
         $data = $request->validate([
             'student_number' => ['required', 'string', 'max:64', 'unique:alumni_education_records,student_number'],
@@ -217,7 +274,13 @@ class AlumniController extends Controller
             'honors' => ['nullable', 'string', 'max:120'],
         ]);
 
-        $record = $profile->educationRecords()->create($data);
+        $record = DB::transaction(function () use ($profile, $data, $credentialService) {
+            $record = $profile->educationRecords()->create($data);
+            $credentialService->provisionForProfile($profile, $record->student_number);
+
+            return $record;
+        });
+
         $activityLogger->record('alumni.education_record_created', $record, [
             'graduation_year' => (int) $data['graduation_year'],
         ]);

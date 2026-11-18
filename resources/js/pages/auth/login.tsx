@@ -86,10 +86,12 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">
+                                    Username or Email address
+                                </Label>
                                 <Input
                                     id="email"
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     value={email}
                                     onChange={(event) =>
@@ -98,8 +100,8 @@ export default function Login({
                                     required
                                     autoFocus
                                     tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="email@example.com"
+                                    autoComplete="username"
+                                    placeholder="e.g., dela_cruz_c or email@example.com"
                                 />
                                 <InputError message={errors.email} />
                             </div>

@@ -167,6 +167,8 @@ class AlumniImportService
                         'gwa' => $gwa,
                     ]);
 
+                    app(AlumniCredentialService::class)->provisionForProfile($profile, $studentNumber);
+
                     $stats['education_records_created']++;
                     $stats['successful']++;
                 });

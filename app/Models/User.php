@@ -23,6 +23,7 @@ use Laravel\Sanctum\HasApiTokens;
 /**
  * @property int $id
  * @property string $name
+ * @property string|null $username
  * @property string $email
  * @property int|null $alumni_profile_id
  * @property Carbon|null $email_verified_at
@@ -35,7 +36,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'alumni_profile_id'])]
+#[Fillable(['name', 'username', 'email', 'password', 'alumni_profile_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'avatar_path'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {

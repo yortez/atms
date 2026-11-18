@@ -34,6 +34,7 @@ class AlumniProfileResource extends JsonResource
             'is_complete' => $this->isComplete(),
             'missing_fields' => $this->missingProfileFields(),
             'profile_status' => $this->profile_status,
+            'username' => $this->when($this->resource->relationLoaded('user'), fn () => $this->user?->username),
             'avatar' => $this->when($this->resource->relationLoaded('user'), fn () => $this->user?->avatar),
             'is_claimed' => $this->when($this->resource->relationLoaded('user'), fn () => $this->user !== null),
             'claimed_at' => $this->when($this->resource->relationLoaded('user'), fn () => $this->user?->created_at?->toISOString()),

@@ -10,6 +10,7 @@ use App\Models\AlumniStudentNumber;
 use App\Models\Employer;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AlumniCredentialService;
 use App\Services\AlumniRegistrationLogger;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -108,8 +109,16 @@ class CreateNewUser implements CreatesNewUsers
                 return null;
             }
 
+            $username = app(AlumniCredentialService::class)->generateUniqueUsername(
+                $profile->first_name,
+                $profile->middle_name,
+                $profile->last_name,
+                $profile->name,
+            );
+
             $user = new User([
                 'name' => $input['name'] ?? $profile->name,
+                'username' => $username,
                 'email' => $input['email'],
                 'password' => $input['password'],
                 'alumni_profile_id' => $profile->id,

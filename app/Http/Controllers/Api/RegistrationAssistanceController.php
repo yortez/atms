@@ -12,6 +12,7 @@ use App\Models\ProgramDegree;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\AlumniCredentialService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -331,8 +332,20 @@ class RegistrationAssistanceController extends Controller
         string $name,
         string $rawPassword,
     ): User {
+        $credentialService = app(AlumniCredentialService::class);
         $existingByProfile = User::query()->where('alumni_profile_id', $profile->id)->first();
         if ($existingByProfile) {
+            if (blank($existingByProfile->username)) {
+                $existingByProfile->username = $credentialService->generateUniqueUsername(
+                    $profile->first_name,
+                    $profile->middle_name,
+                    $profile->last_name,
+                    $profile->name,
+                    $existingByProfile->id,
+                );
+                $existingByProfile->save();
+            }
+
             return $existingByProfile;
         }
 
@@ -340,6 +353,12 @@ class RegistrationAssistanceController extends Controller
         if (! $user) {
             $user = new User([
                 'name' => $name,
+                'username' => $credentialService->generateUniqueUsername(
+                    $profile->first_name,
+                    $profile->middle_name,
+                    $profile->last_name,
+                    $profile->name,
+                ),
                 'email' => Str::lower(trim($email)),
                 'password' => $rawPassword,
                 'alumni_profile_id' => $profile->id,
@@ -350,6 +369,13 @@ class RegistrationAssistanceController extends Controller
             $user->forceFill([
                 'alumni_profile_id' => $profile->id,
                 'email_verified_at' => $user->email_verified_at ?? now(),
+                'username' => $user->username ?: $credentialService->generateUniqueUsername(
+                    $profile->first_name,
+                    $profile->middle_name,
+                    $profile->last_name,
+                    $profile->name,
+                    $user->id,
+                ),
             ])->save();
         }
 
