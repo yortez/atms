@@ -290,9 +290,12 @@ export type JobApplication = {
 export type RegistrationAssistanceRequest = {
     id: number;
     name: string;
+    first_name?: string | null;
+    middle_name?: string | null;
+    last_name?: string | null;
     email: string;
     date_of_birth: string;
-    student_number: string;
+    student_number: string | null;
     academic_program_id: number | null;
     graduation_year?: number | null;
     program?: {
@@ -304,6 +307,8 @@ export type RegistrationAssistanceRequest = {
     status: 'pending' | 'reviewed' | 'needs_more_information' | 'rejected';
     resolution_action?: 'sync_record' | 'create_record' | 'provision_account' | 'manual_review' | null;
     resolved_alumni_profile_id?: number | null;
+    credential_delivery_method?: 'status' | 'email' | 'both' | null;
+    released_username?: string | null;
     created_at: string;
     reviewed_at: string | null;
     reviewed_by?: {
@@ -314,20 +319,26 @@ export type RegistrationAssistanceRequest = {
     registrar_match?: {
         found: boolean;
         match_status:
-            | 'not_found'
-            | 'already_claimed'
-            | 'ready_to_claim'
-            | 'dob_mismatch'
-            | 'name_mismatch'
-            | 'multiple_mismatches';
+        | 'not_found'
+        | 'already_claimed'
+        | 'ready_to_claim'
+        | 'dob_mismatch'
+        | 'name_mismatch'
+        | 'multiple_mismatches';
         summary: string;
         recommended_action: 'create_record' | 'sync_record' | 'provision_account' | 'manual_review';
         profile: {
             id: number;
             name: string;
+            first_name?: string | null;
+            middle_name?: string | null;
+            last_name?: string | null;
+            student_number?: string | null;
+            username?: string | null;
             email: string;
             date_of_birth: string | null;
             is_claimed: boolean;
+            program_id?: number | null;
             program_code?: string | null;
             graduation_year?: number | null;
         } | null;

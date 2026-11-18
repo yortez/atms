@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -10,9 +11,12 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property string $name
+ * @property string|null $first_name
+ * @property string|null $middle_name
+ * @property string|null $last_name
  * @property string $email
  * @property Carbon $date_of_birth
- * @property string $student_number
+ * @property string|null $student_number
  * @property int|null $academic_program_id
  * @property int|null $graduation_year
  * @property string|null $message
@@ -22,9 +26,15 @@ use Illuminate\Support\Carbon;
  * @property string|null $review_note
  * @property string|null $resolution_action
  * @property int|null $resolved_alumni_profile_id
+ * @property string|null $credential_delivery_method
+ * @property string|null $released_username
+ * @property string|null $released_password
  */
 #[Fillable([
     'name',
+    'first_name',
+    'middle_name',
+    'last_name',
     'email',
     'date_of_birth',
     'student_number',
@@ -37,7 +47,11 @@ use Illuminate\Support\Carbon;
     'review_note',
     'resolution_action',
     'resolved_alumni_profile_id',
+    'credential_delivery_method',
+    'released_username',
+    'released_password',
 ])]
+#[Hidden(['released_password'])]
 class AlumniRegistrationAssistanceRequest extends Model
 {
     /**
@@ -70,6 +84,7 @@ class AlumniRegistrationAssistanceRequest extends Model
             'date_of_birth' => 'date:Y-m-d',
             'graduation_year' => 'integer',
             'reviewed_at' => 'datetime',
+            'released_password' => 'encrypted',
         ];
     }
 }

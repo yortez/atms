@@ -6,6 +6,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\AlumniProfile;
 use App\Models\AlumniRegistrationAssistanceRequest;
+use App\Models\AlumniRegistrationLog;
 use App\Models\AlumniStudentNumber;
 use App\Models\Employer;
 use App\Models\Role;
@@ -14,6 +15,7 @@ use App\Services\AlumniCredentialService;
 use App\Services\AlumniRegistrationLogger;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -67,17 +69,46 @@ class CreateNewUser implements CreatesNewUsers
             $input['name'] = trim($input['name']);
         }
 
+        $inputLastName = ! empty($input['last_name']) && is_string($input['last_name'])
+            ? trim($input['last_name'])
+            : (is_string($input['name'] ?? null) ? $this->extractLastName($input['name']) : '');
+
+        $ignoreUserIdForEmail = null;
+        if (
+            is_string($input['student_number'] ?? null)
+            && $input['student_number'] !== ''
+            && is_string($input['date_of_birth'] ?? null)
+            && $inputLastName !== ''
+        ) {
+            $candidateSn = AlumniStudentNumber::query()
+                ->with(['alumniProfile.user', 'alumniProfile.studentNumbers'])
+                ->where('student_number', $input['student_number'])
+                ->first();
+            $candidateProfile = $candidateSn?->alumniProfile;
+            $candidateUser = $candidateProfile?->user;
+
+            if ($candidateProfile !== null && $candidateUser !== null) {
+                $candidateLastName = ! empty($candidateProfile->last_name)
+                    ? trim($candidateProfile->last_name)
+                    : $this->extractLastName($candidateProfile->name ?? '');
+
+                if (
+                    $this->normalizeName($candidateLastName) === $this->normalizeName($inputLastName)
+                    && $candidateProfile->date_of_birth->toDateString() === $input['date_of_birth']
+                    && $this->isUnclaimedPreprovisionedUser($candidateProfile, $candidateUser)
+                ) {
+                    $ignoreUserIdForEmail = $candidateUser->id;
+                }
+            }
+        }
+
         Validator::make($input, [
-            ...$this->profileRules(),
+            ...$this->profileRules($ignoreUserIdForEmail),
             'student_number' => ['required', 'string', 'max:255'],
             'date_of_birth' => ['required', 'date_format:Y-m-d'],
             'password' => $this->passwordRules(),
             'last_name' => ['nullable', 'string', 'max:100'],
         ])->validate();
-
-        $inputLastName = ! empty($input['last_name']) && is_string($input['last_name'])
-            ? trim($input['last_name'])
-            : $this->extractLastName($input['name'] ?? '');
 
         $user = DB::transaction(function () use ($input, $inputLastName): ?User {
             $studentNumber = AlumniStudentNumber::query()
@@ -94,7 +125,12 @@ class CreateNewUser implements CreatesNewUsers
                 ->lockForUpdate()
                 ->first();
 
-            if ($profile === null || $profile->user()->exists()) {
+            if ($profile === null) {
+                return null;
+            }
+
+            $existingUser = $profile->user()->lockForUpdate()->first();
+            if ($existingUser !== null && ! $this->isUnclaimedPreprovisionedUser($profile, $existingUser)) {
                 return null;
             }
 
@@ -109,22 +145,36 @@ class CreateNewUser implements CreatesNewUsers
                 return null;
             }
 
-            $username = app(AlumniCredentialService::class)->generateUniqueUsername(
+            $username = $existingUser?->username ?: app(AlumniCredentialService::class)->generateUniqueUsername(
                 $profile->first_name,
                 $profile->middle_name,
                 $profile->last_name,
                 $profile->name,
+                $existingUser?->id,
             );
 
-            $user = new User([
-                'name' => $input['name'] ?? $profile->name,
-                'username' => $username,
-                'email' => $input['email'],
-                'password' => $input['password'],
-                'alumni_profile_id' => $profile->id,
-            ]);
-            $user->email_verified_at = Carbon::instance(now());
-            $user->save();
+            if ($existingUser !== null) {
+                $existingUser->fill([
+                    'name' => $input['name'] ?? $profile->name,
+                    'username' => $username,
+                    'email' => $input['email'],
+                    'password' => $input['password'],
+                ]);
+                $existingUser->email_verified_at = Carbon::instance(now());
+                $existingUser->save();
+                $user = $existingUser;
+            } else {
+                $user = new User([
+                    'name' => $input['name'] ?? $profile->name,
+                    'username' => $username,
+                    'email' => $input['email'],
+                    'password' => $input['password'],
+                    'alumni_profile_id' => $profile->id,
+                ]);
+                $user->email_verified_at = Carbon::instance(now());
+                $user->save();
+            }
+
             $alumniRole = Role::query()->firstOrCreate(
                 ['name' => 'alumni'],
                 ['label' => 'Alumni'],
@@ -226,6 +276,27 @@ class CreateNewUser implements CreatesNewUsers
 
             return $user;
         });
+    }
+
+    private function isUnclaimedPreprovisionedUser(AlumniProfile $profile, User $user): bool
+    {
+        $hasCompletedRegistration = AlumniRegistrationLog::query()
+            ->where('alumni_profile_id', $profile->id)
+            ->where('event', 'registration_completed')
+            ->exists();
+
+        if ($hasCompletedRegistration) {
+            return false;
+        }
+
+        foreach ($profile->studentNumbers as $studentNumberRecord) {
+            $normalizedStudentNumber = Str::upper(trim((string) $studentNumberRecord->student_number));
+            if ($normalizedStudentNumber !== '' && Hash::check($normalizedStudentNumber, $user->password)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function extractLastName(string $name): string

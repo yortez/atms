@@ -164,7 +164,7 @@ class AlumniCredentialService
     /**
      * @return array{0: string, 1: string, 2: string}
      */
-    private function parseFullName(string $fullName): array
+    public function parseFullName(string $fullName): array
     {
         $tokens = preg_split('/\s+/', trim($fullName)) ?: [];
         $count = count($tokens);

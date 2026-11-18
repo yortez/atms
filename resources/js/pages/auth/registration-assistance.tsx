@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { login, register } from '@/routes';
+import { login } from '@/routes';
 
 type ProgramOption = {
     id: number;
@@ -16,7 +16,13 @@ type ProgramOption = {
 type LookupResult = {
     id: number;
     name: string;
-    student_number: string;
+    first_name?: string | null;
+    middle_name?: string | null;
+    last_name?: string | null;
+    student_number?: string | null;
+    credential_delivery_method?: 'status' | 'email' | 'both' | null;
+    username?: string | null;
+    password?: string | null;
     program: string | null;
     graduation_year: number | null;
     status: 'pending' | 'reviewed' | 'needs_more_information' | 'rejected';
@@ -112,22 +118,20 @@ export default function RegistrationAssistance({
                 <button
                     type="button"
                     onClick={() => setActiveMode('submit')}
-                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${
-                        activeMode === 'submit'
+                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${activeMode === 'submit'
                             ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
                             : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
-                    }`}
+                        }`}
                 >
                     Submit Claim Request
                 </button>
                 <button
                     type="button"
                     onClick={() => setActiveMode('lookup')}
-                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${
-                        activeMode === 'lookup'
+                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${activeMode === 'lookup'
                             ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
                             : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
-                    }`}
+                        }`}
                 >
                     Check Request Status
                 </button>
@@ -151,12 +155,14 @@ export default function RegistrationAssistance({
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="lookup_identifier">Student number or email address</Label>
+                            <Label htmlFor="lookup_identifier">
+                                Email address (or Student Number)
+                            </Label>
                             <Input
                                 id="lookup_identifier"
                                 value={lookupIdentifier}
                                 onChange={(e) => setLookupIdentifier(e.target.value)}
-                                placeholder="Enter your student number or email"
+                                placeholder="Enter your email address or student number"
                                 required
                             />
                         </div>
@@ -187,7 +193,8 @@ export default function RegistrationAssistance({
 
                             <div className="space-y-1 text-xs text-muted-foreground">
                                 <p>
-                                    Applicant: <span className="font-medium text-foreground">{lookupResult.name}</span> ({lookupResult.student_number})
+                                    Applicant: <span className="font-medium text-foreground">{lookupResult.name}</span>
+                                    {lookupResult.student_number ? ` (${lookupResult.student_number})` : ''}
                                 </p>
                                 {lookupResult.program && (
                                     <p>
@@ -196,6 +203,42 @@ export default function RegistrationAssistance({
                                     </p>
                                 )}
                             </div>
+
+                            {lookupResult.status === 'reviewed' && (lookupResult.username || lookupResult.password) && (
+                                <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50/70 p-3 text-xs text-emerald-950 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-200">
+                                    <p className="font-semibold">
+                                        Your Verified Portal Login Credentials
+                                    </p>
+                                    <div className="grid gap-1.5 sm:grid-cols-2">
+                                        {lookupResult.username && (
+                                            <div className="rounded-md bg-white/80 px-2.5 py-1.5 dark:bg-zinc-900/60">
+                                                <span className="block text-[10px] font-semibold uppercase tracking-wider text-emerald-800/80 dark:text-emerald-300/80">
+                                                    Username
+                                                </span>
+                                                <code className="font-mono font-bold">
+                                                    {lookupResult.username}
+                                                </code>
+                                            </div>
+                                        )}
+                                        {lookupResult.password && (
+                                            <div className="rounded-md bg-white/80 px-2.5 py-1.5 dark:bg-zinc-900/60">
+                                                <span className="block text-[10px] font-semibold uppercase tracking-wider text-emerald-800/80 dark:text-emerald-300/80">
+                                                    Password
+                                                </span>
+                                                <code className="font-mono font-bold">
+                                                    {lookupResult.password}
+                                                </code>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {lookupResult.status === 'reviewed' && lookupResult.credential_delivery_method === 'email' && (
+                                <div className="rounded-lg border border-teal-200 bg-teal-50/80 p-3 text-xs text-teal-950 dark:border-teal-500/30 dark:bg-teal-950/40 dark:text-teal-200">
+                                    Your login credentials have been sent to your registered email address. Please check your inbox.
+                                </div>
+                            )}
 
                             {lookupResult.review_note && (
                                 <div className="rounded-md border border-border bg-muted/40 p-3 text-xs">
@@ -206,21 +249,12 @@ export default function RegistrationAssistance({
 
                             {lookupResult.status === 'reviewed' && (
                                 <div className="pt-1">
-                                    {lookupResult.resolution_action === 'provision_account' ? (
-                                        <Link
-                                            href={login()}
-                                            className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-xs hover:opacity-90"
-                                        >
-                                            Proceed to Sign In
-                                        </Link>
-                                    ) : (
-                                        <Link
-                                            href={register()}
-                                            className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-xs hover:opacity-90"
-                                        >
-                                            Complete Alumni Registration Now
-                                        </Link>
-                                    )}
+                                    <Link
+                                        href={login()}
+                                        className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-xs hover:opacity-90"
+                                    >
+                                        Proceed to Sign In
+                                    </Link>
                                 </div>
                             )}
                         </div>
@@ -259,32 +293,46 @@ export default function RegistrationAssistance({
                     {({ processing, errors }) => (
                         <>
                             <p className="text-sm text-muted-foreground">
-                                If your details do not match the alumni records,
-                                send a request for staff to review. An account
-                                will not be created until your record is
-                                confirmed.
+                                Enter your official details below so an
+                                administrator can verify your alumni record and
+                                release your portal login credentials.
                             </p>
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Full name</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    required
-                                    autoComplete="name"
-                                />
-                                <InputError message={errors.name} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="student_number">
-                                    Student number
-                                </Label>
-                                <Input
-                                    id="student_number"
-                                    name="student_number"
-                                    required
-                                    autoComplete="off"
-                                />
-                                <InputError message={errors.student_number} />
+                            <div className="grid gap-3 sm:grid-cols-3">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="last_name">Last name</Label>
+                                    <Input
+                                        id="last_name"
+                                        name="last_name"
+                                        required
+                                        autoFocus
+                                        autoComplete="family-name"
+                                        placeholder="Dela Cruz"
+                                    />
+                                    <InputError message={errors.last_name} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="first_name">First name</Label>
+                                    <Input
+                                        id="first_name"
+                                        name="first_name"
+                                        required
+                                        autoComplete="given-name"
+                                        placeholder="Clarisse"
+                                    />
+                                    <InputError message={errors.first_name} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="middle_name">
+                                        Middle name (optional)
+                                    </Label>
+                                    <Input
+                                        id="middle_name"
+                                        name="middle_name"
+                                        autoComplete="additional-name"
+                                        placeholder="A."
+                                    />
+                                    <InputError message={errors.middle_name} />
+                                </div>
                             </div>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="grid gap-2">
@@ -294,11 +342,12 @@ export default function RegistrationAssistance({
                                     <select
                                         id="academic_program_id"
                                         name="academic_program_id"
+                                        required
                                         className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                         defaultValue=""
                                     >
                                         <option value="" className="bg-background text-foreground">
-                                            Select program (optional)
+                                            Select academic program
                                         </option>
                                         {programs.map((program) => (
                                             <option
@@ -314,12 +363,13 @@ export default function RegistrationAssistance({
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="graduation_year">
-                                        Graduation year
+                                        Batch / graduation year
                                     </Label>
                                     <Input
                                         id="graduation_year"
                                         name="graduation_year"
                                         type="number"
+                                        required
                                         min={1950}
                                         max={2100}
                                         placeholder="e.g. 2024"
@@ -327,29 +377,32 @@ export default function RegistrationAssistance({
                                     <InputError message={errors.graduation_year} />
                                 </div>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="date_of_birth">
-                                    Date of birth
-                                </Label>
-                                <Input
-                                    id="date_of_birth"
-                                    name="date_of_birth"
-                                    type="date"
-                                    required
-                                    autoComplete="bday"
-                                />
-                                <InputError message={errors.date_of_birth} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    required
-                                    autoComplete="email"
-                                />
-                                <InputError message={errors.email} />
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="date_of_birth">
+                                        Date of birth
+                                    </Label>
+                                    <Input
+                                        id="date_of_birth"
+                                        name="date_of_birth"
+                                        type="date"
+                                        required
+                                        autoComplete="bday"
+                                    />
+                                    <InputError message={errors.date_of_birth} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="email">Email address</Label>
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        autoComplete="email"
+                                        placeholder="email@example.com"
+                                    />
+                                    <InputError message={errors.email} />
+                                </div>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="message">
@@ -369,7 +422,7 @@ export default function RegistrationAssistance({
                                 className="h-11 w-full rounded-xl bg-[#E47818] font-heading text-xs font-bold text-white shadow-md transition hover:bg-[#F36C21] sm:text-sm"
                             >
                                 {processing && <Spinner />}
-                                Submit Registrar Assistance Request
+                                Submit Record Assistance Request
                             </Button>
                         </>
                     )}
@@ -377,17 +430,14 @@ export default function RegistrationAssistance({
             )}
             <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-600 sm:flex-row dark:border-white/10 dark:text-zinc-400">
                 <Link
-                    href={register()}
+                    href={login()}
                     className="font-heading font-bold text-[#E47818] underline-offset-4 hover:underline"
                 >
-                    ← Back to Alumni Claim Registration
+                    ← Return to Sign In
                 </Link>
-                <Link
-                    href={login()}
-                    className="font-heading font-bold text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
-                >
-                    Return to Sign In
-                </Link>
+                <span className="text-[11px] text-zinc-500">
+                    Already have your username & student number? Sign in directly.
+                </span>
             </div>
         </>
     );

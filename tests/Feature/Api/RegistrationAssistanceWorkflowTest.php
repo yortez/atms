@@ -4,10 +4,16 @@ use App\Models\AcademicProgram;
 use App\Models\AlumniProfile;
 use App\Models\AlumniRegistrationAssistanceRequest;
 use App\Models\AlumniStudentNumber;
+use App\Models\Degree;
 use App\Models\Department;
+use App\Models\ProgramDegree;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\AlumniCredentialsReleased;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Sanctum\Sanctum;
 
 function createClaimRoleUser(string $roleName): User
@@ -206,4 +212,130 @@ test('public claim assistance submission stores graduation year and supports ref
     ]));
 
     $lookupResponse->assertOk();
+});
+
+test('structured assistance form matches official record by name and dob and releases credentials via status or email choice', function () {
+    Notification::fake();
+
+    $admin = createClaimRoleUser('system-administrator');
+    $program = createClaimProgram('BSCS-ASSIST', 'BS Computer Science');
+    $degree = Degree::create(['code' => 'BS-ASSIST', 'title' => 'BS Computer Science', 'degree_level' => 'bachelor']);
+    $offering = ProgramDegree::create(['program_id' => $program->id, 'degree_id' => $degree->id]);
+
+    $profile = AlumniProfile::create([
+        'name' => 'Clarisse A. Dela Cruz',
+        'first_name' => 'Clarisse',
+        'middle_name' => 'A.',
+        'last_name' => 'Dela Cruz',
+        'email' => 'clarisse.official@example.com',
+        'date_of_birth' => '1999-05-14',
+        'profile_status' => 'active',
+    ]);
+
+    DB::table('alumni_education_records')->insert([
+        'alumni_profile_id' => $profile->id,
+        'student_number' => '2020-00123',
+        'program_degree_id' => $offering->id,
+        'graduation_year' => 2024,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // 1. Alumni submits structured request without student_number
+    $this->post('/alumni/registration-assistance', [
+        'last_name' => 'Dela Cruz',
+        'first_name' => 'Clarisse',
+        'middle_name' => 'A.',
+        'academic_program_id' => $program->id,
+        'graduation_year' => 2024,
+        'date_of_birth' => '1999-05-14',
+        'email' => 'clarisse.personal@example.com',
+        'message' => 'Forgot my student number and need login credentials.',
+    ])->assertRedirect(route('alumni.registration-assistance.create'));
+
+    $requestItem = AlumniRegistrationAssistanceRequest::where('email', 'clarisse.personal@example.com')->firstOrFail();
+    expect($requestItem->last_name)->toBe('Dela Cruz')
+        ->and($requestItem->first_name)->toBe('Clarisse')
+        ->and($requestItem->middle_name)->toBe('A.')
+        ->and($requestItem->student_number)->toBe('2020-00123');
+
+    // 2. Admin inspects queue and sees matched registrar record + generated username
+    Sanctum::actingAs($admin, ['api']);
+    $indexRes = $this->getJson('/api/registration-assistance?status=pending')->assertOk();
+    $matchedItem = collect($indexRes->json('data.data'))->firstWhere('id', $requestItem->id);
+    expect($matchedItem['registrar_match']['found'])->toBeTrue()
+        ->and($matchedItem['registrar_match']['match_status'])->toBe('ready_to_claim')
+        ->and($matchedItem['registrar_match']['profile']['student_number'])->toBe('2020-00123')
+        ->and($matchedItem['registrar_match']['profile']['username'])->toBe('dela_cruz_c');
+
+    // 3a. Admin approves with delivery method = 'email' (sends email, hides credentials from Check Request Status)
+    $this->patchJson("/api/registration-assistance/{$requestItem->id}", [
+        'status' => 'reviewed',
+        'resolution_action' => 'provision_account',
+        'credential_delivery_method' => 'email',
+        'review_note' => 'Verified! Sent to your email.',
+    ])->assertOk()
+        ->assertJsonPath('data.credential_delivery_method', 'email')
+        ->assertJsonPath('data.released_username', 'dela_cruz_c');
+
+    Notification::assertSentTo(
+        new AnonymousNotifiable,
+        AlumniCredentialsReleased::class,
+        function (AlumniCredentialsReleased $notification, array $channels, object $notifiable) {
+            return in_array('mail', $channels, true)
+                && ($notifiable->routes['mail'] ?? null) === 'clarisse.personal@example.com'
+                && $notification->username === 'dela_cruz_c'
+                && $notification->password === '2020-00123';
+        },
+    );
+
+    $this->get(route('alumni.registration-assistance.create', [
+        'lookup_reference' => $requestItem->id,
+        'lookup_identifier' => 'clarisse.personal@example.com',
+    ]))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('lookupResult.credential_delivery_method', 'email')
+        ->where('lookupResult.username', null)
+        ->where('lookupResult.password', null)
+    );
+
+    // 3b. Admin updates delivery method to 'status' (exposes credentials in Check Request Status without sending email)
+    Notification::fake();
+    $this->patchJson("/api/registration-assistance/{$requestItem->id}", [
+        'status' => 'reviewed',
+        'resolution_action' => 'provision_account',
+        'credential_delivery_method' => 'status',
+        'review_note' => 'Visible in status checker.',
+    ])->assertOk()
+        ->assertJsonPath('data.credential_delivery_method', 'status');
+
+    Notification::assertNothingSent();
+
+    $this->get(route('alumni.registration-assistance.create', [
+        'lookup_reference' => $requestItem->id,
+        'lookup_identifier' => 'clarisse.personal@example.com',
+    ]))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('lookupResult.credential_delivery_method', 'status')
+        ->where('lookupResult.username', 'dela_cruz_c')
+        ->where('lookupResult.password', '2020-00123')
+    );
+
+    // 3c. Admin updates delivery method to 'both' (sends email AND returns credentials in Check Request Status)
+    Notification::fake();
+    $this->patchJson("/api/registration-assistance/{$requestItem->id}", [
+        'status' => 'reviewed',
+        'resolution_action' => 'provision_account',
+        'credential_delivery_method' => 'both',
+    ])->assertOk()
+        ->assertJsonPath('data.credential_delivery_method', 'both');
+
+    Notification::assertSentTo(new AnonymousNotifiable, AlumniCredentialsReleased::class);
+
+    $this->get(route('alumni.registration-assistance.create', [
+        'lookup_reference' => $requestItem->id,
+        'lookup_identifier' => 'clarisse.personal@example.com',
+    ]))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('lookupResult.credential_delivery_method', 'both')
+        ->where('lookupResult.username', 'dela_cruz_c')
+        ->where('lookupResult.password', '2020-00123')
+    );
 });

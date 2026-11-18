@@ -17,7 +17,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
@@ -103,6 +102,17 @@ export default function Login({
                                     autoComplete="username"
                                     placeholder="e.g., dela_cruz_c or email@example.com"
                                 />
+                                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                                    Alumni default login:{' '}
+                                    <code className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">
+                                        lastname_firstinitial
+                                    </code>{' '}
+                                    (e.g.,{' '}
+                                    <code className="font-mono">
+                                        dela_cruz_c
+                                    </code>
+                                    ) · Default password: Student Number
+                                </p>
                                 <InputError message={errors.email} />
                             </div>
 
@@ -180,9 +190,8 @@ export default function Login({
                                                 : 'Show demo roles'}
                                         </span>
                                         <ChevronDown
-                                            className={`size-4 text-[#3ce6b0] transition-transform duration-200 ${
-                                                demoExpanded ? 'rotate-180' : ''
-                                            }`}
+                                            className={`size-4 text-[#3ce6b0] transition-transform duration-200 ${demoExpanded ? 'rotate-180' : ''
+                                                }`}
                                         />
                                     </span>
                                 </button>
@@ -192,7 +201,7 @@ export default function Login({
                                         {demoAccounts.map((account) => {
                                             const isSelected =
                                                 selectedEmail ===
-                                                    account.email &&
+                                                account.email &&
                                                 email === account.email;
 
                                             return (
@@ -205,11 +214,10 @@ export default function Login({
                                                         )
                                                     }
                                                     data-test={`demo-account-${account.handle}`}
-                                                    className={`group flex flex-col justify-between rounded-xl border px-4 py-3.5 text-left transition active:scale-[0.99] ${
-                                                        isSelected
+                                                    className={`group flex flex-col justify-between rounded-xl border px-4 py-3.5 text-left transition active:scale-[0.99] ${isSelected
                                                             ? 'border-[#3ce6b0] bg-[#0d2922] ring-1 ring-[#3ce6b0]/40'
                                                             : 'border-[#18352e] bg-[#0a1916] hover:border-[#E47818]/65 hover:bg-[#0e231e]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <div className="flex items-center gap-2">
                                                         <DemoRoleIcon
@@ -237,20 +245,20 @@ export default function Login({
 
                         <div className="flex flex-col items-center justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-600 sm:flex-row dark:border-white/10 dark:text-zinc-400">
                             <span>
-                                Don't have an account?{' '}
+                                Employer Partner?{' '}
                                 <TextLink
-                                    href={register()}
+                                    href="/register?type=employer"
                                     tabIndex={5}
                                     className="font-heading font-bold text-[#E47818]"
                                 >
-                                    Claim Alumni Record
+                                    Register Company
                                 </TextLink>
                             </span>
                             <TextLink
                                 href="/alumni/registration-assistance"
                                 className="font-heading font-bold text-teal-700 dark:text-teal-300"
                             >
-                                Need Registrar Claim Assistance?
+                                Need Alumni Record / Login Assistance?
                             </TextLink>
                         </div>
                     </>
