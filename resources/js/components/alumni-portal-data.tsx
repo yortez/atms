@@ -158,8 +158,8 @@ function DemoQuickLoginToggleCard() {
                     </h3>
                     <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${enabled
-                                ? 'bg-[#e3eee0] text-[#2b5139]'
-                                : 'bg-[#eff0ec] text-[#6d746a]'
+                            ? 'bg-[#e3eee0] text-[#2b5139]'
+                            : 'bg-[#eff0ec] text-[#6d746a]'
                             }`}
                     >
                         {loading ? 'Checking…' : enabled ? 'Shown' : 'Hidden'}
@@ -896,107 +896,107 @@ function AlumniProfileDialog({
                                         className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
                                     />
                                 </div>
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div>
-                                    <label className="block text-xs font-medium text-[#495a4f]">
-                                        Gender
-                                    </label>
-                                    <select
-                                        value={editForm.gender}
-                                        onChange={(e) =>
-                                            setEditForm({ ...editForm, gender: e.target.value })
-                                        }
-                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
-                                    >
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                        <option value="Prefer not to say">Prefer not to say</option>
-                                    </select>
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-[#495a4f]">
+                                            Gender
+                                        </label>
+                                        <select
+                                            value={editForm.gender}
+                                            onChange={(e) =>
+                                                setEditForm({ ...editForm, gender: e.target.value })
+                                            }
+                                            className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                        >
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                            <option value="Prefer not to say">Prefer not to say</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-[#495a4f]">
+                                            Civil status
+                                        </label>
+                                        <select
+                                            value={editForm.civil_status}
+                                            onChange={(e) =>
+                                                setEditForm({ ...editForm, civil_status: e.target.value })
+                                            }
+                                            className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                        >
+                                            <option value="">Select Civil Status</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Married">Married</option>
+                                            <option value="Widowed">Widowed</option>
+                                            <option value="Separated">Separated</option>
+                                            <option value="Divorced">Divorced</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-[#495a4f]">
+                                            Contact number
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            placeholder="e.g. +63 912 345 6789"
+                                            value={editForm.contact_number}
+                                            onChange={(e) =>
+                                                setEditForm({ ...editForm, contact_number: e.target.value })
+                                            }
+                                            className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-[#495a4f]">
+                                            Profile status
+                                        </label>
+                                        <select
+                                            value={editForm.profile_status}
+                                            onChange={(e) =>
+                                                setEditForm({
+                                                    ...editForm,
+                                                    profile_status: e.target.value as 'active' | 'archived',
+                                                })
+                                            }
+                                            className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
+                                        >
+                                            <option value="active">Active</option>
+                                            <option value="archived">Archived</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[#495a4f]">
-                                        Civil status
-                                    </label>
-                                    <select
-                                        value={editForm.civil_status}
-                                        onChange={(e) =>
-                                            setEditForm({ ...editForm, civil_status: e.target.value })
-                                        }
-                                        className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
-                                    >
-                                        <option value="">Select Civil Status</option>
-                                        <option value="Single">Single</option>
-                                        <option value="Married">Married</option>
-                                        <option value="Widowed">Widowed</option>
-                                        <option value="Separated">Separated</option>
-                                        <option value="Divorced">Divorced</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div>
-                                    <label className="block text-xs font-medium text-[#495a4f]">
-                                        Contact number
+                                        Current address
                                     </label>
                                     <input
-                                        type="tel"
-                                        placeholder="e.g. +63 912 345 6789"
-                                        value={editForm.contact_number}
+                                        type="text"
+                                        placeholder="Street, Barangay, City/Municipality, Province"
+                                        value={editForm.current_address}
                                         onChange={(e) =>
-                                            setEditForm({ ...editForm, contact_number: e.target.value })
+                                            setEditForm({ ...editForm, current_address: e.target.value })
                                         }
                                         className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-[#495a4f]">
-                                        Profile status
+                                        Permanent address
                                     </label>
-                                    <select
-                                        value={editForm.profile_status}
+                                    <input
+                                        type="text"
+                                        placeholder="Street, Barangay, City/Municipality, Province"
+                                        value={editForm.permanent_address}
                                         onChange={(e) =>
-                                            setEditForm({
-                                                ...editForm,
-                                                profile_status: e.target.value as 'active' | 'archived',
-                                            })
+                                            setEditForm({ ...editForm, permanent_address: e.target.value })
                                         }
                                         className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
-                                    >
-                                        <option value="active">Active</option>
-                                        <option value="archived">Archived</option>
-                                    </select>
+                                    />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-[#495a4f]">
-                                    Current address
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Street, Barangay, City/Municipality, Province"
-                                    value={editForm.current_address}
-                                    onChange={(e) =>
-                                        setEditForm({ ...editForm, current_address: e.target.value })
-                                    }
-                                    className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-[#495a4f]">
-                                    Permanent address
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Street, Barangay, City/Municipality, Province"
-                                    value={editForm.permanent_address}
-                                    onChange={(e) =>
-                                        setEditForm({ ...editForm, permanent_address: e.target.value })
-                                    }
-                                    className="mt-1 h-9 w-full rounded-lg border border-[#e4e7e0] px-3 text-xs"
-                                />
-                            </div>
                             </div>
                             <div className="flex justify-end gap-2 pt-3 border-t border-[#eff0ec]">
                                 <button
@@ -2894,8 +2894,8 @@ export function AlumniProfileSummary({
                                         {latestEmployment.is_related_to_degree !== undefined && (
                                             <span
                                                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${latestEmployment.is_related_to_degree
-                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                                        : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                    : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
                                                     }`}
                                             >
                                                 <CheckCircle2 className="size-3" />
@@ -3444,8 +3444,8 @@ export function EmploymentTracer({
                                             {record.is_related_to_degree !== undefined && (
                                                 <span
                                                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${record.is_related_to_degree
-                                                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                                            : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                                        : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
                                                         }`}
                                                 >
                                                     <CheckCircle2 className="size-3" />
@@ -5972,8 +5972,8 @@ export function AcademicCatalog({
                                 type="button"
                                 onClick={() => setViewMode('modular')}
                                 className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'modular'
-                                        ? 'bg-white text-[#2b5139] shadow-2xs'
-                                        : 'text-[#626c61] hover:text-[#29382e]'
+                                    ? 'bg-white text-[#2b5139] shadow-2xs'
+                                    : 'text-[#626c61] hover:text-[#29382e]'
                                     }`}
                             >
                                 Modular by Department
@@ -5982,8 +5982,8 @@ export function AcademicCatalog({
                                 type="button"
                                 onClick={() => setViewMode('grid')}
                                 className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition ${viewMode === 'grid'
-                                        ? 'bg-white text-[#2b5139] shadow-2xs'
-                                        : 'text-[#626c61] hover:text-[#29382e]'
+                                    ? 'bg-white text-[#2b5139] shadow-2xs'
+                                    : 'text-[#626c61] hover:text-[#29382e]'
                                     }`}
                             >
                                 All Programs Grid
@@ -6021,8 +6021,8 @@ export function AcademicCatalog({
                             type="button"
                             onClick={() => setSelectedDepartmentFilter('all')}
                             className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${selectedDepartmentFilter === 'all'
-                                    ? 'bg-[#2b5139] text-white'
-                                    : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                ? 'bg-[#2b5139] text-white'
+                                : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
                                 }`}
                         >
                             All Departments ({departmentsList.length})
@@ -6043,8 +6043,8 @@ export function AcademicCatalog({
                                         )
                                     }
                                     className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${active
-                                            ? 'bg-[#2b5139] text-white'
-                                            : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                        ? 'bg-[#2b5139] text-white'
+                                        : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
                                         }`}
                                 >
                                     {dept.code} ({count})
@@ -6452,7 +6452,7 @@ export function AcademicCatalog({
                                                     <span className="rounded-full bg-[#f2f4f0] px-2.5 py-0.5 text-[10px] font-semibold text-[#5b675c]">
                                                         {deptPrograms.length}{' '}
                                                         {deptPrograms.length ===
-                                                        1
+                                                            1
                                                             ? 'program'
                                                             : 'programs'}
                                                     </span>
@@ -8997,8 +8997,8 @@ export function AnnouncementCenter({
                                     type="button"
                                     onClick={() => setStatusFilter(key)}
                                     className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${statusFilter === key
-                                            ? 'bg-[#2b5139] text-white'
-                                            : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                        ? 'bg-[#2b5139] text-white'
+                                        : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
                                         }`}
                                 >
                                     {label}
@@ -9249,8 +9249,8 @@ export function AnnouncementCenter({
                                                         })
                                                     }
                                                     className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-white text-[#526053]'
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#dce2d9] bg-white text-[#526053]'
                                                         }`}
                                                 >
                                                     {dept.code} · {dept.name}
@@ -9295,8 +9295,8 @@ export function AnnouncementCenter({
                                                         })
                                                     }
                                                     className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-white text-[#526053]'
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#dce2d9] bg-white text-[#526053]'
                                                         }`}
                                                 >
                                                     {prog.code}
@@ -9423,14 +9423,14 @@ export function AnnouncementCenter({
                             <article
                                 key={announcement.id}
                                 className={`flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-start sm:p-5 ${announcement.is_pinned
-                                        ? 'border-[#cfe0cc] bg-[#fbfcfa]'
-                                        : 'border-[#e9ebe5] bg-white'
+                                    ? 'border-[#cfe0cc] bg-[#fbfcfa]'
+                                    : 'border-[#e9ebe5] bg-white'
                                     }`}
                             >
                                 <span
                                     className={`grid size-10 shrink-0 place-items-center rounded-xl ${announcement.is_pinned
-                                            ? 'bg-[#2b5139] text-white'
-                                            : 'bg-[#eef2eb] text-[#5e795f]'
+                                        ? 'bg-[#2b5139] text-white'
+                                        : 'bg-[#eef2eb] text-[#5e795f]'
                                         }`}
                                 >
                                     <MessageSquareText className="size-4" />
@@ -11200,8 +11200,8 @@ export function EmployerJobs({
                             type="button"
                             onClick={() => setStatusFilter(key)}
                             className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${statusFilter === key
-                                    ? 'bg-[#0b382f] text-white shadow-xs'
-                                    : 'text-zinc-600 hover:bg-zinc-100'
+                                ? 'bg-[#0b382f] text-white shadow-xs'
+                                : 'text-zinc-600 hover:bg-zinc-100'
                                 }`}
                         >
                             {label}
@@ -11277,10 +11277,10 @@ export function EmployerJobs({
 
                                         <span
                                             className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide capitalize ${job.status === 'published'
-                                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                                    : job.status === 'draft'
-                                                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                                                        : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                                : job.status === 'draft'
+                                                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                                    : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
                                                 }`}
                                         >
                                             {job.status === 'published'
@@ -11319,8 +11319,8 @@ export function EmployerJobs({
                                         {daysInfo && (
                                             <span
                                                 className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 font-medium ${daysInfo.urgent
-                                                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                                        : 'bg-zinc-100 text-zinc-600'
+                                                    ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                                    : 'bg-zinc-100 text-zinc-600'
                                                     }`}
                                             >
                                                 <Clock className="size-3" />
@@ -11883,12 +11883,12 @@ export function EmployerJobs({
                             <div className="flex flex-wrap items-center gap-2">
                                 <span
                                     className={`rounded-full px-3 py-1 text-xs font-bold capitalize ${selectedJobForPreview.status ===
-                                            'published'
-                                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                            : selectedJobForPreview.status ===
-                                                'draft'
-                                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                                                : 'bg-zinc-100 text-zinc-600'
+                                        'published'
+                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                        : selectedJobForPreview.status ===
+                                            'draft'
+                                            ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                            : 'bg-zinc-100 text-zinc-600'
                                         }`}
                                 >
                                     {selectedJobForPreview.status === 'published'
@@ -12162,15 +12162,15 @@ export function AlumniApplications({
                         type="button"
                         onClick={() => setStatusFilter(tab.id as typeof statusFilter)}
                         className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${statusFilter === tab.id
-                                ? 'bg-[#001c17] text-white shadow-2xs'
-                                : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'
+                            ? 'bg-[#001c17] text-white shadow-2xs'
+                            : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'
                             }`}
                     >
                         <span>{tab.label}</span>
                         <span
                             className={`rounded-full px-1.5 py-0.2 text-[10px] ${statusFilter === tab.id
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-zinc-100 text-zinc-600'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-zinc-100 text-zinc-600'
                                 }`}
                         >
                             {tab.count}
@@ -12408,8 +12408,8 @@ export function AlumniApplications({
                                                 {viewingApp.resume_snapshot_path.toLowerCase().endsWith('.docx')
                                                     ? 'Microsoft Word (.docx)'
                                                     : viewingApp.resume_snapshot_path.toLowerCase().endsWith('.doc')
-                                                    ? 'Word Document (.doc)'
-                                                    : 'PDF Document (.pdf)'}
+                                                        ? 'Word Document (.doc)'
+                                                        : 'PDF Document (.pdf)'}
                                             </span>
                                         </div>
                                     </div>
@@ -12694,8 +12694,8 @@ export function EmployerApplicants({
                         <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
                             <span
                                 className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${currentJob.status === 'published'
-                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                        : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                    : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
                                     }`}
                             >
                                 Status: {currentJob.status}
@@ -12792,8 +12792,8 @@ export function EmployerApplicants({
                                 setStatusFilter(tab.id as typeof statusFilter)
                             }
                             className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${statusFilter === tab.id
-                                    ? 'bg-[#001c17] text-white shadow-2xs'
-                                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                                ? 'bg-[#001c17] text-white shadow-2xs'
+                                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
                                 }`}
                         >
                             <span>{tab.label}</span>
@@ -13180,8 +13180,8 @@ export function EmployerApplicants({
                                                 ? inspectingApp.resume_snapshot_path.toLowerCase().endsWith('.docx')
                                                     ? 'Transmitted Word Resume (.docx)'
                                                     : inspectingApp.resume_snapshot_path.toLowerCase().endsWith('.doc')
-                                                    ? 'Transmitted Word Document (.doc)'
-                                                    : 'Transmitted Candidate Resume (PDF)'
+                                                        ? 'Transmitted Word Document (.doc)'
+                                                        : 'Transmitted Candidate Resume (PDF)'
                                                 : 'Verified Academic & Career Dossier'}
                                         </span>
                                         <span className="block text-[10px] text-zinc-400">
@@ -13447,8 +13447,8 @@ export function RegistrationAssistanceQueue() {
                             type="button"
                             onClick={() => setStatusFilter(tab.value)}
                             className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${statusFilter === tab.value
-                                    ? 'bg-[#2b5139] text-white shadow-xs'
-                                    : 'bg-[#f4f6f2] text-[#526051] hover:bg-[#e9ede6]'
+                                ? 'bg-[#2b5139] text-white shadow-xs'
+                                : 'bg-[#f4f6f2] text-[#526051] hover:bg-[#e9ede6]'
                                 }`}
                         >
                             {tab.label}
@@ -13572,8 +13572,8 @@ export function RegistrationAssistanceQueue() {
                                                                 Name:{' '}
                                                                 <span
                                                                     className={`font-medium ${officialProfile.name.toLowerCase() !== request.name.toLowerCase()
-                                                                            ? 'text-[#b45309] underline'
-                                                                            : ''
+                                                                        ? 'text-[#b45309] underline'
+                                                                        : ''
                                                                         }`}
                                                                 >
                                                                     {officialProfile.name}
@@ -13590,8 +13590,8 @@ export function RegistrationAssistanceQueue() {
                                                                 Birthdate:{' '}
                                                                 <span
                                                                     className={`font-medium ${String(officialProfile.date_of_birth ?? '').slice(0, 10) !== String(request.date_of_birth ?? '').slice(0, 10)
-                                                                            ? 'text-[#b45309] underline'
-                                                                            : ''
+                                                                        ? 'text-[#b45309] underline'
+                                                                        : ''
                                                                         }`}
                                                                 >
                                                                     {officialProfile.date_of_birth ?? 'Not set in registrar record'}
@@ -14369,8 +14369,8 @@ export function EventCenter({
                                 type="button"
                                 onClick={() => setViewFilter(key)}
                                 className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${viewFilter === key
-                                        ? 'bg-[#2b5139] text-white'
-                                        : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                    ? 'bg-[#2b5139] text-white'
+                                    : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
                                     }`}
                             >
                                 {label}
@@ -14682,8 +14682,8 @@ export function EventCenter({
                                                         })
                                                     }
                                                     className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-white text-[#526053]'
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#dce2d9] bg-white text-[#526053]'
                                                         }`}
                                                 >
                                                     {dept.code} · {dept.name}
@@ -14728,8 +14728,8 @@ export function EventCenter({
                                                         })
                                                     }
                                                     className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-white text-[#526053]'
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#dce2d9] bg-white text-[#526053]'
                                                         }`}
                                                 >
                                                     {prog.code}
@@ -14870,16 +14870,16 @@ export function EventCenter({
                             <article
                                 key={eventItem.id}
                                 className={`rounded-2xl border p-4 sm:p-5 ${eventItem.is_featured
-                                        ? 'border-[#cfe0cc] bg-[#fbfcfa]'
-                                        : 'border-[#e9ebe5] bg-white'
+                                    ? 'border-[#cfe0cc] bg-[#fbfcfa]'
+                                    : 'border-[#e9ebe5] bg-white'
                                     }`}
                             >
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                                     {/* Calendar Badge */}
                                     <div
                                         className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-2xl border text-center ${eventItem.is_featured
-                                                ? 'border-[#2b5139] bg-[#2b5139] text-white'
-                                                : 'border-[#dfe5dc] bg-[#f4f7f3] text-[#2b5139]'
+                                            ? 'border-[#2b5139] bg-[#2b5139] text-white'
+                                            : 'border-[#dfe5dc] bg-[#f4f7f3] text-[#2b5139]'
                                             }`}
                                     >
                                         <span className="text-[10px] font-bold tracking-wider uppercase">
@@ -15041,8 +15041,8 @@ export function EventCenter({
                                                         )
                                                     }
                                                     className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold transition ${myRsvp === 'going'
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#cfe0cc] bg-[#edf2eb] text-[#2b5139] hover:bg-[#dfe8dc]'
+                                                        ? 'bg-[#2b5139] text-white'
+                                                        : 'border border-[#cfe0cc] bg-[#edf2eb] text-[#2b5139] hover:bg-[#dfe8dc]'
                                                         }`}
                                                 >
                                                     {myRsvp === 'going'
@@ -15065,8 +15065,8 @@ export function EventCenter({
                                                         )
                                                     }
                                                     className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${myRsvp === 'interested'
-                                                            ? 'bg-[#2c5270] text-white'
-                                                            : 'border border-[#e3e7df] bg-white text-[#526054] hover:bg-[#f6f7f4]'
+                                                        ? 'bg-[#2c5270] text-white'
+                                                        : 'border border-[#e3e7df] bg-white text-[#526054] hover:bg-[#f6f7f4]'
                                                         }`}
                                                 >
                                                     {myRsvp === 'interested'
@@ -15221,9 +15221,9 @@ export function EventCenter({
                                                                 </div>
                                                                 <span
                                                                     className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${attendee.status ===
-                                                                            'going'
-                                                                            ? 'bg-[#edf2eb] text-[#2b5139]'
-                                                                            : 'bg-[#e8eff4] text-[#2c5270]'
+                                                                        'going'
+                                                                        ? 'bg-[#edf2eb] text-[#2b5139]'
+                                                                        : 'bg-[#e8eff4] text-[#2c5270]'
                                                                         }`}
                                                                 >
                                                                     {
