@@ -319,12 +319,12 @@ export type RegistrationAssistanceRequest = {
     registrar_match?: {
         found: boolean;
         match_status:
-        | 'not_found'
-        | 'already_claimed'
-        | 'ready_to_claim'
-        | 'dob_mismatch'
-        | 'name_mismatch'
-        | 'multiple_mismatches';
+            | 'not_found'
+            | 'already_claimed'
+            | 'ready_to_claim'
+            | 'dob_mismatch'
+            | 'name_mismatch'
+            | 'multiple_mismatches';
         summary: string;
         recommended_action: 'create_record' | 'sync_record' | 'provision_account' | 'manual_review';
         profile: {

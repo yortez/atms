@@ -118,20 +118,22 @@ export default function RegistrationAssistance({
                 <button
                     type="button"
                     onClick={() => setActiveMode('submit')}
-                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${activeMode === 'submit'
+                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${
+                        activeMode === 'submit'
                             ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
                             : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
-                        }`}
+                    }`}
                 >
                     Submit Claim Request
                 </button>
                 <button
                     type="button"
                     onClick={() => setActiveMode('lookup')}
-                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${activeMode === 'lookup'
+                    className={`flex h-10 items-center justify-center rounded-lg px-3 font-heading text-xs font-bold transition ${
+                        activeMode === 'lookup'
                             ? 'bg-[#001c17] text-white shadow-2xs dark:bg-[#E47818]'
                             : 'text-zinc-600 hover:bg-white/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white'
-                        }`}
+                    }`}
                 >
                     Check Request Status
                 </button>
