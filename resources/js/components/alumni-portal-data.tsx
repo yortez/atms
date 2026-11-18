@@ -4443,12 +4443,20 @@ type NotificationPage = {
     total: number;
 };
 
+type NotificationResponse = {
+    data: NotificationPage;
+    meta?: {
+        unread_count: number;
+    };
+};
+
 export function UnreadNotificationIndicator() {
-    const { data } =
-        useApiResource<ApiEnvelope<NotificationPage>>('/api/notifications');
+    const { data } = useApiResource<NotificationResponse>('/api/notifications');
     const unreadCount =
+        data?.meta?.unread_count ??
         data?.data.data.filter((notification) => !notification.read_at)
-            .length ?? 0;
+            .length ??
+        0;
 
     return unreadCount ? (
         <span className="absolute -top-1 -right-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-[#c57657] px-1 text-[9px] font-bold text-white">
@@ -4459,9 +4467,13 @@ export function UnreadNotificationIndicator() {
 
 export function Notifications({ onUpdated }: { onUpdated?: () => void } = {}) {
     const { data, loading, error, reload } =
-        useApiResource<ApiEnvelope<NotificationPage>>('/api/notifications');
+        useApiResource<NotificationResponse>('/api/notifications');
     const notifications = data?.data.data ?? [];
+    const unreadCount =
+        data?.meta?.unread_count ??
+        notifications.filter((notification) => !notification.read_at).length;
     const [updating, setUpdating] = useState<string | null>(null);
+    const [markingAll, setMarkingAll] = useState(false);
 
     async function markAsRead(id: string) {
         setUpdating(id);
@@ -4484,6 +4496,26 @@ export function Notifications({ onUpdated }: { onUpdated?: () => void } = {}) {
         }
     }
 
+    async function markAllAsRead() {
+        setMarkingAll(true);
+        try {
+            await apiRequest<
+                ApiEnvelope<{ marked_count: number; read_at: string }>
+            >('/api/notifications/read-all', { method: 'PATCH' });
+            reload();
+            onUpdated?.();
+            toast.success('All notifications marked as read.');
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError
+                    ? error.message
+                    : 'Notifications could not be updated.',
+            );
+        } finally {
+            setMarkingAll(false);
+        }
+    }
+
     if (loading) {
         return <LoadingState />;
     }
@@ -4494,6 +4526,22 @@ export function Notifications({ onUpdated }: { onUpdated?: () => void } = {}) {
 
     return notifications.length ? (
         <div className="grid gap-3">
+            {unreadCount > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#e9ebe5] bg-[#fafbf9] px-4 py-2.5">
+                    <span className="text-xs font-medium text-[#495a4f]">
+                        {unreadCount} unread{' '}
+                        {unreadCount === 1 ? 'notification' : 'notifications'}
+                    </span>
+                    <button
+                        type="button"
+                        disabled={markingAll}
+                        onClick={() => void markAllAsRead()}
+                        className="rounded-lg border border-[#d2ddd0] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#2c5339] hover:bg-[#edf2ea] disabled:opacity-60"
+                    >
+                        {markingAll ? 'Updating…' : 'Mark all as read'}
+                    </button>
+                </div>
+            )}
             {notifications.map((notification) => {
                 const title =
                     typeof notification.data.title === 'string'

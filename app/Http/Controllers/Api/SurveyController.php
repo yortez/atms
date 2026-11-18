@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Survey;
 use App\Models\SurveyQuestion;
 use App\Models\SurveyResponse;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class SurveyController extends Controller
@@ -166,6 +168,7 @@ class SurveyController extends Controller
         abort_if($survey->questions()->count() === 0, 422, 'A survey must have at least one question before publishing.');
 
         $survey->forceFill(['status' => 'published', 'published_at' => now()])->save();
+        $this->broadcastNotification($survey);
 
         return response()->json([
             'data' => $survey->load('questions')->loadCount('responses'),
@@ -415,6 +418,34 @@ class SurveyController extends Controller
                 'options' => $question['options'] ?? null,
                 'is_required' => $question['is_required'] ?? true,
                 'position' => $question['position'] ?? $position,
+            ]);
+        }
+    }
+
+    private function broadcastNotification(Survey $survey): void
+    {
+        $recipients = User::query()
+            ->whereNull('suspended_at')
+            ->whereHas('roles', fn ($q) => $q->where('name', 'alumni'))
+            ->limit(250)
+            ->get(['id', 'alumni_profile_id']);
+
+        foreach ($recipients as $recipient) {
+            if ($survey->hasCohortTargeting()) {
+                $profileId = $recipient->alumni_profile_id ? (int) $recipient->alumni_profile_id : null;
+                if ($profileId === null || ! $survey->matchesAlumniProfile($profileId)) {
+                    continue;
+                }
+            }
+
+            $recipient->notifications()->create([
+                'id' => (string) Str::uuid(),
+                'type' => 'App\\Notifications\\SurveyPublished',
+                'data' => [
+                    'title' => '📋 New Survey: '.$survey->title,
+                    'message' => Str::limit($survey->description ?: 'Please complete this graduate tracer survey.', 140),
+                    'survey_id' => $survey->id,
+                ],
             ]);
         }
     }

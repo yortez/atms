@@ -130,6 +130,8 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
     Route::patch('/employers/{employer}/verification', [EmployerController::class, 'review'])
         ->name('api.employers.verification');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('api.notifications.index');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead'])
+        ->name('api.notifications.read-all');
     Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'markRead'])
         ->name('api.notifications.read');
     Route::get('/registration-assistance', [RegistrationAssistanceController::class, 'index'])

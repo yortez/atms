@@ -196,6 +196,20 @@ class JobController extends Controller
             'status' => 'submitted',
         ]);
 
+        $employerRecipients = $jobPosting->employer?->users()->whereNull('suspended_at')->get(['users.id']) ?? collect();
+        foreach ($employerRecipients as $employerRecipient) {
+            $employerRecipient->notifications()->create([
+                'id' => (string) Str::uuid(),
+                'type' => 'App\\Notifications\\JobApplicationReceived',
+                'data' => [
+                    'title' => "New Application: {$jobPosting->title}",
+                    'message' => "{$profile->name} applied for {$jobPosting->title}.",
+                    'job_posting_id' => $jobPosting->id,
+                    'application_id' => $application->id,
+                ],
+            ]);
+        }
+
         return response()->json(['data' => $application], 201);
     }
 
@@ -305,6 +319,20 @@ class JobController extends Controller
             'reviewed_at' => now(),
             'reviewed_by_user_id' => $request->user()->id,
         ])->save();
+
+        if ($application->applicant !== null && ! $application->applicant->isSuspended()) {
+            $application->applicant->notifications()->create([
+                'id' => (string) Str::uuid(),
+                'type' => 'App\\Notifications\\JobApplicationStatusUpdated',
+                'data' => [
+                    'title' => 'Application status updated',
+                    'message' => "Your application for {$application->jobPosting->title} is now {$application->status}.",
+                    'job_posting_id' => $application->job_posting_id,
+                    'application_id' => $application->id,
+                    'status' => $application->status,
+                ],
+            ]);
+        }
 
         return response()->json(['data' => $application->refresh()]);
     }

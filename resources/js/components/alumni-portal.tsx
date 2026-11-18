@@ -610,7 +610,11 @@ export default function AlumniPortal({
     ) ? (
         <EmploymentReports />
     ) : activePage === 'Notifications' ? (
-        <Notifications />
+        <Notifications
+            onUpdated={() =>
+                setNotificationRefreshKey((key) => key + 1)
+            }
+        />
     ) : activePage === 'Claim assistance' ? (
         <RegistrationAssistanceQueue />
     ) : activePage === 'Activity log' ? (
