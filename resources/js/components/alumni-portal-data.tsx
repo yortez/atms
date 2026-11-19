@@ -754,7 +754,7 @@ function AlumniProfileDialog({
                         credentialsForm.mode === 'student_number',
                     password:
                         credentialsForm.mode === 'custom' &&
-                        credentialsForm.password.trim()
+                            credentialsForm.password.trim()
                             ? credentialsForm.password.trim()
                             : undefined,
                 },
@@ -1238,29 +1238,29 @@ function AlumniProfileDialog({
 
                                             {credentialsForm.mode ===
                                                 'custom' && (
-                                                <label className="block text-xs font-medium text-[#495a4f]">
-                                                    New temporary password
-                                                    <input
-                                                        type="password"
-                                                        required
-                                                        minLength={8}
-                                                        maxLength={255}
-                                                        value={
-                                                            credentialsForm.password
-                                                        }
-                                                        onChange={(e) =>
-                                                            setCredentialsForm({
-                                                                ...credentialsForm,
-                                                                password:
-                                                                    e.target
-                                                                        .value,
-                                                            })
-                                                        }
-                                                        placeholder="Minimum 8 characters"
-                                                        className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-3 text-xs"
-                                                    />
-                                                </label>
-                                            )}
+                                                    <label className="block text-xs font-medium text-[#495a4f]">
+                                                        New temporary password
+                                                        <input
+                                                            type="password"
+                                                            required
+                                                            minLength={8}
+                                                            maxLength={255}
+                                                            value={
+                                                                credentialsForm.password
+                                                            }
+                                                            onChange={(e) =>
+                                                                setCredentialsForm({
+                                                                    ...credentialsForm,
+                                                                    password:
+                                                                        e.target
+                                                                            .value,
+                                                                })
+                                                            }
+                                                            placeholder="Minimum 8 characters"
+                                                            className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-3 text-xs"
+                                                        />
+                                                    </label>
+                                                )}
 
                                             <div className="flex items-center justify-end gap-2 pt-1">
                                                 <button
@@ -1471,10 +1471,10 @@ export function AlumniDirectory({
 
     const hasActiveFilters = Boolean(
         query.trim() ||
-            programFilter ||
-            graduationYearFilter ||
-            employmentStatusFilter ||
-            profileCompletionFilter,
+        programFilter ||
+        graduationYearFilter ||
+        employmentStatusFilter ||
+        profileCompletionFilter,
     );
 
     const { data, loading, error, reload } = useApiResource<
@@ -2161,7 +2161,7 @@ export function AlumniDirectory({
                                                 </td>
                                                 <td className="px-4 py-3.5">
                                                     {education?.program_code ||
-                                                    education?.program ? (
+                                                        education?.program ? (
                                                         <div className="flex flex-wrap items-center gap-1">
                                                             <span
                                                                 title={
@@ -2177,31 +2177,31 @@ export function AlumniDirectory({
                                                                 .education_records
                                                                 ?.length ?? 0) >
                                                                 1 && (
-                                                                <span
-                                                                    title={alumnus.education_records
-                                                                        ?.map(
-                                                                            (
-                                                                                rec,
-                                                                            ) =>
-                                                                                rec.program_code ??
-                                                                                rec.program ??
-                                                                                rec.degree,
-                                                                        )
-                                                                        .filter(
-                                                                            Boolean,
-                                                                        )
-                                                                        .join(
-                                                                            ', ',
-                                                                        )}
-                                                                    className="rounded-full bg-[#f0f3ee] px-1.5 py-0.5 text-[10px] font-semibold text-[#4d5a4f]"
-                                                                >
-                                                                    +
-                                                                    {(alumnus
-                                                                        .education_records
-                                                                        ?.length ??
-                                                                        1) - 1}
-                                                                </span>
-                                                            )}
+                                                                    <span
+                                                                        title={alumnus.education_records
+                                                                            ?.map(
+                                                                                (
+                                                                                    rec,
+                                                                                ) =>
+                                                                                    rec.program_code ??
+                                                                                    rec.program ??
+                                                                                    rec.degree,
+                                                                            )
+                                                                            .filter(
+                                                                                Boolean,
+                                                                            )
+                                                                            .join(
+                                                                                ', ',
+                                                                            )}
+                                                                        className="rounded-full bg-[#f0f3ee] px-1.5 py-0.5 text-[10px] font-semibold text-[#4d5a4f]"
+                                                                    >
+                                                                        +
+                                                                        {(alumnus
+                                                                            .education_records
+                                                                            ?.length ??
+                                                                            1) - 1}
+                                                                    </span>
+                                                                )}
                                                         </div>
                                                     ) : (
                                                         '—'
@@ -2264,8 +2264,8 @@ export function AlumniDirectory({
                                                 </td>
                                                 <td className="px-4 py-3.5">
                                                     {employment?.job_title ||
-                                                    employment?.employer_name ||
-                                                    employment?.work_location ? (
+                                                        employment?.employer_name ||
+                                                        employment?.work_location ? (
                                                         <div>
                                                             <p className="font-medium text-[#39463b]">
                                                                 {employment?.job_title ||
@@ -2273,7 +2273,7 @@ export function AlumniDirectory({
                                                             </p>
                                                             {(employment?.job_title &&
                                                                 employment?.employer_name) ||
-                                                            employment?.work_location ? (
+                                                                employment?.work_location ? (
                                                                 <p className="mt-0.5 text-[10px] text-[#848a81]">
                                                                     {[
                                                                         employment?.job_title
@@ -5209,11 +5209,10 @@ function RoleCheckboxPills({
                 return (
                     <label
                         key={`${keyPrefix}-${code}`}
-                        className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium transition ${
-                            checked
+                        className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium transition ${checked
                                 ? 'border-[#2b5139] bg-[#edf2eb] text-[#2b5139]'
                                 : 'border-[#dfe5dd] bg-white text-[#4d5a4f] hover:bg-[#f8faf7]'
-                        } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                            } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
                     >
                         <input
                             type="checkbox"
@@ -5292,16 +5291,15 @@ function ProgramScopeSelector({
                                 onChange(
                                     active
                                         ? selectedProgramIds.filter(
-                                              (id) => id !== prog.id,
-                                          )
+                                            (id) => id !== prog.id,
+                                        )
                                         : [...selectedProgramIds, prog.id],
                                 )
                             }
-                            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition disabled:opacity-50 ${
-                                active
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition disabled:opacity-50 ${active
                                     ? 'bg-[#2b5139] text-white'
                                     : 'border border-[#dce2d9] bg-white text-[#4d5a4f] hover:bg-[#edf2eb]'
-                            }`}
+                                }`}
                         >
                             {prog.code} · {prog.name}
                         </button>
@@ -5701,22 +5699,20 @@ export function AssignedRoles({
                     <button
                         type="button"
                         onClick={() => setActiveTab('users')}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                            activeTab === 'users'
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeTab === 'users'
                                 ? 'bg-white text-[#2b5139] shadow-2xs'
                                 : 'text-[#626c61] hover:text-[#29382e]'
-                        }`}
+                            }`}
                     >
                         Users & Access ({users.length})
                     </button>
                     <button
                         type="button"
                         onClick={() => setActiveTab('permissions')}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                            activeTab === 'permissions'
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeTab === 'permissions'
                                 ? 'bg-white text-[#2b5139] shadow-2xs'
                                 : 'text-[#626c61] hover:text-[#29382e]'
-                        }`}
+                            }`}
                     >
                         Role Permissions & Settings
                     </button>
@@ -5764,11 +5760,10 @@ export function AssignedRoles({
                                         setRoleFilter(code);
                                         setUserPage(1);
                                     }}
-                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
-                                        roleFilter === code
+                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${roleFilter === code
                                             ? 'bg-[#2b5139] text-white'
                                             : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                    }`}
+                                        }`}
                                 >
                                     {label} ({roleFilterCounts[code] ?? 0})
                                 </button>
@@ -5828,14 +5823,14 @@ export function AssignedRoles({
                                                     ?.length
                                                     ? user.assigned_programs
                                                     : programsCatalog.filter(
-                                                          (prog) =>
-                                                              (
-                                                                  user.assigned_program_ids ??
-                                                                  []
-                                                              ).includes(
-                                                                  prog.id,
-                                                              ),
-                                                      );
+                                                        (prog) =>
+                                                            (
+                                                                user.assigned_program_ids ??
+                                                                []
+                                                            ).includes(
+                                                                prog.id,
+                                                            ),
+                                                    );
 
                                             return (
                                                 <tr
@@ -5870,10 +5865,10 @@ export function AssignedRoles({
                                                                     </p>
                                                                     {user.id ===
                                                                         currentUserId && (
-                                                                        <span className="rounded-full bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
-                                                                            You
-                                                                        </span>
-                                                                    )}
+                                                                            <span className="rounded-full bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                                                                You
+                                                                            </span>
+                                                                        )}
                                                                     {user.alumni_profile_id && (
                                                                         <span className="rounded-full bg-[#f0f3ee] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
                                                                             Alumni
@@ -5920,7 +5915,7 @@ export function AssignedRoles({
                                                             </span>
                                                         ) : isDeptCoordinator ? (
                                                             assignedPrograms.length >
-                                                            0 ? (
+                                                                0 ? (
                                                                 <div className="flex flex-wrap items-center gap-1">
                                                                     {assignedPrograms
                                                                         .slice(
@@ -5948,27 +5943,27 @@ export function AssignedRoles({
                                                                         )}
                                                                     {assignedPrograms.length >
                                                                         3 && (
-                                                                        <span
-                                                                            title={assignedPrograms
-                                                                                .slice(
-                                                                                    3,
-                                                                                )
-                                                                                .map(
-                                                                                    (
-                                                                                        p,
-                                                                                    ) =>
-                                                                                        `${p.code} · ${p.name}`,
-                                                                                )
-                                                                                .join(
-                                                                                    ', ',
-                                                                                )}
-                                                                            className="rounded-full bg-[#f0f3ee] px-1.5 py-0.5 text-[10px] font-semibold text-[#4d5a4f]"
-                                                                        >
-                                                                            +
-                                                                            {assignedPrograms.length -
-                                                                                3}
-                                                                        </span>
-                                                                    )}
+                                                                            <span
+                                                                                title={assignedPrograms
+                                                                                    .slice(
+                                                                                        3,
+                                                                                    )
+                                                                                    .map(
+                                                                                        (
+                                                                                            p,
+                                                                                        ) =>
+                                                                                            `${p.code} · ${p.name}`,
+                                                                                    )
+                                                                                    .join(
+                                                                                        ', ',
+                                                                                    )}
+                                                                                className="rounded-full bg-[#f0f3ee] px-1.5 py-0.5 text-[10px] font-semibold text-[#4d5a4f]"
+                                                                            >
+                                                                                +
+                                                                                {assignedPrograms.length -
+                                                                                    3}
+                                                                            </span>
+                                                                        )}
                                                                 </div>
                                                             ) : (
                                                                 <span className="rounded-full bg-[#fdf4e7] px-2.5 py-0.5 text-[10px] font-semibold text-[#9a6728]">
@@ -6010,8 +6005,8 @@ export function AssignedRoles({
                                                                     disabled={
                                                                         !canManage ||
                                                                         managing[
-                                                                            user
-                                                                                .id
+                                                                        user
+                                                                            .id
                                                                         ]
                                                                     }
                                                                     onClick={() =>
@@ -6061,8 +6056,8 @@ export function AssignedRoles({
                                                                         disabled={
                                                                             !canManage ||
                                                                             managing[
-                                                                                user
-                                                                                    .id
+                                                                            user
+                                                                                .id
                                                                             ]
                                                                         }
                                                                         className="rounded-lg border border-[#dfe5dd] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4d5a4f] transition hover:bg-[#f6f7f4] disabled:cursor-not-allowed disabled:opacity-50"
@@ -6086,8 +6081,8 @@ export function AssignedRoles({
                                                                         disabled={
                                                                             !canManage ||
                                                                             managing[
-                                                                                user
-                                                                                    .id
+                                                                            user
+                                                                                .id
                                                                             ]
                                                                         }
                                                                         className="rounded-lg border border-[#ecd8d2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#8b4e43] transition hover:bg-[#fdf6f5] disabled:cursor-not-allowed disabled:opacity-50"
@@ -6180,7 +6175,7 @@ export function AssignedRoles({
                                         (r) =>
                                             r.name === 'alumni-coordinator' ||
                                             r.name ===
-                                                'department-coordinator',
+                                            'department-coordinator',
                                     )
                                     .map((roleItem) => (
                                         <div
@@ -6212,8 +6207,8 @@ export function AssignedRoles({
                                                                 type="button"
                                                                 disabled={
                                                                     savingRolePermissions[
-                                                                        roleItem
-                                                                            .id
+                                                                    roleItem
+                                                                        .id
                                                                     ]
                                                                 }
                                                                 onClick={() =>
@@ -6225,11 +6220,10 @@ export function AssignedRoles({
                                                                 title={
                                                                     perm.label
                                                                 }
-                                                                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
-                                                                    active
+                                                                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${active
                                                                         ? 'bg-[#2b5139] text-white'
                                                                         : 'border border-[#dce2d9] bg-white text-[#5c685d] hover:bg-[#eff2ed]'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 {perm.label}
                                                             </button>
@@ -6358,8 +6352,8 @@ export function AssignedRoles({
                                             ...form,
                                             roles: form.roles.includes(code)
                                                 ? form.roles.filter(
-                                                      (role) => role !== code,
-                                                  )
+                                                    (role) => role !== code,
+                                                )
                                                 : [...form.roles, code],
                                         }))
                                     }
@@ -6369,20 +6363,20 @@ export function AssignedRoles({
                             {inviteForm.roles.includes(
                                 'department-coordinator',
                             ) && (
-                                <ProgramScopeSelector
-                                    programsCatalog={programsCatalog}
-                                    selectedProgramIds={
-                                        inviteForm.assigned_program_ids
-                                    }
-                                    disabled={inviting}
-                                    onChange={(nextIds) =>
-                                        setInviteForm((form) => ({
-                                            ...form,
-                                            assigned_program_ids: nextIds,
-                                        }))
-                                    }
-                                />
-                            )}
+                                    <ProgramScopeSelector
+                                        programsCatalog={programsCatalog}
+                                        selectedProgramIds={
+                                            inviteForm.assigned_program_ids
+                                        }
+                                        disabled={inviting}
+                                        onChange={(nextIds) =>
+                                            setInviteForm((form) => ({
+                                                ...form,
+                                                assigned_program_ids: nextIds,
+                                            }))
+                                        }
+                                    />
+                                )}
 
                             <div className="flex items-center justify-end gap-2 border-t border-[#eff0ec] pt-3">
                                 <button
@@ -6459,8 +6453,8 @@ export function AssignedRoles({
                                         setEditRoles((current) =>
                                             current.includes(code)
                                                 ? current.filter(
-                                                      (role) => role !== code,
-                                                  )
+                                                    (role) => role !== code,
+                                                )
                                                 : [...current, code],
                                         )
                                     }
