@@ -1065,6 +1065,40 @@ export default function AlumniPortal({
                         </div>
                     )}
 
+                    {role === 'Alumni' && user?.must_change_password && !isCustomChildPage && (
+                        <div className="mb-6 rounded-2xl border border-rose-300/80 bg-linear-to-r from-rose-50 via-amber-50 to-rose-50 p-4 shadow-xs sm:p-5">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex items-start gap-3.5">
+                                    <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-rose-600 text-white shadow-xs">
+                                        <ShieldCheck className="size-5" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h2 className="font-heading text-sm font-bold text-zinc-900 sm:text-base">
+                                                Security Notice: Change Your Default Password
+                                            </h2>
+                                            <span className="rounded-full border border-rose-300 bg-rose-100/80 px-2 py-0.5 text-[10px] font-bold text-rose-900 uppercase">
+                                                Recommended
+                                            </span>
+                                        </div>
+                                        <p className="mt-1 text-xs text-zinc-600 sm:text-sm">
+                                            Your account is currently using your pre-provisioned SEAIT Student Number as its password. To protect your academic and career records under RA 10173, please set a private password.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="shrink-0">
+                                    <Link
+                                        href="/settings/security"
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#001c17] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#002e26] sm:w-auto"
+                                    >
+                                        <ShieldCheck className="size-3.5 text-[#E47818]" />
+                                        Change Password Now
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {role === 'Alumni' && !isProfileComplete && !isCustomChildPage && (
                         <div className="mb-6 rounded-2xl border border-amber-300/80 bg-linear-to-r from-amber-50 via-orange-50 to-amber-50 p-4 sm:p-5 shadow-xs">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -52,7 +52,10 @@ class AlumniController extends Controller
                     ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhereHas('educationRecords', fn (Builder $records) => $records
-                        ->where('student_number', 'like', "%{$search}%"));
+                        ->where('student_number', 'like', "%{$search}%"))
+                    ->orWhereHas('educationRecords.programDegree.program', fn (Builder $programQuery) => $programQuery
+                        ->where('code', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%"));
             });
         }
 
@@ -66,6 +69,44 @@ class AlumniController extends Controller
             $request->validate(['graduation_year' => ['integer', 'between:1900,2100']]);
             $query->whereHas('educationRecords', fn (Builder $records) => $records
                 ->where('graduation_year', $request->integer('graduation_year')));
+        }
+
+        if ($request->filled('employment_status')) {
+            $employmentFilter = trim((string) $request->query('employment_status'));
+            if ($employmentFilter === 'not_reported') {
+                $query->whereDoesntHave('employmentRecords');
+            } else {
+                $request->validate([
+                    'employment_status' => ['integer', 'exists:employment_statuses,id'],
+                ]);
+                $statusId = $request->integer('employment_status');
+                $query->whereHas('employmentRecords', function (Builder $records) use ($statusId): void {
+                    $records
+                        ->where('employment_status_id', $statusId)
+                        ->whereRaw(
+                            'alumni_employment_records.id = (select aer2.id from alumni_employment_records as aer2 where aer2.alumni_id = alumni_employment_records.alumni_id order by aer2.reported_at desc, aer2.id desc limit 1)',
+                        );
+                });
+            }
+        }
+
+        if ($request->filled('profile_completion')) {
+            $request->validate([
+                'profile_completion' => [Rule::in(['completed', 'incomplete'])],
+            ]);
+            $requiredFields = ['gender', 'civil_status', 'contact_number', 'current_address', 'permanent_address'];
+
+            if ($request->query('profile_completion') === 'completed') {
+                foreach ($requiredFields as $field) {
+                    $query->whereNotNull($field)->where($field, '!=', '');
+                }
+            } else {
+                $query->where(function (Builder $incompleteQuery) use ($requiredFields): void {
+                    foreach ($requiredFields as $field) {
+                        $incompleteQuery->orWhereNull($field)->orWhere($field, '=', '');
+                    }
+                });
+            }
         }
 
         return AlumniProfileResource::collection($query->orderBy('last_name')->paginate(25))
@@ -144,13 +185,13 @@ class AlumniController extends Controller
         ]);
 
         $profile = DB::transaction(function () use ($data, $request, $credentialService): AlumniProfile {
-            $profileData = collect($data)->except([
+            $profileData = $this->normalizeProfileNames(collect($data)->except([
                 'student_number',
                 'program_degree_id',
                 'graduation_year',
                 'honors',
                 'gwa',
-            ])->all();
+            ])->all());
 
             $profile = AlumniProfile::create([
                 ...$profileData,
@@ -216,7 +257,7 @@ class AlumniController extends Controller
                 'permanent_address' => ['sometimes', 'nullable', 'string', 'max:500'],
                 'profile_status' => ['sometimes', Rule::in(['active', 'archived'])],
             ];
-        $data = $request->validate($rules);
+        $data = $this->normalizeProfileNames($request->validate($rules));
 
         if (isset($data['email'])) {
             $data['email'] = mb_strtolower(trim($data['email']));
@@ -227,6 +268,21 @@ class AlumniController extends Controller
         $activityLogger->record('alumni.profile_updated', $profile, ['changed_fields' => array_keys($data)]);
 
         return new AlumniProfileResource($profile->refresh());
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizeProfileNames(array $data): array
+    {
+        foreach (['name', 'first_name', 'middle_name', 'last_name', 'preferred_name'] as $field) {
+            if (array_key_exists($field, $data) && filled($data[$field])) {
+                $data[$field] = AlumniProfile::formatName((string) $data[$field]);
+            }
+        }
+
+        return $data;
     }
 
     private function syncContactAndAddresses(AlumniProfile $profile, array $data): void
@@ -327,6 +383,99 @@ class AlumniController extends Controller
         return response($csv, 200, [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="alumni_import_template.csv"',
+        ]);
+    }
+
+    public function updateCredentials(
+        Request $request,
+        AlumniProfile $profile,
+        ActivityLogger $activityLogger,
+        AlumniCredentialService $credentialService,
+    ): JsonResponse {
+        $this->authorize('updateCredentials', $profile);
+
+        $existingUser = $profile->user;
+
+        if ($request->filled('username') && is_string($request->input('username'))) {
+            $request->merge([
+                'username' => Str::lower(trim((string) $request->input('username'))),
+            ]);
+        }
+
+        $data = $request->validate([
+            'username' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:64',
+                'regex:/^[a-z0-9_.-]+$/',
+                Rule::unique('users', 'username')->ignore($existingUser?->id),
+            ],
+            'reset_to_student_number' => ['sometimes', 'boolean'],
+            'password' => ['nullable', 'string', 'min:8', 'max:255'],
+        ]);
+
+        $resetToStudentNumber = $request->boolean('reset_to_student_number');
+        $customPassword = filled($data['password'] ?? null) ? (string) $data['password'] : null;
+
+        $primaryStudentNumber = Str::upper(trim((string) (
+            $profile->educationRecords()->orderBy('id')->value('student_number') ?? ''
+        )));
+
+        if ($resetToStudentNumber && $primaryStudentNumber === '') {
+            return response()->json([
+                'message' => 'This alumni record does not have a student number to reset the password to.',
+                'errors' => [
+                    'reset_to_student_number' => ['This alumni record does not have a student number to reset the password to.'],
+                ],
+            ], 422);
+        }
+
+        $nextPassword = $resetToStudentNumber
+            ? $primaryStudentNumber
+            : $customPassword;
+
+        if ($existingUser === null) {
+            $fallbackPassword = $nextPassword ?: ($primaryStudentNumber !== '' ? $primaryStudentNumber : 'Alumni@2026');
+            $existingUser = $credentialService->provisionForProfile($profile, $fallbackPassword);
+        }
+
+        if (isset($data['username'])) {
+            $existingUser->username = $data['username'];
+        } elseif (blank($existingUser->username)) {
+            $existingUser->username = $credentialService->generateUniqueUsername(
+                $profile->first_name,
+                $profile->middle_name,
+                $profile->last_name,
+                $profile->name,
+                $existingUser->id,
+            );
+        }
+
+        if ($nextPassword !== null) {
+            $existingUser->password = $nextPassword;
+        }
+
+        $existingUser->save();
+        $existingUser->tokens()->delete();
+
+        $activityLogger->record('alumni.credentials_updated', $profile, [
+            'username' => $existingUser->username,
+            'password_reset_mode' => $resetToStudentNumber
+                ? 'student_number'
+                : ($customPassword !== null ? 'custom_password' : 'username_only'),
+        ]);
+
+        return response()->json([
+            'message' => $resetToStudentNumber
+                ? "Login password reset to Student Number ({$primaryStudentNumber})."
+                : 'Alumni login credentials updated.',
+            'data' => new AlumniProfileResource($profile->fresh([
+                'educationRecords.programDegree.program',
+                'educationRecords.programDegree.degree',
+                'employmentRecords.status',
+                'user:id,alumni_profile_id,username,avatar_path,created_at',
+            ])),
         ]);
     }
 }

@@ -9,6 +9,7 @@ export type User = {
     updated_at: string;
     alumni_profile_id?: number | null;
     is_profile_complete?: boolean;
+    must_change_password?: boolean;
     missing_profile_fields?: string[];
     roles?: string[];
     [key: string]: unknown;

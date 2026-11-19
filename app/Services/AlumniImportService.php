@@ -54,9 +54,11 @@ class AlumniImportService
             $rowNum = $index + 1;
 
             $studentNumber = isset($row['student_number']) ? Str::upper(trim((string) $row['student_number'])) : '';
-            $lastName = isset($row['last_name']) ? trim((string) $row['last_name']) : '';
-            $firstName = isset($row['first_name']) ? trim((string) $row['first_name']) : '';
-            $middleName = isset($row['middle_name']) ? trim((string) $row['middle_name']) : null;
+            $lastName = isset($row['last_name']) ? (AlumniProfile::formatName((string) $row['last_name']) ?? '') : '';
+            $firstName = isset($row['first_name']) ? (AlumniProfile::formatName((string) $row['first_name']) ?? '') : '';
+            $middleName = isset($row['middle_name']) && trim((string) $row['middle_name']) !== ''
+                ? AlumniProfile::formatName((string) $row['middle_name'])
+                : null;
             $dobString = isset($row['date_of_birth']) ? trim((string) $row['date_of_birth']) : '';
 
             if ($studentNumber === '' || $lastName === '' || $firstName === '' || $dobString === '') {

@@ -129,6 +129,30 @@ class AlumniProfile extends Model
             && filled($this->permanent_address);
     }
 
+    public static function formatName(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmed = trim(preg_replace('/\s+/', ' ', $value) ?? $value);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        return implode(' ', array_map(function (string $word): string {
+            if (preg_match('/^(II|III|IV|V|VI)$/i', $word)) {
+                return strtoupper($word);
+            }
+
+            if ($word === mb_strtoupper($word) || $word === mb_strtolower($word)) {
+                return mb_convert_case(mb_strtolower($word), MB_CASE_TITLE, 'UTF-8');
+            }
+
+            return $word;
+        }, explode(' ', $trimmed)));
+    }
+
     /**
      * @return array<string>
      */

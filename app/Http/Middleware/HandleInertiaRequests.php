@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                     ? [
                         ...$request->user()->toArray(),
                         'is_profile_complete' => $request->user()->hasCompletedAlumniProfile(),
+                        'must_change_password' => $request->user()->hasDefaultAlumniPassword(),
                         'missing_profile_fields' => $request->user()->hasRole('alumni')
                             ? ($request->user()->alumniProfile?->missingProfileFields() ?? ['gender', 'civil_status', 'contact_number', 'current_address', 'permanent_address'])
                             : [],

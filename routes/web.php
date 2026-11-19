@@ -42,6 +42,8 @@ Route::prefix('api')->middleware(['auth:sanctum', 'verified', 'ability:api', Ens
     Route::get('/alumni/import-template', [AlumniController::class, 'importTemplate'])->name('api.alumni.import-template');
     Route::get('/alumni/{profile}', [AlumniController::class, 'show'])->name('api.alumni.show');
     Route::patch('/alumni/{profile}', [AlumniController::class, 'update'])->name('api.alumni.update');
+    Route::patch('/alumni/{profile}/credentials', [AlumniController::class, 'updateCredentials'])
+        ->name('api.alumni.credentials.update');
     Route::post('/alumni/{profile}/education-records', [AlumniController::class, 'storeEducationRecord'])
         ->name('api.alumni.education-records.store');
     Route::get('/alumni/{profile}/employment', [AlumniEmploymentController::class, 'index'])

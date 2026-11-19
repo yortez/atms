@@ -59,6 +59,7 @@ class SecurityController extends Controller
         $user->update([
             'password' => $request->password,
         ]);
+        $user->clearReleasedAssistancePasswords();
         $user->tokens()->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Password updated.')]);

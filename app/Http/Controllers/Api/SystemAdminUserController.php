@@ -43,6 +43,11 @@ class SystemAdminUserController extends Controller
                 'permissions' => $role->permissions->pluck('name')->values()->all(),
             ]);
 
+        Permission::query()->firstOrCreate(
+            ['name' => 'alumni.credentials.update'],
+            ['label' => 'Update alumni login credentials'],
+        );
+
         $permissionsCatalog = Permission::query()
             ->orderBy('name')
             ->get(['id', 'name', 'label']);

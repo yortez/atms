@@ -45,6 +45,24 @@ class AlumniProfilePolicy
             && $this->withinAssignedPrograms($user, $profile);
     }
 
+    public function updateCredentials(User $user, AlumniProfile $profile): bool
+    {
+        if ($user->hasRole('system-administrator')) {
+            return true;
+        }
+
+        if (! $user->hasPermission('alumni.credentials.update')) {
+            return false;
+        }
+
+        if ($user->hasRole('alumni-coordinator')) {
+            return true;
+        }
+
+        return $user->hasRole('department-coordinator')
+            && $this->withinAssignedPrograms($user, $profile);
+    }
+
     public function create(User $user): bool
     {
         return $user->hasRole('system-administrator', 'alumni-coordinator')

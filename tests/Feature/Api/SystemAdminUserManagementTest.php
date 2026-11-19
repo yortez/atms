@@ -5,6 +5,7 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
+use Laravel\Sanctum\Sanctum;
 
 function assignSystemRole(User $user, string $name): void
 {
@@ -197,6 +198,7 @@ test('authorization seeding grants the expected role permissions and is repeatab
 
     $allPermissions = [
         'alumni.create',
+        'alumni.credentials.update',
         'alumni.update',
         'alumni.view',
         'announcements.manage',
@@ -277,5 +279,94 @@ test('system administrators can update non-admin role permissions while protecti
     $this->assertDatabaseHas('activity_logs', [
         'action' => 'role.permissions_updated',
         'subject_id' => $deptRole->id,
+    ]);
+});
+
+test('coordinators require alumni.credentials.update permission to update or reset alumni login credentials', function () {
+    (new RoleSeeder)->run();
+
+    $dept = \App\Models\Department::create(['code' => 'CCS', 'name' => 'College of Computing Studies']);
+    $program = $dept->programs()->create(['code' => 'BSIT', 'name' => 'BS Information Technology']);
+    $degree = \App\Models\Degree::create(['code' => 'BSIT', 'title' => 'BS Information Technology', 'degree_level' => 'bachelor']);
+    $offering = \App\Models\ProgramDegree::create(['program_id' => $program->id, 'degree_id' => $degree->id]);
+
+    $profile = \App\Models\AlumniProfile::create([
+        'name' => 'Marco Santos',
+        'first_name' => 'Marco',
+        'last_name' => 'Santos',
+        'email' => 'marco.santos@example.com',
+        'date_of_birth' => '2000-04-12',
+        'profile_status' => 'active',
+    ]);
+
+    \Illuminate\Support\Facades\DB::table('alumni_education_records')->insert([
+        'alumni_profile_id' => $profile->id,
+        'student_number' => '2020-12345',
+        'program_degree_id' => $offering->id,
+        'graduation_year' => 2024,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $alumniUser = User::factory()->create([
+        'name' => 'Marco Santos',
+        'username' => 'santos_m',
+        'email' => 'marco.santos@example.com',
+        'password' => 'OldSecretPass123!',
+        'alumni_profile_id' => $profile->id,
+    ]);
+    assignSystemRole($alumniUser, 'alumni');
+
+    // Department coordinator without alumni.credentials.update receives 403
+    $deptCoordinator = User::factory()->create();
+    assignSystemRole($deptCoordinator, 'department-coordinator');
+    $deptCoordinator->assignedPrograms()->sync([$program->id => ['created_at' => now()]]);
+
+    Sanctum::actingAs($deptCoordinator, ['api']);
+    $this->patchJson("/api/alumni/{$profile->id}/credentials", [
+        'username' => 'santos_marco',
+        'reset_to_student_number' => true,
+    ])->assertForbidden();
+
+    // Alumni coordinator (has alumni.credentials.update by default) can reset credentials
+    $alumniCoordinator = User::factory()->create();
+    assignSystemRole($alumniCoordinator, 'alumni-coordinator');
+
+    Sanctum::actingAs($alumniCoordinator, ['api']);
+    $this->patchJson("/api/alumni/{$profile->id}/credentials", [
+        'username' => 'santos_marco',
+        'reset_to_student_number' => true,
+    ])->assertOk()
+        ->assertJsonPath('data.username', 'santos_marco')
+        ->assertJsonPath('data.can_update_credentials', true);
+
+    $alumniUser->refresh();
+    expect($alumniUser->username)->toBe('santos_marco')
+        ->and(\Illuminate\Support\Facades\Hash::check('2020-12345', $alumniUser->password))->toBeTrue();
+
+    // Granting alumni.credentials.update to department-coordinator allows recovery for assigned programs
+    $admin = User::factory()->create();
+    assignSystemRole($admin, 'system-administrator');
+    $deptRole = Role::query()->where('name', 'department-coordinator')->firstOrFail();
+
+    Sanctum::actingAs($admin, ['api']);
+    $this->patchJson("/api/admin/roles/{$deptRole->id}/permissions", [
+        'permissions' => ['alumni.view', 'alumni.credentials.update', 'reports.view'],
+    ])->assertOk();
+
+    Sanctum::actingAs($deptCoordinator, ['api']);
+    $this->patchJson("/api/alumni/{$profile->id}/credentials", [
+        'username' => 'santos_m_recovery',
+        'password' => 'TempRecovery2026!',
+    ])->assertOk()
+        ->assertJsonPath('data.username', 'santos_m_recovery');
+
+    $alumniUser->refresh();
+    expect($alumniUser->username)->toBe('santos_m_recovery')
+        ->and(\Illuminate\Support\Facades\Hash::check('TempRecovery2026!', $alumniUser->password))->toBeTrue();
+
+    $this->assertDatabaseHas('activity_logs', [
+        'action' => 'alumni.credentials_updated',
+        'subject_id' => $profile->id,
     ]);
 });

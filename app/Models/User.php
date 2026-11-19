@@ -14,7 +14,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -117,6 +119,39 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->roles()
             ->whereHas('permissions', fn ($query) => $query->where('name', $permission))
             ->exists();
+    }
+
+    public function hasDefaultAlumniPassword(): bool
+    {
+        if (! $this->alumni_profile_id || ! $this->hasRole('alumni')) {
+            return false;
+        }
+
+        $studentNumbers = AlumniStudentNumber::query()
+            ->where('alumni_profile_id', $this->alumni_profile_id)
+            ->pluck('student_number');
+
+        foreach ($studentNumbers as $studentNumber) {
+            $normalized = Str::upper(trim((string) $studentNumber));
+            if ($normalized !== '' && Hash::check($normalized, $this->password)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function clearReleasedAssistancePasswords(): void
+    {
+        AlumniRegistrationAssistanceRequest::query()
+            ->whereNotNull('released_password')
+            ->where(function ($query): void {
+                $query->where('email', $this->email);
+                if ($this->alumni_profile_id) {
+                    $query->orWhere('resolved_alumni_profile_id', $this->alumni_profile_id);
+                }
+            })
+            ->update(['released_password' => null]);
     }
 
     /**

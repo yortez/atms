@@ -660,6 +660,13 @@ function AlumniProfileDialog({
         permanent_address: '',
         profile_status: 'active' as 'active' | 'archived',
     });
+    const [credentialsOpen, setCredentialsOpen] = useState(false);
+    const [credentialsForm, setCredentialsForm] = useState({
+        username: '',
+        mode: 'student_number' as 'student_number' | 'custom',
+        password: '',
+    });
+    const [savingCredentials, setSavingCredentials] = useState(false);
 
     useEffect(() => {
         if (profile) {
@@ -678,6 +685,10 @@ function AlumniProfileDialog({
                 permanent_address: profile.permanent_address ?? '',
                 profile_status: profile.profile_status ?? 'active',
             });
+            setCredentialsForm((current) => ({
+                ...current,
+                username: profile.username ?? '',
+            }));
         }
     }, [profile]);
 
@@ -725,6 +736,43 @@ function AlumniProfileDialog({
             );
         } finally {
             setSaving(false);
+        }
+    }
+
+    async function handleUpdateCredentials(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setSavingCredentials(true);
+        try {
+            const res = await apiRequest<{
+                message?: string;
+                data: AlumniProfile;
+            }>(`/api/alumni/${profileId}/credentials`, {
+                method: 'PATCH',
+                body: {
+                    username: credentialsForm.username.trim() || undefined,
+                    reset_to_student_number:
+                        credentialsForm.mode === 'student_number',
+                    password:
+                        credentialsForm.mode === 'custom' &&
+                        credentialsForm.password.trim()
+                            ? credentialsForm.password.trim()
+                            : undefined,
+                },
+            });
+            toast.success(
+                res.message ?? 'Alumni login credentials updated.',
+            );
+            setCredentialsOpen(false);
+            setCredentialsForm((current) => ({ ...current, password: '' }));
+            reload();
+        } catch (err) {
+            toast.error(
+                err instanceof ApiError
+                    ? err.message
+                    : 'Could not update alumni login credentials.',
+            );
+        } finally {
+            setSavingCredentials(false);
         }
     }
 
@@ -1060,6 +1108,187 @@ function AlumniProfileDialog({
                                 </div>
                             </section>
 
+                            {profile.can_update_credentials && (
+                                <section className="rounded-2xl border border-[#dfe6dc] bg-[#f8faf7] p-4">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <div>
+                                            <h3 className="text-[11px] font-semibold tracking-[0.14em] text-[#2b5139] uppercase">
+                                                Login Credentials & Account Recovery
+                                            </h3>
+                                            <p className="mt-0.5 text-[11px] text-[#6d766b]">
+                                                Update username or reset password when an alumnus cannot sign in.
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setCredentialsOpen((prev) => {
+                                                    const next = !prev;
+                                                    if (next) {
+                                                        setCredentialsForm({
+                                                            username:
+                                                                profile.username ??
+                                                                '',
+                                                            mode: 'student_number',
+                                                            password: '',
+                                                        });
+                                                    }
+                                                    return next;
+                                                });
+                                            }}
+                                            className="inline-flex items-center gap-1 rounded-lg border border-[#cfe0cc] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#2b5139] transition hover:bg-[#edf2eb] cursor-pointer"
+                                        >
+                                            <Lock className="size-3" />
+                                            {credentialsOpen
+                                                ? 'Close'
+                                                : 'Update credentials'}
+                                        </button>
+                                    </div>
+
+                                    <dl className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                                        {detail(
+                                            'Username',
+                                            profile.username ?? 'Not provisioned',
+                                        )}
+                                        {detail('Login Email', profile.email)}
+                                        {detail(
+                                            'Student Number',
+                                            profile.education_records?.[0]
+                                                ?.student_number,
+                                        )}
+                                    </dl>
+
+                                    {credentialsOpen && (
+                                        <form
+                                            onSubmit={handleUpdateCredentials}
+                                            className="mt-3.5 space-y-3 border-t border-[#e1e7de] pt-3.5"
+                                        >
+                                            <label className="block text-xs font-medium text-[#495a4f]">
+                                                Username
+                                                <input
+                                                    required
+                                                    maxLength={64}
+                                                    pattern="[a-zA-Z0-9_.-]+"
+                                                    value={
+                                                        credentialsForm.username
+                                                    }
+                                                    onChange={(e) =>
+                                                        setCredentialsForm({
+                                                            ...credentialsForm,
+                                                            username:
+                                                                e.target.value,
+                                                        })
+                                                    }
+                                                    placeholder="e.g., santos_m"
+                                                    className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-3 font-mono text-xs lowercase"
+                                                />
+                                            </label>
+
+                                            <fieldset className="space-y-2">
+                                                <legend className="text-xs font-medium text-[#495a4f]">
+                                                    Password recovery action
+                                                </legend>
+                                                <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+                                                    <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-[#36443a]">
+                                                        <input
+                                                            type="radio"
+                                                            name={`recovery-mode-${profileId}`}
+                                                            checked={
+                                                                credentialsForm.mode ===
+                                                                'student_number'
+                                                            }
+                                                            onChange={() =>
+                                                                setCredentialsForm(
+                                                                    {
+                                                                        ...credentialsForm,
+                                                                        mode: 'student_number',
+                                                                        password:
+                                                                            '',
+                                                                    },
+                                                                )
+                                                            }
+                                                            className="accent-[#2b5139]"
+                                                        />
+                                                        Reset password to
+                                                        Student Number
+                                                    </label>
+                                                    <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-[#36443a]">
+                                                        <input
+                                                            type="radio"
+                                                            name={`recovery-mode-${profileId}`}
+                                                            checked={
+                                                                credentialsForm.mode ===
+                                                                'custom'
+                                                            }
+                                                            onChange={() =>
+                                                                setCredentialsForm(
+                                                                    {
+                                                                        ...credentialsForm,
+                                                                        mode: 'custom',
+                                                                    },
+                                                                )
+                                                            }
+                                                            className="accent-[#2b5139]"
+                                                        />
+                                                        Set a new temporary
+                                                        password
+                                                    </label>
+                                                </div>
+                                            </fieldset>
+
+                                            {credentialsForm.mode ===
+                                                'custom' && (
+                                                <label className="block text-xs font-medium text-[#495a4f]">
+                                                    New temporary password
+                                                    <input
+                                                        type="password"
+                                                        required
+                                                        minLength={8}
+                                                        maxLength={255}
+                                                        value={
+                                                            credentialsForm.password
+                                                        }
+                                                        onChange={(e) =>
+                                                            setCredentialsForm({
+                                                                ...credentialsForm,
+                                                                password:
+                                                                    e.target
+                                                                        .value,
+                                                            })
+                                                        }
+                                                        placeholder="Minimum 8 characters"
+                                                        className="mt-1 h-9 w-full rounded-lg border border-[#d6dfd2] bg-white px-3 text-xs"
+                                                    />
+                                                </label>
+                                            )}
+
+                                            <div className="flex items-center justify-end gap-2 pt-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setCredentialsOpen(
+                                                            false,
+                                                        )
+                                                    }
+                                                    className="h-8 rounded-lg border border-[#dce2d9] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    disabled={savingCredentials}
+                                                    className="h-8 rounded-lg bg-[#2b5139] px-3.5 text-xs font-semibold text-white transition hover:bg-[#22422d] disabled:opacity-60"
+                                                >
+                                                    {savingCredentials
+                                                        ? 'Saving…'
+                                                        : 'Save credentials'}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+                                </section>
+                            )}
+
                             <section className="rounded-2xl border border-[#e9ebe5] p-4">
                                 <h3 className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-[#495a4f] uppercase">
                                     Personal information
@@ -1174,6 +1403,10 @@ export function AlumniDirectory({
     onQueryChange: (value: string) => void;
 }) {
     const [page, setPage] = useState(1);
+    const [programFilter, setProgramFilter] = useState('');
+    const [graduationYearFilter, setGraduationYearFilter] = useState('');
+    const [employmentStatusFilter, setEmploymentStatusFilter] = useState('');
+    const [profileCompletionFilter, setProfileCompletionFilter] = useState('');
     const [creating, setCreating] = useState(false);
     const [viewingProfileId, setViewingProfileId] = useState<number | null>(null);
     const [importModalOpen, setImportModalOpen] = useState(false);
@@ -1205,11 +1438,44 @@ export function AlumniDirectory({
         latin_honors: '',
         gwa: '',
     });
+    const programsRes =
+        useApiResource<ApiEnvelope<AcademicProgram[]>>('/api/programs');
+    const employmentStatusesRes = useApiResource<
+        ApiEnvelope<EmploymentStatus[]>
+    >('/api/employment-statuses');
+    const programsList = programsRes.data?.data ?? [];
+    const employmentStatusesList = employmentStatusesRes.data?.data ?? [];
+    const currentYear = new Date().getFullYear();
+    const graduationYears = Array.from(
+        { length: 27 },
+        (_, index) => currentYear - index,
+    );
+
     const params = new URLSearchParams({ page: String(page) });
 
     if (query.trim()) {
         params.set('search', query.trim());
     }
+    if (programFilter) {
+        params.set('program_id', programFilter);
+    }
+    if (graduationYearFilter) {
+        params.set('graduation_year', graduationYearFilter);
+    }
+    if (employmentStatusFilter) {
+        params.set('employment_status', employmentStatusFilter);
+    }
+    if (profileCompletionFilter) {
+        params.set('profile_completion', profileCompletionFilter);
+    }
+
+    const hasActiveFilters = Boolean(
+        query.trim() ||
+            programFilter ||
+            graduationYearFilter ||
+            employmentStatusFilter ||
+            profileCompletionFilter,
+    );
 
     const { data, loading, error, reload } = useApiResource<
         PaginatedApiResponse<AlumniProfile>
@@ -1605,41 +1871,126 @@ export function AlumniDirectory({
                     </div>
                 </form>
             )}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <label className="flex h-10 flex-1 items-center gap-2 rounded-xl border border-[#e7e9e3] bg-white px-3">
-                    <span aria-hidden="true" className="text-sm text-[#899087]">
-                        ⌕
-                    </span>
-                    <input
-                        aria-label="Search alumni"
-                        value={query}
+            <div className="space-y-2.5">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <label className="flex h-10 flex-1 items-center gap-2 rounded-xl border border-[#e7e9e3] bg-white px-3">
+                        <span
+                            aria-hidden="true"
+                            className="text-sm text-[#899087]"
+                        >
+                            ⌕
+                        </span>
+                        <input
+                            aria-label="Search alumni"
+                            value={query}
+                            onChange={(event) => {
+                                onQueryChange(event.target.value);
+                                setPage(1);
+                            }}
+                            placeholder="Search by name, student number, or program"
+                            className="w-full bg-transparent text-xs outline-none placeholder:text-[#9ca198]"
+                        />
+                    </label>
+                    <div className="flex w-full items-center gap-2 sm:w-auto">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setImportModalOpen(true);
+                                setImportStats(null);
+                                setImportFile(null);
+                            }}
+                            className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#d2ddd0] bg-white px-3.5 text-xs font-semibold text-[#2c5339] shadow-xs transition hover:bg-[#edf2ea] sm:flex-initial"
+                        >
+                            <span>Import CSV</span>
+                        </button>
+                        <a
+                            href="/api/alumni/import-template"
+                            className="inline-flex h-10 flex-1 items-center justify-center gap-1 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea] sm:flex-initial"
+                            title="Download sample import template"
+                        >
+                            <span>Template</span>
+                        </a>
+                    </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                    <select
+                        aria-label="Filter by program"
+                        value={programFilter}
                         onChange={(event) => {
-                            onQueryChange(event.target.value);
+                            setProgramFilter(event.target.value);
                             setPage(1);
                         }}
-                        placeholder="Search by name, student number, or program"
-                        className="w-full bg-transparent text-xs outline-none placeholder:text-[#9ca198]"
-                    />
-                </label>
-                <div className="flex w-full items-center gap-2 sm:w-auto">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setImportModalOpen(true);
-                            setImportStats(null);
-                            setImportFile(null);
+                        className="h-9 rounded-xl border border-[#e7e9e3] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                    >
+                        <option value="">All programs</option>
+                        {programsList.map((prog) => (
+                            <option key={prog.id} value={String(prog.id)}>
+                                {prog.code} · {prog.name}
+                            </option>
+                        ))}
+                    </select>
+                    <select
+                        aria-label="Filter by class year"
+                        value={graduationYearFilter}
+                        onChange={(event) => {
+                            setGraduationYearFilter(event.target.value);
+                            setPage(1);
                         }}
-                        className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#d2ddd0] bg-white px-3.5 text-xs font-semibold text-[#2c5339] shadow-xs transition hover:bg-[#edf2ea] sm:flex-initial"
+                        className="h-9 rounded-xl border border-[#e7e9e3] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
                     >
-                        <span>Import CSV</span>
-                    </button>
-                    <a
-                        href="/api/alumni/import-template"
-                        className="inline-flex h-10 flex-1 items-center justify-center gap-1 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea] sm:flex-initial"
-                        title="Download sample import template"
+                        <option value="">All classes</option>
+                        {graduationYears.map((yr) => (
+                            <option key={yr} value={String(yr)}>
+                                Class of {yr}
+                            </option>
+                        ))}
+                    </select>
+                    <select
+                        aria-label="Filter by employment status"
+                        value={employmentStatusFilter}
+                        onChange={(event) => {
+                            setEmploymentStatusFilter(event.target.value);
+                            setPage(1);
+                        }}
+                        className="h-9 rounded-xl border border-[#e7e9e3] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
                     >
-                        <span>Template</span>
-                    </a>
+                        <option value="">All employment</option>
+                        {employmentStatusesList.map((st) => (
+                            <option key={st.id} value={String(st.id)}>
+                                {st.label}
+                            </option>
+                        ))}
+                        <option value="not_reported">Not reported</option>
+                    </select>
+                    <select
+                        aria-label="Filter by profile status"
+                        value={profileCompletionFilter}
+                        onChange={(event) => {
+                            setProfileCompletionFilter(event.target.value);
+                            setPage(1);
+                        }}
+                        className="h-9 rounded-xl border border-[#e7e9e3] bg-white px-3 text-xs text-[#32413a] outline-none transition focus:border-[#819981]"
+                    >
+                        <option value="">All profiles</option>
+                        <option value="completed">Completed</option>
+                        <option value="incomplete">Incomplete profile</option>
+                    </select>
+                    {hasActiveFilters && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onQueryChange('');
+                                setProgramFilter('');
+                                setGraduationYearFilter('');
+                                setEmploymentStatusFilter('');
+                                setProfileCompletionFilter('');
+                                setPage(1);
+                            }}
+                            className="h-9 rounded-xl border border-[#e2e7df] bg-[#f8faf7] px-3 text-xs font-medium text-[#5c685b] transition hover:bg-[#edf2ea]"
+                        >
+                            Reset filters
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -1798,6 +2149,12 @@ export function AlumniDirectory({
                                                             <span className="mt-0.5 block text-[10px] text-[#92978f]">
                                                                 {education?.student_number ??
                                                                     '—'}
+                                                                {alumnus.username
+                                                                    ? ` · ${alumnus.username}`
+                                                                    : ''}
+                                                                {alumnus.contact_number
+                                                                    ? ` · ${alumnus.contact_number}`
+                                                                    : ''}
                                                             </span>
                                                         </span>
                                                     </div>
@@ -1805,44 +2162,143 @@ export function AlumniDirectory({
                                                 <td className="px-4 py-3.5">
                                                     {education?.program_code ||
                                                     education?.program ? (
-                                                        <span
-                                                            title={
-                                                                education?.program ??
-                                                                undefined
-                                                            }
-                                                            className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase"
-                                                        >
-                                                            {education?.program_code ??
-                                                                education?.program}
-                                                        </span>
+                                                        <div className="flex flex-wrap items-center gap-1">
+                                                            <span
+                                                                title={
+                                                                    education?.program ??
+                                                                    undefined
+                                                                }
+                                                                className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase"
+                                                            >
+                                                                {education?.program_code ??
+                                                                    education?.program}
+                                                            </span>
+                                                            {(alumnus
+                                                                .education_records
+                                                                ?.length ?? 0) >
+                                                                1 && (
+                                                                <span
+                                                                    title={alumnus.education_records
+                                                                        ?.map(
+                                                                            (
+                                                                                rec,
+                                                                            ) =>
+                                                                                rec.program_code ??
+                                                                                rec.program ??
+                                                                                rec.degree,
+                                                                        )
+                                                                        .filter(
+                                                                            Boolean,
+                                                                        )
+                                                                        .join(
+                                                                            ', ',
+                                                                        )}
+                                                                    className="rounded-full bg-[#f0f3ee] px-1.5 py-0.5 text-[10px] font-semibold text-[#4d5a4f]"
+                                                                >
+                                                                    +
+                                                                    {(alumnus
+                                                                        .education_records
+                                                                        ?.length ??
+                                                                        1) - 1}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     ) : (
                                                         '—'
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3.5">
-                                                    {education?.graduation_year ??
-                                                        '—'}
-                                                </td>
-                                                <td className="px-4 py-3.5">
-                                                    {status ? (
-                                                        <span
-                                                            className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${statusClass[status] ?? 'bg-[#f0f1ed] text-[#6d746a]'}`}
-                                                        >
-                                                            {status}
+                                                    <div>
+                                                        <span>
+                                                            {education?.graduation_year ??
+                                                                '—'}
                                                         </span>
-                                                    ) : (
-                                                        'Not reported'
-                                                    )}
+                                                        {education?.honors && (
+                                                            <span className="mt-1 block w-fit rounded-full bg-[#fdf6e9] px-2 py-0.5 text-[10px] font-medium text-[#8a6116] capitalize">
+                                                                {education.honors.replaceAll(
+                                                                    '-',
+                                                                    ' ',
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-3.5">
-                                                    {employment?.employer_name ??
-                                                        '—'}
+                                                    <div className="space-y-1">
+                                                        <div className="flex flex-wrap items-center gap-1">
+                                                            {status ? (
+                                                                <span
+                                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${statusClass[status] ?? 'bg-[#f0f1ed] text-[#6d746a]'}`}
+                                                                >
+                                                                    {status}
+                                                                </span>
+                                                            ) : (
+                                                                <span>
+                                                                    Not reported
+                                                                </span>
+                                                            )}
+                                                            {employment?.is_related_to_degree && (
+                                                                <span className="rounded-full bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                                                    Degree-aligned
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {employment?.reported_at && (
+                                                            <span
+                                                                title={`Reported on ${new Date(employment.reported_at).toLocaleDateString()}`}
+                                                                className="block text-[10px] text-[#92978f]"
+                                                            >
+                                                                Updated{' '}
+                                                                {new Date(
+                                                                    employment.reported_at,
+                                                                ).toLocaleDateString(
+                                                                    undefined,
+                                                                    {
+                                                                        month: 'short',
+                                                                        year: 'numeric',
+                                                                    },
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3.5">
+                                                    {employment?.job_title ||
+                                                    employment?.employer_name ||
+                                                    employment?.work_location ? (
+                                                        <div>
+                                                            <p className="font-medium text-[#39463b]">
+                                                                {employment?.job_title ||
+                                                                    employment?.employer_name}
+                                                            </p>
+                                                            {(employment?.job_title &&
+                                                                employment?.employer_name) ||
+                                                            employment?.work_location ? (
+                                                                <p className="mt-0.5 text-[10px] text-[#848a81]">
+                                                                    {[
+                                                                        employment?.job_title
+                                                                            ? employment?.employer_name
+                                                                            : null,
+                                                                        employment?.work_location,
+                                                                    ]
+                                                                        .filter(
+                                                                            Boolean,
+                                                                        )
+                                                                        .join(
+                                                                            ' · ',
+                                                                        )}
+                                                                </p>
+                                                            ) : null}
+                                                        </div>
+                                                    ) : (
+                                                        '—'
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3.5">
                                                     {alumnus.is_complete ? (
                                                         <span
                                                             title="All required profile fields completed"
-                                                            className="rounded-full bg-[#e3eee0] px-2.5 py-1 text-[10px] font-medium text-[#2f5a37]"
+                                                            className="inline-flex items-center whitespace-nowrap rounded-full bg-[#e3eee0] px-2.5 py-1 text-[10px] font-medium text-[#2f5a37]"
                                                         >
                                                             Completed
                                                         </span>
@@ -1855,9 +2311,14 @@ export function AlumniDirectory({
                                                                     ? `Missing: ${alumnus.missing_fields.map((f) => f.replaceAll('_', ' ')).join(', ')}`
                                                                     : 'Profile has missing required fields'
                                                             }
-                                                            className="rounded-full bg-[#f3efe6] px-2.5 py-1 text-[10px] font-medium text-[#8a6a35]"
+                                                            className="inline-flex items-center whitespace-nowrap rounded-full bg-[#f3efe6] px-2.5 py-1 text-[10px] font-medium text-[#8a6a35]"
                                                         >
                                                             Incomplete profile
+                                                            {alumnus
+                                                                .missing_fields
+                                                                ?.length
+                                                                ? ` (${alumnus.missing_fields.length} missing)`
+                                                                : ''}
                                                         </span>
                                                     )}
                                                 </td>
@@ -4707,6 +5168,150 @@ type AdminUsersResponse = {
     };
 };
 
+const ADMIN_ROLE_LABELS: Record<string, string> = {
+    'system-administrator': 'System administrator',
+    'alumni-coordinator': 'Alumni coordinator',
+    'department-coordinator': 'Department coordinator',
+    alumni: 'Alumni',
+    employer: 'Employer',
+};
+
+const ADMIN_ROLE_BADGE_CLASSES: Record<string, string> = {
+    'system-administrator': 'bg-[#2b5139] text-white',
+    'alumni-coordinator': 'bg-[#edf2eb] text-[#2b5139]',
+    'department-coordinator': 'bg-[#edf2eb] text-[#2b5139]',
+    alumni: 'bg-[#f3f5f1] text-[#4d5a4f]',
+    employer: 'bg-[#f3f5f1] text-[#4d5a4f]',
+};
+
+const ASSIGNABLE_ROLE_OPTIONS = [
+    'alumni-coordinator',
+    'department-coordinator',
+    'alumni',
+    'employer',
+] as const;
+
+function RoleCheckboxPills({
+    selectedRoles,
+    onToggle,
+    keyPrefix,
+    disabled = false,
+}: {
+    selectedRoles: string[];
+    onToggle: (roleCode: string) => void;
+    keyPrefix: string;
+    disabled?: boolean;
+}) {
+    return (
+        <div className="flex flex-wrap gap-2">
+            {ASSIGNABLE_ROLE_OPTIONS.map((code) => {
+                const checked = selectedRoles.includes(code);
+                return (
+                    <label
+                        key={`${keyPrefix}-${code}`}
+                        className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium transition ${
+                            checked
+                                ? 'border-[#2b5139] bg-[#edf2eb] text-[#2b5139]'
+                                : 'border-[#dfe5dd] bg-white text-[#4d5a4f] hover:bg-[#f8faf7]'
+                        } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                    >
+                        <input
+                            type="checkbox"
+                            disabled={disabled}
+                            className="h-3.5 w-3.5 accent-[#2f4f3e]"
+                            checked={checked}
+                            onChange={() => onToggle(code)}
+                        />
+                        {ADMIN_ROLE_LABELS[code] ?? code}
+                    </label>
+                );
+            })}
+        </div>
+    );
+}
+
+function ProgramScopeSelector({
+    programsCatalog,
+    selectedProgramIds,
+    onChange,
+    disabled = false,
+}: {
+    programsCatalog: AdminProgramCatalogItem[];
+    selectedProgramIds: number[];
+    onChange: (nextIds: number[]) => void;
+    disabled?: boolean;
+}) {
+    if (!programsCatalog.length) {
+        return null;
+    }
+
+    return (
+        <fieldset className="rounded-xl border border-[#e2e7df] bg-[#fafbf9] p-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-[11px] font-semibold text-[#2b5139]">
+                    Assigned Academic Programs ({selectedProgramIds.length}{' '}
+                    selected)
+                </legend>
+                <div className="flex items-center gap-2 text-[11px]">
+                    <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() =>
+                            onChange(programsCatalog.map((prog) => prog.id))
+                        }
+                        className="font-semibold text-[#2b5139] hover:underline disabled:opacity-50"
+                    >
+                        Select all
+                    </button>
+                    <span className="text-[#cbd2c7]">·</span>
+                    <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onChange([])}
+                        className="font-medium text-[#687267] hover:underline disabled:opacity-50"
+                    >
+                        Clear all
+                    </button>
+                </div>
+            </div>
+            {selectedProgramIds.length === 0 && (
+                <p className="mt-1.5 rounded-lg bg-[#fdf4e7] px-2.5 py-1 text-[10px] font-semibold text-[#9a6728]">
+                    No programs assigned — select at least one program to grant
+                    Department Coordinator record access.
+                </p>
+            )}
+            <div className="mt-2.5 flex max-h-44 flex-wrap gap-1.5 overflow-y-auto">
+                {programsCatalog.map((prog) => {
+                    const active = selectedProgramIds.includes(prog.id);
+                    return (
+                        <button
+                            key={prog.id}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() =>
+                                onChange(
+                                    active
+                                        ? selectedProgramIds.filter(
+                                              (id) => id !== prog.id,
+                                          )
+                                        : [...selectedProgramIds, prog.id],
+                                )
+                            }
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition disabled:opacity-50 ${
+                                active
+                                    ? 'bg-[#2b5139] text-white'
+                                    : 'border border-[#dce2d9] bg-white text-[#4d5a4f] hover:bg-[#edf2eb]'
+                            }`}
+                        >
+                            {prog.code} · {prog.name}
+                        </button>
+                    );
+                })}
+            </div>
+        </fieldset>
+    );
+}
+
 export function AssignedRoles({
     roleCodes,
     currentUserId,
@@ -4714,34 +5319,22 @@ export function AssignedRoles({
     roleCodes: string[];
     currentUserId: number;
 }) {
-    const roleLabels: Record<string, string> = {
-        'system-administrator': 'System administrator',
-        'alumni-coordinator': 'Alumni coordinator',
-        'department-coordinator': 'Department coordinator',
-        alumni: 'Alumni',
-        employer: 'Employer',
-    };
     const isSystemAdmin = roleCodes.includes('system-administrator');
     const { data, loading, error, reload } =
         useApiResource<AdminUsersResponse>(
             isSystemAdmin ? '/api/admin/users' : null,
         );
-    const [selectedRoles, setSelectedRoles] = useState<
-        Record<number, string[]>
-    >({});
-    const [selectedPrograms, setSelectedPrograms] = useState<
-        Record<number, number[]>
-    >({});
-    const [saving, setSaving] = useState<Record<number, boolean>>({});
-    const [savingPrograms, setSavingPrograms] = useState<
-        Record<number, boolean>
-    >({});
+    const [activeTab, setActiveTab] = useState<'users' | 'permissions'>(
+        'users',
+    );
+    const [userPage, setUserPage] = useState(1);
+    const usersPerPage = 15;
+
     const [savingRolePermissions, setSavingRolePermissions] = useState<
         Record<number, boolean>
     >({});
     const [managing, setManaging] = useState<Record<number, boolean>>({});
     const [inviteOpen, setInviteOpen] = useState(false);
-    const [permissionsMatrixOpen, setPermissionsMatrixOpen] = useState(false);
     const [inviting, setInviting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -4752,94 +5345,77 @@ export function AssignedRoles({
         roles: [] as string[],
         assigned_program_ids: [] as number[],
     });
-    const roleOptions = [
-        'alumni-coordinator',
-        'department-coordinator',
-        'alumni',
-        'employer',
-    ];
 
-    useEffect(() => {
-        if (!data?.data) {
-            return;
-        }
+    // Manage User Access Modal State
+    const [editingUser, setEditingUser] = useState<UserRoleAssignment | null>(
+        null,
+    );
+    const [editRoles, setEditRoles] = useState<string[]>([]);
+    const [editProgramIds, setEditProgramIds] = useState<number[]>([]);
+    const [savingAccess, setSavingAccess] = useState(false);
 
-        const nextSelectedRoles = Object.fromEntries(
-            data.data.map((user) => [user.id, [...user.roles]]),
-        );
-        const nextSelectedPrograms = Object.fromEntries(
-            data.data.map((user) => [
-                user.id,
-                [...(user.assigned_program_ids ?? [])],
-            ]),
-        );
-        setSelectedRoles(nextSelectedRoles);
-        setSelectedPrograms(nextSelectedPrograms);
-    }, [data]);
-
-    async function updateUserRoles(userId: number, nextRoles: string[]) {
-        setSaving((current) => ({ ...current, [userId]: true }));
-
-        try {
-            await apiRequest<ApiEnvelope<UserRoleAssignment>>(
-                `/api/admin/users/${userId}/roles`,
-                {
-                    method: 'PATCH',
-                    body: { roles: nextRoles },
-                },
-            );
-            setSelectedRoles((current) => ({
-                ...current,
-                [userId]: nextRoles,
-            }));
-            reload();
-            toast.success('User roles updated.');
-        } catch (requestError) {
-            toast.error(
-                requestError instanceof ApiError
-                    ? requestError.message
-                    : 'User roles could not be updated.',
-            );
-            if (data?.data) {
-                const fallback =
-                    data.data.find((user) => user.id === userId)?.roles ?? [];
-                setSelectedRoles((current) => ({
-                    ...current,
-                    [userId]: fallback,
-                }));
-            }
-        } finally {
-            setSaving((current) => ({ ...current, [userId]: false }));
-        }
+    function openManageUserModal(user: UserRoleAssignment) {
+        setEditingUser(user);
+        setEditRoles([...user.roles]);
+        setEditProgramIds([...(user.assigned_program_ids ?? [])]);
     }
 
-    async function updateUserAssignedPrograms(
-        userId: number,
-        nextProgramIds: number[],
-    ) {
-        setSavingPrograms((current) => ({ ...current, [userId]: true }));
+    function closeManageUserModal() {
+        if (savingAccess) return;
+        setEditingUser(null);
+        setEditRoles([]);
+        setEditProgramIds([]);
+    }
+
+    function closeInviteModal() {
+        if (inviting) return;
+        setInviteOpen(false);
+        setInviteForm({
+            name: '',
+            email: '',
+            password: '',
+            roles: [],
+            assigned_program_ids: [],
+        });
+    }
+
+    async function saveUserAccess(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!editingUser) return;
+
+        setSavingAccess(true);
         try {
             await apiRequest<ApiEnvelope<UserRoleAssignment>>(
-                `/api/admin/users/${userId}/programs`,
+                `/api/admin/users/${editingUser.id}/roles`,
                 {
                     method: 'PATCH',
-                    body: { assigned_program_ids: nextProgramIds },
+                    body: { roles: editRoles },
                 },
             );
-            setSelectedPrograms((current) => ({
-                ...current,
-                [userId]: nextProgramIds,
-            }));
+
+            if (editRoles.includes('department-coordinator')) {
+                await apiRequest<ApiEnvelope<UserRoleAssignment>>(
+                    `/api/admin/users/${editingUser.id}/programs`,
+                    {
+                        method: 'PATCH',
+                        body: { assigned_program_ids: editProgramIds },
+                    },
+                );
+            }
+
             reload();
-            toast.success('Assigned academic programs updated.');
+            toast.success('User access updated.');
+            setEditingUser(null);
+            setEditRoles([]);
+            setEditProgramIds([]);
         } catch (requestError) {
             toast.error(
                 requestError instanceof ApiError
                     ? requestError.message
-                    : 'Assigned programs could not be updated.',
+                    : 'User access could not be updated.',
             );
         } finally {
-            setSavingPrograms((current) => ({ ...current, [userId]: false }));
+            setSavingAccess(false);
         }
     }
 
@@ -4981,11 +5557,43 @@ export function AssignedRoles({
     const permissionsCatalog = data?.meta?.permissions_catalog ?? [];
     const programsCatalog = data?.meta?.programs_catalog ?? [];
 
+    const totalUsers = users.length;
+    const staffCount = users.filter((u) =>
+        u.roles.some((r) =>
+            [
+                'system-administrator',
+                'alumni-coordinator',
+                'department-coordinator',
+            ].includes(r),
+        ),
+    ).length;
+    const portalUsersCount = users.filter((u) =>
+        u.roles.some((r) => ['alumni', 'employer'].includes(r)),
+    ).length;
+    const suspendedCount = users.filter((u) => u.is_suspended).length;
+
+    const roleFilterCounts: Record<string, number> = {
+        all: totalUsers,
+        'system-administrator': users.filter((u) =>
+            u.roles.includes('system-administrator'),
+        ).length,
+        'alumni-coordinator': users.filter((u) =>
+            u.roles.includes('alumni-coordinator'),
+        ).length,
+        'department-coordinator': users.filter((u) =>
+            u.roles.includes('department-coordinator'),
+        ).length,
+        alumni: users.filter((u) => u.roles.includes('alumni')).length,
+        employer: users.filter((u) => u.roles.includes('employer')).length,
+        suspended: suspendedCount,
+    };
+
+    const normalizedSearch = searchQuery.trim().toLowerCase();
     const filteredUsers = users.filter((u) => {
         const matchesSearch =
-            !searchQuery.trim() ||
-            u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            u.email.toLowerCase().includes(searchQuery.toLowerCase());
+            !normalizedSearch ||
+            u.name.toLowerCase().includes(normalizedSearch) ||
+            u.email.toLowerCase().includes(normalizedSearch);
         const matchesRole =
             roleFilter === 'all'
                 ? true
@@ -4995,41 +5603,40 @@ export function AssignedRoles({
         return matchesSearch && matchesRole;
     });
 
-    return (
-        <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
-                        Roles assigned to your account
-                    </h2>
-                    <p className="mt-0.5 text-xs text-[#7a8278]">
-                        Active permissions and institutional scopes linked to
-                        your credentials.
-                    </p>
-                </div>
-                {isSystemAdmin && rolesCatalog.length > 0 && (
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setPermissionsMatrixOpen((prev) => !prev)
-                        }
-                        className="rounded-full border border-[#d6dfd3] bg-[#f8faf7] px-3.5 py-1.5 text-[11px] font-semibold text-[#2f4f3e] transition hover:bg-[#edf2eb]"
-                    >
-                        {permissionsMatrixOpen
-                            ? 'Hide Role Permissions Matrix'
-                            : 'Configure Role Permissions'}
-                    </button>
-                )}
-            </div>
+    const totalUserPages = Math.max(
+        1,
+        Math.ceil(filteredUsers.length / usersPerPage),
+    );
+    const safeUserPage = Math.min(userPage, totalUserPages);
+    const pageStart = (safeUserPage - 1) * usersPerPage;
+    const paginatedUsers = filteredUsers.slice(
+        pageStart,
+        pageStart + usersPerPage,
+    );
+    const pageEnd = Math.min(
+        pageStart + paginatedUsers.length,
+        filteredUsers.length,
+    );
 
+    const accountRolesCard = (
+        <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+            <div>
+                <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
+                    Roles assigned to your account
+                </h2>
+                <p className="mt-0.5 text-xs text-[#7a8278]">
+                    Active permissions and institutional scopes linked to your
+                    credentials.
+                </p>
+            </div>
             {roleCodes.length ? (
                 <ul className="mt-4 flex flex-wrap gap-2">
                     {roleCodes.map((code) => (
                         <li
                             key={code}
-                            className="rounded-full bg-[#edf2eb] px-3 py-1.5 text-xs font-medium text-[#45664a]"
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium ${ADMIN_ROLE_BADGE_CLASSES[code] ?? 'bg-[#edf2eb] text-[#45664a]'}`}
                         >
-                            {roleLabels[code] ?? code}
+                            {ADMIN_ROLE_LABELS[code] ?? code}
                         </li>
                     ))}
                 </ul>
@@ -5038,117 +5645,105 @@ export function AssignedRoles({
                     No roles are currently assigned.
                 </p>
             )}
+        </section>
+    );
 
-            {/* Granular Role Permissions Matrix */}
-            {isSystemAdmin && permissionsMatrixOpen && rolesCatalog.length > 0 && (
-                <div className="mt-5 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4">
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                            <h3 className="text-xs font-bold tracking-wider text-[#2b5139] uppercase">
-                                Role Permissions Matrix
-                            </h3>
-                            <p className="mt-0.5 text-[11px] text-[#6b7669]">
-                                Grant or restrict granular capabilities per role
-                                (e.g., allowing Department Coordinators to edit
-                                alumni records or manage surveys within their
-                                assigned programs).
-                            </p>
-                        </div>
+    if (!isSystemAdmin) {
+        return <div className="space-y-4">{accountRolesCard}</div>;
+    }
+
+    return (
+        <div className="space-y-4">
+            {/* Top Summary Strip */}
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                    {
+                        label: 'Total Users',
+                        value: totalUsers,
+                        hint: 'Registered workspace accounts',
+                    },
+                    {
+                        label: 'Admins & Coordinators',
+                        value: staffCount,
+                        hint: 'Institutional governance & staff',
+                    },
+                    {
+                        label: 'Alumni & Employers',
+                        value: portalUsersCount,
+                        hint: 'Portal graduate & partner accounts',
+                    },
+                    {
+                        label: 'Suspended',
+                        value: suspendedCount,
+                        hint: 'Accounts with sign-in disabled',
+                    },
+                ].map((stat) => (
+                    <div
+                        key={stat.label}
+                        className="rounded-2xl border border-[#e9ebe5] bg-white px-4 py-3.5"
+                    >
+                        <p className="text-[11px] font-medium text-[#7a8278]">
+                            {stat.label}
+                        </p>
+                        <p className="mt-1 text-xl font-semibold tracking-tight text-[#29382e]">
+                            {loading ? '—' : stat.value.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-[#92978f]">
+                            {stat.hint}
+                        </p>
                     </div>
-                    <div className="grid gap-3 md:grid-cols-2">
-                        {rolesCatalog
-                            .filter(
-                                (r) =>
-                                    r.name === 'alumni-coordinator' ||
-                                    r.name === 'department-coordinator',
-                            )
-                            .map((roleItem) => (
-                                <div
-                                    key={roleItem.id}
-                                    className="rounded-xl border border-[#e3e8e0] bg-white p-3.5"
-                                >
-                                    <div className="mb-2.5 flex items-center justify-between">
-                                        <span className="text-xs font-semibold text-[#29382e]">
-                                            {roleItem.label}
-                                        </span>
-                                        <span className="rounded-full bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
-                                            {roleItem.permissions.length}{' '}
-                                            permissions
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {permissionsCatalog.map((perm) => {
-                                            const active =
-                                                roleItem.permissions.includes(
-                                                    perm.name,
-                                                );
-                                            return (
-                                                <button
-                                                    key={perm.name}
-                                                    type="button"
-                                                    disabled={
-                                                        savingRolePermissions[
-                                                        roleItem.id
-                                                        ]
-                                                    }
-                                                    onClick={() =>
-                                                        void toggleRolePermission(
-                                                            roleItem,
-                                                            perm.name,
-                                                        )
-                                                    }
-                                                    title={perm.label}
-                                                    className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${active
-                                                        ? 'bg-[#2b5139] text-white'
-                                                        : 'border border-[#dce2d9] bg-[#fafbf9] text-[#5c685d] hover:bg-[#eff2ed]'
-                                                        }`}
-                                                >
-                                                    {perm.label}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            ))}
-                    </div>
+                ))}
+            </div>
+
+            {/* Tab Navigation & Primary Action Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:px-5">
+                <div className="flex flex-wrap items-center rounded-xl bg-[#f3f5f1] p-1">
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('users')}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                            activeTab === 'users'
+                                ? 'bg-white text-[#2b5139] shadow-2xs'
+                                : 'text-[#626c61] hover:text-[#29382e]'
+                        }`}
+                    >
+                        Users & Access ({users.length})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('permissions')}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                            activeTab === 'permissions'
+                                ? 'bg-white text-[#2b5139] shadow-2xs'
+                                : 'text-[#626c61] hover:text-[#29382e]'
+                        }`}
+                    >
+                        Role Permissions & Settings
+                    </button>
                 </div>
-            )}
 
-            {isSystemAdmin && (
-                <div className="mt-6 space-y-5 border-t border-[#eff0ec] pt-5">
-                    <DemoQuickLoginToggleCard />
+                <button
+                    type="button"
+                    onClick={() => setInviteOpen(true)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[#2b5139] px-3.5 text-xs font-semibold text-white transition hover:bg-[#22422d]"
+                >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    + Invite user
+                </button>
+            </div>
 
-                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
-                                User access & program scoping
-                            </h3>
-                            <p className="mt-0.5 text-xs text-[#7a8278]">
-                                Assign institutional roles and academic program
-                                scopes for Department Coordinators.
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="rounded-full bg-[#edf2eb] px-2.5 py-1 text-[10px] font-medium text-[#45664a]">
-                                {users.length} users
-                            </span>
-                            <button
-                                type="button"
-                                onClick={() => setInviteOpen((open) => !open)}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-[#2f4f3e] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#263f32]"
-                            >
-                                <UserPlus className="h-3.5 w-3.5" />
-                                Invite user
-                            </button>
-                        </div>
-                    </div>
-
+            {activeTab === 'users' ? (
+                <section className="space-y-4">
                     {/* Search & Role Filter Bar */}
-                    <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <input
                             type="search"
+                            aria-label="Search users"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setUserPage(1);
+                            }}
                             placeholder="Search users by name or email…"
                             className="h-9 w-full rounded-xl border border-[#dfe5dd] bg-[#fafbf9] px-3 text-xs text-[#29382e] outline-none focus:border-[#6d8b72] sm:max-w-xs"
                         />
@@ -5165,24 +5760,537 @@ export function AssignedRoles({
                                 <button
                                     key={code}
                                     type="button"
-                                    onClick={() => setRoleFilter(code)}
-                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${roleFilter === code
-                                        ? 'bg-[#2b5139] text-white'
-                                        : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
-                                        }`}
+                                    onClick={() => {
+                                        setRoleFilter(code);
+                                        setUserPage(1);
+                                    }}
+                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
+                                        roleFilter === code
+                                            ? 'bg-[#2b5139] text-white'
+                                            : 'border border-[#e2e7df] bg-[#fafbf9] text-[#5e6a5f] hover:bg-[#eff2ed]'
+                                    }`}
                                 >
-                                    {label}
+                                    {label} ({roleFilterCounts[code] ?? 0})
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {inviteOpen && (
-                        <form
-                            onSubmit={inviteUser}
-                            className="mb-5 space-y-3.5 rounded-2xl border border-[#dfe5dd] bg-[#f9faf7] p-4"
-                        >
-                            <div className="grid gap-3 sm:grid-cols-3">
+                    {loading ? (
+                        <LoadingState />
+                    ) : error ? (
+                        <ErrorState message={error} />
+                    ) : filteredUsers.length ? (
+                        <div className="overflow-hidden rounded-2xl border border-[#e9ebe5] bg-white">
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[780px] text-left">
+                                    <thead>
+                                        <tr className="border-b border-[#eff0ec] bg-[#fafbf9] text-[10px] font-semibold tracking-wide text-[#848a81] uppercase">
+                                            <th className="px-4 py-3 sm:px-5">
+                                                User
+                                            </th>
+                                            <th className="px-4 py-3">
+                                                Assigned Roles
+                                            </th>
+                                            <th className="px-4 py-3">
+                                                Program Scope
+                                            </th>
+                                            <th className="px-4 py-3">
+                                                Status
+                                            </th>
+                                            <th className="px-4 py-3 text-right sm:px-5">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#f0f1ed]">
+                                        {paginatedUsers.map((user) => {
+                                            const isProtected =
+                                                user.roles.includes(
+                                                    'system-administrator',
+                                                );
+                                            const canManage =
+                                                !isProtected &&
+                                                user.id !== currentUserId;
+                                            const isDeptCoordinator =
+                                                user.roles.includes(
+                                                    'department-coordinator',
+                                                );
+                                            const hasGlobalScope =
+                                                user.roles.includes(
+                                                    'system-administrator',
+                                                ) ||
+                                                user.roles.includes(
+                                                    'alumni-coordinator',
+                                                );
+                                            const assignedPrograms =
+                                                user.assigned_programs
+                                                    ?.length
+                                                    ? user.assigned_programs
+                                                    : programsCatalog.filter(
+                                                          (prog) =>
+                                                              (
+                                                                  user.assigned_program_ids ??
+                                                                  []
+                                                              ).includes(
+                                                                  prog.id,
+                                                              ),
+                                                      );
+
+                                            return (
+                                                <tr
+                                                    key={user.id}
+                                                    className="text-xs text-[#5f685f] hover:bg-[#fcfcfa]"
+                                                >
+                                                    <td className="px-4 py-3.5 sm:px-5">
+                                                        <div className="flex items-center gap-3">
+                                                            <Avatar className="size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-[#001c17]/10">
+                                                                <AvatarImage
+                                                                    src={
+                                                                        user.avatar ??
+                                                                        undefined
+                                                                    }
+                                                                    alt={
+                                                                        user.name
+                                                                    }
+                                                                    className="object-cover"
+                                                                />
+                                                                <AvatarFallback className="rounded-full bg-[#e9eee5] text-[10px] font-bold text-[#45634a]">
+                                                                    {initials(
+                                                                        user.name,
+                                                                    )}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="min-w-0">
+                                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                                    <p className="font-semibold text-[#39463b]">
+                                                                        {
+                                                                            user.name
+                                                                        }
+                                                                    </p>
+                                                                    {user.id ===
+                                                                        currentUserId && (
+                                                                        <span className="rounded-full bg-[#edf2eb] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                                                            You
+                                                                        </span>
+                                                                    )}
+                                                                    {user.alumni_profile_id && (
+                                                                        <span className="rounded-full bg-[#f0f3ee] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
+                                                                            Alumni
+                                                                            #
+                                                                            {
+                                                                                user.alumni_profile_id
+                                                                            }
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <p className="mt-0.5 text-[11px] text-[#838a81]">
+                                                                    {user.email}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3.5">
+                                                        {user.roles.length ? (
+                                                            <div className="flex flex-wrap gap-1">
+                                                                {user.roles.map(
+                                                                    (code) => (
+                                                                        <span
+                                                                            key={`${user.id}-${code}`}
+                                                                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${ADMIN_ROLE_BADGE_CLASSES[code] ?? 'bg-[#f3f5f1] text-[#4d5a4f]'}`}
+                                                                        >
+                                                                            {ADMIN_ROLE_LABELS[
+                                                                                code
+                                                                            ] ??
+                                                                                code}
+                                                                        </span>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[11px] text-[#92978f]">
+                                                                No roles
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3.5">
+                                                        {hasGlobalScope ? (
+                                                            <span className="rounded-full bg-[#f3f5f1] px-2.5 py-0.5 text-[10px] font-medium text-[#5c685d]">
+                                                                All programs
+                                                            </span>
+                                                        ) : isDeptCoordinator ? (
+                                                            assignedPrograms.length >
+                                                            0 ? (
+                                                                <div className="flex flex-wrap items-center gap-1">
+                                                                    {assignedPrograms
+                                                                        .slice(
+                                                                            0,
+                                                                            3,
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                prog,
+                                                                            ) => (
+                                                                                <span
+                                                                                    key={
+                                                                                        prog.id
+                                                                                    }
+                                                                                    title={
+                                                                                        prog.name
+                                                                                    }
+                                                                                    className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase"
+                                                                                >
+                                                                                    {
+                                                                                        prog.code
+                                                                                    }
+                                                                                </span>
+                                                                            ),
+                                                                        )}
+                                                                    {assignedPrograms.length >
+                                                                        3 && (
+                                                                        <span
+                                                                            title={assignedPrograms
+                                                                                .slice(
+                                                                                    3,
+                                                                                )
+                                                                                .map(
+                                                                                    (
+                                                                                        p,
+                                                                                    ) =>
+                                                                                        `${p.code} · ${p.name}`,
+                                                                                )
+                                                                                .join(
+                                                                                    ', ',
+                                                                                )}
+                                                                            className="rounded-full bg-[#f0f3ee] px-1.5 py-0.5 text-[10px] font-semibold text-[#4d5a4f]"
+                                                                        >
+                                                                            +
+                                                                            {assignedPrograms.length -
+                                                                                3}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <span className="rounded-full bg-[#fdf4e7] px-2.5 py-0.5 text-[10px] font-semibold text-[#9a6728]">
+                                                                    No programs
+                                                                    assigned
+                                                                </span>
+                                                            )
+                                                        ) : (
+                                                            '—'
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3.5">
+                                                        <div className="flex flex-wrap items-center gap-1">
+                                                            {user.is_suspended ? (
+                                                                <span className="rounded-full bg-[#f7e9e5] px-2.5 py-0.5 text-[10px] font-semibold text-[#8b4e43]">
+                                                                    Suspended
+                                                                </span>
+                                                            ) : (
+                                                                <span className="rounded-full bg-[#e3eee0] px-2.5 py-0.5 text-[10px] font-medium text-[#2f5a37]">
+                                                                    Active
+                                                                </span>
+                                                            )}
+                                                            {user.is_verified && (
+                                                                <span className="rounded-full bg-[#eef2ec] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
+                                                                    Verified
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3.5 text-right sm:px-5">
+                                                        {isProtected ? (
+                                                            <span className="text-[11px] font-medium text-[#8a9288]">
+                                                                Protected admin
+                                                            </span>
+                                                        ) : (
+                                                            <div className="inline-flex items-center justify-end gap-1.5">
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={
+                                                                        !canManage ||
+                                                                        managing[
+                                                                            user
+                                                                                .id
+                                                                        ]
+                                                                    }
+                                                                    onClick={() =>
+                                                                        openManageUserModal(
+                                                                            user,
+                                                                        )
+                                                                    }
+                                                                    className="rounded-lg border border-[#d2ddd0] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#2c5339] transition hover:bg-[#edf2ea] disabled:cursor-not-allowed disabled:opacity-50"
+                                                                >
+                                                                    Manage
+                                                                    access
+                                                                </button>
+                                                                <ConfirmationDialog
+                                                                    title={
+                                                                        user.is_suspended
+                                                                            ? 'Reactivate user?'
+                                                                            : 'Suspend user?'
+                                                                    }
+                                                                    description={
+                                                                        user.is_suspended
+                                                                            ? `Reactivate ${user.name}'s account? They will be able to sign in and use the application again.`
+                                                                            : `Suspend ${user.name}'s account? They will be signed out and unable to sign in or use the application until reactivated.`
+                                                                    }
+                                                                    confirmLabel={
+                                                                        user.is_suspended
+                                                                            ? 'Reactivate user'
+                                                                            : 'Suspend user'
+                                                                    }
+                                                                    pendingLabel={
+                                                                        user.is_suspended
+                                                                            ? 'Reactivating…'
+                                                                            : 'Suspending…'
+                                                                    }
+                                                                    variant={
+                                                                        user.is_suspended
+                                                                            ? 'default'
+                                                                            : 'destructive'
+                                                                    }
+                                                                    onConfirm={() =>
+                                                                        updateUserSuspension(
+                                                                            user,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={
+                                                                            !canManage ||
+                                                                            managing[
+                                                                                user
+                                                                                    .id
+                                                                            ]
+                                                                        }
+                                                                        className="rounded-lg border border-[#dfe5dd] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4d5a4f] transition hover:bg-[#f6f7f4] disabled:cursor-not-allowed disabled:opacity-50"
+                                                                    >
+                                                                        {user.is_suspended
+                                                                            ? 'Reactivate'
+                                                                            : 'Suspend'}
+                                                                    </button>
+                                                                </ConfirmationDialog>
+                                                                <ConfirmationDialog
+                                                                    title="Delete user?"
+                                                                    description={`Delete ${user.name}'s account? They will lose access, and their account will be archived.`}
+                                                                    onConfirm={() =>
+                                                                        deleteUser(
+                                                                            user,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={
+                                                                            !canManage ||
+                                                                            managing[
+                                                                                user
+                                                                                    .id
+                                                                            ]
+                                                                        }
+                                                                        className="rounded-lg border border-[#ecd8d2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#8b4e43] transition hover:bg-[#fdf6f5] disabled:cursor-not-allowed disabled:opacity-50"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </ConfirmationDialog>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="flex flex-col gap-2.5 border-t border-[#eff0ec] px-4 py-3 text-[11px] text-[#838980] sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                                <span>
+                                    Showing {pageStart + 1}–{pageEnd} of{' '}
+                                    {filteredUsers.length} users
+                                </span>
+                                <div className="flex items-center justify-between gap-2 sm:justify-end">
+                                    <button
+                                        type="button"
+                                        disabled={safeUserPage <= 1}
+                                        onClick={() =>
+                                            setUserPage((current) =>
+                                                Math.max(1, current - 1),
+                                            )
+                                        }
+                                        className="rounded-lg border border-[#e8eae4] px-2.5 py-1 disabled:opacity-40"
+                                    >
+                                        Previous
+                                    </button>
+                                    <span>
+                                        Page {safeUserPage} of {totalUserPages}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            safeUserPage >= totalUserPages
+                                        }
+                                        onClick={() =>
+                                            setUserPage((current) =>
+                                                Math.min(
+                                                    totalUserPages,
+                                                    current + 1,
+                                                ),
+                                            )
+                                        }
+                                        className="rounded-lg border border-[#e8eae4] px-2.5 py-1 disabled:opacity-40"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <EmptyState>
+                            No users match your current filter.
+                        </EmptyState>
+                    )}
+                </section>
+            ) : (
+                <div className="space-y-4">
+                    {accountRolesCard}
+
+                    {/* Granular Role Permissions Matrix */}
+                    <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+                        <div className="mb-4">
+                            <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
+                                Role Permissions Matrix
+                            </h3>
+                            <p className="mt-0.5 text-xs text-[#6b7669]">
+                                Grant or restrict granular capabilities per role
+                                (e.g., allowing Department Coordinators to edit
+                                alumni records or manage surveys within their
+                                assigned programs).
+                            </p>
+                        </div>
+
+                        {loading ? (
+                            <LoadingState />
+                        ) : error ? (
+                            <ErrorState message={error} />
+                        ) : rolesCatalog.length > 0 ? (
+                            <div className="grid gap-3 md:grid-cols-2">
+                                {rolesCatalog
+                                    .filter(
+                                        (r) =>
+                                            r.name === 'alumni-coordinator' ||
+                                            r.name ===
+                                                'department-coordinator',
+                                    )
+                                    .map((roleItem) => (
+                                        <div
+                                            key={roleItem.id}
+                                            className="rounded-xl border border-[#e3e8e0] bg-[#fafbf9] p-4"
+                                        >
+                                            <div className="mb-3 flex items-center justify-between">
+                                                <span className="text-xs font-semibold text-[#29382e]">
+                                                    {roleItem.label}
+                                                </span>
+                                                <span className="rounded-full bg-[#edf2eb] px-2.5 py-0.5 text-[10px] font-semibold text-[#2b5139]">
+                                                    {
+                                                        roleItem.permissions
+                                                            .length
+                                                    }{' '}
+                                                    permissions
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {permissionsCatalog.map(
+                                                    (perm) => {
+                                                        const active =
+                                                            roleItem.permissions.includes(
+                                                                perm.name,
+                                                            );
+                                                        return (
+                                                            <button
+                                                                key={perm.name}
+                                                                type="button"
+                                                                disabled={
+                                                                    savingRolePermissions[
+                                                                        roleItem
+                                                                            .id
+                                                                    ]
+                                                                }
+                                                                onClick={() =>
+                                                                    void toggleRolePermission(
+                                                                        roleItem,
+                                                                        perm.name,
+                                                                    )
+                                                                }
+                                                                title={
+                                                                    perm.label
+                                                                }
+                                                                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
+                                                                    active
+                                                                        ? 'bg-[#2b5139] text-white'
+                                                                        : 'border border-[#dce2d9] bg-white text-[#5c685d] hover:bg-[#eff2ed]'
+                                                                }`}
+                                                            >
+                                                                {perm.label}
+                                                            </button>
+                                                        );
+                                                    },
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        ) : (
+                            <EmptyState>
+                                No configurable roles found.
+                            </EmptyState>
+                        )}
+                    </section>
+
+                    <DemoQuickLoginToggleCard />
+                </div>
+            )}
+
+            <p className="text-xs leading-5 text-[#7a8278]">
+                Role and permission changes are managed by an administrator and
+                recorded in the system activity log.
+            </p>
+
+            {/* Invite / Create User Modal */}
+            {inviteOpen && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={closeInviteModal}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Invite or Create User"
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-2xl sm:p-6"
+                    >
+                        <div className="flex items-start justify-between gap-3 border-b border-[#eff0ec] pb-3.5">
+                            <div>
+                                <h3 className="text-sm font-semibold text-[#29382e]">
+                                    Invite or Create User
+                                </h3>
+                                <p className="mt-0.5 text-xs text-[#7a8278]">
+                                    Assign institutional roles and send a setup
+                                    link or create an initial password.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeInviteModal}
+                                aria-label="Close modal"
+                                className="rounded-lg p-1.5 text-[#7a8278] transition hover:bg-[#f2f4f0] hover:text-[#29382e]"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={inviteUser} className="mt-4 space-y-4">
+                            <div className="grid gap-3 sm:grid-cols-2">
                                 <label className="space-y-1.5 text-xs font-medium text-[#4d5a4f]">
                                     Name
                                     <input
@@ -5195,7 +6303,8 @@ export function AssignedRoles({
                                                 name: event.target.value,
                                             }))
                                         }
-                                        className="w-full rounded-xl border border-[#dfe5dd] bg-white px-3 py-2 text-sm font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
+                                        placeholder="e.g., Maria Santos"
+                                        className="h-10 w-full rounded-xl border border-[#dfe5dd] bg-white px-3 text-xs font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
                                         autoComplete="name"
                                     />
                                 </label>
@@ -5212,11 +6321,12 @@ export function AssignedRoles({
                                                 email: event.target.value,
                                             }))
                                         }
-                                        className="w-full rounded-xl border border-[#dfe5dd] bg-white px-3 py-2 text-sm font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
+                                        placeholder="name@seait.edu.ph"
+                                        className="h-10 w-full rounded-xl border border-[#dfe5dd] bg-white px-3 text-xs font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
                                         autoComplete="email"
                                     />
                                 </label>
-                                <label className="space-y-1.5 text-xs font-medium text-[#4d5a4f]">
+                                <label className="space-y-1.5 text-xs font-medium text-[#4d5a4f] sm:col-span-2">
                                     Initial password (optional)
                                     <input
                                         type="password"
@@ -5230,108 +6340,55 @@ export function AssignedRoles({
                                             }))
                                         }
                                         placeholder="Leave blank to email setup link"
-                                        className="w-full rounded-xl border border-[#dfe5dd] bg-white px-3 py-2 text-sm font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
+                                        className="h-10 w-full rounded-xl border border-[#dfe5dd] bg-white px-3 text-xs font-normal text-[#29382e] outline-none focus:border-[#6d8b72]"
                                     />
                                 </label>
                             </div>
+
                             <fieldset>
                                 <legend className="mb-2 text-xs font-medium text-[#4d5a4f]">
                                     Assign roles
                                 </legend>
-                                <div className="flex flex-wrap gap-2">
-                                    {roleOptions.map((code) => (
-                                        <label
-                                            key={`invite-${code}`}
-                                            className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#dfe5dd] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                className="h-3.5 w-3.5 accent-[#2f4f3e]"
-                                                checked={inviteForm.roles.includes(
-                                                    code,
-                                                )}
-                                                onChange={() =>
-                                                    setInviteForm((form) => ({
-                                                        ...form,
-                                                        roles: form.roles.includes(
-                                                            code,
-                                                        )
-                                                            ? form.roles.filter(
-                                                                (role) =>
-                                                                    role !==
-                                                                    code,
-                                                            )
-                                                            : [
-                                                                ...form.roles,
-                                                                code,
-                                                            ],
-                                                    }))
-                                                }
-                                            />
-                                            {roleLabels[code] ?? code}
-                                        </label>
-                                    ))}
-                                </div>
+                                <RoleCheckboxPills
+                                    keyPrefix="invite"
+                                    selectedRoles={inviteForm.roles}
+                                    disabled={inviting}
+                                    onToggle={(code) =>
+                                        setInviteForm((form) => ({
+                                            ...form,
+                                            roles: form.roles.includes(code)
+                                                ? form.roles.filter(
+                                                      (role) => role !== code,
+                                                  )
+                                                : [...form.roles, code],
+                                        }))
+                                    }
+                                />
                             </fieldset>
 
                             {inviteForm.roles.includes(
                                 'department-coordinator',
-                            ) &&
-                                programsCatalog.length > 0 && (
-                                    <fieldset className="rounded-xl border border-[#e2e7df] bg-white p-3">
-                                        <legend className="px-1 text-[11px] font-semibold text-[#2b5139]">
-                                            Assigned Academic Programs
-                                            (Department Coordinator Scope)
-                                        </legend>
-                                        <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                            {programsCatalog.map((prog) => {
-                                                const active =
-                                                    inviteForm.assigned_program_ids.includes(
-                                                        prog.id,
-                                                    );
-                                                return (
-                                                    <button
-                                                        key={prog.id}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setInviteForm(
-                                                                (form) => ({
-                                                                    ...form,
-                                                                    assigned_program_ids:
-                                                                        active
-                                                                            ? form.assigned_program_ids.filter(
-                                                                                (
-                                                                                    id,
-                                                                                ) =>
-                                                                                    id !==
-                                                                                    prog.id,
-                                                                            )
-                                                                            : [
-                                                                                ...form.assigned_program_ids,
-                                                                                prog.id,
-                                                                            ],
-                                                                }),
-                                                            )
-                                                        }
-                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${active
-                                                            ? 'bg-[#2b5139] text-white'
-                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#4d5a4f]'
-                                                            }`}
-                                                    >
-                                                        {prog.code} ·{' '}
-                                                        {prog.name}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </fieldset>
-                                )}
+                            ) && (
+                                <ProgramScopeSelector
+                                    programsCatalog={programsCatalog}
+                                    selectedProgramIds={
+                                        inviteForm.assigned_program_ids
+                                    }
+                                    disabled={inviting}
+                                    onChange={(nextIds) =>
+                                        setInviteForm((form) => ({
+                                            ...form,
+                                            assigned_program_ids: nextIds,
+                                        }))
+                                    }
+                                />
+                            )}
 
-                            <div className="flex justify-end gap-2">
+                            <div className="flex items-center justify-end gap-2 border-t border-[#eff0ec] pt-3">
                                 <button
                                     type="button"
-                                    onClick={() => setInviteOpen(false)}
-                                    className="rounded-full border border-[#dfe5dd] bg-white px-3 py-2 text-[11px] font-semibold text-[#4d5a4f]"
+                                    onClick={closeInviteModal}
+                                    className="h-9 rounded-lg border border-[#dfe5dd] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
                                 >
                                     Cancel
                                 </button>
@@ -5340,7 +6397,7 @@ export function AssignedRoles({
                                     disabled={
                                         inviting || !inviteForm.roles.length
                                     }
-                                    className="rounded-full bg-[#2f4f3e] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#263f32] disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white transition hover:bg-[#22422d] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {inviting
                                         ? 'Saving…'
@@ -5350,326 +6407,96 @@ export function AssignedRoles({
                                 </button>
                             </div>
                         </form>
-                    )}
-
-                    {loading ? (
-                        <LoadingState />
-                    ) : error ? (
-                        <ErrorState message={error} />
-                    ) : filteredUsers.length ? (
-                        <div className="space-y-4">
-                            {filteredUsers.map((user) => {
-                                const currentRoles =
-                                    selectedRoles[user.id] ?? user.roles;
-                                const currentProgramIds =
-                                    selectedPrograms[user.id] ??
-                                    user.assigned_program_ids ??
-                                    [];
-                                const isProtected = user.roles.includes(
-                                    'system-administrator',
-                                );
-                                const canManage =
-                                    !isProtected && user.id !== currentUserId;
-                                const isDeptCoordinator =
-                                    currentRoles.includes(
-                                        'department-coordinator',
-                                    );
-
-                                return (
-                                    <div
-                                        key={user.id}
-                                        className="rounded-2xl border border-[#e9ebe5] bg-[#f9faf7] p-4"
-                                    >
-                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="size-9 shrink-0 overflow-hidden rounded-full ring-1 ring-[#001c17]/10">
-                                                    <AvatarImage
-                                                        src={
-                                                            user.avatar ??
-                                                            undefined
-                                                        }
-                                                        alt={user.name}
-                                                        className="object-cover"
-                                                    />
-                                                    <AvatarFallback className="rounded-full bg-[#e9eee5] text-[11px] font-bold text-[#45634a]">
-                                                        {initials(user.name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <p className="text-sm font-semibold text-[#39463b]">
-                                                            {user.name}
-                                                        </p>
-                                                        {user.is_verified && (
-                                                            <span className="rounded-full bg-[#e6efe4] px-2 py-0.5 text-[10px] font-semibold text-[#2b5139]">
-                                                                Verified
-                                                            </span>
-                                                        )}
-                                                        {user.alumni_profile_id && (
-                                                            <span className="rounded-full bg-[#eef2ec] px-2 py-0.5 text-[10px] font-medium text-[#4d6250]">
-                                                                Claimed Alumni #
-                                                                {
-                                                                    user.alumni_profile_id
-                                                                }
-                                                            </span>
-                                                        )}
-                                                        {user.is_suspended && (
-                                                            <span className="rounded-full bg-[#f7e9e5] px-2.5 py-0.5 text-[10px] font-semibold text-[#8b4e43]">
-                                                                Suspended
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="mt-1 text-[11px] text-[#7a8278]">
-                                                        {user.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <span className="text-[10px] font-medium tracking-[0.14em] text-[#6d7d6a] uppercase">
-                                                {currentRoles.length
-                                                    ? currentRoles.length
-                                                    : 0}{' '}
-                                                roles
-                                            </span>
-                                        </div>
-
-                                        {isProtected ? (
-                                            <div className="mt-4 flex flex-wrap gap-2">
-                                                {currentRoles.map((code) => (
-                                                    <label
-                                                        key={`${user.id}-${code}`}
-                                                        className="inline-flex items-center gap-2 rounded-full border border-[#dfe5dd] bg-[#f1f3ef] px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
-                                                    >
-                                                        {roleLabels[code] ??
-                                                            code}
-                                                    </label>
-                                                ))}
-                                                <span className="self-center text-[10px] text-[#7a8278]">
-                                                    Protected system
-                                                    administrator
-                                                </span>
-                                            </div>
-                                        ) : (
-                                            <div className="mt-4 flex flex-wrap gap-2">
-                                                {roleOptions.map((code) => {
-                                                    const checked =
-                                                        currentRoles.includes(
-                                                            code,
-                                                        );
-                                                    return (
-                                                        <label
-                                                            key={`${user.id}-${code}`}
-                                                            className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#dfe5dd] bg-white px-2.5 py-1.5 text-[11px] font-medium text-[#4d5a4f]"
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                className="h-3.5 w-3.5 accent-[#2f4f3e]"
-                                                                checked={
-                                                                    checked
-                                                                }
-                                                                disabled={
-                                                                    saving[
-                                                                    user.id
-                                                                    ] ||
-                                                                    !canManage
-                                                                }
-                                                                onChange={() => {
-                                                                    const nextRoles =
-                                                                        checked
-                                                                            ? currentRoles.filter(
-                                                                                (
-                                                                                    role,
-                                                                                ) =>
-                                                                                    role !==
-                                                                                    code,
-                                                                            )
-                                                                            : [
-                                                                                ...new Set(
-                                                                                    [
-                                                                                        ...currentRoles,
-                                                                                        code,
-                                                                                    ],
-                                                                                ),
-                                                                            ];
-                                                                    void updateUserRoles(
-                                                                        user.id,
-                                                                        nextRoles,
-                                                                    );
-                                                                }}
-                                                            />
-                                                            {roleLabels[code] ??
-                                                                code}
-                                                        </label>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-
-                                        {/* Assigned Academic Programs for Department Coordinators */}
-                                        {isDeptCoordinator &&
-                                            programsCatalog.length > 0 && (
-                                                <div className="mt-3.5 rounded-xl border border-[#e2e7df] bg-white p-3">
-                                                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                                        <span className="text-[11px] font-semibold text-[#2b5139]">
-                                                            Assigned Academic
-                                                            Programs (
-                                                            {
-                                                                currentProgramIds.length
-                                                            }{' '}
-                                                            selected)
-                                                        </span>
-                                                        {currentProgramIds.length ===
-                                                            0 && (
-                                                                <span className="rounded bg-[#fdf4e7] px-2 py-0.5 text-[10px] font-semibold text-[#9a6728]">
-                                                                    No programs
-                                                                    assigned —
-                                                                    select programs
-                                                                    to grant record
-                                                                    access
-                                                                </span>
-                                                            )}
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-1.5">
-                                                        {programsCatalog.map(
-                                                            (prog) => {
-                                                                const active =
-                                                                    currentProgramIds.includes(
-                                                                        prog.id,
-                                                                    );
-                                                                return (
-                                                                    <button
-                                                                        key={
-                                                                            prog.id
-                                                                        }
-                                                                        type="button"
-                                                                        disabled={
-                                                                            savingPrograms[
-                                                                            user
-                                                                                .id
-                                                                            ]
-                                                                        }
-                                                                        onClick={() => {
-                                                                            const nextIds =
-                                                                                active
-                                                                                    ? currentProgramIds.filter(
-                                                                                        (
-                                                                                            id,
-                                                                                        ) =>
-                                                                                            id !==
-                                                                                            prog.id,
-                                                                                    )
-                                                                                    : [
-                                                                                        ...currentProgramIds,
-                                                                                        prog.id,
-                                                                                    ];
-                                                                            void updateUserAssignedPrograms(
-                                                                                user.id,
-                                                                                nextIds,
-                                                                            );
-                                                                        }}
-                                                                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${active
-                                                                            ? 'bg-[#2b5139] text-white'
-                                                                            : 'border border-[#dce2d9] bg-[#f9faf7] text-[#536055] hover:bg-[#edf2eb]'
-                                                                            }`}
-                                                                    >
-                                                                        {
-                                                                            prog.code
-                                                                        }{' '}
-                                                                        ·{' '}
-                                                                        {
-                                                                            prog.name
-                                                                        }
-                                                                    </button>
-                                                                );
-                                                            },
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                        {!isProtected && (
-                                            <div className="mt-4 flex justify-end gap-2">
-                                                <ConfirmationDialog
-                                                    title={
-                                                        user.is_suspended
-                                                            ? 'Reactivate user?'
-                                                            : 'Suspend user?'
-                                                    }
-                                                    description={
-                                                        user.is_suspended
-                                                            ? `Reactivate ${user.name}'s account? They will be able to sign in and use the application again.`
-                                                            : `Suspend ${user.name}'s account? They will be signed out and unable to sign in or use the application until reactivated.`
-                                                    }
-                                                    confirmLabel={
-                                                        user.is_suspended
-                                                            ? 'Reactivate user'
-                                                            : 'Suspend user'
-                                                    }
-                                                    pendingLabel={
-                                                        user.is_suspended
-                                                            ? 'Reactivating…'
-                                                            : 'Suspending…'
-                                                    }
-                                                    variant={
-                                                        user.is_suspended
-                                                            ? 'default'
-                                                            : 'destructive'
-                                                    }
-                                                    onConfirm={() =>
-                                                        updateUserSuspension(
-                                                            user,
-                                                        )
-                                                    }
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        disabled={
-                                                            !canManage ||
-                                                            managing[user.id]
-                                                        }
-                                                        className="rounded-full border border-[#dfe5dd] bg-white px-3 py-2 text-[10px] font-semibold text-[#4d5a4f] disabled:cursor-not-allowed disabled:opacity-50"
-                                                    >
-                                                        {user.is_suspended
-                                                            ? 'Reactivate'
-                                                            : 'Suspend'}
-                                                    </button>
-                                                </ConfirmationDialog>
-                                                <ConfirmationDialog
-                                                    title="Delete user?"
-                                                    description={`Delete ${user.name}'s account? They will lose access, and their account will be archived.`}
-                                                    onConfirm={() =>
-                                                        deleteUser(user)
-                                                    }
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        disabled={
-                                                            !canManage ||
-                                                            managing[user.id]
-                                                        }
-                                                        className="rounded-full border border-[#ecd8d2] bg-white px-3 py-2 text-[10px] font-semibold text-[#8b4e43] disabled:cursor-not-allowed disabled:opacity-50"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </ConfirmationDialog>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <EmptyState>
-                            No users match your current filter.
-                        </EmptyState>
-                    )}
+                    </div>
                 </div>
             )}
 
-            <p className="mt-4 text-xs leading-5 text-[#7a8278]">
-                Role and permission changes are managed by an administrator and
-                recorded in the system activity log.
-            </p>
-        </section>
+            {/* Manage User Access & Program Scope Modal */}
+            {editingUser !== null && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={closeManageUserModal}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={`Manage access for ${editingUser.name}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-2xl sm:p-6"
+                    >
+                        <div className="flex items-start justify-between gap-3 border-b border-[#eff0ec] pb-3.5">
+                            <div>
+                                <h3 className="text-sm font-semibold text-[#29382e]">
+                                    Manage Access — {editingUser.name}
+                                </h3>
+                                <p className="mt-0.5 text-xs text-[#7a8278]">
+                                    {editingUser.email}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeManageUserModal}
+                                aria-label="Close modal"
+                                className="rounded-lg p-1.5 text-[#7a8278] transition hover:bg-[#f2f4f0] hover:text-[#29382e]"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <form
+                            onSubmit={saveUserAccess}
+                            className="mt-4 space-y-4"
+                        >
+                            <fieldset>
+                                <legend className="mb-2 text-xs font-medium text-[#4d5a4f]">
+                                    Assigned roles
+                                </legend>
+                                <RoleCheckboxPills
+                                    keyPrefix={`manage-${editingUser.id}`}
+                                    selectedRoles={editRoles}
+                                    disabled={savingAccess}
+                                    onToggle={(code) =>
+                                        setEditRoles((current) =>
+                                            current.includes(code)
+                                                ? current.filter(
+                                                      (role) => role !== code,
+                                                  )
+                                                : [...current, code],
+                                        )
+                                    }
+                                />
+                            </fieldset>
+
+                            {editRoles.includes('department-coordinator') && (
+                                <ProgramScopeSelector
+                                    programsCatalog={programsCatalog}
+                                    selectedProgramIds={editProgramIds}
+                                    disabled={savingAccess}
+                                    onChange={setEditProgramIds}
+                                />
+                            )}
+
+                            <div className="flex items-center justify-end gap-2 border-t border-[#eff0ec] pt-3">
+                                <button
+                                    type="button"
+                                    onClick={closeManageUserModal}
+                                    className="h-9 rounded-lg border border-[#dfe5dd] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={savingAccess}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white transition hover:bg-[#22422d] disabled:opacity-60"
+                                >
+                                    {savingAccess ? 'Saving…' : 'Save access'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 

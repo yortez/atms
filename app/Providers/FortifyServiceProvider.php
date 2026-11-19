@@ -62,6 +62,8 @@ class FortifyServiceProvider extends ServiceProvider
                 return null;
             }
 
+            $user->clearReleasedAssistancePasswords();
+
             return $user;
         });
     }
