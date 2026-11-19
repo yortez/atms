@@ -5706,16 +5706,8 @@ export function AcademicCatalog({
         code: '',
         name: '',
         description: '',
-        degree_title: '',
     });
     const [creating, setCreating] = useState(false);
-
-    // Inline Add Degree Offering State
-    const [addingDegreeProgramId, setAddingDegreeProgramId] = useState<
-        number | null
-    >(null);
-    const [degreeTitleInput, setDegreeTitleInput] = useState('');
-    const [savingDegree, setSavingDegree] = useState(false);
 
     const isProgramModalActive = createOpen || programFormOpen;
 
@@ -5754,6 +5746,16 @@ export function AcademicCatalog({
         setDepartmentFormOpen(true);
     }
 
+    function closeDepartmentForm() {
+        clearDepartmentLogoPreview(departmentLogoPreview);
+        setDepartmentForm({ code: '', name: '', description: '' });
+        setDepartmentLogoFile(null);
+        setDepartmentLogoPreview(null);
+        setRemoveDepartmentLogo(false);
+        setEditingDepartmentId(null);
+        setDepartmentFormOpen(false);
+    }
+
     function openAddProgramForDepartment(deptId?: number) {
         setEditingProgramId(null);
         setCreateNewDeptInline(false);
@@ -5762,7 +5764,6 @@ export function AcademicCatalog({
             code: '',
             name: '',
             description: '',
-            degree_title: '',
         });
         setProgramFormOpen(true);
     }
@@ -5775,12 +5776,18 @@ export function AcademicCatalog({
             code: prog.code,
             name: prog.name,
             description: prog.description ?? '',
-            degree_title: '',
         });
         setProgramFormOpen(true);
     }
 
     function closeProgramForm() {
+        setForm({
+            department_id: '',
+            code: '',
+            name: '',
+            description: '',
+        });
+        setInlineDeptForm({ code: '', name: '', description: '' });
         setProgramFormOpen(false);
         setEditingProgramId(null);
         setCreateNewDeptInline(false);
@@ -5822,13 +5829,7 @@ export function AcademicCatalog({
                 );
                 toast.success('Department created.');
             }
-            clearDepartmentLogoPreview(departmentLogoPreview);
-            setDepartmentForm({ code: '', name: '', description: '' });
-            setDepartmentLogoFile(null);
-            setDepartmentLogoPreview(null);
-            setRemoveDepartmentLogo(false);
-            setEditingDepartmentId(null);
-            setDepartmentFormOpen(false);
+            closeDepartmentForm();
             reloadAll();
         } catch (error) {
             toast.error(
@@ -5884,21 +5885,12 @@ export function AcademicCatalog({
                             code: form.code,
                             name: form.name,
                             description: form.description || null,
-                            degree_title: form.degree_title || null,
                         },
                     },
                 );
                 toast.success('Academic program created.');
             }
 
-            setForm({
-                department_id: '',
-                code: '',
-                name: '',
-                description: '',
-                degree_title: '',
-            });
-            setInlineDeptForm({ code: '', name: '', description: '' });
             closeProgramForm();
             reloadAll();
         } catch (error) {
@@ -5912,31 +5904,6 @@ export function AcademicCatalog({
         }
     }
 
-    async function addDegreeOffering(programId: number) {
-        if (!degreeTitleInput.trim()) return;
-        setSavingDegree(true);
-        try {
-            await apiRequest(`/api/programs/${programId}/degrees`, {
-                method: 'POST',
-                body: {
-                    degree_title: degreeTitleInput.trim(),
-                },
-            });
-            setDegreeTitleInput('');
-            setAddingDegreeProgramId(null);
-            reloadAll();
-            toast.success('Degree offering added to program.');
-        } catch (error) {
-            toast.error(
-                error instanceof ApiError
-                    ? error.message
-                    : 'Degree offering could not be added.',
-            );
-        } finally {
-            setSavingDegree(false);
-        }
-    }
-
     if (programsRes.loading || departmentsRes.loading) {
         return <LoadingState />;
     }
@@ -5947,10 +5914,6 @@ export function AcademicCatalog({
 
     const departmentsList = departmentsRes.data?.data ?? [];
     const programsList = programsRes.data?.data ?? [];
-    const totalDegrees = programsList.reduce(
-        (sum, p) => sum + (p.program_degrees?.length ?? 0),
-        0,
-    );
 
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
@@ -6008,9 +5971,6 @@ export function AcademicCatalog({
                             {programsList.length === 1
                                 ? 'Academic Program'
                                 : 'Academic Programs'}
-                        </span>
-                        <span className="rounded-full bg-[#f7f8f5] px-3 py-1 text-xs font-medium text-[#6f786e]">
-                            {totalDegrees} Degree Offerings
                         </span>
                     </div>
 
@@ -6103,353 +6063,399 @@ export function AcademicCatalog({
                 </div>
             </div>
 
-            {/* Create / Edit Department Form */}
+            {/* Create / Edit Department Modal */}
             {departmentFormOpen && (
-                <form
-                    onSubmit={saveDepartment}
-                    className="space-y-4 rounded-2xl border border-[#cfe0cc] bg-[#f8faf7] p-4 sm:p-5"
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={closeDepartmentForm}
                 >
-                    <div className="flex items-center justify-between border-b border-[#e3eae0] pb-2.5">
-                        <div>
-                            <h3 className="text-sm font-semibold text-[#29382e]">
-                                {editingDepartmentId !== null
-                                    ? 'Edit Academic Department / College'
-                                    : 'Create New Academic Department / College'}
-                            </h3>
-                            <p className="text-xs text-[#6f786e]">
-                                Departments group related academic programs and
-                                cohort reports.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-3">
-                        <label className="text-xs font-medium text-[#4d5a4f]">
-                            Department code
-                            <input
-                                required
-                                maxLength={32}
-                                value={departmentForm.code}
-                                onChange={(e) =>
-                                    setDepartmentForm({
-                                        ...departmentForm,
-                                        code: e.target.value,
-                                    })
-                                }
-                                placeholder="e.g., CCS, CBA, COE"
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs uppercase"
-                            />
-                        </label>
-                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                            Department / College name
-                            <input
-                                required
-                                maxLength={160}
-                                value={departmentForm.name}
-                                onChange={(e) =>
-                                    setDepartmentForm({
-                                        ...departmentForm,
-                                        name: e.target.value,
-                                    })
-                                }
-                                placeholder="e.g., College of Computing Studies"
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
-                            />
-                        </label>
-                        <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-3">
-                            Description (optional)
-                            <input
-                                maxLength={500}
-                                value={departmentForm.description}
-                                onChange={(e) =>
-                                    setDepartmentForm({
-                                        ...departmentForm,
-                                        description: e.target.value,
-                                    })
-                                }
-                                placeholder="Brief overview of the college or academic department…"
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
-                            />
-                        </label>
-                        <div className="sm:col-span-3">
-                            <span className="block text-xs font-medium text-[#4d5a4f]">
-                                Department logo (optional)
-                            </span>
-                            <div className="mt-1.5 flex flex-wrap items-center gap-3 rounded-xl border border-[#dce2d9] bg-white p-3">
-                                {departmentLogoPreview ? (
-                                    <img
-                                        src={departmentLogoPreview}
-                                        alt="Department logo preview"
-                                        className="size-12 shrink-0 rounded-xl border border-[#dce2d9] object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#cfd8cc] bg-[#f8faf7] text-[10px] font-bold tracking-wide text-[#5e6a5f] uppercase">
-                                        {departmentForm.code.trim().slice(0, 5) ||
-                                            'LOGO'}
-                                    </div>
-                                )}
-                                <div className="min-w-0 flex-1 space-y-1">
-                                    <input
-                                        type="file"
-                                        accept="image/png,image/jpeg,image/webp"
-                                        onChange={(e) => {
-                                            const file =
-                                                e.target.files?.[0] ?? null;
-                                            clearDepartmentLogoPreview(
-                                                departmentLogoPreview,
-                                            );
-                                            setDepartmentLogoFile(file);
-                                            if (file) {
-                                                setDepartmentLogoPreview(
-                                                    URL.createObjectURL(file),
-                                                );
-                                                setRemoveDepartmentLogo(false);
-                                            } else {
-                                                setDepartmentLogoPreview(null);
-                                            }
-                                        }}
-                                        className="block w-full text-xs text-[#4d5a4f] file:mr-3 file:rounded-lg file:border-0 file:bg-[#edf2eb] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#2b5139] hover:file:bg-[#e1ebe0]"
-                                    />
-                                    <p className="text-[11px] text-[#737c72]">
-                                        PNG, JPG, or WEBP up to 5MB. Displayed
-                                        in the catalog and public portal.
-                                    </p>
-                                </div>
-                                {departmentLogoPreview && (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            clearDepartmentLogoPreview(
-                                                departmentLogoPreview,
-                                            );
-                                            setDepartmentLogoFile(null);
-                                            setDepartmentLogoPreview(null);
-                                            setRemoveDepartmentLogo(true);
-                                        }}
-                                        className="rounded-lg border border-[#e3d3cf] bg-[#fdf6f5] px-2.5 py-1.5 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#f9ebe8]"
-                                    >
-                                        Remove logo
-                                    </button>
-                                )}
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={
+                            editingDepartmentId !== null
+                                ? 'Edit Academic Department / College'
+                                : 'Create New Academic Department / College'
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-2xl sm:p-6"
+                    >
+                        <div className="flex items-start justify-between gap-3 border-b border-[#eff0ec] pb-3.5">
+                            <div>
+                                <h3 className="text-sm font-semibold text-[#29382e]">
+                                    {editingDepartmentId !== null
+                                        ? 'Edit Academic Department / College'
+                                        : 'Create New Academic Department / College'}
+                                </h3>
+                                <p className="mt-0.5 text-xs text-[#6f786e]">
+                                    Departments group related academic programs
+                                    and cohort reports.
+                                </p>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                clearDepartmentLogoPreview(
-                                    departmentLogoPreview,
-                                );
-                                setDepartmentLogoFile(null);
-                                setDepartmentLogoPreview(null);
-                                setRemoveDepartmentLogo(false);
-                                setDepartmentFormOpen(false);
-                                setEditingDepartmentId(null);
-                            }}
-                            className="h-9 rounded-lg border border-[#dce2d9] bg-white px-3 text-xs font-medium text-[#687267]"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={savingDepartment}
-                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                            {savingDepartment
-                                ? 'Saving…'
-                                : editingDepartmentId !== null
-                                    ? 'Save department'
-                                    : 'Create department'}
-                        </button>
-                    </div>
-                </form>
-            )}
-
-            {/* Create / Edit Academic Program Form */}
-            {isProgramModalActive && (
-                <form
-                    onSubmit={createProgram}
-                    className="grid gap-3 rounded-2xl border border-[#e9ebe5] bg-white p-4 sm:grid-cols-2 sm:p-5"
-                >
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#eff0ec] pb-2.5 sm:col-span-2">
-                        <div>
-                            <h3 className="text-sm font-semibold text-[#29382e]">
-                                {editingProgramId !== null
-                                    ? 'Edit Academic Program'
-                                    : 'Add Academic Program'}
-                            </h3>
-                            <p className="text-xs text-[#7a8278]">
-                                Link the program to an existing department or
-                                create a new department inline.
-                            </p>
-                        </div>
-                        {editingProgramId === null && (
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setCreateNewDeptInline((prev) => !prev)
-                                }
-                                className="rounded-lg border border-[#cfe0cc] bg-[#edf2eb] px-3 py-1.5 text-[11px] font-semibold text-[#2b5139] hover:bg-[#e1ebe0]"
+                                onClick={closeDepartmentForm}
+                                aria-label="Close modal"
+                                className="rounded-lg p-1.5 text-[#7a8278] transition hover:bg-[#f2f4f0] hover:text-[#29382e]"
                             >
-                                {createNewDeptInline
-                                    ? '← Select existing department'
-                                    : '+ Create new department inline'}
+                                <X className="size-4" />
                             </button>
-                        )}
-                    </div>
-
-                    {createNewDeptInline ? (
-                        <div className="grid gap-3 rounded-xl border border-[#dce4d9] bg-[#f8faf7] p-3.5 sm:col-span-2 sm:grid-cols-2">
-                            <label className="text-xs font-medium text-[#2b5139]">
-                                New department code
-                                <input
-                                    required
-                                    maxLength={32}
-                                    value={inlineDeptForm.code}
-                                    onChange={(e) =>
-                                        setInlineDeptForm({
-                                            ...inlineDeptForm,
-                                            code: e.target.value,
-                                        })
-                                    }
-                                    placeholder="e.g., CON"
-                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs uppercase"
-                                />
-                            </label>
-                            <label className="text-xs font-medium text-[#2b5139]">
-                                New department name
-                                <input
-                                    required
-                                    maxLength={160}
-                                    value={inlineDeptForm.name}
-                                    onChange={(e) =>
-                                        setInlineDeptForm({
-                                            ...inlineDeptForm,
-                                            name: e.target.value,
-                                        })
-                                    }
-                                    placeholder="e.g., College of Nursing"
-                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
-                                />
-                            </label>
                         </div>
-                    ) : (
-                        <label className="text-xs font-medium text-[#4d5a4f]">
-                            Department
-                            <select
-                                required
-                                value={form.department_id}
-                                onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        department_id: event.target.value,
-                                    })
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
-                            >
-                                <option value="">Select a department</option>
-                                {departmentsList.map((department) => (
-                                    <option
-                                        key={department.id}
-                                        value={department.id}
-                                    >
-                                        {department.code} · {department.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                    )}
 
-                    {(
-                        [
-                            ['code', 'Program code'],
-                            ['name', 'Program name'],
-                        ] as const
-                    ).map(([name, label]) => (
-                        <label
-                            key={name}
-                            className="text-xs font-medium text-[#4d5a4f]"
-                        >
-                            {label}
-                            <input
-                                required
-                                value={form[name]}
-                                onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        [name]: event.target.value,
-                                    })
-                                }
-                                placeholder={
-                                    name === 'code'
-                                        ? 'e.g., BSCS, BSIT, BSN'
-                                        : 'e.g., BS in Computer Science'
-                                }
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                            />
-                        </label>
-                    ))}
+                        <form onSubmit={saveDepartment} className="mt-4 space-y-4">
+                            <div className="grid gap-3 sm:grid-cols-3">
+                                <label className="text-xs font-medium text-[#4d5a4f]">
+                                    Department code
+                                    <input
+                                        required
+                                        maxLength={32}
+                                        value={departmentForm.code}
+                                        onChange={(e) =>
+                                            setDepartmentForm({
+                                                ...departmentForm,
+                                                code: e.target.value,
+                                            })
+                                        }
+                                        placeholder="e.g., CCS, CBA, COE"
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs uppercase"
+                                    />
+                                </label>
+                                <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                                    Department / College name
+                                    <input
+                                        required
+                                        maxLength={160}
+                                        value={departmentForm.name}
+                                        onChange={(e) =>
+                                            setDepartmentForm({
+                                                ...departmentForm,
+                                                name: e.target.value,
+                                            })
+                                        }
+                                        placeholder="e.g., College of Computing Studies"
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
+                                    />
+                                </label>
+                                <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-3">
+                                    Description (optional)
+                                    <input
+                                        maxLength={500}
+                                        value={departmentForm.description}
+                                        onChange={(e) =>
+                                            setDepartmentForm({
+                                                ...departmentForm,
+                                                description: e.target.value,
+                                            })
+                                        }
+                                        placeholder="Brief overview of the college or academic department…"
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
+                                    />
+                                </label>
+                                <div className="sm:col-span-3">
+                                    <span className="block text-xs font-medium text-[#4d5a4f]">
+                                        Department logo (optional)
+                                    </span>
+                                    <div className="mt-1.5 flex flex-wrap items-center gap-3 rounded-xl border border-[#dce2d9] bg-[#fafbf9] p-3">
+                                        {departmentLogoPreview ? (
+                                            <img
+                                                src={departmentLogoPreview}
+                                                alt="Department logo preview"
+                                                className="size-12 shrink-0 rounded-xl border border-[#dce2d9] object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#cfd8cc] bg-white text-[10px] font-bold tracking-wide text-[#5e6a5f] uppercase">
+                                                {departmentForm.code
+                                                    .trim()
+                                                    .slice(0, 5) || 'LOGO'}
+                                            </div>
+                                        )}
+                                        <div className="min-w-0 flex-1 space-y-1">
+                                            <input
+                                                type="file"
+                                                accept="image/png,image/jpeg,image/webp"
+                                                onChange={(e) => {
+                                                    const file =
+                                                        e.target.files?.[0] ??
+                                                        null;
+                                                    clearDepartmentLogoPreview(
+                                                        departmentLogoPreview,
+                                                    );
+                                                    setDepartmentLogoFile(file);
+                                                    if (file) {
+                                                        setDepartmentLogoPreview(
+                                                            URL.createObjectURL(
+                                                                file,
+                                                            ),
+                                                        );
+                                                        setRemoveDepartmentLogo(
+                                                            false,
+                                                        );
+                                                    } else {
+                                                        setDepartmentLogoPreview(
+                                                            null,
+                                                        );
+                                                    }
+                                                }}
+                                                className="block w-full text-xs text-[#4d5a4f] file:mr-3 file:rounded-lg file:border-0 file:bg-[#edf2eb] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#2b5139] hover:file:bg-[#e1ebe0]"
+                                            />
+                                            <p className="text-[11px] text-[#737c72]">
+                                                PNG, JPG, or WEBP up to 5MB.
+                                                Displayed in the catalog and
+                                                public portal.
+                                            </p>
+                                        </div>
+                                        {departmentLogoPreview && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    clearDepartmentLogoPreview(
+                                                        departmentLogoPreview,
+                                                    );
+                                                    setDepartmentLogoFile(null);
+                                                    setDepartmentLogoPreview(
+                                                        null,
+                                                    );
+                                                    setRemoveDepartmentLogo(
+                                                        true,
+                                                    );
+                                                }}
+                                                className="rounded-lg border border-[#e3d3cf] bg-[#fdf6f5] px-2.5 py-1.5 text-[11px] font-semibold text-[#8b4e43] hover:bg-[#f9ebe8]"
+                                            >
+                                                Remove logo
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
 
-                    {editingProgramId === null && (
-                        <label className="text-xs font-medium text-[#4d5a4f]">
-                            Initial degree title (optional)
-                            <input
-                                value={form.degree_title}
-                                onChange={(event) =>
-                                    setForm({
-                                        ...form,
-                                        degree_title: event.target.value,
-                                    })
-                                }
-                                placeholder="e.g., Bachelor of Science in Computer Science"
-                                className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                            />
-                        </label>
-                    )}
-
-                    <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
-                        Description (optional)
-                        <input
-                            value={form.description}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    description: event.target.value,
-                                })
-                            }
-                            placeholder="Optional program summary or specialization notes…"
-                            className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
-                        />
-                    </label>
-
-                    <div className="flex items-center justify-end gap-2 sm:col-span-2">
-                        <button
-                            type="button"
-                            onClick={closeProgramForm}
-                            className="h-9 rounded-lg border border-[#e8eae4] px-3 text-xs font-medium text-[#687267]"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={creating}
-                            className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white disabled:opacity-60"
-                        >
-                            {creating
-                                ? 'Saving…'
-                                : editingProgramId !== null
-                                    ? 'Save changes'
-                                    : 'Add program'}
-                        </button>
+                            <div className="flex items-center justify-end gap-2 border-t border-[#eff0ec] pt-3">
+                                <button
+                                    type="button"
+                                    onClick={closeDepartmentForm}
+                                    className="h-9 rounded-lg border border-[#dce2d9] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={savingDepartment}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white transition hover:bg-[#22422d] disabled:opacity-60"
+                                >
+                                    {savingDepartment
+                                        ? 'Saving…'
+                                        : editingDepartmentId !== null
+                                            ? 'Save department'
+                                            : 'Create department'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    {departmentsRes.error ? (
-                        <p role="alert" className="text-xs text-[#8b4e43]">
-                            {departmentsRes.error}
-                        </p>
-                    ) : null}
-                </form>
+                </div>
+            )}
+
+            {/* Create / Edit Academic Program Modal */}
+            {isProgramModalActive && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={closeProgramForm}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={
+                            editingProgramId !== null
+                                ? 'Edit Academic Program'
+                                : 'Add Academic Program'
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#e3e7df] bg-white p-5 shadow-2xl sm:p-6"
+                    >
+                        <div className="flex items-start justify-between gap-3 border-b border-[#eff0ec] pb-3.5">
+                            <div>
+                                <h3 className="text-sm font-semibold text-[#29382e]">
+                                    {editingProgramId !== null
+                                        ? 'Edit Academic Program'
+                                        : 'Add Academic Program'}
+                                </h3>
+                                <p className="mt-0.5 text-xs text-[#7a8278]">
+                                    Link the program to an existing department
+                                    or create a new department inline.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeProgramForm}
+                                aria-label="Close modal"
+                                className="rounded-lg p-1.5 text-[#7a8278] transition hover:bg-[#f2f4f0] hover:text-[#29382e]"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+
+                        <form
+                            onSubmit={createProgram}
+                            className="mt-4 grid gap-3 sm:grid-cols-2"
+                        >
+                            {editingProgramId === null && (
+                                <div className="flex justify-end sm:col-span-2">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setCreateNewDeptInline(
+                                                (prev) => !prev,
+                                            )
+                                        }
+                                        className="rounded-lg border border-[#cfe0cc] bg-[#edf2eb] px-3 py-1.5 text-[11px] font-semibold text-[#2b5139] hover:bg-[#e1ebe0]"
+                                    >
+                                        {createNewDeptInline
+                                            ? '← Select existing department'
+                                            : '+ Create new department inline'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {createNewDeptInline ? (
+                                <div className="grid gap-3 rounded-xl border border-[#dce4d9] bg-[#f8faf7] p-3.5 sm:col-span-2 sm:grid-cols-2">
+                                    <label className="text-xs font-medium text-[#2b5139]">
+                                        New department code
+                                        <input
+                                            required
+                                            maxLength={32}
+                                            value={inlineDeptForm.code}
+                                            onChange={(e) =>
+                                                setInlineDeptForm({
+                                                    ...inlineDeptForm,
+                                                    code: e.target.value,
+                                                })
+                                            }
+                                            placeholder="e.g., CON"
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs uppercase"
+                                        />
+                                    </label>
+                                    <label className="text-xs font-medium text-[#2b5139]">
+                                        New department name
+                                        <input
+                                            required
+                                            maxLength={160}
+                                            value={inlineDeptForm.name}
+                                            onChange={(e) =>
+                                                setInlineDeptForm({
+                                                    ...inlineDeptForm,
+                                                    name: e.target.value,
+                                                })
+                                            }
+                                            placeholder="e.g., College of Nursing"
+                                            className="mt-1.5 h-10 w-full rounded-lg border border-[#dce2d9] bg-white px-3 text-xs"
+                                        />
+                                    </label>
+                                </div>
+                            ) : (
+                                <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                                    Department
+                                    <select
+                                        required
+                                        value={form.department_id}
+                                        onChange={(event) =>
+                                            setForm({
+                                                ...form,
+                                                department_id:
+                                                    event.target.value,
+                                            })
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] bg-white px-3 text-xs"
+                                    >
+                                        <option value="">
+                                            Select a department
+                                        </option>
+                                        {departmentsList.map((department) => (
+                                            <option
+                                                key={department.id}
+                                                value={department.id}
+                                            >
+                                                {department.code} ·{' '}
+                                                {department.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            )}
+
+                            {(
+                                [
+                                    ['code', 'Program code'],
+                                    ['name', 'Program name'],
+                                ] as const
+                            ).map(([name, label]) => (
+                                <label
+                                    key={name}
+                                    className="text-xs font-medium text-[#4d5a4f]"
+                                >
+                                    {label}
+                                    <input
+                                        required
+                                        value={form[name]}
+                                        onChange={(event) =>
+                                            setForm({
+                                                ...form,
+                                                [name]: event.target.value,
+                                            })
+                                        }
+                                        placeholder={
+                                            name === 'code'
+                                                ? 'e.g., BSCS, BSIT, BSN'
+                                                : 'e.g., BS in Computer Science'
+                                        }
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                    />
+                                </label>
+                            ))}
+
+                            <label className="text-xs font-medium text-[#4d5a4f] sm:col-span-2">
+                                Description (optional)
+                                <input
+                                    value={form.description}
+                                    onChange={(event) =>
+                                        setForm({
+                                            ...form,
+                                            description: event.target.value,
+                                        })
+                                    }
+                                    placeholder="Optional program summary or specialization notes…"
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-[#e3e7df] px-3 text-xs"
+                                />
+                            </label>
+
+                            <div className="flex items-center justify-end gap-2 border-t border-[#eff0ec] pt-3 sm:col-span-2">
+                                <button
+                                    type="button"
+                                    onClick={closeProgramForm}
+                                    className="h-9 rounded-lg border border-[#e8eae4] bg-white px-3 text-xs font-medium text-[#687267] hover:bg-[#f6f7f4]"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={creating}
+                                    className="h-9 rounded-lg bg-[#2b5139] px-4 text-xs font-semibold text-white transition hover:bg-[#22422d] disabled:opacity-60"
+                                >
+                                    {creating
+                                        ? 'Saving…'
+                                        : editingProgramId !== null
+                                            ? 'Save changes'
+                                            : 'Add program'}
+                                </button>
+                            </div>
+                            {departmentsRes.error ? (
+                                <p
+                                    role="alert"
+                                    className="text-xs text-[#8b4e43] sm:col-span-2"
+                                >
+                                    {departmentsRes.error}
+                                </p>
+                            ) : null}
+                        </form>
+                    </div>
+                </div>
             )}
 
             {/* Modular by Department View */}
@@ -6542,136 +6548,34 @@ export function AcademicCatalog({
                                             {deptPrograms.map((program) => (
                                                 <article
                                                     key={program.id}
-                                                    className="flex flex-col justify-between rounded-xl border border-[#e9ebe5] bg-[#fafbf9] p-4"
+                                                    className="rounded-xl border border-[#e9ebe5] bg-[#fafbf9] p-4"
                                                 >
-                                                    <div>
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase">
-                                                                {program.code}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    openEditProgram(
-                                                                        program,
-                                                                    )
-                                                                }
-                                                                className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
-                                                            >
-                                                                Edit
-                                                            </button>
-                                                        </div>
-                                                        <h3 className="mt-2 text-sm font-semibold text-[#39463b]">
-                                                            {program.name}
-                                                        </h3>
-                                                        {program.description && (
-                                                            <p className="mt-1 text-xs text-[#7a8278]">
-                                                                {
-                                                                    program.description
-                                                                }
-                                                            </p>
-                                                        )}
-
-                                                        {program.program_degrees
-                                                            ?.length ? (
-                                                            <ul className="mt-3 space-y-1 border-t border-[#e8ece5] pt-2.5">
-                                                                {program.program_degrees.map(
-                                                                    (
-                                                                        offering,
-                                                                    ) => (
-                                                                        <li
-                                                                            key={
-                                                                                offering.id
-                                                                            }
-                                                                            className="text-[11px] text-[#5e685d]"
-                                                                        >
-                                                                            •{' '}
-                                                                            {
-                                                                                offering
-                                                                                    .degree
-                                                                                    .title
-                                                                            }
-                                                                        </li>
-                                                                    ),
-                                                                )}
-                                                            </ul>
-                                                        ) : (
-                                                            <p className="mt-3 border-t border-[#e8ece5] pt-2.5 text-[11px] text-[#969e95]">
-                                                                No degree
-                                                                offerings linked
-                                                                yet.
-                                                            </p>
-                                                        )}
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <span className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase">
+                                                            {program.code}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                openEditProgram(
+                                                                    program,
+                                                                )
+                                                            }
+                                                            className="text-[11px] font-semibold text-[#687267] hover:text-[#2b5139]"
+                                                        >
+                                                            Edit
+                                                        </button>
                                                     </div>
-
-                                                    <div className="mt-3 pt-2">
-                                                        {addingDegreeProgramId ===
-                                                            program.id ? (
-                                                            <div className="flex gap-1.5">
-                                                                <input
-                                                                    type="text"
-                                                                    value={
-                                                                        degreeTitleInput
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) =>
-                                                                        setDegreeTitleInput(
-                                                                            e
-                                                                                .target
-                                                                                .value,
-                                                                        )
-                                                                    }
-                                                                    placeholder="Degree title (e.g. BS in IT)"
-                                                                    className="h-8 flex-1 rounded-lg border border-[#dce2d9] bg-white px-2 text-[11px]"
-                                                                />
-                                                                <button
-                                                                    type="button"
-                                                                    disabled={
-                                                                        savingDegree
-                                                                    }
-                                                                    onClick={() =>
-                                                                        void addDegreeOffering(
-                                                                            program.id,
-                                                                        )
-                                                                    }
-                                                                    className="h-8 rounded-lg bg-[#2b5139] px-2.5 text-[10px] font-semibold text-white"
-                                                                >
-                                                                    Save
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        setAddingDegreeProgramId(
-                                                                            null,
-                                                                        );
-                                                                        setDegreeTitleInput(
-                                                                            '',
-                                                                        );
-                                                                    }}
-                                                                    className="h-8 rounded-lg border border-[#dce2d9] bg-white px-2 text-[10px] text-[#687267]"
-                                                                >
-                                                                    ✕
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setAddingDegreeProgramId(
-                                                                        program.id,
-                                                                    );
-                                                                    setDegreeTitleInput(
-                                                                        '',
-                                                                    );
-                                                                }}
-                                                                className="text-[11px] font-semibold text-[#2b5139] hover:underline"
-                                                            >
-                                                                + Add degree
-                                                                offering
-                                                            </button>
-                                                        )}
-                                                    </div>
+                                                    <h3 className="mt-2 text-sm font-semibold text-[#39463b]">
+                                                        {program.name}
+                                                    </h3>
+                                                    {program.description && (
+                                                        <p className="mt-1 text-xs text-[#7a8278]">
+                                                            {
+                                                                program.description
+                                                            }
+                                                        </p>
+                                                    )}
                                                 </article>
                                             ))}
                                         </div>
@@ -6731,18 +6635,11 @@ export function AcademicCatalog({
                                 {program.department?.name ??
                                     'Department not assigned'}
                             </p>
-                            {program.program_degrees?.length ? (
-                                <ul className="mt-4 space-y-1 border-t border-[#eff0ec] pt-3">
-                                    {program.program_degrees.map((offering) => (
-                                        <li
-                                            key={offering.id}
-                                            className="text-[11px] text-[#6f786e]"
-                                        >
-                                            {offering.degree.title}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : null}
+                            {program.description && (
+                                <p className="mt-2 border-t border-[#eff0ec] pt-2.5 text-xs text-[#6f786e]">
+                                    {program.description}
+                                </p>
+                            )}
                         </article>
                     ))}
                 </div>

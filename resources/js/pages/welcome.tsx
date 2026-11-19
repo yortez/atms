@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useAppearance } from '@/hooks/use-appearance';
-import { login, register } from '@/routes';
+import { login } from '@/routes';
 import type { Auth } from '@/types/auth';
 
 type PublicAnnouncement = {
@@ -140,15 +140,15 @@ const fivePillars = [
         ctaLabel: 'Update Tracer Record',
     },
     {
-        eyebrow: 'REGISTRAR MASTERLIST VERIFICATION',
-        title: 'Official Alumni Identity Claiming',
+        eyebrow: 'REGISTRAR MASTERLIST & PORTAL ACCESS',
+        title: 'Pre-Provisioned Alumni Accounts',
         description:
-            'Matches your pre-registered SEAIT Student Number, Last Name, and Date of Birth against the Registrar roster with automated Department Coordinator assistance.',
+            'Every graduate on the Registrar masterlist receives a ready-to-use default username (lastname_firstinitial) and Student Number password, with dedicated Department Coordinator assistance.',
         icon: UsersRound,
         badgeTone:
             'border-teal-600/25 bg-teal-500/10 text-teal-700 dark:border-teal-500/30 dark:bg-teal-500/15 dark:text-teal-300',
         portalPage: 'My profile',
-        ctaLabel: 'Claim Alumni Profile',
+        ctaLabel: 'Access Alumni Profile',
     },
     {
         eyebrow: 'REGIONAL & NATIONAL PLACEMENT',
@@ -588,35 +588,31 @@ export default function Welcome({
                                 className="relative flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100/80 text-zinc-900 transition-colors hover:border-[#E47818]/50 sm:size-10 dark:border-white/15 dark:bg-white/5 dark:text-white"
                             >
                                 <Menu
-                                    className={`size-5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                                        menuOpen
+                                    className={`size-5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen
                                             ? 'scale-50 rotate-90 opacity-0'
                                             : 'scale-100 rotate-0 opacity-100'
-                                    }`}
+                                        }`}
                                 />
                                 <X
-                                    className={`absolute size-5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                                        menuOpen
+                                    className={`absolute size-5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen
                                             ? 'scale-100 rotate-0 opacity-100'
                                             : 'scale-50 -rotate-90 opacity-0'
-                                    }`}
+                                        }`}
                                 />
                             </button>
                         </div>
 
                         <nav
-                            className={`max-lg:absolute max-lg:top-full max-lg:right-0 max-lg:left-0 max-lg:z-40 flex max-lg:origin-top flex-col gap-3.5 max-lg:border-b max-lg:border-zinc-200 max-lg:bg-white/98 max-lg:px-4 max-lg:shadow-2xl max-lg:backdrop-blur-md max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex-row lg:items-center lg:gap-0.5 lg:bg-transparent lg:backdrop-blur-none xl:gap-1 max-lg:dark:border-[#006d5b]/30 max-lg:dark:bg-[#081110]/98 ${
-                                menuOpen
+                            className={`max-lg:absolute max-lg:top-full max-lg:right-0 max-lg:left-0 max-lg:z-40 flex max-lg:origin-top flex-col gap-3.5 max-lg:border-b max-lg:border-zinc-200 max-lg:bg-white/98 max-lg:px-4 max-lg:shadow-2xl max-lg:backdrop-blur-md max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex-row lg:items-center lg:gap-0.5 lg:bg-transparent lg:backdrop-blur-none xl:gap-1 max-lg:dark:border-[#006d5b]/30 max-lg:dark:bg-[#081110]/98 ${menuOpen
                                     ? 'max-lg:pointer-events-auto max-lg:visible max-lg:max-h-[480px] max-lg:translate-y-0 max-lg:scale-y-100 max-lg:py-4 max-lg:opacity-100'
                                     : 'max-lg:pointer-events-none max-lg:invisible max-lg:max-h-0 max-lg:-translate-y-3 max-lg:scale-y-95 max-lg:overflow-hidden max-lg:border-b-0 max-lg:py-0 max-lg:opacity-0'
-                            }`}
+                                }`}
                         >
                             <div
-                                className={`grid grid-cols-2 gap-1.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex lg:flex-row lg:items-center lg:gap-0.5 xl:gap-1 ${
-                                    menuOpen
+                                className={`grid grid-cols-2 gap-1.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex lg:flex-row lg:items-center lg:gap-0.5 xl:gap-1 ${menuOpen
                                         ? 'max-lg:translate-y-0 max-lg:opacity-100 max-lg:delay-75'
                                         : 'max-lg:-translate-y-2 max-lg:opacity-0'
-                                }`}
+                                    }`}
                             >
                                 {[
                                     ['Tracer Study', '#tracer-study'],
@@ -639,11 +635,10 @@ export default function Welcome({
                             </div>
 
                             <div
-                                className={`flex flex-col gap-2 border-t border-zinc-200/80 pt-3.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:mt-0 lg:ml-2 lg:shrink-0 lg:flex-row lg:flex-nowrap lg:items-center lg:border-t-0 lg:border-l lg:border-zinc-200 lg:pt-0 lg:pl-3 dark:border-white/10 dark:lg:border-white/15 ${
-                                    menuOpen
+                                className={`flex flex-col gap-2 border-t border-zinc-200/80 pt-3.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:mt-0 lg:ml-2 lg:shrink-0 lg:flex-row lg:flex-nowrap lg:items-center lg:border-t-0 lg:border-l lg:border-zinc-200 lg:pt-0 lg:pl-3 dark:border-white/10 dark:lg:border-white/15 ${menuOpen
                                         ? 'max-lg:translate-y-0 max-lg:opacity-100 max-lg:delay-100'
                                         : 'max-lg:-translate-y-2 max-lg:opacity-0'
-                                }`}
+                                    }`}
                             >
                                 <button
                                     type="button"
@@ -685,17 +680,17 @@ export default function Welcome({
                                                 Employer Partner
                                             </Link>
                                             <Link
-                                                href={login()}
+                                                href="/alumni/registration-assistance"
                                                 className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-xs font-bold whitespace-nowrap text-zinc-800 transition hover:border-[#E47818] hover:text-[#E47818] lg:h-9 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-orange-400/50"
                                             >
-                                                Sign In
+                                                Assistance
                                             </Link>
                                         </div>
                                         <Link
-                                            href={register()}
+                                            href={login()}
                                             className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl border border-[#E47818]/40 bg-[#E47818]/10 px-3.5 font-heading text-xs font-bold whitespace-nowrap text-[#E47818] transition hover:bg-[#E47818] hover:text-white lg:h-9 lg:w-auto dark:border-orange-400/40 dark:bg-orange-500/15 dark:text-orange-300 dark:hover:bg-[#E47818] dark:hover:text-white"
                                         >
-                                            Claim Alumni Record
+                                            Sign In to Portal
                                             <ArrowRight className="ml-1.5 size-3.5" />
                                         </Link>
                                     </>
@@ -711,11 +706,10 @@ export default function Welcome({
                     aria-label="Close mobile navigation menu"
                     tabIndex={menuOpen ? 0 : -1}
                     onClick={() => setMenuOpen(false)}
-                    className={`fixed inset-0 z-30 bg-zinc-950/35 backdrop-blur-[2px] transition-opacity duration-300 ease-out lg:hidden ${
-                        menuOpen
+                    className={`fixed inset-0 z-30 bg-zinc-950/35 backdrop-blur-[2px] transition-opacity duration-300 ease-out lg:hidden ${menuOpen
                             ? 'pointer-events-auto opacity-100'
                             : 'pointer-events-none opacity-0'
-                    }`}
+                        }`}
                 />
 
                 <main>
@@ -763,14 +757,14 @@ export default function Welcome({
                                         href={
                                             isAuthenticated
                                                 ? '/dashboard?page=Employment+tracer'
-                                                : register()
+                                                : login()
                                         }
                                         className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#E47818] px-6 py-3.5 font-heading text-xs font-bold text-white shadow-xl shadow-orange-950/50 transition hover:bg-[#F36C21] sm:px-7 sm:py-4 sm:text-sm"
                                     >
                                         <span>
                                             {isAuthenticated
                                                 ? 'Update My Graduate Tracer'
-                                                : 'Claim Record & Join Tracer Study'}
+                                                : 'Sign In & Join Tracer Study'}
                                         </span>
                                         <ArrowRight className="size-4 sm:size-5" />
                                     </Link>
@@ -858,7 +852,7 @@ export default function Welcome({
                                                                 href={
                                                                     isAuthenticated
                                                                         ? '/dashboard?page=Surveys'
-                                                                        : register()
+                                                                        : login()
                                                                 }
                                                                 className="shrink-0 rounded-lg border border-teal-600/30 bg-teal-600/10 px-3 py-1.5 font-heading text-[11px] font-bold text-teal-700 transition hover:bg-teal-600 hover:text-white dark:border-teal-400/30 dark:bg-teal-500/15 dark:text-teal-300 dark:hover:bg-teal-500 dark:hover:text-zinc-950"
                                                             >
@@ -871,10 +865,10 @@ export default function Welcome({
                                         ) : (
                                             <div className="mt-3 rounded-xl border border-dashed border-zinc-300 bg-white/80 p-3.5 text-xs leading-relaxed text-zinc-600 dark:border-white/15 dark:bg-[#15190B]/60 dark:text-zinc-300">
                                                 No cohort survey questionnaires are
-                                                currently open, but you can claim
-                                                your verified SEAIT profile and
-                                                update your employment history at
-                                                any time.
+                                                currently open, but you can sign
+                                                in to your SEAIT alumni account
+                                                and update your employment history
+                                                at any time.
                                             </div>
                                         )}
                                     </div>
@@ -884,13 +878,13 @@ export default function Welcome({
                                             href={
                                                 isAuthenticated
                                                     ? '/dashboard?page=Surveys'
-                                                    : register()
+                                                    : login()
                                             }
                                             className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-[#004d40]/30 bg-[#001c17] px-5 font-heading text-xs font-bold text-white shadow-sm transition hover:bg-[#002b24] dark:border-teal-400/30 dark:bg-teal-950/80 dark:text-teal-100 dark:hover:bg-teal-900"
                                         >
                                             {isAuthenticated
                                                 ? 'Open Tracer Surveys'
-                                                : 'Verify & Claim Alumni Account'}
+                                                : 'Sign In to Alumni Portal'}
                                             <ArrowRight className="ml-2 size-4 text-[#E47818] dark:text-orange-400" />
                                         </Link>
                                         <Link
@@ -917,7 +911,7 @@ export default function Welcome({
                                     Alumni Masterlist
                                 </span>
                                 <span className="mt-0.5 block text-[10px] text-zinc-500 sm:text-[11px] dark:text-zinc-400">
-                                    {stats.claimed_graduates_count.toLocaleString()} claimed accounts
+                                    {stats.claimed_graduates_count.toLocaleString()} active portal accounts
                                 </span>
                             </div>
 
@@ -988,7 +982,7 @@ export default function Welcome({
                         </div>
 
                         {stats.tracked_graduates_count === 0 &&
-                        stats.graduates_count === 0 ? (
+                            stats.graduates_count === 0 ? (
                             <div className="rounded-3xl border border-dashed border-amber-400/60 bg-amber-50/60 p-7 sm:p-9 dark:border-amber-500/30 dark:bg-[#15190B]">
                                 <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
                                     <div className="max-w-2xl space-y-2">
@@ -999,14 +993,14 @@ export default function Welcome({
                                             Awaiting Initial Graduate Tracer Submissions
                                         </h3>
                                         <p className="text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-300">
-                                            Institutional employability and curriculum relevance percentages are automatically published as SEAIT graduates claim their Registrar records and log their employment history.
+                                            Institutional employability and curriculum relevance percentages are automatically published as SEAIT graduates sign in to their alumni accounts and log their employment history.
                                         </p>
                                     </div>
                                     <Link
                                         href={
                                             isAuthenticated
                                                 ? '/dashboard?page=Employment+tracer'
-                                                : register()
+                                                : login()
                                         }
                                         className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-5 font-heading text-xs font-bold text-white shadow-md transition hover:bg-[#F36C21]"
                                     >
@@ -1076,7 +1070,7 @@ export default function Welcome({
                                 <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-2xs sm:p-7 dark:border-white/10 dark:bg-[#15190B]">
                                     <div className="flex items-center justify-between">
                                         <span className="font-heading text-xs font-bold tracking-wider text-[#CD7A30] uppercase dark:text-amber-300">
-                                            Roster Claim Coverage
+                                            Portal Account Coverage
                                         </span>
                                         <FileCheck2 className="size-5 text-[#CD7A30] dark:text-amber-300" />
                                     </div>
@@ -1167,13 +1161,13 @@ export default function Welcome({
                                         href={
                                             isAuthenticated
                                                 ? '/dashboard'
-                                                : register()
+                                                : login()
                                         }
                                         className="mt-4 rounded-xl bg-white px-4 py-2 font-heading text-xs font-bold text-teal-950 transition hover:bg-orange-50"
                                     >
                                         {isAuthenticated
                                             ? 'Enter Alumni Portal →'
-                                            : 'Claim Official Record →'}
+                                            : 'Sign In to Portal →'}
                                     </Link>
                                 </div>
                             </div>
@@ -1239,7 +1233,7 @@ export default function Welcome({
                                                     href={
                                                         isAuthenticated
                                                             ? `/dashboard?page=${encodeURIComponent(portalPage)}`
-                                                            : register()
+                                                            : login()
                                                     }
                                                     className="inline-flex items-center gap-1.5 font-heading text-xs font-bold text-[#E47818] transition hover:text-[#CD7A30]"
                                                 >
@@ -1265,10 +1259,10 @@ export default function Welcome({
                             <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                                 <div>
                                     <span className="text-xs font-bold tracking-wider text-[#E47818] uppercase">
-                                        Academic Offerings & Roster Verification
+                                        Academic Offerings & Alumni Portal Access
                                     </span>
                                     <h2 className="mt-1 font-heading text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl md:text-4xl dark:text-white">
-                                        SEAIT Academic Divisions & Claim Protocol
+                                        SEAIT Academic Divisions & Alumni Access Guide
                                     </h2>
                                     <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-zinc-600 sm:text-sm dark:text-zinc-400">
                                         Strictly synchronized with the active
@@ -1281,13 +1275,13 @@ export default function Welcome({
                                         href={
                                             isAuthenticated
                                                 ? '/dashboard?page=My+profile'
-                                                : register()
+                                                : login()
                                         }
                                         className="inline-flex items-center gap-1.5 rounded-xl bg-[#E47818] px-4 py-2.5 font-heading text-xs font-bold text-white transition hover:bg-[#F36C21]"
                                     >
                                         {isAuthenticated
                                             ? 'View My Alumni Profile'
-                                            : 'Verify & Claim Record'}
+                                            : 'Sign In to Alumni Portal'}
                                         <ArrowRight className="size-3.5" />
                                     </Link>
                                     <Link
@@ -1300,18 +1294,18 @@ export default function Welcome({
                                 </div>
                             </div>
 
-                            {/* 3-Step Claim Protocol Strip */}
+                            {/* 3-Step Alumni Access Protocol Strip */}
                             <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-3">
                                 {[
                                     {
                                         step: 'STEP 01',
-                                        title: 'Enter 3 Academic Credentials',
-                                        text: 'Provide your SEAIT Student Number, Last Name on record, and Date of Birth with your active personal email.',
+                                        title: 'Sign In with Default Credentials',
+                                        text: 'Use your default username (lastname_firstinitial, e.g., dela_cruz_c) and your SEAIT Student Number as your initial password.',
                                     },
                                     {
                                         step: 'STEP 02',
-                                        title: 'Instant Roster Match or Assistance',
-                                        text: 'Exact matches verify immediately. Discrepancies can be routed directly to your Department Coordinator.',
+                                        title: 'Complete Profile or Request Assistance',
+                                        text: 'Update your personal email, password, and contact details on first sign-in—or request Coordinator Assistance if you forgot your Student Number.',
                                     },
                                     {
                                         step: 'STEP 03',
@@ -1410,11 +1404,11 @@ export default function Welcome({
                                                     href={
                                                         isAuthenticated
                                                             ? '/dashboard?page=My+profile'
-                                                            : register()
+                                                            : login()
                                                     }
                                                     className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-700 transition group-hover:text-[#E47818] dark:text-zinc-300 dark:group-hover:text-orange-400"
                                                 >
-                                                    Claim Graduate Record
+                                                    Access Alumni Portal
                                                     <ArrowRight className="size-3.5" />
                                                 </Link>
                                             </div>
@@ -1793,13 +1787,13 @@ export default function Welcome({
                                     href={
                                         isAuthenticated
                                             ? '/dashboard?page=Events'
-                                            : register()
+                                            : login()
                                     }
                                     className="inline-flex items-center gap-1.5 font-heading text-xs font-bold text-[#E47818] transition hover:text-[#CD7A30]"
                                 >
                                     {isAuthenticated
                                         ? 'Manage Event RSVPs'
-                                        : 'Claim Account to RSVP'}
+                                        : 'Sign In to RSVP'}
                                     <ArrowRight className="size-4" />
                                 </Link>
                             </div>
@@ -1916,12 +1910,27 @@ export default function Welcome({
                                     />
                                     <div>
                                         <p className="font-heading text-xs font-bold tracking-widest text-orange-300 uppercase">
-                                            Ready to Verify Your Pathway at SEAIT?
+                                            Ready to Access Your SEAIT Alumni Portal?
                                         </p>
                                         <h2 className="mt-1 max-w-xl font-heading text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                                            Claim your official alumni record &
-                                            strengthen SEAIT’s accreditation.
+                                            Sign in with your default alumni
+                                            account & strengthen SEAIT’s
+                                            accreditation.
                                         </h2>
+                                        <p className="mt-2 text-xs text-zinc-300">
+                                            Default Username:{' '}
+                                            <code className="font-mono font-semibold text-orange-300">
+                                                lastname_firstinitial
+                                            </code>{' '}
+                                            (e.g.,{' '}
+                                            <code className="font-mono text-white">
+                                                dela_cruz_c
+                                            </code>
+                                            ) · Default Password:{' '}
+                                            <span className="font-semibold text-white">
+                                                Your Student Number
+                                            </span>
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row lg:flex-col">
@@ -1929,22 +1938,30 @@ export default function Welcome({
                                         href={
                                             isAuthenticated
                                                 ? '/dashboard'
-                                                : register()
+                                                : login()
                                         }
                                         className="inline-flex h-12 w-full shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-6 font-heading text-xs font-bold whitespace-nowrap text-white shadow-lg shadow-orange-950/40 transition hover:bg-[#F36C21] sm:w-56 sm:text-sm"
                                     >
                                         {isAuthenticated
                                             ? 'Open Alumni Portal'
-                                            : 'Claim Alumni Record'}
+                                            : 'Sign In to Alumni Portal'}
                                         <ArrowRight className="ml-2 size-4 shrink-0" />
                                     </Link>
                                     {!isAuthenticated && (
-                                        <Link
-                                            href="/register?type=employer"
-                                            className="inline-flex h-12 w-full shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 px-6 font-heading text-xs font-bold whitespace-nowrap text-white transition hover:bg-white/15 sm:w-56 sm:text-sm"
-                                        >
-                                            Employer Registration
-                                        </Link>
+                                        <>
+                                            <Link
+                                                href="/register?type=employer"
+                                                className="inline-flex h-12 w-full shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 px-6 font-heading text-xs font-bold whitespace-nowrap text-white transition hover:bg-white/15 sm:w-56 sm:text-sm"
+                                            >
+                                                Employer Registration
+                                            </Link>
+                                            <Link
+                                                href="/alumni/registration-assistance"
+                                                className="text-center text-xs font-semibold text-teal-300 underline-offset-4 transition hover:text-white hover:underline"
+                                            >
+                                                Need Login Assistance?
+                                            </Link>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -2065,7 +2082,7 @@ export default function Welcome({
                                             href="/alumni/registration-assistance"
                                             className="transition hover:text-orange-400"
                                         >
-                                            Registrar Claim Assistance
+                                            Alumni Login & Record Assistance
                                         </Link>
                                     </li>
                                     <li>
@@ -2237,16 +2254,16 @@ export default function Welcome({
                                 ) : (
                                     <>
                                         <Link
-                                            href={login()}
+                                            href="/alumni/registration-assistance"
                                             className="inline-flex h-10 items-center rounded-xl border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-800 hover:border-[#E47818] dark:border-white/15 dark:bg-[#0A1006] dark:text-white"
                                         >
-                                            Sign in to Apply
+                                            Need Login Assistance?
                                         </Link>
                                         <Link
-                                            href={register()}
+                                            href={login()}
                                             className="inline-flex h-10 items-center rounded-xl bg-[#E47818] px-5 font-heading text-xs font-bold text-white hover:bg-[#F36C21]"
                                         >
-                                            Claim Alumni Account
+                                            Sign in to Apply
                                         </Link>
                                     </>
                                 )}
@@ -2403,13 +2420,13 @@ export default function Welcome({
                                 href={
                                     isAuthenticated
                                         ? '/dashboard?page=Events'
-                                        : register()
+                                        : login()
                                 }
                                 className="inline-flex h-10 items-center rounded-xl bg-[#E47818] px-5 font-heading text-xs font-bold text-white hover:bg-[#F36C21]"
                             >
                                 {isAuthenticated
                                     ? 'Open Portal Events & RSVP'
-                                    : 'Claim Account to RSVP'}
+                                    : 'Sign In to RSVP'}
                                 <ArrowRight className="ml-2 size-3.5" />
                             </Link>
                         </div>
@@ -2462,11 +2479,10 @@ export default function Welcome({
                                     <button
                                         type="button"
                                         onClick={() => openLegalModal('terms')}
-                                        className={`rounded-lg px-3 py-1.5 transition ${
-                                            selectedLegalDoc === 'terms'
+                                        className={`rounded-lg px-3 py-1.5 transition ${selectedLegalDoc === 'terms'
                                                 ? 'bg-[#E47818] text-white shadow-2xs'
                                                 : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                                        }`}
+                                            }`}
                                     >
                                         Terms & Conditions
                                     </button>
@@ -2475,11 +2491,10 @@ export default function Welcome({
                                         onClick={() =>
                                             openLegalModal('privacy')
                                         }
-                                        className={`rounded-lg px-3 py-1.5 transition ${
-                                            selectedLegalDoc === 'privacy'
+                                        className={`rounded-lg px-3 py-1.5 transition ${selectedLegalDoc === 'privacy'
                                                 ? 'bg-[#E47818] text-white shadow-2xs'
                                                 : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                                        }`}
+                                            }`}
                                     >
                                         Privacy Policy
                                     </button>
