@@ -5,6 +5,7 @@ export type EducationRecord = {
     honors: string | null;
     gwa?: number | string | null;
     program: string | null;
+    program_code?: string | null;
     degree: string | null;
 };
 

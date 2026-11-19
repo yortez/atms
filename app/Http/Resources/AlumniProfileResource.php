@@ -52,6 +52,7 @@ class AlumniProfileResource extends JsonResource
                     'honors' => $record->honors,
                     'gwa' => $record->gwa,
                     'program' => $record->programDegree?->program?->name,
+                    'program_code' => $record->programDegree?->program?->code,
                     'degree' => $record->programDegree?->degree?->title,
                 ]);
             }),

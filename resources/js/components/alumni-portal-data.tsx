@@ -1033,16 +1033,24 @@ function AlumniProfileDialog({
                                         {profile.name}
                                     </p>
                                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                                        {profile.is_claimed ? (
-                                            <span className="rounded-full bg-[#e3eee0] px-2 py-0.5 text-[10px] font-medium text-[#2f5a37]">
-                                                Claimed
-                                                {profile.claimed_at
-                                                    ? ` · ${new Date(profile.claimed_at).toLocaleDateString()}`
-                                                    : ''}
+                                        {profile.is_complete ? (
+                                            <span
+                                                title="All required profile fields completed"
+                                                className="rounded-full bg-[#e3eee0] px-2 py-0.5 text-[10px] font-medium text-[#2f5a37]"
+                                            >
+                                                Completed
                                             </span>
                                         ) : (
-                                            <span className="rounded-full bg-[#f3efe6] px-2 py-0.5 text-[10px] font-medium text-[#8a6a35]">
-                                                Unclaimed
+                                            <span
+                                                title={
+                                                    profile.missing_fields
+                                                        ?.length
+                                                        ? `Missing: ${profile.missing_fields.map((f) => f.replaceAll('_', ' ')).join(', ')}`
+                                                        : 'Profile has missing required fields'
+                                                }
+                                                className="rounded-full bg-[#f3efe6] px-2 py-0.5 text-[10px] font-medium text-[#8a6a35]"
+                                            >
+                                                Incomplete profile
                                             </span>
                                         )}
                                         <span className="rounded-full bg-[#f0f1ed] px-2 py-0.5 text-[10px] font-medium text-[#6d746a] capitalize">
@@ -1736,7 +1744,7 @@ export function AlumniDirectory({
                                     <th className="px-4 py-3">
                                         Current employer
                                     </th>
-                                    <th className="px-4 py-3">Account</th>
+                                    <th className="px-4 py-3">Profile status</th>
                                     <th className="px-4 py-3 text-right">
                                         <span className="sr-only">Actions</span>
                                     </th>
@@ -1795,7 +1803,21 @@ export function AlumniDirectory({
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-3.5">
-                                                    {education?.program ?? '—'}
+                                                    {education?.program_code ||
+                                                    education?.program ? (
+                                                        <span
+                                                            title={
+                                                                education?.program ??
+                                                                undefined
+                                                            }
+                                                            className="rounded bg-[#edf2eb] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#2b5139] uppercase"
+                                                        >
+                                                            {education?.program_code ??
+                                                                education?.program}
+                                                        </span>
+                                                    ) : (
+                                                        '—'
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3.5">
                                                     {education?.graduation_year ??
@@ -1817,20 +1839,25 @@ export function AlumniDirectory({
                                                         '—'}
                                                 </td>
                                                 <td className="px-4 py-3.5">
-                                                    {alumnus.is_claimed ? (
+                                                    {alumnus.is_complete ? (
                                                         <span
-                                                            title={
-                                                                alumnus.claimed_at
-                                                                    ? `Claimed on ${new Date(alumnus.claimed_at).toLocaleDateString()}`
-                                                                    : 'Claimed'
-                                                            }
+                                                            title="All required profile fields completed"
                                                             className="rounded-full bg-[#e3eee0] px-2.5 py-1 text-[10px] font-medium text-[#2f5a37]"
                                                         >
-                                                            Claimed
+                                                            Completed
                                                         </span>
                                                     ) : (
-                                                        <span className="rounded-full bg-[#f3efe6] px-2.5 py-1 text-[10px] font-medium text-[#8a6a35]">
-                                                            Unclaimed
+                                                        <span
+                                                            title={
+                                                                alumnus
+                                                                    .missing_fields
+                                                                    ?.length
+                                                                    ? `Missing: ${alumnus.missing_fields.map((f) => f.replaceAll('_', ' ')).join(', ')}`
+                                                                    : 'Profile has missing required fields'
+                                                            }
+                                                            className="rounded-full bg-[#f3efe6] px-2.5 py-1 text-[10px] font-medium text-[#8a6a35]"
+                                                        >
+                                                            Incomplete profile
                                                         </span>
                                                     )}
                                                 </td>
@@ -2701,14 +2728,6 @@ export function AlumniProfileSummary({
                                     <ShieldCheck className="size-3" />
                                     Verified Alumni
                                 </span>
-                                {profile.is_claimed && (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5 font-medium text-white/90 border border-white/10">
-                                        Claimed{' '}
-                                        {profile.claimed_at
-                                            ? `· ${new Date(profile.claimed_at).toLocaleDateString()}`
-                                            : ''}
-                                    </span>
-                                )}
                                 {profile.is_complete ? (
                                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 font-medium text-emerald-200 border border-emerald-500/30">
                                         <CheckCircle2 className="size-3" />
