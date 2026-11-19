@@ -20,7 +20,7 @@ export default function AppearanceToggleTab({
     return (
         <div
             className={cn(
-                'inline-flex gap-1.5 rounded-xl border border-zinc-200/80 bg-[#F5F4EE] p-1.5',
+                'inline-flex max-w-full gap-1 rounded-xl sm:gap-1.5 border border-zinc-200/80 bg-[#F5F4EE] p-1.5',
                 className,
             )}
             {...props}
@@ -33,7 +33,7 @@ export default function AppearanceToggleTab({
                         type="button"
                         onClick={() => updateAppearance(value)}
                         className={cn(
-                            'flex items-center rounded-lg px-4 py-2 text-xs font-bold transition-colors',
+                            'flex items-center rounded-lg px-3 py-2 sm:px-4 text-xs font-bold transition-colors',
                             active
                                 ? 'bg-[#001c17] text-white shadow-2xs'
                                 : 'text-zinc-600 hover:bg-white hover:text-zinc-900',

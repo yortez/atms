@@ -33,8 +33,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <div className="grid gap-5 lg:grid-cols-12">
-            <aside className="lg:col-span-3">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <aside className="min-w-0 lg:col-span-3">
                 <div className="rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-2xs">
                     <div className="px-2.5 pt-1 pb-2 text-[10px] font-bold tracking-[0.14em] text-zinc-400 uppercase">
                         Account Preferences
@@ -87,7 +87,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 </div>
             </aside>
 
-            <div className="lg:col-span-9">
+            <div className="min-w-0 lg:col-span-9">
                 <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-2xs sm:p-7">
                     <section className="max-w-2xl space-y-10">
                         {children}

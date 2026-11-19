@@ -2082,7 +2082,7 @@ export function AlumniDirectory({
                 <ErrorState message={error} />
             ) : (
                 <section className="overflow-hidden rounded-2xl border border-[#e9ebe5] bg-white">
-                    <div className="overflow-x-auto">
+                    <div className="relative overflow-x-auto">
                         <table className="w-full min-w-[690px] text-left">
                             <thead>
                                 <tr className="border-b border-[#eff0ec] bg-[#fafbf9] text-[10px] font-semibold tracking-wide text-[#848a81] uppercase">
@@ -4472,7 +4472,7 @@ export function EmploymentReports() {
     return (
         <div className="space-y-5">
             {/* Report Catalog Selector & Export Actions */}
-            <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+            <section className="min-w-0 rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
                 <div className="flex flex-col justify-between gap-4 border-b border-[#eff0ec] pb-4 lg:flex-row lg:items-center">
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -4677,8 +4677,8 @@ export function EmploymentReports() {
             </div>
 
             {/* Interactive Chart & Quick Catalog Navigator */}
-            <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
-                <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.35fr_0.65fr]">
+                <section className="min-w-0 rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
                     <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
                         <div>
                             <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
@@ -4805,7 +4805,7 @@ export function EmploymentReports() {
                 </section>
 
                 {/* All 18 Institutional Reports Quick Directory */}
-                <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+                <section className="min-w-0 rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
                     <h3 className="mb-3 text-sm font-semibold tracking-tight text-[#29382e]">
                         18 Institutional Tracer Reports
                     </h3>
@@ -4857,7 +4857,7 @@ export function EmploymentReports() {
                 </div>
 
                 {filteredRows.length ? (
-                    <div className="overflow-x-auto">
+                    <div className="relative overflow-x-auto">
                         <table className="w-full text-left text-xs">
                             <thead className="border-b border-[#eff0ec] bg-[#fafbf9] text-[10px] font-bold tracking-wider text-[#7d867c] uppercase">
                                 <tr>
@@ -5617,7 +5617,7 @@ export function AssignedRoles({
     );
 
     const accountRolesCard = (
-        <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+        <section className="min-w-0 rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
             <div>
                 <h2 className="text-sm font-semibold tracking-tight text-[#29382e]">
                     Roles assigned to your account
@@ -5777,7 +5777,7 @@ export function AssignedRoles({
                         <ErrorState message={error} />
                     ) : filteredUsers.length ? (
                         <div className="overflow-hidden rounded-2xl border border-[#e9ebe5] bg-white">
-                            <div className="overflow-x-auto">
+                            <div className="relative overflow-x-auto">
                                 <table className="w-full min-w-[780px] text-left">
                                     <thead>
                                         <tr className="border-b border-[#eff0ec] bg-[#fafbf9] text-[10px] font-semibold tracking-wide text-[#848a81] uppercase">
@@ -6151,7 +6151,7 @@ export function AssignedRoles({
                     {accountRolesCard}
 
                     {/* Granular Role Permissions Matrix */}
-                    <section className="rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
+                    <section className="min-w-0 rounded-2xl border border-[#e9ebe5] bg-white p-5 sm:p-6">
                         <div className="mb-4">
                             <h3 className="text-sm font-semibold tracking-tight text-[#29382e]">
                                 Role Permissions Matrix

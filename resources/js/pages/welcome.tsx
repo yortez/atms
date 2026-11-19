@@ -563,7 +563,7 @@ export default function Welcome({
                             </div>
                         </Link>
 
-                        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
+                        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 xl:hidden">
                             <button
                                 type="button"
                                 onClick={toggleTheme}
@@ -603,15 +603,15 @@ export default function Welcome({
                         </div>
 
                         <nav
-                            className={`max-lg:absolute max-lg:top-full max-lg:right-0 max-lg:left-0 max-lg:z-40 flex max-lg:origin-top flex-col gap-3.5 max-lg:border-b max-lg:border-zinc-200 max-lg:bg-white/98 max-lg:px-4 max-lg:shadow-2xl max-lg:backdrop-blur-md max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex-row lg:items-center lg:gap-0.5 lg:bg-transparent lg:backdrop-blur-none xl:gap-1 max-lg:dark:border-[#006d5b]/30 max-lg:dark:bg-[#081110]/98 ${menuOpen
-                                    ? 'max-lg:pointer-events-auto max-lg:visible max-lg:max-h-[480px] max-lg:translate-y-0 max-lg:scale-y-100 max-lg:py-4 max-lg:opacity-100'
-                                    : 'max-lg:pointer-events-none max-lg:invisible max-lg:max-h-0 max-lg:-translate-y-3 max-lg:scale-y-95 max-lg:overflow-hidden max-lg:border-b-0 max-lg:py-0 max-lg:opacity-0'
+                            className={`max-xl:absolute max-xl:top-full max-xl:right-0 max-xl:left-0 max-xl:z-40 flex max-xl:origin-top flex-col gap-3.5 max-xl:border-b max-xl:border-zinc-200 max-xl:bg-white/98 max-xl:px-4 max-xl:shadow-2xl max-xl:backdrop-blur-md max-xl:transition-all max-xl:duration-300 max-xl:ease-[cubic-bezier(0.16,1,0.3,1)] xl:flex-row xl:items-center xl:gap-0.5 xl:bg-transparent xl:backdrop-blur-none  max-xl:dark:border-[#006d5b]/30 max-xl:dark:bg-[#081110]/98 ${menuOpen
+                                    ? 'max-xl:pointer-events-auto max-xl:visible max-xl:max-h-[480px] max-xl:translate-y-0 max-xl:scale-y-100 max-xl:py-4 max-xl:opacity-100'
+                                    : 'max-xl:pointer-events-none max-xl:invisible max-xl:max-h-0 max-xl:-translate-y-3 max-xl:scale-y-95 max-xl:overflow-hidden max-xl:border-b-0 max-xl:py-0 max-xl:opacity-0'
                                 }`}
                         >
                             <div
-                                className={`grid grid-cols-2 gap-1.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex lg:flex-row lg:items-center lg:gap-0.5 xl:gap-1 ${menuOpen
-                                        ? 'max-lg:translate-y-0 max-lg:opacity-100 max-lg:delay-75'
-                                        : 'max-lg:-translate-y-2 max-lg:opacity-0'
+                                className={`grid grid-cols-2 gap-1.5 max-xl:transition-all max-xl:duration-300 max-xl:ease-[cubic-bezier(0.16,1,0.3,1)] xl:flex xl:flex-row xl:items-center xl:gap-0.5  ${menuOpen
+                                        ? 'max-xl:translate-y-0 max-xl:opacity-100 max-xl:delay-75'
+                                        : 'max-xl:-translate-y-2 max-xl:opacity-0'
                                     }`}
                             >
                                 {[
@@ -626,18 +626,18 @@ export default function Welcome({
                                         key={href}
                                         href={href}
                                         onClick={() => setMenuOpen(false)}
-                                        className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-zinc-50/80 px-3 py-2.5 text-xs font-semibold whitespace-nowrap text-zinc-800 transition hover:border-[#E47818]/40 hover:bg-orange-50/90 hover:text-[#E47818] lg:border-0 lg:bg-transparent lg:px-2 lg:py-2 lg:text-zinc-700 xl:px-2.5 2xl:px-3 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-orange-950/40 dark:hover:text-orange-400 dark:lg:bg-transparent"
+                                        className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-zinc-50/80 px-3 py-2.5 text-xs font-semibold whitespace-nowrap text-zinc-800 transition hover:border-[#E47818]/40 hover:bg-orange-50/90 hover:text-[#E47818] xl:border-0 xl:bg-transparent xl:px-2 xl:py-2 xl:text-zinc-700   dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-orange-950/40 dark:hover:text-orange-400 dark:xl:bg-transparent"
                                     >
                                         <span>{label}</span>
-                                        <ArrowUpRight className="size-3.5 text-zinc-400 lg:hidden dark:text-zinc-500" />
+                                        <ArrowUpRight className="size-3.5 text-zinc-400 xl:hidden dark:text-zinc-500" />
                                     </a>
                                 ))}
                             </div>
 
                             <div
-                                className={`flex flex-col gap-2 border-t border-zinc-200/80 pt-3.5 max-lg:transition-all max-lg:duration-300 max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:mt-0 lg:ml-2 lg:shrink-0 lg:flex-row lg:flex-nowrap lg:items-center lg:border-t-0 lg:border-l lg:border-zinc-200 lg:pt-0 lg:pl-3 dark:border-white/10 dark:lg:border-white/15 ${menuOpen
-                                        ? 'max-lg:translate-y-0 max-lg:opacity-100 max-lg:delay-100'
-                                        : 'max-lg:-translate-y-2 max-lg:opacity-0'
+                                className={`flex flex-col gap-2 border-t border-zinc-200/80 pt-3.5 max-xl:transition-all max-xl:duration-300 max-xl:ease-[cubic-bezier(0.16,1,0.3,1)] xl:mt-0 xl:ml-2 xl:shrink-0 xl:flex-row xl:flex-nowrap xl:items-center xl:border-t-0 xl:border-l xl:border-zinc-200 xl:pt-0 xl:pl-3 dark:border-white/10 dark:xl:border-white/15 ${menuOpen
+                                        ? 'max-xl:translate-y-0 max-xl:opacity-100 max-xl:delay-100'
+                                        : 'max-xl:-translate-y-2 max-xl:opacity-0'
                                     }`}
                             >
                                 <button
@@ -653,7 +653,7 @@ export default function Welcome({
                                             ? 'Switch to Light Mode'
                                             : 'Switch to Dark Mode'
                                     }
-                                    className="hidden size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200/80 bg-zinc-100/80 text-zinc-700 transition hover:border-[#E47818]/40 hover:text-[#E47818] lg:flex dark:border-white/15 dark:bg-zinc-800/80 dark:text-orange-400 dark:hover:border-orange-400/50"
+                                    className="hidden size-9 shrink-0 items-center justify-center rounded-xl border border-zinc-200/80 bg-zinc-100/80 text-zinc-700 transition hover:border-[#E47818]/40 hover:text-[#E47818] xl:flex dark:border-white/15 dark:bg-zinc-800/80 dark:text-orange-400 dark:hover:border-orange-400/50"
                                 >
                                     {isDark ? (
                                         <Sun className="size-4" />
@@ -665,30 +665,30 @@ export default function Welcome({
                                 {isAuthenticated ? (
                                     <Link
                                         href="/dashboard"
-                                        className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-4 font-heading text-xs font-bold whitespace-nowrap text-white shadow-lg shadow-orange-900/25 transition hover:bg-[#F36C21] lg:h-9 lg:w-auto"
+                                        className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl bg-[#E47818] px-4 font-heading text-xs font-bold whitespace-nowrap text-white shadow-lg shadow-orange-900/25 transition hover:bg-[#F36C21] xl:h-9 xl:w-auto"
                                     >
                                         Open Portal Dashboard
                                         <ArrowRight className="ml-1.5 size-3.5" />
                                     </Link>
                                 ) : (
                                     <>
-                                        <div className="grid grid-cols-2 gap-2 lg:flex lg:items-center lg:gap-2">
+                                        <div className="grid grid-cols-2 gap-2 xl:flex xl:items-center xl:gap-2">
                                             <Link
                                                 href="/register?type=employer"
-                                                className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-xs font-semibold whitespace-nowrap text-zinc-700 transition hover:border-[#E47818] hover:text-[#E47818] lg:hidden xl:inline-flex xl:h-9 xl:border-0 xl:bg-transparent xl:px-2.5 xl:text-zinc-600 dark:border-white/15 dark:bg-white/5 dark:text-zinc-200 dark:hover:text-orange-400 dark:xl:bg-transparent"
+                                                className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-xs font-semibold whitespace-nowrap text-zinc-700 transition hover:border-[#E47818] hover:text-[#E47818] xl:inline-flex xl:h-9 xl:border-0 xl:bg-transparent xl:px-2.5 xl:text-zinc-600 dark:border-white/15 dark:bg-white/5 dark:text-zinc-200 dark:hover:text-orange-400 dark:xl:bg-transparent"
                                             >
                                                 Employer Partner
                                             </Link>
                                             <Link
                                                 href="/alumni/registration-assistance"
-                                                className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-xs font-bold whitespace-nowrap text-zinc-800 transition hover:border-[#E47818] hover:text-[#E47818] lg:h-9 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-orange-400/50"
+                                                className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 text-xs font-bold whitespace-nowrap text-zinc-800 transition hover:border-[#E47818] hover:text-[#E47818] xl:h-9 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-orange-400/50"
                                             >
                                                 Assistance
                                             </Link>
                                         </div>
                                         <Link
                                             href={login()}
-                                            className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl border border-[#E47818]/40 bg-[#E47818]/10 px-3.5 font-heading text-xs font-bold whitespace-nowrap text-[#E47818] transition hover:bg-[#E47818] hover:text-white lg:h-9 lg:w-auto dark:border-orange-400/40 dark:bg-orange-500/15 dark:text-orange-300 dark:hover:bg-[#E47818] dark:hover:text-white"
+                                            className="inline-flex h-10 w-full shrink-0 items-center justify-center rounded-xl border border-[#E47818]/40 bg-[#E47818]/10 px-3.5 font-heading text-xs font-bold whitespace-nowrap text-[#E47818] transition hover:bg-[#E47818] hover:text-white xl:h-9 xl:w-auto dark:border-orange-400/40 dark:bg-orange-500/15 dark:text-orange-300 dark:hover:bg-[#E47818] dark:hover:text-white"
                                         >
                                             Sign In to Portal
                                             <ArrowRight className="ml-1.5 size-3.5" />
@@ -706,7 +706,7 @@ export default function Welcome({
                     aria-label="Close mobile navigation menu"
                     tabIndex={menuOpen ? 0 : -1}
                     onClick={() => setMenuOpen(false)}
-                    className={`fixed inset-0 z-30 bg-zinc-950/35 backdrop-blur-[2px] transition-opacity duration-300 ease-out lg:hidden ${menuOpen
+                    className={`fixed inset-0 z-30 bg-zinc-950/35 backdrop-blur-[2px] transition-opacity duration-300 ease-out xl:hidden ${menuOpen
                             ? 'pointer-events-auto opacity-100'
                             : 'pointer-events-none opacity-0'
                         }`}
@@ -873,14 +873,14 @@ export default function Welcome({
                                         )}
                                     </div>
 
-                                    <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
+                                    <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
                                         <Link
                                             href={
                                                 isAuthenticated
                                                     ? '/dashboard?page=Surveys'
                                                     : login()
                                             }
-                                            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-[#004d40]/30 bg-[#001c17] px-5 font-heading text-xs font-bold text-white shadow-sm transition hover:bg-[#002b24] dark:border-teal-400/30 dark:bg-teal-950/80 dark:text-teal-100 dark:hover:bg-teal-900"
+                                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#004d40]/30 bg-[#001c17] px-5 py-2 text-center whitespace-nowrap sm:flex-1 font-heading text-xs font-bold text-white shadow-sm transition hover:bg-[#002b24] dark:border-teal-400/30 dark:bg-teal-950/80 dark:text-teal-100 dark:hover:bg-teal-900"
                                         >
                                             {isAuthenticated
                                                 ? 'Open Tracer Surveys'
@@ -889,7 +889,7 @@ export default function Welcome({
                                         </Link>
                                         <Link
                                             href="/alumni/registration-assistance"
-                                            className="inline-flex h-11 items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-700 transition hover:border-[#E47818] hover:text-[#E47818] dark:border-white/15 dark:bg-white/5 dark:text-zinc-200 dark:hover:border-orange-400/50 dark:hover:text-orange-300"
+                                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-xs font-semibold whitespace-nowrap text-zinc-700 transition hover:border-[#E47818] hover:text-[#E47818] dark:border-white/15 dark:bg-white/5 dark:text-zinc-200 dark:hover:border-orange-400/50 dark:hover:text-orange-300"
                                         >
                                             <ShieldCheck className="mr-1.5 size-4 text-teal-600 dark:text-teal-300" />
                                             Record Assistance
