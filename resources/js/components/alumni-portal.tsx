@@ -26,7 +26,7 @@ import {
     UsersRound,
     X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { logout } from '@/routes';
 import { edit as profileSettings } from '@/routes/profile';
 import ConfirmationDialog from '@/components/confirmation-dialog';
@@ -44,35 +44,118 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import {
-    ActivityLog,
-    AcademicCatalog,
-    AcademicRecords,
-    AlumniDirectory,
-    AlumniProfileSummary,
-    AlumniApplications,
-    AssignedRoles,
-    AnnouncementCenter,
-    CompanyProfileCenter,
-    EmploymentReports,
-    EmploymentTracer,
-    EmployerApplicants,
-    EmployerDirectory,
-    EmployerJobs,
-    EventCenter,
-    exportEmploymentOutcomes,
-    LiveOverview,
-    Notifications,
-    PublicJobs,
-    RegistrationAssistanceQueue,
-    SurveyCenter,
-    UnreadNotificationIndicator,
-    AlumniProfileCompletionModal,
-} from '@/components/alumni-portal-data';
+import { UnreadNotificationIndicator } from '@/components/portal/notifications-activity';
+import { LoadingState } from '@/components/portal/shared';
 import { useApiResource } from '@/hooks/use-api-resource';
 import { type ApiEnvelope } from '@/lib/api';
 import type { AlumniProfile } from '@/types/alumni';
 import type { Auth } from '@/types/auth';
+
+const LiveOverview = lazy(() =>
+    import('@/components/portal/overview').then((m) => ({
+        default: m.LiveOverview,
+    })),
+);
+const AlumniDirectory = lazy(() =>
+    import('@/components/portal/alumni-directory').then((m) => ({
+        default: m.AlumniDirectory,
+    })),
+);
+const AcademicCatalog = lazy(() =>
+    import('@/components/portal/academic-catalog').then((m) => ({
+        default: m.AcademicCatalog,
+    })),
+);
+const AcademicRecords = lazy(() =>
+    import('@/components/portal/academic-records').then((m) => ({
+        default: m.AcademicRecords,
+    })),
+);
+const AlumniProfileSummary = lazy(() =>
+    import('@/components/portal/alumni-profile').then((m) => ({
+        default: m.AlumniProfileSummary,
+    })),
+);
+const AlumniProfileCompletionModal = lazy(() =>
+    import('@/components/portal/alumni-profile').then((m) => ({
+        default: m.AlumniProfileCompletionModal,
+    })),
+);
+const EmploymentTracer = lazy(() =>
+    import('@/components/portal/employment-tracer').then((m) => ({
+        default: m.EmploymentTracer,
+    })),
+);
+const EmploymentReports = lazy(() =>
+    import('@/components/portal/employment-reports').then((m) => ({
+        default: m.EmploymentReports,
+    })),
+);
+const Notifications = lazy(() =>
+    import('@/components/portal/notifications-activity').then((m) => ({
+        default: m.Notifications,
+    })),
+);
+const ActivityLog = lazy(() =>
+    import('@/components/portal/notifications-activity').then((m) => ({
+        default: m.ActivityLog,
+    })),
+);
+const AssignedRoles = lazy(() =>
+    import('@/components/portal/assigned-roles').then((m) => ({
+        default: m.AssignedRoles,
+    })),
+);
+const SurveyCenter = lazy(() =>
+    import('@/components/portal/survey-center').then((m) => ({
+        default: m.SurveyCenter,
+    })),
+);
+const AnnouncementCenter = lazy(() =>
+    import('@/components/portal/announcement-center').then((m) => ({
+        default: m.AnnouncementCenter,
+    })),
+);
+const EmployerDirectory = lazy(() =>
+    import('@/components/portal/employers').then((m) => ({
+        default: m.EmployerDirectory,
+    })),
+);
+const CompanyProfileCenter = lazy(() =>
+    import('@/components/portal/employers').then((m) => ({
+        default: m.CompanyProfileCenter,
+    })),
+);
+const PublicJobs = lazy(() =>
+    import('@/components/portal/jobs').then((m) => ({
+        default: m.PublicJobs,
+    })),
+);
+const EmployerJobs = lazy(() =>
+    import('@/components/portal/jobs').then((m) => ({
+        default: m.EmployerJobs,
+    })),
+);
+const AlumniApplications = lazy(() =>
+    import('@/components/portal/applications').then((m) => ({
+        default: m.AlumniApplications,
+    })),
+);
+const EmployerApplicants = lazy(() =>
+    import('@/components/portal/applications').then((m) => ({
+        default: m.EmployerApplicants,
+    })),
+);
+const RegistrationAssistanceQueue = lazy(() =>
+    import('@/components/portal/registration-assistance').then((m) => ({
+        default: m.RegistrationAssistanceQueue,
+    })),
+);
+const EventCenter = lazy(() =>
+    import('@/components/portal/event-center').then((m) => ({
+        default: m.EventCenter,
+    })),
+);
 
 type Role =
     | 'Administrator'
@@ -425,8 +508,8 @@ export default function AlumniPortal({
         role !== 'Alumni'
             ? []
             : (alumniProfile?.missing_fields ??
-              user.missing_profile_fields ??
-              []);
+                user.missing_profile_fields ??
+                []);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && role) {
@@ -482,9 +565,9 @@ export default function AlumniPortal({
     const pageDefinition =
         activePage === 'Overview' || activePage === 'My dashboard'
             ? {
-                  ...(pageCopy[activePage] ?? pageCopy.Overview),
-                  title: `${activePage === 'My dashboard' ? 'Welcome back' : 'Good morning'}, ${extractFirstName(profile.name)}`,
-              }
+                ...(pageCopy[activePage] ?? pageCopy.Overview),
+                title: `${activePage === 'My dashboard' ? 'Welcome back' : 'Good morning'}, ${extractFirstName(profile.name)}`,
+            }
             : (pageCopy[activePage] ?? pageCopy.Overview);
     const canManageContent = ['Administrator', 'Alumni coordinator'].includes(
         role,
@@ -508,7 +591,9 @@ export default function AlumniPortal({
 
     function handleAction() {
         if (currentPage.action?.startsWith('Export')) {
-            void exportEmploymentOutcomes();
+            void import('@/components/portal/employment-reports').then(
+                ({ exportEmploymentOutcomes }) => exportEmploymentOutcomes(),
+            );
         } else {
             setDialogOpen(true);
         }
@@ -663,18 +748,16 @@ export default function AlumniPortal({
                 type="button"
                 tabIndex={mobileNavOpen ? 0 : -1}
                 onClick={() => setMobileNavOpen(false)}
-                className={`fixed inset-0 z-30 bg-[#001c17]/40 backdrop-blur-[2px] transition-opacity duration-300 ease-out md:hidden ${
-                    mobileNavOpen
+                className={`fixed inset-0 z-30 bg-[#001c17]/40 backdrop-blur-[2px] transition-opacity duration-300 ease-out md:hidden ${mobileNavOpen
                         ? 'pointer-events-auto opacity-100'
                         : 'pointer-events-none opacity-0'
-                }`}
+                    }`}
             />
             <aside
-                className={`fixed inset-y-0 left-0 z-40 flex w-[min(272px,85vw)] flex-col border-r border-zinc-200/90 bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:w-[256px] md:translate-x-0 md:shadow-none ${
-                    mobileNavOpen
+                className={`fixed inset-y-0 left-0 z-40 flex w-[min(272px,85vw)] flex-col border-r border-zinc-200/90 bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:w-[256px] md:translate-x-0 md:shadow-none ${mobileNavOpen
                         ? 'translate-x-0 shadow-2xl'
                         : '-translate-x-full shadow-none'
-                }`}
+                    }`}
             >
                 <div className="flex h-16 items-center justify-between border-b border-zinc-200/80 px-4">
                     <Link
@@ -757,18 +840,16 @@ export default function AlumniPortal({
                                         setSearch('');
                                     }}
                                     aria-current={selected ? 'page' : undefined}
-                                    className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-semibold transition ${
-                                        selected
+                                    className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-semibold transition ${selected
                                             ? 'bg-[#001c17] text-white shadow-2xs'
                                             : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-                                    }`}
+                                        }`}
                                 >
                                     <Icon
-                                        className={`size-4 shrink-0 ${
-                                            selected
+                                        className={`size-4 shrink-0 ${selected
                                                 ? 'text-[#E47818]'
                                                 : 'text-zinc-500'
-                                        }`}
+                                            }`}
                                     />
                                     <span className="truncate">{label}</span>
                                     {isGatedInteraction && (
@@ -799,18 +880,16 @@ export default function AlumniPortal({
                                 ? 'page'
                                 : undefined
                         }
-                        className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-semibold transition ${
-                            activeNavOverride === 'Account settings'
+                        className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-xs font-semibold transition ${activeNavOverride === 'Account settings'
                                 ? 'bg-[#001c17] text-white shadow-2xs'
                                 : 'font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-                        }`}
+                            }`}
                     >
                         <Settings2
-                            className={`size-4 shrink-0 ${
-                                activeNavOverride === 'Account settings'
+                            className={`size-4 shrink-0 ${activeNavOverride === 'Account settings'
                                     ? 'text-[#E47818]'
                                     : 'text-zinc-500'
-                            }`}
+                                }`}
                         />{' '}
                         Account settings
                     </Link>
@@ -821,11 +900,10 @@ export default function AlumniPortal({
                             role="menu"
                             aria-label="Account menu"
                             aria-hidden={!accountMenuOpen}
-                            className={`absolute right-2 bottom-full left-2 z-30 mb-2 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg transition-all ${
-                                accountMenuOpen
+                            className={`absolute right-2 bottom-full left-2 z-30 mb-2 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg transition-all ${accountMenuOpen
                                     ? 'pointer-events-auto visible translate-y-0 opacity-100'
                                     : 'pointer-events-none invisible translate-y-1 opacity-0'
-                            }`}
+                                }`}
                         >
                             <Link
                                 href={profileSettings()}
@@ -897,9 +975,8 @@ export default function AlumniPortal({
                             className="grid size-7 place-items-center rounded-lg text-zinc-500 hover:bg-white"
                         >
                             <ChevronDown
-                                className={`size-3.5 transition-transform duration-200 ${
-                                    accountMenuOpen ? 'rotate-180' : ''
-                                }`}
+                                className={`size-3.5 transition-transform duration-200 ${accountMenuOpen ? 'rotate-180' : ''
+                                    }`}
                             />
                         </button>
                     </div>
@@ -934,38 +1011,38 @@ export default function AlumniPortal({
                             'Alumni coordinator',
                             'Department coordinator',
                         ].includes(role) && (
-                            <label className="hidden h-9 w-52 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-2.5 lg:flex">
-                                <Search className="size-3.5 text-zinc-400" />
-                                <input
-                                    value={search}
-                                    onChange={(event) => {
-                                        const value = event.target.value;
-                                        setSearch(value);
-                                        if (value.trim()) {
-                                            const directoryPage = navigation[
-                                                role
-                                            ].find((item) =>
-                                                [
-                                                    'Alumni directory',
-                                                    'Program alumni',
-                                                ].includes(item.label),
-                                            );
-                                            if (directoryPage) {
-                                                navigateToPage(
-                                                    directoryPage.label,
+                                <label className="hidden h-9 w-52 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-2.5 lg:flex">
+                                    <Search className="size-3.5 text-zinc-400" />
+                                    <input
+                                        value={search}
+                                        onChange={(event) => {
+                                            const value = event.target.value;
+                                            setSearch(value);
+                                            if (value.trim()) {
+                                                const directoryPage = navigation[
+                                                    role
+                                                ].find((item) =>
+                                                    [
+                                                        'Alumni directory',
+                                                        'Program alumni',
+                                                    ].includes(item.label),
                                                 );
+                                                if (directoryPage) {
+                                                    navigateToPage(
+                                                        directoryPage.label,
+                                                    );
+                                                }
                                             }
-                                        }
-                                    }}
-                                    aria-label="Search alumni records"
-                                    placeholder="Search graduate records..."
-                                    className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-400"
-                                />
-                                <kbd className="rounded border border-zinc-200 px-1 py-0.5 text-[9px] text-zinc-400">
-                                    ⌘ K
-                                </kbd>
-                            </label>
-                        )}
+                                        }}
+                                        aria-label="Search alumni records"
+                                        placeholder="Search graduate records..."
+                                        className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-zinc-400"
+                                    />
+                                    <kbd className="rounded border border-zinc-200 px-1 py-0.5 text-[9px] text-zinc-400">
+                                        ⌘ K
+                                    </kbd>
+                                </label>
+                            )}
                         <button
                             type="button"
                             aria-label="Notifications"
@@ -1147,7 +1224,13 @@ export default function AlumniPortal({
                         </div>
                     )}
 
-                    {isCustomChildPage ? children : content}
+                    {isCustomChildPage ? (
+                        children
+                    ) : (
+                        <Suspense fallback={<LoadingState />}>
+                            {content}
+                        </Suspense>
+                    )}
 
                     <footer className="mt-8 flex flex-col justify-between gap-2 border-t border-zinc-200/80 pt-4 text-xs text-zinc-500 sm:flex-row">
                         <span>
@@ -1183,24 +1266,28 @@ export default function AlumniPortal({
                             Recent updates and account activity.
                         </DialogDescription>
                     </DialogHeader>
-                    <Notifications
-                        onUpdated={() =>
-                            setNotificationRefreshKey((key) => key + 1)
-                        }
-                    />
+                    <Suspense fallback={<LoadingState />}>
+                        <Notifications
+                            onUpdated={() =>
+                                setNotificationRefreshKey((key) => key + 1)
+                            }
+                        />
+                    </Suspense>
                 </DialogContent>
             </Dialog>
 
-            {role === 'Alumni' && (
-                <AlumniProfileCompletionModal
-                    isOpen={profileCompletionModalOpen}
-                    onClose={() => setProfileCompletionModalOpen(false)}
-                    profile={alumniProfile}
-                    onSuccess={() => {
-                        void alumniProfileRes.reload();
-                        router.reload({ only: ['auth'] });
-                    }}
-                />
+            {role === 'Alumni' && profileCompletionModalOpen && (
+                <Suspense fallback={null}>
+                    <AlumniProfileCompletionModal
+                        isOpen={profileCompletionModalOpen}
+                        onClose={() => setProfileCompletionModalOpen(false)}
+                        profile={alumniProfile}
+                        onSuccess={() => {
+                            void alumniProfileRes.reload();
+                            router.reload({ only: ['auth'] });
+                        }}
+                    />
+                </Suspense>
             )}
         </div>
     );

@@ -14,8 +14,9 @@ class SystemSettings
     public static function demoQuickLoginEnabled(): bool
     {
         $settings = self::readSettings();
+        $default = ! app()->isProduction();
 
-        return (bool) ($settings['demo_quick_login_enabled'] ?? true);
+        return (bool) ($settings['demo_quick_login_enabled'] ?? $default);
     }
 
     public static function setDemoQuickLoginEnabled(bool $enabled): void
